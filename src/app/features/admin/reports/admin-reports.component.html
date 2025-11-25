@@ -1,0 +1,846 @@
+<section class="reports">
+  <header class="header">
+    <div class="header-content">
+      <h1>Reports & Analytics</h1>
+      <p>Generate VAT-ready exports, accrual reconciliations, and audit logs.</p>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="currentView = 'generate'" [class.active]="currentView === 'generate'">
+        <mat-icon>assessment</mat-icon>
+        Generate
+      </button>
+      <button mat-stroked-button (click)="currentView = 'schedule'" [class.active]="currentView === 'schedule'">
+        <mat-icon>schedule</mat-icon>
+        Schedule
+      </button>
+      <button mat-stroked-button (click)="currentView = 'history'" [class.active]="currentView === 'history'">
+        <mat-icon>history</mat-icon>
+        History
+      </button>
+      <button mat-stroked-button (click)="currentView = 'compare'" [class.active]="currentView === 'compare'">
+        <mat-icon>compare_arrows</mat-icon>
+        Compare
+      </button>
+    </div>
+  </header>
+
+  <!-- Quick Report Actions -->
+  <section class="quick-reports-section" *ngIf="currentView === 'generate'">
+    <h3 class="section-title">Quick Reports</h3>
+    <mat-card class="quick-actions-card">
+      <mat-card-content>
+      <div class="quick-buttons">
+        <button mat-stroked-button (click)="showQuickReport('lastMonth')">
+          <mat-icon>calendar_month</mat-icon>
+          Last Month Summary
+        </button>
+        <button mat-stroked-button (click)="showQuickReport('vatQuarter')">
+          <mat-icon>receipt</mat-icon>
+          VAT This Quarter
+        </button>
+        <button mat-stroked-button (click)="showQuickReport('ytd')">
+          <mat-icon>trending_up</mat-icon>
+          Year to Date
+        </button>
+      </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+  <!-- Generate Report Section -->
+  <section class="generate-section" *ngIf="currentView === 'generate'">
+    <h3 class="section-title">Generate Custom Report</h3>
+    <mat-card class="generator-card" [formGroup]="form">
+      <mat-card-header>
+        <div class="card-title-with-icon">
+          <mat-icon>assessment</mat-icon>
+          <mat-card-title style="display: inline-block;">Report Configuration</mat-card-title>
+        </div>
+        <button 
+          mat-icon-button 
+          (click)="toggleFormExpansion()" 
+          [attr.aria-label]="formExpanded ? 'Collapse form' : 'Expand form'"
+          class="expand-toggle-btn">
+          <mat-icon>{{ formExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content *ngIf="formExpanded" class="form-content">
+        <!-- Basic Configuration Section -->
+        <div class="form-section">
+          <h4 class="form-section-title">
+            <mat-icon>settings</mat-icon>
+            Basic Configuration
+          </h4>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Report Type</mat-label>
+              <mat-select formControlName="type">
+                <mat-option *ngFor="let option of reportTypes" [value]="option.value">
+                  {{ option.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Export Format</mat-label>
+              <mat-select formControlName="format">
+                <mat-option *ngFor="let option of formatOptions" [value]="option.value">
+                  <mat-icon>{{ option.icon }}</mat-icon>
+                  {{ option.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Date Range Section -->
+        <div class="form-section">
+          <h4 class="form-section-title">
+            <mat-icon>date_range</mat-icon>
+            Date Range
+          </h4>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Date Range Preset</mat-label>
+              <mat-select formControlName="dateRangePreset" (selectionChange)="onDateRangePresetChange($event.value)">
+                <mat-option *ngFor="let preset of dateRangePresets" [value]="preset.value">
+                  {{ preset.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Start Date</mat-label>
+              <input matInput [matDatepicker]="startDatePicker" formControlName="startDate" placeholder="Select start date" />
+              <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #startDatePicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>End Date</mat-label>
+              <input matInput [matDatepicker]="endDatePicker" formControlName="endDate" placeholder="Select end date" />
+              <mat-datepicker-toggle matIconSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #endDatePicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Amount Filters Section -->
+        <div class="form-section">
+          <h4 class="form-section-title">
+            <mat-icon>attach_money</mat-icon>
+            Amount Filters
+          </h4>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Min Amount (AED)</mat-label>
+              <input matInput type="number" formControlName="minAmount" placeholder="0.00" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Max Amount (AED)</mat-label>
+              <input matInput type="number" formControlName="maxAmount" placeholder="0.00" />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Report-Specific Fields -->
+        <div class="form-section" *ngIf="form.get('type')?.value === 'bank_reconciliation' || form.get('type')?.value === 'attachments_report'">
+          <h4 class="form-section-title">
+            <mat-icon>tune</mat-icon>
+            Report-Specific Options
+          </h4>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field" *ngIf="form.get('type')?.value === 'bank_reconciliation'">
+              <mat-label>Bank Account</mat-label>
+              <input matInput formControlName="bankAccount" placeholder="Bank account name" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field" *ngIf="form.get('type')?.value === 'attachments_report'">
+              <mat-label>File Type</mat-label>
+              <mat-select formControlName="fileType">
+                <mat-option value="">All Types</mat-option>
+                <mat-option *ngFor="let type of fileTypeOptions" [value]="type">
+                  {{ type | uppercase }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Advanced Filters Section -->
+        <div class="form-section">
+          <h4 class="form-section-title">
+            <mat-icon>filter_list</mat-icon>
+            Advanced Filters
+          </h4>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field" *ngIf="categories.length > 0">
+              <mat-label>Category</mat-label>
+              <mat-select formControlName="categoryId" multiple>
+                <mat-option *ngFor="let category of categories" [value]="category.id">
+                  {{ category.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field" *ngIf="vendors.length > 0">
+              <mat-label>Vendor</mat-label>
+              <mat-select formControlName="vendorName" multiple>
+                <mat-option *ngFor="let vendor of vendors" [value]="vendor">
+                  {{ vendor }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Status</mat-label>
+              <mat-select formControlName="status" multiple>
+                <mat-option *ngFor="let status of statusOptions" [value]="status">
+                  {{ status | titlecase }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Expense Type</mat-label>
+              <mat-select formControlName="expenseType" multiple>
+                <mat-option *ngFor="let type of typeOptions" [value]="type">
+                  {{ type | titlecase }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field" *ngIf="users.length > 0">
+              <mat-label>Employee</mat-label>
+              <mat-select formControlName="userId" multiple>
+                <mat-option *ngFor="let user of users" [value]="user.id">
+                  {{ user.name }} ({{ user.email }})
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="form-actions">
+          <button mat-raised-button color="primary" (click)="generate()" [disabled]="loading" class="generate-btn">
+            <mat-progress-spinner
+              *ngIf="loading"
+              [diameter]="20"
+              mode="indeterminate"
+              class="btn-spinner"
+            ></mat-progress-spinner>
+            <mat-icon *ngIf="!loading">assessment</mat-icon>
+            <span *ngIf="!loading">Generate Report</span>
+            <span *ngIf="loading">Generating...</span>
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Generated Report Preview -->
+    <mat-card 
+      *ngIf="currentView === 'generate' && generatedReport as report" 
+      class="report-preview-card"
+      #reportPreviewCard>
+    <mat-card-header>
+      <mat-card-title>
+        {{ report.type | titlecase }} &nbsp;•&nbsp;
+        {{ report.generatedAt | date: 'medium' }}
+      </mat-card-title>
+      <div class="download-actions">
+        <button mat-stroked-button (click)="generateAndDownload('pdf')" [disabled]="loading">
+          <mat-icon>picture_as_pdf</mat-icon>
+          PDF
+        </button>
+        <button mat-stroked-button (click)="generateAndDownload('xlsx')" [disabled]="loading">
+          <mat-icon>table_chart</mat-icon>
+          Excel
+        </button>
+        <button mat-stroked-button (click)="generateAndDownload('csv')" [disabled]="loading">
+          <mat-icon>description</mat-icon>
+          CSV
+        </button>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="report-preview">
+        <!-- Trend Report Chart -->
+        <div *ngIf="report.type === 'trend_report' && isArray(report.data) && report.data.length > 0" class="chart-preview">
+          <canvas baseChart
+            [data]="getTrendChartData(report)"
+            [labels]="getTrendChartLabels(report)"
+            [type]="'line'"
+            [options]="chartOptions">
+          </canvas>
+        </div>
+        
+        <!-- Expense Summary Charts -->
+        <div *ngIf="report.type === 'expense_summary' && isArray(report.data) && report.data.length > 0" class="expense-summary-charts">
+          <div class="chart-preview">
+            <h4>Expenses by Category</h4>
+            <canvas baseChart
+              [data]="getExpenseSummaryPieChart(report)"
+              [type]="'pie'"
+              [options]="pieChartOptions">
+            </canvas>
+          </div>
+          <div class="chart-preview">
+            <h4>Expenses by Month</h4>
+            <canvas baseChart
+              [data]="getExpenseSummaryBarChart(report)"
+              [type]="'bar'"
+              [options]="barChartOptions">
+            </canvas>
+          </div>
+        </div>
+        
+        <!-- Expense Summary Table (after charts) -->
+        <div *ngIf="report.type === 'expense_summary' && isArray(report.data) && report.data.length > 0" class="table-preview">
+          <h4 style="margin: 0 0 16px; font-size: 1rem; font-weight: 600; color: #1e3a8a;">Expense Details</h4>
+          <table mat-table [dataSource]="getReportPreviewData(report)" class="mat-elevation-z0">
+            <!-- Date -->
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let row">{{ getSummaryValue(row, 'date') | date:'shortDate' }}</td>
+            </ng-container>
+            <!-- Category -->
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef>Category</th>
+              <td mat-cell *matCellDef="let row">{{ getSummaryValue(row, 'category') }}</td>
+            </ng-container>
+            <!-- Vendor -->
+            <ng-container matColumnDef="vendor">
+              <th mat-header-cell *matHeaderCellDef>Vendor</th>
+              <td mat-cell *matCellDef="let row">{{ getSummaryValue(row, 'vendor') }}</td>
+            </ng-container>
+            <!-- Total -->
+            <ng-container matColumnDef="total">
+              <th mat-header-cell class="number" *matHeaderCellDef>Total</th>
+              <td mat-cell class="number" *matCellDef="let row">
+                {{ getSummaryValue(row, 'total') | number:'1.2-2' }} AED
+              </td>
+            </ng-container>
+            <!-- Details -->
+            <ng-container matColumnDef="details">
+              <th mat-header-cell *matHeaderCellDef>Details</th>
+              <td mat-cell *matCellDef="let row">
+                <button mat-stroked-button (click)="openDetails(row)">
+                  <mat-icon>info</mat-icon>
+                  View
+                </button>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedSummaryColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedSummaryColumns"></tr>
+          </table>
+        </div>
+
+        <!-- VAT Report Summary Cards -->
+        <div *ngIf="report.type === 'vat_report' && !isArray(report.data)" class="vat-summary">
+          <div class="summary-cards">
+            <div class="summary-card">
+              <div class="card-label">Taxable Supplies</div>
+              <div class="card-value">{{ report.data.taxableSupplies || report.data.taxableAmount | number: '1.2-2' }} {{ report.data.currency || 'AED' }}</div>
+            </div>
+            <div class="summary-card">
+              <div class="card-label">Output VAT</div>
+              <div class="card-value">{{ report.data.outputVat || 0 | number: '1.2-2' }} {{ report.data.currency || 'AED' }}</div>
+            </div>
+            <div class="summary-card">
+              <div class="card-label">Input VAT</div>
+              <div class="card-value">{{ report.data.inputVat || report.data.vatAmount | number: '1.2-2' }} {{ report.data.currency || 'AED' }}</div>
+            </div>
+            <div class="summary-card">
+              <div class="card-label">Net VAT Payable</div>
+              <div class="card-value">{{ report.data.netVatPayable || 0 | number: '1.2-2' }} {{ report.data.currency || 'AED' }}</div>
+            </div>
+            <div class="summary-card">
+              <div class="card-label">Status</div>
+              <div class="card-value">{{ report.data.status || 'Pending' }}</div>
+            </div>
+            <div class="summary-card">
+              <div class="card-label">Transactions</div>
+              <div class="card-value">{{ report.data.transactionCount }}</div>
+            </div>
+          </div>
+          <div *ngIf="report.data.organizationName" class="org-info">
+            <h4>Organization Information</h4>
+            <p><strong>Name:</strong> {{ report.data.organizationName }}</p>
+            <p *ngIf="report.data.vatNumber"><strong>VAT Number:</strong> {{ report.data.vatNumber }}</p>
+            <p *ngIf="report.data.address"><strong>Address:</strong> {{ report.data.address }}</p>
+          </div>
+          <div *ngIf="report.data.categoryBreakdown && report.data.categoryBreakdown.length > 0" class="category-breakdown">
+            <h4>Category Breakdown</h4>
+            <table mat-table [dataSource]="report.data.categoryBreakdown" class="mat-elevation-z0">
+              <ng-container matColumnDef="category">
+                <th mat-header-cell *matHeaderCellDef>Category</th>
+                <td mat-cell *matCellDef="let row">{{ row.category }}</td>
+              </ng-container>
+              <ng-container matColumnDef="taxableAmount">
+                <th mat-header-cell *matHeaderCellDef>Taxable</th>
+                <td mat-cell *matCellDef="let row">{{ row.taxableAmount | number: '1.2-2' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="vatAmount">
+                <th mat-header-cell *matHeaderCellDef>VAT</th>
+                <td mat-cell *matCellDef="let row">{{ row.vatAmount | number: '1.2-2' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="totalAmount">
+                <th mat-header-cell *matHeaderCellDef>Total</th>
+                <td mat-cell *matCellDef="let row">{{ row.totalAmount | number: '1.2-2' }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="['category', 'taxableAmount', 'vatAmount', 'totalAmount']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['category', 'taxableAmount', 'vatAmount', 'totalAmount']"></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Bank Reconciliation Report -->
+        <div *ngIf="report.type === 'bank_reconciliation' && !isArray(report.data)" class="bank-reconciliation">
+          <div class="summary-cards">
+            <div class="summary-card">
+              <div class="card-label">Reconciliation ID</div>
+              <div class="card-value">{{ report.data.reconciliationId }}</div>
+            </div>
+            <div class="summary-card">
+              <div class="card-label">Date Range</div>
+              <div class="card-value">{{ report.data.dateRange?.startDate }} to {{ report.data.dateRange?.endDate }}</div>
+            </div>
+            <div class="summary-card">
+              <div class="card-label">Total Transactions</div>
+              <div class="card-value">{{ report.data.totalTransactions }}</div>
+            </div>
+            <div class="summary-card">
+              <div class="card-label">Matched</div>
+              <div class="card-value">{{ report.data.matched }}</div>
+            </div>
+            <div class="summary-card">
+              <div class="card-label">Unmatched</div>
+              <div class="card-value">{{ report.data.unmatched }}</div>
+            </div>
+            <div class="summary-card">
+              <div class="card-label">Variance</div>
+              <div class="card-value">{{ report.data.variance | number: '1.2-2' }} AED</div>
+            </div>
+          </div>
+          <div *ngIf="report.data.transactions && report.data.transactions.length > 0" class="transactions-table">
+            <h4>Transactions</h4>
+            <table mat-table [dataSource]="report.data.transactions" class="mat-elevation-z0">
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <td mat-cell *matCellDef="let row">{{ row.date }}</td>
+              </ng-container>
+              <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef>Description</th>
+                <td mat-cell *matCellDef="let row">{{ row.description }}</td>
+              </ng-container>
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef>Amount</th>
+                <td mat-cell *matCellDef="let row">{{ row.amount | number: '1.2-2' }} AED</td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let row">
+                  <span [class]="row.status === 'Matched' ? 'status-matched' : 'status-unmatched'">
+                    {{ row.status }}
+                  </span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="linkedExpenseId">
+                <th mat-header-cell *matHeaderCellDef>Linked Expense</th>
+                <td mat-cell *matCellDef="let row">{{ row.linkedExpenseId }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="['date', 'description', 'amount', 'status', 'linkedExpenseId']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['date', 'description', 'amount', 'status', 'linkedExpenseId']"></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Trial Balance Report -->
+        <div *ngIf="report.type === 'trial_balance' && !isArray(report.data)" class="trial-balance">
+          <div class="summary-cards">
+            <div class="summary-card">
+              <div class="card-label">Period</div>
+              <div class="card-value">{{ report.data.period?.startDate }} to {{ report.data.period?.endDate }}</div>
+            </div>
+            <div class="summary-card">
+              <div class="card-label">Total Debit</div>
+              <div class="card-value">{{ report.data.summary?.totalDebit | number: '1.2-2' }} AED</div>
+            </div>
+            <div class="summary-card">
+              <div class="card-label">Total Credit</div>
+              <div class="card-value">{{ report.data.summary?.totalCredit | number: '1.2-2' }} AED</div>
+            </div>
+            <div class="summary-card">
+              <div class="card-label">Total Balance</div>
+              <div class="card-value">{{ report.data.summary?.totalBalance | number: '1.2-2' }} AED</div>
+            </div>
+          </div>
+          <div *ngIf="report.data.accounts && report.data.accounts.length > 0" class="accounts-table">
+            <h4>Accounts</h4>
+            <table mat-table [dataSource]="report.data.accounts" class="mat-elevation-z0">
+              <ng-container matColumnDef="accountName">
+                <th mat-header-cell *matHeaderCellDef>Account Name</th>
+                <td mat-cell *matCellDef="let row">{{ row.accountName }}</td>
+              </ng-container>
+              <ng-container matColumnDef="accountType">
+                <th mat-header-cell *matHeaderCellDef>Type</th>
+                <td mat-cell *matCellDef="let row">{{ row.accountType }}</td>
+              </ng-container>
+              <ng-container matColumnDef="debit">
+                <th mat-header-cell *matHeaderCellDef>Debit</th>
+                <td mat-cell *matCellDef="let row">{{ row.debit | number: '1.2-2' }} AED</td>
+              </ng-container>
+              <ng-container matColumnDef="credit">
+                <th mat-header-cell *matHeaderCellDef>Credit</th>
+                <td mat-cell *matCellDef="let row">{{ row.credit | number: '1.2-2' }} AED</td>
+              </ng-container>
+              <ng-container matColumnDef="balance">
+                <th mat-header-cell *matHeaderCellDef>Balance</th>
+                <td mat-cell *matCellDef="let row">{{ row.balance | number: '1.2-2' }} AED</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="['accountName', 'accountType', 'debit', 'credit', 'balance']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['accountName', 'accountType', 'debit', 'credit', 'balance']"></tr>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Table Preview for Array Data (excluding expense_summary which has its own table) -->
+        <div *ngIf="report.type !== 'trend_report' && report.type !== 'vat_report' && report.type !== 'bank_reconciliation' && report.type !== 'trial_balance' && report.type !== 'expense_summary' && isArray(report.data) && report.data.length > 0" class="table-preview">
+          <table mat-table [dataSource]="getReportPreviewData(report)" class="mat-elevation-z0">
+            <ng-container *ngFor="let header of getReportPreviewHeaders(getReportPreviewData(report)); let i = index" [matColumnDef]="header">
+              <th mat-header-cell *matHeaderCellDef>{{ header | titlecase }}</th>
+              <td mat-cell *matCellDef="let row">{{ row[header] }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="getReportPreviewHeaders(getReportPreviewData(report))"></tr>
+            <tr mat-row *matRowDef="let row; columns: getReportPreviewHeaders(getReportPreviewData(report))"></tr>
+          </table>
+        </div>
+        
+        <!-- Object Preview for Non-Array Data -->
+        <div *ngIf="report.type !== 'vat_report' && report.type !== 'bank_reconciliation' && report.type !== 'trial_balance' && (!isArray(report.data) || report.data.length === 0)" class="object-preview">
+          <pre>{{ report.data | json }}</pre>
+        </div>
+      </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+  <!-- Material dialog template for row details -->
+  <ng-template #detailsDialog let-data>
+    <h2 mat-dialog-title style="margin:0; font-weight:700; color:#1e3a8a;">Expense Details</h2>
+    <mat-dialog-content class="details-content">
+      <table class="kv-table">
+        <tbody>
+          <tr *ngFor="let kv of (data | keyvalue)">
+            <th class="k">{{ kv.key }}</th>
+            <td class="v">
+              <ng-container *ngIf="isPrimitiveValue(kv.value)">{{ kv.value }}</ng-container>
+              <ng-container *ngIf="isObjectOrArray(kv.value)">
+                <pre>{{ kv.value | json }}</pre>
+              </ng-container>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-stroked-button color="primary" (click)="closeDetails()">Close</button>
+    </mat-dialog-actions>
+  </ng-template>
+
+  <!-- Schedule Report Section -->
+  <section class="schedule-section" *ngIf="currentView === 'schedule'">
+    <h3 class="section-title">Schedule Recurring Report</h3>
+    <mat-card class="scheduler-card" [formGroup]="scheduleForm">
+      <mat-card-header>
+        <div class="card-title-with-icon">
+          <mat-icon>schedule</mat-icon>
+          <mat-card-title>Recurring Report Configuration</mat-card-title>
+        </div>
+      </mat-card-header>
+    <mat-card-content>
+      <div class="fields">
+        <mat-form-field appearance="outline">
+          <mat-label>Report Type</mat-label>
+          <mat-select formControlName="type">
+            <mat-option *ngFor="let option of reportTypes" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Export Format</mat-label>
+          <mat-select formControlName="format">
+            <mat-option *ngFor="let option of formatOptions" [value]="option.value">
+              <mat-icon>{{ option.icon }}</mat-icon>
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Schedule Frequency</mat-label>
+          <mat-select formControlName="schedule">
+            <mat-option value="daily">Daily</mat-option>
+            <mat-option value="weekly">Weekly</mat-option>
+            <mat-option value="monthly">Monthly</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Next Run Date</mat-label>
+          <input matInput [matDatepicker]="nextRunPicker" formControlName="nextRun" placeholder="Select next run date" />
+          <mat-datepicker-toggle matIconSuffix [for]="nextRunPicker"></mat-datepicker-toggle>
+          <mat-datepicker #nextRunPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Recipient Email</mat-label>
+          <input matInput type="email" formControlName="recipientEmail" placeholder="email@example.com" />
+          <mat-hint>Report will be emailed to this address</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Start Date</mat-label>
+          <input matInput [matDatepicker]="scheduleStartDatePicker" formControlName="startDate" placeholder="Select start date" />
+          <mat-datepicker-toggle matIconSuffix [for]="scheduleStartDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #scheduleStartDatePicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>End Date</mat-label>
+          <input matInput [matDatepicker]="scheduleEndDatePicker" formControlName="endDate" placeholder="Select end date" />
+          <mat-datepicker-toggle matIconSuffix [for]="scheduleEndDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #scheduleEndDatePicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+      <button mat-raised-button color="primary" (click)="schedule()" [disabled]="loading || scheduleForm.invalid">
+        <mat-progress-spinner
+          *ngIf="loading"
+          [diameter]="20"
+          mode="indeterminate"
+        ></mat-progress-spinner>
+        <span *ngIf="!loading">Schedule Report</span>
+      </button>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+  <!-- Report Comparison Section -->
+  <section class="compare-section" *ngIf="currentView === 'compare'">
+    <h3 class="section-title">Compare Reports</h3>
+    <mat-card class="comparison-card" [formGroup]="compareForm">
+      <mat-card-header>
+        <div class="card-title-with-icon">
+          <mat-icon>compare_arrows</mat-icon>
+          <mat-card-title>Report Comparison</mat-card-title>
+        </div>
+      </mat-card-header>
+    <mat-card-content>
+      <div class="fields">
+        <mat-form-field appearance="outline">
+          <mat-label>Report Type</mat-label>
+          <mat-select formControlName="type">
+            <mat-option *ngFor="let option of reportTypes" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="period-group">
+          <h4>Period 1</h4>
+          <mat-form-field appearance="outline">
+            <mat-label>Start Date</mat-label>
+            <input matInput [matDatepicker]="comparePeriod1StartPicker" formControlName="period1StartDate" />
+            <mat-datepicker-toggle matIconSuffix [for]="comparePeriod1StartPicker"></mat-datepicker-toggle>
+            <mat-datepicker #comparePeriod1StartPicker></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>End Date</mat-label>
+            <input matInput [matDatepicker]="comparePeriod1EndPicker" formControlName="period1EndDate" />
+            <mat-datepicker-toggle matIconSuffix [for]="comparePeriod1EndPicker"></mat-datepicker-toggle>
+            <mat-datepicker #comparePeriod1EndPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <div class="period-group">
+          <h4>Period 2</h4>
+          <mat-form-field appearance="outline">
+            <mat-label>Start Date</mat-label>
+            <input matInput [matDatepicker]="comparePeriod2StartPicker" formControlName="period2StartDate" />
+            <mat-datepicker-toggle matIconSuffix [for]="comparePeriod2StartPicker"></mat-datepicker-toggle>
+            <mat-datepicker #comparePeriod2StartPicker></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>End Date</mat-label>
+            <input matInput [matDatepicker]="comparePeriod2EndPicker" formControlName="period2EndDate" />
+            <mat-datepicker-toggle matIconSuffix [for]="comparePeriod2EndPicker"></mat-datepicker-toggle>
+            <mat-datepicker #comparePeriod2EndPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+      <button mat-raised-button color="primary" (click)="compareReports()" [disabled]="loading || compareForm.invalid">
+        <mat-progress-spinner
+          *ngIf="loading"
+          [diameter]="20"
+          mode="indeterminate"
+        ></mat-progress-spinner>
+        <span *ngIf="!loading">Compare Reports</span>
+      </button>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Comparison Results -->
+    <div *ngIf="currentView === 'compare' && comparisonReport1 && comparisonReport2" class="comparison-results">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Comparison Summary</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngIf="getComparisonSummary() as summary" class="comparison-summary">
+          <div class="summary-item">
+            <div class="summary-label">Period 1 Total</div>
+            <div class="summary-value">{{ summary.period1Total | number: '1.2-2' }} AED</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Period 2 Total</div>
+            <div class="summary-value">{{ summary.period2Total | number: '1.2-2' }} AED</div>
+          </div>
+          <div class="summary-item" [class.increase]="summary.isIncrease" [class.decrease]="!summary.isIncrease">
+            <div class="summary-label">Difference</div>
+            <div class="summary-value">
+              {{ summary.isIncrease ? '+' : '' }}{{ summary.difference | number: '1.2-2' }} AED
+              ({{ summary.percentageChange | number: '1.1-1' }}%)
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="comparison-reports">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Period 1</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="report-preview">
+            <div *ngIf="isArray(comparisonReport1.data) && comparisonReport1.data.length > 0" class="table-preview">
+              <table mat-table [dataSource]="getReportPreviewData(comparisonReport1)" class="mat-elevation-z0">
+                <ng-container *ngFor="let header of getReportPreviewHeaders(getReportPreviewData(comparisonReport1)); let i = index" [matColumnDef]="header">
+                  <th mat-header-cell *matHeaderCellDef>{{ header | titlecase }}</th>
+                  <td mat-cell *matCellDef="let row">{{ row[header] }}</td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="getReportPreviewHeaders(getReportPreviewData(comparisonReport1))"></tr>
+                <tr mat-row *matRowDef="let row; columns: getReportPreviewHeaders(getReportPreviewData(comparisonReport1))"></tr>
+              </table>
+            </div>
+            <div *ngIf="!isArray(comparisonReport1.data) || comparisonReport1.data.length === 0" class="object-preview">
+              <pre>{{ comparisonReport1.data | json }}</pre>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Period 2</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="report-preview">
+            <div *ngIf="isArray(comparisonReport2.data) && comparisonReport2.data.length > 0" class="table-preview">
+              <table mat-table [dataSource]="getReportPreviewData(comparisonReport2)" class="mat-elevation-z0">
+                <ng-container *ngFor="let header of getReportPreviewHeaders(getReportPreviewData(comparisonReport2)); let i = index" [matColumnDef]="header">
+                  <th mat-header-cell *matHeaderCellDef>{{ header | titlecase }}</th>
+                  <td mat-cell *matCellDef="let row">{{ row[header] }}</td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="getReportPreviewHeaders(getReportPreviewData(comparisonReport2))"></tr>
+                <tr mat-row *matRowDef="let row; columns: getReportPreviewHeaders(getReportPreviewData(comparisonReport2))"></tr>
+              </table>
+            </div>
+            <div *ngIf="!isArray(comparisonReport2.data) || comparisonReport2.data.length === 0" class="object-preview">
+              <pre>{{ comparisonReport2.data | json }}</pre>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+  </section>
+
+  <!-- Report History Section -->
+  <section class="history-section" *ngIf="currentView === 'history'">
+    <h3 class="section-title">Report History</h3>
+    <mat-card class="history-card">
+      <mat-card-header>
+        <div class="card-title-with-icon">
+          <mat-icon>history</mat-icon>
+          <mat-card-title>Report History</mat-card-title>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="history-filter">
+          <mat-label>Filter by Type</mat-label>
+          <mat-select [value]="historyFilterType" (selectionChange)="historyFilterType = $event.value; onHistoryFilterChange()">
+            <mat-option value="">All Types</mat-option>
+            <mat-option *ngFor="let option of reportTypes" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      <table mat-table [dataSource]="history" class="mat-elevation-z0">
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let item">
+            <span class="report-type-badge">{{ item.type | titlecase }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="filters">
+          <th mat-header-cell *matHeaderCellDef>Filters</th>
+          <td mat-cell *matCellDef="let item">
+            <span *ngIf="item.filters && (item.filters.startDate || item.filters.endDate)" class="filter-info">
+              <mat-icon>date_range</mat-icon>
+              {{ item.filters.startDate | date: 'shortDate' }} - {{ item.filters.endDate | date: 'shortDate' }}
+            </span>
+            <span *ngIf="!item.filters || (!item.filters.startDate && !item.filters.endDate)" class="no-filters">
+              No filters
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="created">
+          <th mat-header-cell *matHeaderCellDef>Generated</th>
+          <td mat-cell *matCellDef="let item">
+            {{ item.createdAt | date: 'medium' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="download">
+          <th mat-header-cell *matHeaderCellDef>Download</th>
+          <td mat-cell *matCellDef="let item">
+            <button mat-icon-button (click)="downloadReport(item.id, 'pdf')" matTooltip="Download PDF">
+              <mat-icon>picture_as_pdf</mat-icon>
+            </button>
+            <button mat-icon-button (click)="downloadReport(item.id, 'xlsx')" matTooltip="Download Excel">
+              <mat-icon>table_chart</mat-icon>
+            </button>
+            <button mat-icon-button (click)="downloadReport(item.id, 'csv')" matTooltip="Download CSV">
+              <mat-icon>description</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="['type', 'filters', 'created', 'download']" class="table-header"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['type', 'filters', 'created', 'download']" class="table-row"></tr>
+      </table>
+      <div class="empty" *ngIf="history.length === 0">
+        <mat-icon>description</mat-icon>
+        <p>No reports generated yet.</p>
+      </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</section>

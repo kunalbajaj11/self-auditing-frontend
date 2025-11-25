@@ -1,1 +1,279 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+
+// Custom palette maps
+$brand-primary-map: (
+  50: #e5f3fb,
+  100: #c2e1f6,
+  200: #9ccdf0,
+  300: #75b6e7,
+  400: #54a3df,
+  500: #0077c8,
+  600: #006ab4,
+  700: #005fa3,
+  800: #004a80,
+  900: #003456,
+  A100: #cfe8ff,
+  A200: #9ad2ff,
+  A400: #53b3ff,
+  A700: #2e9eff,
+  contrast: (
+    50: #333333,
+    100: #333333,
+    200: #333333,
+    300: #333333,
+    400: #333333,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+    A100: #333333,
+    A200: #333333,
+    A400: #ffffff,
+    A700: #ffffff,
+  ),
+);
+
+$brand-secondary-map: (
+  50: #e0f8f4,
+  100: #b3ede3,
+  200: #80e1d1,
+  300: #4dd4c0,
+  400: #29c9b4,
+  500: #00bfa5,
+  600: #00a991,
+  700: #008f79,
+  800: #007661,
+  900: #005545,
+  contrast: (
+    50: #333333,
+    100: #333333,
+    200: #333333,
+    300: #333333,
+    400: #333333,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+  ),
+);
+
+$brand-warn-map: (
+  50: #fef1e5,
+  100: #fcdab8,
+  200: #fbc28a,
+  300: #f8a85c,
+  400: #f7933a,
+  500: #f4a261,
+  600: #e9893f,
+  700: #d97329,
+  800: #c6601a,
+  900: #a64508,
+  contrast: (
+    50: #333333,
+    100: #333333,
+    200: #333333,
+    300: #333333,
+    400: #333333,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+  ),
+);
+
+$brand-primary: mat.m2-define-palette($brand-primary-map, 500, 100, 700);
+$brand-accent: mat.m2-define-palette($brand-secondary-map, 500, 100, 700);
+$brand-warn: mat.m2-define-palette($brand-warn-map, 500, 100, 700);
+
+$brand-theme: mat.m2-define-light-theme((
+  color: (
+    primary: $brand-primary,
+    accent: $brand-accent,
+    warn: $brand-warn,
+  ),
+  density: 0,
+));
+
+@include mat.core();
+@include mat.all-component-themes($brand-theme);
+
+html,
+body {
+  height: 100%;
+  background-color: #f9fafb;
+  color: #333333;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'Open Sans', 'Lato', sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+a {
+  color: #0077c8;
+  text-decoration: none;
+  transition: color 120ms ease-in-out;
+
+  &:hover {
+    color: #005fa3;
+  }
+}
+
+button.mat-mdc-button,
+button.mat-mdc-raised-button,
+button.mat-mdc-stroked-button,
+button.mat-mdc-unelevated-button,
+button.mat-mdc-outlined-button {
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  padding: 10px 20px !important;
+  text-transform: none !important;
+}
+
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  background: #0077c8 !important;
+  color: #ffffff !important;
+
+  &:hover {
+    background: #005fa3 !important;
+  }
+}
+
+.mat-mdc-stroked-button.mat-primary {
+  border-color: #0077c8 !important;
+  color: #0077c8 !important;
+
+  &:hover {
+    background: rgba(0, 119, 200, 0.08) !important;
+  }
+}
+
+.mat-mdc-card {
+  border-radius: 12px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+}
+
+.mat-mdc-table {
+  background: #ffffff !important;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+}
+
+.mat-form-field-appearance-outline .mat-mdc-form-field-outline {
+  border-radius: 6px;
+}
+
+.mat-mdc-text-field-wrapper {
+  border-radius: 6px !important;
+  border: 1px solid #e0e0e0 !important;
+
+  &.mdc-text-field--focused {
+    border-color: #0077c8 !important;
+    box-shadow: 0 0 0 2px rgba(0, 119, 200, 0.2) !important;
+  }
+}
+
+.mat-mdc-form-field-subscript-wrapper {
+  color: #666666;
+}
+
+.mat-icon {
+  vertical-align: middle;
+  font-size: 20px;
+  line-height: 1;
+  color: #666666;
+}
+
+button mat-icon,
+button .mat-icon {
+  margin-right: 8px;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+.page-heading {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  color: #333333;
+}
+
+.section-subtitle {
+  font-size: 16px;
+  color: #666666;
+  margin: 4px 0 0;
+}
+
+.snack-error {
+  background-color: #e53935;
+  color: #ffffff;
+}
+
+.snack-success {
+  background-color: #00a86b;
+  color: #ffffff;
+}
+
+.card-surface {
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e0e0e0;
+}
+
+// Global mobile responsive styles
+@media (max-width: 768px) {
+  // Make all buttons touch-friendly
+  button.mat-mdc-button,
+  button.mat-mdc-raised-button,
+  button.mat-mdc-stroked-button {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 10px 16px !important;
+  }
+
+  // Improve form field touch targets
+  mat-form-field {
+    .mat-mdc-form-field-subscript-wrapper {
+      font-size: 11px;
+    }
+  }
+
+  // Make dialogs full-width on mobile
+  .mat-mdc-dialog-container {
+    .mdc-dialog__surface {
+      max-width: 100vw !important;
+      margin: 0;
+      border-radius: 0;
+    }
+  }
+
+  // Improve table scrolling on mobile
+  .mat-mdc-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  // Touch-friendly chips
+  mat-chip {
+    min-height: 32px;
+    padding: 4px 12px;
+  }
+
+  // Reduce padding on mobile
+  .mat-mdc-card {
+    padding: 16px !important;
+  }
+}

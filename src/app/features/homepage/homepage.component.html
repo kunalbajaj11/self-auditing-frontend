@@ -1,0 +1,204 @@
+<div class="homepage-container">
+  <!-- Hero Section -->
+  <section class="hero-section" aria-label="Hero section">
+    <div class="hero-content">
+      <h1 class="hero-title">SelfAccounting.AI - Leading Expense Tracker & Auditing Software for UAE</h1>
+      <p class="hero-subtitle">
+        Intelligent expense management and auditing software for UAE businesses. Automate expense tracking, VAT compliance, and financial reporting with AI-powered OCR. Trusted by audit firms and accounting departments across the United Arab Emirates.
+      </p>
+      <div class="hero-actions">
+        <button mat-raised-button class="cta-button cta-button-primary" (click)="navigateToRegister()" aria-label="Get started with SelfAccounting.AI">
+          Get Started
+        </button>
+        <button mat-stroked-button class="cta-button cta-button-outline" (click)="navigateToLogin()" aria-label="Sign in to your account">
+          Sign In
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits Section -->
+  <section class="benefits-section" aria-label="Benefits of using SelfAccounting.AI">
+    <div class="section-container">
+      <h2 class="section-title">Why Choose SelfAccounting.AI for Expense Tracking in UAE?</h2>
+      <p class="section-subtitle">The most comprehensive expense tracker and auditing solution designed specifically for UAE businesses, audit firms, and accounting departments.</p>
+      <div class="benefits-grid">
+        <mat-card *ngFor="let benefit of benefits" class="benefit-card">
+          <mat-card-content>
+            <h3>{{ benefit.title }}</h3>
+            <p>{{ benefit.description }}</p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section" aria-label="Features of SelfAccounting.AI expense tracker">
+    <div class="section-container">
+      <h2 class="section-title">Powerful Expense Tracker Features for UAE Businesses</h2>
+      <p class="section-subtitle">
+        Everything you need to manage expenses efficiently, ensure VAT compliance, and streamline auditing processes in the UAE
+      </p>
+      <mat-grid-list cols="3" rowHeight="280px" gutterSize="24px">
+        <mat-grid-tile *ngFor="let feature of features">
+          <mat-card class="feature-card">
+            <mat-card-content>
+              <div class="feature-icon" aria-hidden="true">
+                <mat-icon>{{ feature.icon }}</mat-icon>
+              </div>
+              <h3>{{ feature.title }}</h3>
+              <p>{{ feature.description }}</p>
+            </mat-card-content>
+          </mat-card>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </div>
+  </section>
+
+  <!-- Use Cases Section -->
+  <section class="use-cases-section" aria-label="Who can use SelfAccounting.AI">
+    <div class="section-container">
+      <h2 class="section-title">Perfect Expense Tracker Solution For</h2>
+      <p class="section-subtitle">Trusted by leading businesses and audit firms across the UAE</p>
+      <div class="use-cases-grid">
+        <mat-card class="use-case-card">
+          <mat-card-content>
+            <mat-icon aria-hidden="true">business</mat-icon>
+            <h3>Audit Firms in UAE</h3>
+            <p>Manage multiple client organizations with complete tenant isolation and comprehensive audit trails. Perfect for auditing companies handling expense management for multiple clients.</p>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="use-case-card">
+          <mat-card-content>
+            <mat-icon aria-hidden="true">account_balance</mat-icon>
+            <h3>Accounting Departments</h3>
+            <p>Streamline expense approvals, accrual tracking, and financial reporting for your organization. Ideal for UAE-based accounting teams.</p>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="use-case-card">
+          <mat-card-content>
+            <mat-icon aria-hidden="true">groups</mat-icon>
+            <h3>Multi-Location Businesses</h3>
+            <p>Centralized expense management with role-based access for employees across different locations in the UAE and beyond.</p>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="use-case-card">
+          <mat-card-content>
+            <mat-icon aria-hidden="true">verified</mat-icon>
+            <h3>VAT-Registered Companies in UAE</h3>
+            <p>Ensure VAT compliance with automated calculations, TRN tracking, and FTA-ready reports. Essential for UAE businesses requiring VAT compliance.</p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section" aria-label="Call to action">
+    <div class="section-container">
+      <h2 class="cta-title">Ready to Transform Your Expense Management in UAE?</h2>
+      <p class="cta-subtitle">
+        Join leading audit firms and businesses in the UAE who trust SelfAccounting.AI for expense tracking, VAT compliance, and auditing solutions
+      </p>
+      <button mat-raised-button class="cta-button-large cta-button-primary" (click)="navigateToRegister()" aria-label="Request a demo of SelfAccounting.AI">
+        Request Demo
+      </button>
+    </div>
+  </section>
+
+  <!-- Contact Form Section -->
+  <section class="contact-section" aria-label="Contact us">
+    <div class="section-container">
+      <h2 class="section-title">Get in Touch</h2>
+      <p class="section-subtitle">
+        Have questions about our expense tracker or auditing software? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+      </p>
+      <mat-card class="contact-form-card">
+        <mat-card-content>
+          <form [formGroup]="contactForm" (ngSubmit)="submitContactForm()" class="contact-form">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Full Name *</mat-label>
+                <input matInput formControlName="name" placeholder="John Doe" />
+                <mat-error *ngIf="contactForm.get('name')?.hasError('required')">
+                  Name is required
+                </mat-error>
+                <mat-error *ngIf="contactForm.get('name')?.hasError('minlength')">
+                  Name must be at least 2 characters
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Email *</mat-label>
+                <input matInput type="email" formControlName="email" placeholder="john@company.com" />
+                <mat-error *ngIf="contactForm.get('email')?.hasError('required')">
+                  Email is required
+                </mat-error>
+                <mat-error *ngIf="contactForm.get('email')?.hasError('email')">
+                  Please enter a valid email
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Phone Number *</mat-label>
+                <input matInput formControlName="phone" placeholder="+971 50 123 4567" />
+                <mat-error *ngIf="contactForm.get('phone')?.hasError('required')">
+                  Phone number is required
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Company Name</mat-label>
+                <input matInput formControlName="company" placeholder="Your Company" />
+              </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline" class="form-field-full">
+              <mat-label>Message *</mat-label>
+              <textarea
+                matInput
+                formControlName="message"
+                rows="5"
+                placeholder="Tell us about your requirements or questions..."
+              ></textarea>
+              <mat-error *ngIf="contactForm.get('message')?.hasError('required')">
+                Message is required
+              </mat-error>
+              <mat-error *ngIf="contactForm.get('message')?.hasError('minlength')">
+                Message must be at least 10 characters
+              </mat-error>
+            </mat-form-field>
+
+            <div class="form-actions">
+              <button
+                mat-raised-button
+                type="submit"
+                class="submit-button"
+                [disabled]="submitting || contactForm.invalid"
+              >
+                <mat-spinner *ngIf="submitting" [diameter]="20" class="button-spinner"></mat-spinner>
+                <span *ngIf="!submitting">Send Message</span>
+                <span *ngIf="submitting">Sending...</span>
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="section-container">
+      <p>&copy; {{ currentYear }} SelfAccounting.AI. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="/auth/login">Sign In</a>
+        <a href="/auth/register">Register</a>
+      </div>
+    </div>
+  </footer>
+</div>
+

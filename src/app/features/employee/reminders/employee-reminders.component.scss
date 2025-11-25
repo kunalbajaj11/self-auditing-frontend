@@ -1,0 +1,260 @@
+.reminders {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 32px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 20px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+
+  .header-content {
+    flex: 1;
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin: 0;
+      color: #64748b;
+      font-size: 1rem;
+      line-height: 1.6;
+      max-width: 600px;
+    }
+  }
+}
+
+.reminders-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section-title {
+  margin: 0 0 20px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.reminders-card {
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  transition: all 0.3s ease;
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.12);
+  }
+
+  mat-card-header {
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    background: linear-gradient(to bottom, #ffffff, #f8fafc);
+
+    .card-title-with-icon {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 0;
+
+      mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+        color: #1e3a8a;
+        flex-shrink: 0;
+      }
+
+      mat-card-title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+    }
+  }
+
+  mat-card-content {
+    padding: 24px;
+  }
+}
+
+mat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+mat-list-item {
+  padding: 16px !important;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  transition: all 0.2s ease;
+  margin-bottom: 12px;
+
+  &:hover {
+    background: #f1f5f9;
+    border-color: rgba(30, 58, 138, 0.2);
+    transform: translateX(4px);
+  }
+
+  mat-icon[matListIcon] {
+    color: #1e3a8a;
+    margin-right: 16px;
+  }
+
+  [matLine] {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+
+    &:first-child {
+      font-weight: 600;
+      color: #0f172a;
+      font-size: 1rem;
+    }
+
+    &.secondary {
+      color: #64748b;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    &.meta {
+      color: #94a3b8;
+      font-size: 0.875rem;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+  }
+
+  button {
+    margin-left: auto;
+  }
+}
+
+.status {
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.2);
+  color: #1d4ed8;
+
+  &.read {
+    background: rgba(148, 163, 184, 0.2);
+    color: #475569;
+  }
+}
+
+.empty,
+.loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 24px;
+  color: #94a3b8;
+  text-align: center;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #cbd5e1;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1rem;
+    color: #64748b;
+  }
+}
+
+// Mobile Responsive Styles
+@media (max-width: 768px) {
+  .reminders {
+    gap: 24px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 24px;
+
+    .header-content {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      p {
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    margin-bottom: 16px;
+  }
+
+  .reminders-card {
+    mat-card-header {
+      padding: 20px 20px 12px;
+
+      .card-title-with-icon {
+        mat-card-title {
+          font-size: 1.1rem;
+        }
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+
+    mat-card-content {
+      padding: 20px;
+    }
+  }
+
+  mat-list-item {
+    padding: 12px !important;
+    flex-direction: column;
+    align-items: flex-start;
+
+    button {
+      width: 100%;
+      margin-left: 0;
+      margin-top: 12px;
+      min-height: 44px;
+    }
+  }
+}

@@ -1,0 +1,136 @@
+<div class="auth-page">
+  <div class="auth-container">
+    <!-- Left side - Branding Section -->
+    <div class="auth-branding">
+      <div class="brand-content">
+        <div class="logo-container">
+          <img src="assets/images/stryvon-logo.svg" alt="selfAccounting.AI Logo" class="brand-logo" />
+        </div>
+        <h1 class="brand-title">selfAccounting.AI</h1>
+        <p class="brand-subtitle">Intelligent Expense Management & Accounting Platform</p>
+        <div class="brand-features">
+          <div class="feature-item">
+            <mat-icon>verified</mat-icon>
+            <span>Secure & Compliant</span>
+          </div>
+          <div class="feature-item">
+            <mat-icon>speed</mat-icon>
+            <span>AI-Powered Automation</span>
+          </div>
+          <div class="feature-item">
+            <mat-icon>analytics</mat-icon>
+            <span>Real-time Analytics</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right side - Login Form -->
+    <div class="auth-form-section">
+      <mat-card class="auth-card">
+        <mat-card-content>
+          <div class="form-header">
+            <h2 class="form-title">Welcome Back</h2>
+            <p class="form-subtitle">Sign in to your account to continue</p>
+          </div>
+
+          <div *ngIf="inactiveOrgMessage" class="inactive-banner" role="alert">
+            <mat-icon>warning_amber</mat-icon>
+            <div class="banner-text">
+              <strong>Account inactive</strong>
+              <span>{{ inactiveOrgMessage }}</span>
+            </div>
+          </div>
+
+          <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Email Address</mat-label>
+              <mat-icon matPrefix>email</mat-icon>
+              <input 
+                matInput 
+                placeholder="Enter your email" 
+                formControlName="email" 
+                type="email"
+                autocomplete="email"
+              />
+              <mat-error *ngIf="form.controls.email.hasError('required')">
+                Email is required
+              </mat-error>
+              <mat-error *ngIf="form.controls.email.hasError('email')">
+                Enter a valid email address
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Password</mat-label>
+              <mat-icon matPrefix>lock</mat-icon>
+              <input
+                matInput
+                placeholder="Enter your password"
+                [type]="hidePassword ? 'password' : 'text'"
+                formControlName="password"
+                autocomplete="current-password"
+              />
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                (click)="hidePassword = !hidePassword"
+                [attr.aria-label]="hidePassword ? 'Show password' : 'Hide password'"
+                class="password-toggle"
+              >
+                <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              <mat-error *ngIf="form.controls.password.hasError('required')">
+                Password is required
+              </mat-error>
+              <mat-error *ngIf="form.controls.password.hasError('minlength')">
+                Minimum 8 characters required
+              </mat-error>
+            </mat-form-field>
+
+            <div class="form-options">
+              <label class="remember-me">
+                <input type="checkbox" />
+                <span>Remember me</span>
+              </label>
+              <a href="#" class="forgot-password">Forgot password?</a>
+            </div>
+
+            <button
+              mat-raised-button
+              color="primary"
+              class="submit-button"
+              [disabled]="loading || form.invalid"
+              type="submit"
+            >
+              <mat-progress-spinner
+                *ngIf="loading"
+                mode="indeterminate"
+                diameter="20"
+                strokeWidth="3"
+                class="button-spinner"
+              ></mat-progress-spinner>
+              <mat-icon *ngIf="!loading">login</mat-icon>
+              <span *ngIf="!loading">Sign In</span>
+              <span *ngIf="loading">Signing in...</span>
+            </button>
+          </form>
+
+          <div class="form-footer">
+            <p class="register-link">
+              Don't have an account?
+              <a routerLink="/auth/register" class="register-link-text">
+                Activate your workspace
+              </a>
+            </p>
+            <div class="powered-by">
+              <span>Powered by</span>
+              <strong>Stryvon</strong>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

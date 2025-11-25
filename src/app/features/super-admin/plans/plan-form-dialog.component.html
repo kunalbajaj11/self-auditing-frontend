@@ -1,0 +1,63 @@
+<h2 mat-dialog-title>
+  {{ isEdit ? 'Edit Plan' : 'New Plan' }}
+</h2>
+<form mat-dialog-content [formGroup]="form" class="form">
+  <mat-form-field appearance="outline">
+    <mat-label>Plan Name</mat-label>
+    <input matInput formControlName="name" required />
+    <mat-error *ngIf="form.get('name')?.hasError('required')">
+      Plan name is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Description</mat-label>
+    <textarea matInput rows="3" formControlName="description"></textarea>
+    <mat-error *ngIf="form.get('description')?.hasError('required')">
+      Description is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Max Users</mat-label>
+    <input matInput type="number" formControlName="maxUsers" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Max Storage (MB)</mat-label>
+    <input matInput type="number" formControlName="maxStorageMb" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Max Expenses / Month</mat-label>
+    <input matInput type="number" formControlName="maxExpensesPerMonth" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Monthly Price (AED)</mat-label>
+    <input matInput type="number" formControlName="priceMonthly" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Yearly Price (AED)</mat-label>
+    <input matInput type="number" formControlName="priceYearly" />
+  </mat-form-field>
+</form>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="submit()"
+    [disabled]="loading"
+  >
+    <mat-progress-spinner
+      *ngIf="loading"
+      [diameter]="20"
+      mode="indeterminate"
+    ></mat-progress-spinner>
+    <span *ngIf="!loading">{{ isEdit ? 'Save Changes' : 'Create Plan' }}</span>
+  </button>
+</mat-dialog-actions>
+

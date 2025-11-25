@@ -1,0 +1,37 @@
+<h2 mat-dialog-title>Renew License Key</h2>
+<mat-dialog-content [formGroup]="form" class="dialog-content">
+  <p class="muted">
+    Current expiry:
+    <strong>{{ data.license.expiresAt | date: 'mediumDate' }}</strong>
+  </p>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Extend by (days)</mat-label>
+    <input matInput type="number" formControlName="extendByDays" />
+  </mat-form-field>
+
+  <p class="separator">or</p>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Set new expiry date</mat-label>
+    <input matInput type="date" formControlName="newExpiry" />
+  </mat-form-field>
+  <small class="hint">
+    Leave either the extension or the new expiry blank. If both are provided, the new expiry date takes
+    precedence.
+  </small>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button mat-flat-button color="primary" type="button" (click)="submit()" [disabled]="loading">
+    <mat-progress-spinner
+      *ngIf="loading"
+      mode="indeterminate"
+      diameter="16"
+      strokeWidth="3"
+    ></mat-progress-spinner>
+    <span *ngIf="!loading">Renew</span>
+  </button>
+</mat-dialog-actions>
+

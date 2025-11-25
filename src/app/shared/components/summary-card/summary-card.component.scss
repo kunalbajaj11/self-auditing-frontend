@@ -1,0 +1,137 @@
+.summary-card {
+  display: flex;
+  align-items: center;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.1);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1), 0 2px 4px rgba(15, 23, 42, 0.12);
+    transform: translateY(-2px);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: currentColor;
+    opacity: 0.3;
+  }
+
+  .icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 32px;
+    }
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+
+    .label {
+      font-size: 0.75rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 600;
+      margin: 2px;
+      text-align: center;
+    }
+
+    .value {
+      font-size: 1.9rem;
+      font-weight: 700;
+      line-height: 1.1;
+      color: #0f172a;
+      word-break: break-word;
+      text-align: center;
+    }
+
+    .hint {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+  }
+
+  &.primary {
+    &::before {
+      background: #1e3a8a;
+    }
+    .icon {
+      background: linear-gradient(135deg, rgba(30, 58, 138, 0.15), rgba(30, 58, 138, 0.25));
+      color: #1e3a8a;
+    }
+  }
+
+  &.accent {
+    &::before {
+      background: #0f766e;
+    }
+    .icon {
+      background: linear-gradient(135deg, rgba(20, 184, 166, 0.15), rgba(20, 184, 166, 0.25));
+      color: #0f766e;
+    }
+  }
+
+  &.warn {
+    &::before {
+      background: #b45309;
+    }
+    .icon {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.25));
+      color: #b45309;
+    }
+  }
+}
+
+// Mobile responsive styles
+@media (max-width: 768px) {
+  .summary-card {
+    padding: 16px;
+
+    .icon {
+      width: 48px;
+      height: 48px;
+      margin-right: 12px;
+
+      mat-icon {
+        font-size: 24px;
+      }
+    }
+
+    .content {
+      .label {
+        font-size: 0.7rem;
+      }
+
+      .value {
+        font-size: 1.5rem;
+      }
+
+      .hint {
+        font-size: 0.8rem;
+      }
+    }
+  }
+}
+

@@ -1,0 +1,93 @@
+<section class="reconciliation-list">
+  <header class="header">
+    <div class="header-content">
+      <h1>Bank Reconciliations</h1>
+      <p>Upload bank statements and match transactions with expenses for accurate reconciliation.</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="uploadNew()" *ngIf="isEnterprise$ | async">
+      <mat-icon>upload</mat-icon>
+      Upload Statement
+    </button>
+  </header>
+
+  <mat-card *ngIf="!(isEnterprise$ | async)" class="license-notice">
+    <mat-card-content>
+      <mat-icon color="warn">info</mat-icon>
+      <div>
+        <strong>Bank Reconciliation Feature</strong>
+        <p>Bank reconciliation module is available for Enterprise license holders only. Please contact your administrator to upgrade.</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <section class="reconciliations-section" *ngIf="isEnterprise$ | async">
+    <h3 class="section-title">Reconciliation Records</h3>
+    <mat-card class="reconciliations-card">
+      <mat-card-header>
+        <div class="card-title-with-icon">
+          <mat-icon>account_balance</mat-icon>
+          <mat-card-title>Bank Reconciliation History</mat-card-title>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngIf="loading" class="loading">
+          <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+        </div>
+
+        <div class="table-container" *ngIf="!loading">
+          <table mat-table [dataSource]="dataSource" class="reconciliations-table">
+    <ng-container matColumnDef="date">
+      <th mat-header-cell *matHeaderCellDef>Reconciliation Date</th>
+      <td mat-cell *matCellDef="let record">
+        {{ formatDate(record.reconciliationDate) }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="period">
+      <th mat-header-cell *matHeaderCellDef>Statement Period</th>
+      <td mat-cell *matCellDef="let record">
+        {{ formatDate(record.statementPeriodStart) }} -
+        {{ formatDate(record.statementPeriodEnd) }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="matched">
+      <th mat-header-cell *matHeaderCellDef>Matched</th>
+      <td mat-cell *matCellDef="let record">
+        <span class="badge matched">{{ record.totalMatched }}</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="unmatched">
+      <th mat-header-cell *matHeaderCellDef>Unmatched</th>
+      <td mat-cell *matCellDef="let record">
+        <span class="badge unmatched">{{ record.totalUnmatched }}</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Actions</th>
+      <td mat-cell *matCellDef="let record">
+        <button mat-icon-button (click)="viewDetail(record)" color="primary">
+          <mat-icon>visibility</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columns" class="table-header"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns" class="table-row"></tr>
+          </table>
+
+          <div *ngIf="!loading && dataSource.data.length === 0" class="empty">
+            <mat-icon>account_balance</mat-icon>
+            <p>No bank reconciliations found</p>
+            <button mat-raised-button color="primary" (click)="uploadNew()">
+              Upload Your First Statement
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</section>
+

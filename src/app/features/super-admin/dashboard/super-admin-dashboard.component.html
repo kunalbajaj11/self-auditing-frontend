@@ -1,0 +1,203 @@
+<section class="dashboard">
+  <header class="header">
+    <div class="header-content">
+      <h1>Platform Health</h1>
+      <p>
+        Real-time snapshot of tenant adoption, expenses throughput, and audit
+        activity across the selfAccounting.AI platform.
+      </p>
+    </div>
+    <button mat-raised-button color="primary" (click)="refresh()" class="refresh-btn">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </header>
+
+  <ng-container *ngIf="metrics$ | async as metrics; else loadingState">
+    <div *ngIf="metrics; else errorState" class="dashboard-content">
+      <!-- Key Metrics Section -->
+      <section class="metrics-section">
+        <h3 class="section-title">Platform Metrics</h3>
+        <div class="summary-grid">
+          <app-summary-card
+            label="Client Organizations"
+            icon="domain"
+            [value]="metrics.totalOrganizations | number"
+            accent="primary"
+            [hint]="metrics.activeOrganizations + ' active / ' + metrics.inactiveOrganizations + ' inactive'"
+          ></app-summary-card>
+          <app-summary-card
+            label="Active Users"
+            icon="group"
+            [value]="metrics.totalUsers | number"
+            accent="accent"
+          ></app-summary-card>
+          <app-summary-card
+            label="Expenses Processed"
+            icon="receipt_long"
+            [value]="metrics.totalExpensesProcessed | number"
+            accent="warn"
+          ></app-summary-card>
+          <app-summary-card
+            label="Pending Accruals"
+            icon="schedule"
+            [value]="metrics.pendingAccruals | number"
+            accent="primary"
+            [hint]="metrics.totalAccruals + ' total accruals'"
+          ></app-summary-card>
+          <app-summary-card
+            label="Storage Consumed"
+            icon="cloud"
+            [value]="(metrics.storageUsedMb | number:'1.0-2') + ' MB'"
+            accent="accent"
+          ></app-summary-card>
+        </div>
+      </section>
+
+      <!-- Analytics Section -->
+      <section class="analytics-section">
+        <h3 class="section-title">Analytics & Activity</h3>
+        <div class="content-grid">
+          <mat-card class="analytics-card">
+            <mat-card-header>
+              <div class="card-title-with-icon">
+                <mat-icon>trending_up</mat-icon>
+                <mat-card-title>Top Organizations by Activity</mat-card-title>
+              </div>
+              <mat-card-subtitle>Expenses and user engagement</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="table-container">
+                <table
+                  mat-table
+                  [dataSource]="(topOrganizations$ | async) || []"
+                  class="analytics-table"
+                >
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Organisation</th>
+                    <td mat-cell *matCellDef="let org">
+                      <div class="org-cell">
+                        <div class="org-name">{{ org.name }}</div>
+                        <span class="plan-badge">{{ org.planType | titlecase }} plan</span>
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="users">
+                    <th mat-header-cell *matHeaderCellDef class="text-right">Users</th>
+                    <td mat-cell *matCellDef="let org" class="text-right">
+                      {{ org.userCount | number }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="expenses">
+                    <th mat-header-cell *matHeaderCellDef class="text-right">Expenses</th>
+                    <td mat-cell *matCellDef="let org" class="text-right">
+                      {{ org.expenseCount | number }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="accruals">
+                    <th mat-header-cell *matHeaderCellDef class="text-right">Accruals</th>
+                    <td mat-cell *matCellDef="let org" class="text-right">
+                      {{ org.accrualCount | number }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="storage">
+                    <th mat-header-cell *matHeaderCellDef class="text-right">Storage</th>
+                    <td mat-cell *matCellDef="let org" class="text-right">
+                      {{ org.storageUsedMb | number:'1.0-1' }} MB
+                    </td>
+                  </ng-container>
+
+                  <tr
+                    mat-header-row
+                    *matHeaderRowDef="['name', 'users', 'expenses', 'accruals', 'storage']"
+                    class="table-header"
+                  ></tr>
+                  <tr
+                    mat-row
+                    *matRowDef="
+                      let row;
+                      columns: ['name', 'users', 'expenses', 'accruals', 'storage']
+                    "
+                    class="table-row"
+                  ></tr>
+                </table>
+              </div>
+              <div class="empty" *ngIf="(topOrganizations$ | async)?.length === 0">
+                <mat-icon>business</mat-icon>
+                <p>No organizations found.</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="analytics-card">
+            <mat-card-header>
+              <div class="card-title-with-icon">
+                <mat-icon>history</mat-icon>
+                <mat-card-title>Latest Audit Events</mat-card-title>
+              </div>
+              <mat-card-subtitle>Most recent platform-level actions</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="audit-list" *ngIf="metrics.latestAuditLogs && metrics.latestAuditLogs.length > 0; else noAuditLogs">
+                <div class="audit-item" *ngFor="let log of metrics.latestAuditLogs">
+                  <div class="audit-icon">
+                    <mat-icon>history_edu</mat-icon>
+                  </div>
+                  <div class="audit-details">
+                    <div class="audit-header">
+                      <span class="audit-action">{{ log.action | titlecase }}</span>
+                      <span class="entity-type">{{ log.entityType }}</span>
+                    </div>
+                    <div class="audit-meta">
+                      <span class="org-id">Org: {{ log.organizationId }}</span>
+                      <span class="separator">•</span>
+                      <span class="timestamp">{{ log.timestamp | date: 'medium' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <ng-template #noAuditLogs>
+                <div class="empty">
+                  <mat-icon>history</mat-icon>
+                  <p>No audit entries logged yet.</p>
+                </div>
+              </ng-template>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </section>
+    </div>
+  </ng-container>
+</section>
+
+<ng-template #loadingState>
+  <div class="loading-state">
+    <mat-progress-spinner
+      diameter="48"
+      mode="indeterminate"
+    ></mat-progress-spinner>
+    <p>Loading dashboard metrics…</p>
+  </div>
+</ng-template>
+
+<ng-template #errorState>
+  <div class="error-state" *ngIf="error; else emptyState">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-stroked-button color="primary" (click)="refresh()">
+      Retry
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #emptyState>
+  <div class="empty-state">
+    <mat-icon>notification_important</mat-icon>
+    <p>No data available yet. Onboard a client to see metrics populate.</p>
+  </div>
+</ng-template>
+

@@ -1,0 +1,19 @@
+# robots.txt for SelfAccounting.AI
+
+User-agent: *
+Allow: /
+Allow: /auth/login
+Allow: /auth/register
+
+# Disallow private/admin areas
+Disallow: /admin/
+Disallow: /super-admin/
+Disallow: /employee/
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://selfaccounting.ai/sitemap.xml
+
+# Crawl-delay (optional, helps prevent server overload)
+Crawl-delay: 1
+

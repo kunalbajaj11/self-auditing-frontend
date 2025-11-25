@@ -1,0 +1,151 @@
+<section class="organizations">
+  <header class="header">
+    <div class="header-content">
+      <h1>Client Organizations</h1>
+      <p>
+        Manage onboarded audit firms, track usage, and enforce subscription
+        limits across the platform.
+      </p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      New Organization
+    </button>
+  </header>
+
+  <section class="filters-section">
+    <mat-card class="filters-card">
+    <mat-form-field appearance="outline">
+      <mat-label>Search organizations</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput [formControl]="searchControl" placeholder="Name, status, or plan" />
+    </mat-form-field>
+    <button mat-button (click)="refresh()">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+    </mat-card>
+  </section>
+
+  <section class="organizations-section">
+    <h3 class="section-title">Organizations</h3>
+    <mat-card class="organizations-card">
+      <mat-card-header>
+        <div class="card-title-with-icon">
+          <mat-icon>domain</mat-icon>
+          <mat-card-title>Organization List</mat-card-title>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="dataSource" matSort class="organizations-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            Organization
+          </th>
+          <td mat-cell *matCellDef="let org">
+            <div class="primary">{{ org.name }}</div>
+            <div class="secondary">
+              Created {{ org.createdAt | date: 'mediumDate' }}
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="planType">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Plan</th>
+          <td mat-cell *matCellDef="let org">
+            <mat-chip color="primary" selected>
+              {{ org.planType | titlecase }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+          <td mat-cell *matCellDef="let org">
+            <mat-chip [color]="org.status === 'active' ? 'primary' : 'warn'" selected>
+              {{ org.status | titlecase }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="userCount">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Users</th>
+          <td mat-cell *matCellDef="let org">{{ org.userCount | number }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="expenseCount">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Expenses</th>
+          <td mat-cell *matCellDef="let org">{{ org.expenseCount | number }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="accrualCount">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Accruals</th>
+          <td mat-cell *matCellDef="let org">{{ org.accrualCount | number }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="storage">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Storage</th>
+          <td mat-cell *matCellDef="let org">
+            {{ org.storageUsedMb | number: '1.0-2' }} MB
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Joined</th>
+          <td mat-cell *matCellDef="let org">
+            {{ org.createdAt | date: 'mediumDate' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let org">
+            <div class="action-buttons">
+              <button
+                mat-stroked-button
+                color="accent"
+                (click)="upgradeLicense(org)"
+                [disabled]="org.planType === 'enterprise'"
+                matTooltip="Upgrade to a higher license tier"
+              >
+                <mat-icon>upgrade</mat-icon>
+                Upgrade License
+              </button>
+              <button
+                mat-stroked-button
+                color="primary"
+                (click)="toggleStatus(org)"
+              >
+                {{ org.status === 'active' ? 'Deactivate' : 'Activate' }}
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns"
+          class="table-row"
+        ></tr>
+      </table>
+
+          <div class="table-overlay" *ngIf="loading">
+            <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+          </div>
+
+          <div class="empty" *ngIf="!loading && dataSource.data.length === 0">
+            <mat-icon>people_outline</mat-icon>
+            <p>No organizations yet. Create one to get started.</p>
+          </div>
+          <div class="error" *ngIf="error">
+            <mat-icon>error_outline</mat-icon>
+            <p>{{ error }}</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</section>
+

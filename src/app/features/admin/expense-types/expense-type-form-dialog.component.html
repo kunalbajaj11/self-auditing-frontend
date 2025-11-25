@@ -1,0 +1,47 @@
+<h2 mat-dialog-title>
+  {{ isEdit ? 'Edit Expense Type' : 'New Expense Type' }}
+</h2>
+<form mat-dialog-content [formGroup]="form" class="form">
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Name</mat-label>
+    <input matInput formControlName="name" placeholder="e.g., marketing_expense" />
+    <mat-hint>Internal identifier (lowercase, underscores)</mat-hint>
+    <mat-error *ngIf="form.get('name')?.hasError('required')">
+      Name is required
+    </mat-error>
+    <mat-error *ngIf="form.get('name')?.hasError('maxlength')">
+      Name must be 100 characters or less
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Display Label</mat-label>
+    <input matInput formControlName="displayLabel" placeholder="e.g., Marketing Expense" />
+    <mat-hint>User-friendly label shown in the UI</mat-hint>
+    <mat-error *ngIf="form.get('displayLabel')?.hasError('maxlength')">
+      Display label must be 100 characters or less
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Description</mat-label>
+    <textarea matInput formControlName="description" rows="3" placeholder="Optional description"></textarea>
+  </mat-form-field>
+</form>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="submit()"
+    [disabled]="loading || form.invalid"
+  >
+    <mat-progress-spinner
+      *ngIf="loading"
+      [diameter]="20"
+      mode="indeterminate"
+    ></mat-progress-spinner>
+    <span *ngIf="!loading">{{ isEdit ? 'Update' : 'Create' }}</span>
+  </button>
+</mat-dialog-actions>
+

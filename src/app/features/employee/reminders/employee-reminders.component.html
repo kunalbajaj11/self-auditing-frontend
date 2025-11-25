@@ -1,0 +1,66 @@
+<section class="reminders">
+  <header class="header">
+    <div class="header-content">
+      <h1>Reminders</h1>
+      <p>Stay on top of pending accrual settlements and OCR follow-ups.</p>
+    </div>
+  </header>
+
+  <mat-card *ngIf="!(isEnterprise$ | async)" class="license-notice">
+    <mat-card-content>
+      <mat-icon color="warn">info</mat-icon>
+      <div>
+        <strong>Reminders Feature</strong>
+        <p>Reminders module is available for Enterprise license holders only. Please contact your administrator to upgrade.</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <section class="reminders-section" *ngIf="isEnterprise$ | async">
+    <h3 class="section-title">My Reminders</h3>
+    <mat-card class="reminders-card">
+      <mat-card-header>
+        <div class="card-title-with-icon">
+          <mat-icon>event</mat-icon>
+          <mat-card-title>Reminder List</mat-card-title>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+      <mat-list>
+        <mat-list-item *ngFor="let notification of notifications">
+          <mat-icon matListIcon>
+            {{ notification.type === 'accrual_reminder' ? 'event' : 'notifications' }}
+          </mat-icon>
+          <div matLine>
+            {{ notification.title }}
+            <span class="status" [class.read]="notification.isRead">
+              {{ notification.isRead ? 'Read' : 'Unread' }}
+            </span>
+          </div>
+          <div matLine class="secondary">
+            {{ notification.message }}
+          </div>
+          <div matLine class="meta">
+            {{ notification.createdAt | date: 'medium' }}
+            <span *ngIf="notification.scheduledFor">
+              • Due {{ notification.scheduledFor | date: 'short' }}
+            </span>
+          </div>
+          <button mat-button (click)="toggle(notification)">
+            Mark as {{ notification.isRead ? 'Unread' : 'Read' }}
+          </button>
+        </mat-list-item>
+      </mat-list>
+
+      <div class="empty" *ngIf="!loading && notifications.length === 0">
+        <mat-icon>task_alt</mat-icon>
+        <p>No reminders at the moment.</p>
+      </div>
+      <div class="loading" *ngIf="loading">
+        <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+      </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</section>
+

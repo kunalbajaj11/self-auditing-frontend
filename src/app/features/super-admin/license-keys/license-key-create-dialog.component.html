@@ -1,0 +1,52 @@
+<h2 mat-dialog-title>Generate License Key</h2>
+<mat-dialog-content [formGroup]="form" class="dialog-content">
+  <mat-form-field appearance="outline">
+    <mat-label>Plan</mat-label>
+    <mat-select formControlName="planType">
+      <mat-option *ngFor="let plan of planTypes" [value]="plan">
+        {{ plan | titlecase }}
+      </mat-option>
+    </mat-select>
+    <mat-error *ngIf="form.controls.planType.hasError('required')">
+      Plan is required
+    </mat-error>
+  </mat-form-field>
+
+  <div class="two-column">
+    <mat-form-field appearance="outline">
+      <mat-label>Max Users</mat-label>
+      <input matInput type="number" formControlName="maxUsers" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Storage Quota (MB)</mat-label>
+      <input matInput type="number" formControlName="storageQuotaMb" />
+    </mat-form-field>
+  </div>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Validity (days)</mat-label>
+    <input matInput type="number" formControlName="validityDays" />
+    <mat-error *ngIf="form.controls.validityDays.hasError('required')">
+      Validity period is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Notes</mat-label>
+    <textarea matInput rows="2" formControlName="notes"></textarea>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button mat-flat-button color="primary" type="button" (click)="submit()" [disabled]="loading">
+    <mat-progress-spinner
+      *ngIf="loading"
+      mode="indeterminate"
+      diameter="16"
+      strokeWidth="3"
+    ></mat-progress-spinner>
+    <span *ngIf="!loading">Generate</span>
+  </button>
+</mat-dialog-actions>
+

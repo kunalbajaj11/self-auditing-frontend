@@ -1,0 +1,78 @@
+<section class="categories">
+  <header class="header">
+    <div class="header-content">
+      <h1>Expense Categories</h1>
+      <p>Maintain tax-compliant classifications for expense submissions.</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openDialog()">
+      <mat-icon>add</mat-icon>
+      New Category
+    </button>
+  </header>
+
+  <section class="categories-section">
+    <h3 class="section-title">Categories</h3>
+    <mat-card class="categories-card">
+      <mat-card-header>
+        <div class="card-title-with-icon">
+          <mat-icon>category</mat-icon>
+          <mat-card-title>Category List</mat-card-title>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="dataSource" class="categories-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let category">{{ category.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>Description</th>
+          <td mat-cell *matCellDef="let category">
+            {{ category.description || '—' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let category">
+            <mat-chip [disabled]="!category.isSystemDefault" selected>
+              {{ category.isSystemDefault ? 'System' : 'Custom' }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let category">
+            <button mat-button (click)="openDialog(category)">Edit</button>
+            <button
+              mat-button
+              color="warn"
+              (click)="delete(category)"
+              [disabled]="category.isSystemDefault"
+            >
+              Delete
+            </button>
+          </td>
+        </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columns" class="table-header"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns" class="table-row"></tr>
+          </table>
+
+          <div class="table-overlay" *ngIf="loading">
+            <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+          </div>
+        </div>
+
+        <div class="empty" *ngIf="!loading && dataSource.data.length === 0">
+          <mat-icon>category</mat-icon>
+          <p>No categories configured yet.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</section>
+

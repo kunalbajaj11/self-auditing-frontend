@@ -1,0 +1,86 @@
+<div class="upload-container">
+  <h2>Upload Bank Statement</h2>
+  <p class="subtitle">Upload your bank statement in CSV, XLSX, or PDF format</p>
+
+  <mat-card *ngIf="!(isEnterprise$ | async)" class="license-notice">
+    <mat-card-content>
+      <mat-icon color="warn">info</mat-icon>
+      <div>
+        <strong>Bank Reconciliation Feature</strong>
+        <p>Bank reconciliation module is available for Enterprise license holders only. Please contact your administrator to upgrade.</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <form [formGroup]="form" (ngSubmit)="upload()" *ngIf="isEnterprise$ | async">
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Statement Period Start</mat-label>
+        <input matInput type="date" formControlName="statementPeriodStart" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Statement Period End</mat-label>
+        <input matInput type="date" formControlName="statementPeriodEnd" />
+      </mat-form-field>
+    </div>
+
+    <div
+      class="file-drop-zone"
+      [class.drag-over]="dragOver"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+    >
+      <input
+        type="file"
+        #fileInput
+        (change)="onFileSelected($event)"
+        accept=".csv,.xlsx,.xls,.pdf"
+        style="display: none"
+      />
+
+      <div *ngIf="!selectedFile" class="drop-zone-content">
+        <mat-icon>cloud_upload</mat-icon>
+        <p>Drag and drop your bank statement here</p>
+        <p class="hint">or</p>
+        <button mat-raised-button type="button" (click)="fileInput.click()">
+          Browse Files
+        </button>
+        <p class="file-types">Supported formats: CSV, XLSX, PDF</p>
+      </div>
+
+      <div *ngIf="selectedFile" class="file-selected">
+        <mat-icon>description</mat-icon>
+        <div class="file-info">
+          <p class="file-name">{{ selectedFile.name }}</p>
+          <p class="file-size">
+            {{ (selectedFile.size / 1024).toFixed(2) }} KB
+          </p>
+        </div>
+        <button
+          mat-icon-button
+          type="button"
+          (click)="removeFile()"
+          color="warn"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="loading || !selectedFile"
+      >
+        <mat-icon *ngIf="!loading">upload</mat-icon>
+        <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+        <span>{{ loading ? 'Uploading...' : 'Upload Statement' }}</span>
+      </button>
+    </div>
+  </form>
+</div>
+

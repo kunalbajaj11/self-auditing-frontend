@@ -1,0 +1,471 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 32px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 20px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+
+  .header-content {
+    flex: 1;
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin: 0;
+      color: #64748b;
+      font-size: 1rem;
+      line-height: 1.6;
+      max-width: 600px;
+    }
+  }
+
+  .refresh-btn {
+    height: 48px;
+    padding: 0 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.2);
+
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+// Section Titles
+.section-title {
+  margin: 0 0 24px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+// Metrics Section
+.metrics-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+// Analytics Section
+.analytics-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 24px;
+}
+
+.analytics-card {
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  transition: all 0.3s ease;
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.12);
+    transform: translateY(-2px);
+  }
+
+  mat-card-header {
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    background: linear-gradient(to bottom, #ffffff, #f8fafc);
+
+    .card-title-with-icon {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 0;
+
+      mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+        color: #1e3a8a;
+        flex-shrink: 0;
+      }
+
+      mat-card-title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+    }
+
+    mat-card-subtitle {
+      margin: 8px 0 0;
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+  }
+
+  mat-card-content {
+    padding: 24px;
+  }
+}
+
+// Table Styling
+.table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+}
+
+.analytics-table {
+  width: 100%;
+  background: transparent;
+
+  .table-header {
+    background: #f8fafc;
+
+    th {
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 16px;
+      border-bottom: 2px solid rgba(15, 23, 42, 0.08);
+
+      &.text-right {
+        text-align: right;
+      }
+    }
+  }
+
+  .table-row {
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: #f8fafc;
+    }
+
+    td {
+      padding: 16px;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+      color: #0f172a;
+
+      &.text-right {
+        text-align: right;
+        font-family: 'SF Mono', 'Monaco', monospace;
+      }
+    }
+  }
+
+  .org-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    .org-name {
+      font-weight: 600;
+      color: #0f172a;
+      font-size: 0.95rem;
+    }
+
+    .plan-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(30, 58, 138, 0.1);
+      color: #1e3a8a;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      width: fit-content;
+    }
+  }
+}
+
+// Audit Events List
+.audit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.audit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f1f5f9;
+    border-color: rgba(30, 58, 138, 0.2);
+    transform: translateX(4px);
+  }
+
+  .audit-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.15), rgba(30, 58, 138, 0.25));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      color: #1e3a8a;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .audit-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+
+    .audit-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+
+      .audit-action {
+        font-weight: 600;
+        color: #0f172a;
+        font-size: 1rem;
+      }
+
+      .entity-type {
+        padding: 4px 10px;
+        background: rgba(100, 116, 139, 0.1);
+        color: #475569;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+    }
+
+    .audit-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+      color: #64748b;
+
+      .org-id {
+        font-weight: 600;
+        color: #475569;
+      }
+
+      .separator {
+        color: #cbd5e1;
+      }
+
+      .timestamp {
+        color: #64748b;
+        font-family: 'SF Mono', 'Monaco', monospace;
+      }
+    }
+  }
+}
+
+// Empty States
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 48px 24px;
+  color: #94a3b8;
+  text-align: center;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #cbd5e1;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1rem;
+    color: #64748b;
+  }
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 64px 24px;
+  color: #475569;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #1d4ed8;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #64748b;
+  }
+
+  button {
+    margin-top: 8px;
+  }
+}
+
+// Mobile Responsive Styles
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    gap: 24px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 24px;
+
+    .header-content {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      p {
+        font-size: 0.9rem;
+      }
+    }
+
+    .refresh-btn {
+      width: 100%;
+      min-height: 44px;
+    }
+  }
+
+  .dashboard-content {
+    gap: 32px;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    margin-bottom: 20px;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .analytics-card {
+    mat-card-header {
+      padding: 20px 20px 12px;
+
+      .card-title-with-icon {
+        mat-card-title {
+          font-size: 1.1rem;
+        }
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+
+    mat-card-content {
+      padding: 20px;
+    }
+  }
+
+  .analytics-table {
+    .table-header th,
+    .table-row td {
+      padding: 12px 8px;
+      font-size: 0.85rem;
+    }
+  }
+
+  .audit-item {
+    padding: 12px;
+    gap: 12px;
+
+    .audit-icon {
+      width: 36px;
+      height: 36px;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    .audit-details {
+      .audit-header .audit-action {
+        font-size: 0.95rem;
+      }
+
+      .audit-meta {
+        font-size: 0.85rem;
+      }
+    }
+  }
+}

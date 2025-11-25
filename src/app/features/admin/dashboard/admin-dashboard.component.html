@@ -1,0 +1,240 @@
+<section class="dashboard">
+  <header class="header">
+    <div class="header-content">
+      <h1>Operational Dashboard</h1>
+      <p>
+        Monitor spend trends, VAT exposure, and accrual status across
+        {{ (dashboard$ | async)?.organization?.name || 'your organization' }}.
+      </p>
+    </div>
+    <button mat-raised-button color="primary" (click)="refresh()" class="refresh-btn">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </header>
+
+  <ng-container *ngIf="dashboard$ | async as vm; else loadingState">
+    <div *ngIf="vm; else errorState" class="dashboard-content">
+      <div class="period-indicator">
+        <mat-icon>calendar_today</mat-icon>
+        <span>Showing data for <strong>{{ vm.period }}</strong></span>
+      </div>
+
+      <!-- Key Metrics Section -->
+      <section class="metrics-section">
+        <h3 class="section-title">Key Metrics</h3>
+        <div class="summary-grid">
+          <app-summary-card
+            label="Net Profit"
+            icon="account_balance_wallet"
+            [value]="'AED ' + (vm.netProfit | number: '1.0-2')"
+            accent="primary"
+            [hint]="'Revenue: AED ' + (vm.totalRevenue | number: '1.0-2') + ' - Expenses: AED ' + (vm.totalExpenses | number: '1.0-2')"
+          ></app-summary-card>
+
+          <app-summary-card
+            label="VAT Payable"
+            icon="percent"
+            [value]="'AED ' + (vm.vatAmount | number: '1.0-2')"
+            accent="accent"
+            [hint]="
+              vm.vatSummary && (vm.inputVat > 0 || vm.outputVat > 0)
+                ? 'Output: AED ' + (vm.outputVat | number: '1.0-2') + ' - Input: AED ' + (vm.inputVat | number: '1.0-2')
+                : 'No VAT transactions'
+            "
+          ></app-summary-card>
+
+          <app-summary-card
+            label="Expenses"
+            icon="receipt_long"
+            [value]="vm.expenseCount"
+            accent="primary"
+            [hint]="'Avg: AED ' + (vm.averageExpense | number: '1.0-2')"
+          ></app-summary-card>
+
+          <app-summary-card
+            label="Pending Accruals"
+            icon="schedule"
+            [value]="vm.pendingAccruals"
+            accent="warn"
+            [hint]="vm.pendingAccrualAmount > 0 ? 'AED ' + (vm.pendingAccrualAmount | number: '1.0-2') : undefined"
+          ></app-summary-card>
+
+          <app-summary-card
+            label="Pending Approvals"
+            icon="playlist_add_check"
+            [value]="vm.pendingApprovals"
+            accent="warn"
+            [hint]="vm.pendingApprovals > 0 ? 'Awaiting review' : 'All clear'"
+          ></app-summary-card>
+        </div>
+      </section>
+
+      <!-- Analytics Section -->
+      <section class="analytics-section">
+        <h3 class="section-title">Analytics & Reports</h3>
+        <div class="content-grid">
+          <mat-card class="analytics-card">
+            <mat-card-header>
+              <div class="card-title-with-icon">
+                <mat-icon>pie_chart</mat-icon>
+                <mat-card-title>Expense Distribution</mat-card-title>
+              </div>
+              <mat-card-subtitle>By category and type</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="table-container">
+                <table mat-table [dataSource]="vm.expenseSummary" class="analytics-table">
+                  <ng-container matColumnDef="category">
+                    <th mat-header-cell *matHeaderCellDef>Category</th>
+                    <td mat-cell *matCellDef="let row">
+                      <div class="category-cell">
+                        <strong>{{ row.category }}</strong>
+                        <span class="type-badge">{{ row.type | titlecase }}</span>
+                      </div>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="amount">
+                    <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
+                    <td mat-cell *matCellDef="let row" class="text-right">
+                      AED {{ row.amount | number: '1.0-2' }}
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="vat">
+                    <th mat-header-cell *matHeaderCellDef class="text-right">VAT</th>
+                    <td mat-cell *matCellDef="let row" class="text-right">
+                      AED {{ row.vatAmount | number: '1.0-2' }}
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="total">
+                    <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
+                    <td mat-cell *matCellDef="let row" class="text-right">
+                      <strong>AED {{ row.totalAmount | number: '1.0-2' }}</strong>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="['category', 'amount', 'vat', 'total']" class="table-header"></tr>
+                  <tr mat-row *matRowDef="let row; columns: ['category', 'amount', 'vat', 'total']" class="table-row"></tr>
+                </table>
+              </div>
+              <div class="empty" *ngIf="vm.expenseSummary.length === 0">
+                <mat-icon>pie_chart_outline</mat-icon>
+                <p>No expenses recorded yet.</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="analytics-card">
+            <mat-card-header>
+              <div class="card-title-with-icon">
+                <mat-icon>fact_check</mat-icon>
+                <mat-card-title>Accrual Status</mat-card-title>
+              </div>
+              <mat-card-subtitle>Pending vs settled obligations</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="table-container">
+                <table mat-table [dataSource]="vm.accrualSummary" class="analytics-table">
+                  <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let row">
+                      <mat-chip
+                        [color]="row.status === 'pending_settlement' ? 'warn' : 'primary'"
+                        selected
+                        class="status-chip-large"
+                      >
+                        {{ row.status | titlecase }}
+                      </mat-chip>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="count">
+                    <th mat-header-cell *matHeaderCellDef class="text-right">Count</th>
+                    <td mat-cell *matCellDef="let row" class="text-right">{{ row.count }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="value">
+                    <th mat-header-cell *matHeaderCellDef class="text-right">Value</th>
+                    <td mat-cell *matCellDef="let row" class="text-right">
+                      <strong>AED {{ row.amount | number: '1.0-2' }}</strong>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="['status', 'count', 'value']" class="table-header"></tr>
+                  <tr mat-row *matRowDef="let row; columns: ['status', 'count', 'value']" class="table-row"></tr>
+                </table>
+              </div>
+              <div class="empty" *ngIf="vm.accrualSummary.length === 0">
+                <mat-icon>fact_check</mat-icon>
+                <p>No accruals captured yet.</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </section>
+
+      <!-- Recent Activity Section -->
+      <section class="activity-section">
+        <h3 class="section-title">Recent Activity</h3>
+        <mat-card class="activity-card">
+          <mat-card-header>
+            <div class="card-title-with-icon">
+              <mat-icon>receipt_long</mat-icon>
+              <mat-card-title>Recent Expenses</mat-card-title>
+            </div>
+            <mat-card-subtitle>Latest pending submissions</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="expenses-list" *ngIf="vm.recentExpenses.length > 0; else noExpenses">
+              <div class="expense-item" *ngFor="let expense of vm.recentExpenses">
+                <div class="expense-icon">
+                  <mat-icon>receipt</mat-icon>
+                </div>
+                <div class="expense-details">
+                  <div class="expense-header">
+                    <span class="vendor-name">{{ expense.vendorName || 'Unspecified vendor' }}</span>
+                    <span class="status-badge" [ngClass]="expense.status">
+                      {{ expense.status | titlecase }}
+                    </span>
+                  </div>
+                  <div class="expense-meta">
+                    <span class="amount">AED {{ expense.totalAmount | number: '1.0-2' }}</span>
+                    <span class="separator">•</span>
+                    <span class="date">{{ expense.expenseDate | date: 'mediumDate' }}</span>
+                    <span class="separator" *ngIf="expense.categoryName">•</span>
+                    <span class="category" *ngIf="expense.categoryName">{{ expense.categoryName }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ng-template #noExpenses>
+              <div class="empty">
+                <mat-icon>playlist_add</mat-icon>
+                <p>No pending expenses at the moment.</p>
+              </div>
+            </ng-template>
+          </mat-card-content>
+        </mat-card>
+      </section>
+    </div>
+  </ng-container>
+</section>
+
+<ng-template #loadingState>
+  <div class="loading-state">
+    <mat-progress-spinner diameter="48" mode="indeterminate"></mat-progress-spinner>
+    <p>Crunching your numbers…</p>
+  </div>
+</ng-template>
+
+<ng-template #errorState>
+  <div class="error-state" *ngIf="error; else emptyState">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-stroked-button color="primary" (click)="refresh()">Retry</button>
+  </div>
+</ng-template>
+
+<ng-template #emptyState>
+  <div class="empty-state">
+    <mat-icon>lightbulb</mat-icon>
+    <p>Submit expenses to see analytics populate.</p>
+  </div>
+</ng-template>
+

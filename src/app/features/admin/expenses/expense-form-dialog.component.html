@@ -1,0 +1,99 @@
+<h2 mat-dialog-title>
+  {{ isEditMode() ? 'Edit Expense' : 'Record Expense' }}
+  <span *ngIf="ocrResult" class="ocr-badge">
+    <mat-icon>auto_awesome</mat-icon>
+    OCR Detected
+  </span>
+</h2>
+<form mat-dialog-content [formGroup]="form" class="form">
+  <div *ngIf="attachment" class="attachment-info">
+    <mat-icon>attach_file</mat-icon>
+    <span>{{ attachment.fileName }}</span>
+  </div>
+  <mat-form-field appearance="outline">
+    <mat-label>Type</mat-label>
+    <mat-select formControlName="type">
+      <mat-option value="expense">Expense</mat-option>
+      <mat-option value="credit">Sales</mat-option>
+      <mat-option value="adjustment">Adjustment</mat-option>
+      <mat-option value="advance">Advance</mat-option>
+      <mat-option value="accrual">Accrual</mat-option>
+      <mat-option value="fixed_assets">Fixed Assets</mat-option>
+      <mat-option value="share_capital">Share Capital</mat-option>
+      <mat-option value="retained_earnings">Retained Earnings</mat-option>
+      <mat-option value="shareholder_account">Shareholder Account</mat-option>
+      <mat-option value="cost_of_sales">Cost of Sales</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Category</mat-label>
+    <mat-select formControlName="categoryId">
+      <mat-option value="">Uncategorized</mat-option>
+      <mat-option
+        *ngFor="let category of categories"
+        [value]="category.id"
+      >
+        {{ category.name }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Amount (AED)</mat-label>
+    <input matInput type="number" formControlName="amount" required />
+    <mat-error *ngIf="form.get('amount')?.hasError('required')">
+      Amount is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>VAT Amount (AED)</mat-label>
+    <input matInput type="number" formControlName="vatAmount" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Expense Date</mat-label>
+    <input matInput type="date" formControlName="expenseDate" required />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Payment Date</mat-label>
+    <input matInput type="date" formControlName="expectedPaymentDate" />
+    <mat-hint>Required for accrual entries</mat-hint>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>{{ form.get('type')?.value === 'credit' ? 'Customer' : 'Vendor' }}</mat-label>
+    <input matInput formControlName="vendorName" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>{{ form.get('type')?.value === 'credit' ? 'Customer' : 'Vendor' }} TRN</mat-label>
+    <input matInput formControlName="vendorTrn" placeholder="Tax Registration Number" maxlength="20" />
+    <mat-hint>Enter the {{ form.get('type')?.value === 'credit' ? 'customer' : 'vendor' }}'s Tax Registration Number</mat-hint>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Description</mat-label>
+    <textarea matInput formControlName="description" rows="3"></textarea>
+  </mat-form-field>
+</form>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="submit()"
+    [disabled]="loading"
+  >
+    <mat-progress-spinner
+      *ngIf="loading"
+      [diameter]="20"
+      mode="indeterminate"
+    ></mat-progress-spinner>
+    <span *ngIf="!loading">{{ isEditMode() ? 'Save' : 'Create' }}</span>
+  </button>
+</mat-dialog-actions>
+

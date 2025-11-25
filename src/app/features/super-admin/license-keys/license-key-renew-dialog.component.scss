@@ -1,0 +1,22 @@
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.muted {
+  margin: 0;
+  color: #4b5563;
+}
+
+.separator {
+  text-align: center;
+  margin: 0;
+  color: #6b7280;
+}
+
+.hint {
+  color: #6b7280;
+}
+

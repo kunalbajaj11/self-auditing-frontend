@@ -1,0 +1,114 @@
+<section class="notifications">
+  <header class="header">
+    <div class="header-content">
+      <h1>Reminders & Alerts</h1>
+      <p>Send ad-hoc reminders or monitor automated accrual and OCR alerts.</p>
+    </div>
+  </header>
+
+  <mat-card *ngIf="!(isEnterprise$ | async)" class="license-notice">
+    <mat-card-content>
+      <mat-icon color="warn">info</mat-icon>
+      <div>
+        <strong>Reminders Feature</strong>
+        <p>Reminders module is available for Enterprise license holders only. Please contact your administrator to upgrade.</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <section class="composer-section" *ngIf="isEnterprise$ | async">
+    <h3 class="section-title">Broadcast a Notification</h3>
+    <mat-card class="composer-card" [formGroup]="form">
+    <div class="fields">
+      <mat-form-field appearance="outline">
+        <mat-label>Title</mat-label>
+        <input matInput formControlName="title" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Type</mat-label>
+        <mat-select formControlName="type">
+          <mat-option *ngFor="let type of typeOptions" [value]="type">
+            {{ type | titlecase }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Channel</mat-label>
+        <mat-select formControlName="channel">
+          <mat-option *ngFor="let channel of channelOptions" [value]="channel">
+            {{ channel | titlecase }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Schedule Date (optional)</mat-label>
+        <input matInput type="date" formControlName="scheduledFor" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Message</mat-label>
+        <textarea matInput rows="3" formControlName="message"></textarea>
+      </mat-form-field>
+      </div>
+      <button mat-raised-button color="primary" (click)="send()">Send</button>
+    </mat-card>
+  </section>
+
+  <section class="feed-section" *ngIf="isEnterprise$ | async">
+    <h3 class="section-title">Notification Feed</h3>
+    <mat-card class="feed-card">
+      <mat-card-header>
+        <div class="card-title-with-icon">
+          <mat-icon>notifications</mat-icon>
+          <mat-card-title>Recent Notifications</mat-card-title>
+        </div>
+      </mat-card-header>
+    <mat-card-content>
+      <div class="notification-list">
+        <div *ngFor="let notification of notifications" class="notification-item">
+          <mat-icon class="notification-icon">
+            {{ notification.type === 'accrual_reminder' ? 'event' : 'notifications' }}
+          </mat-icon>
+          <div class="notification-content">
+            <div class="title">
+              {{ notification.title }}
+              <span class="chip" [class.read]="notification.isRead">
+                {{ notification.isRead ? 'Read' : 'Unread' }}
+              </span>
+            </div>
+            <div class="secondary">
+              {{ notification.message }}
+            </div>
+            <div class="meta">
+              {{ notification.channel | titlecase }}
+              •
+              {{ notification.createdAt | date: 'medium' }}
+              <span *ngIf="notification.scheduledFor">
+                • Scheduled {{ notification.scheduledFor | date: 'short' }}
+              </span>
+            </div>
+          </div>
+          <button 
+            mat-button 
+            class="action-button"
+            (click)="markAsRead(notification, !notification.isRead)"
+          >
+            Mark as {{ notification.isRead ? 'Unread' : 'Read' }}
+          </button>
+        </div>
+        <div class="empty" *ngIf="!loading && notifications.length === 0">
+          <mat-icon>notifications_off</mat-icon>
+          <p>No notifications yet.</p>
+        </div>
+        <div class="loading" *ngIf="loading">
+          <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+        </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</section>
+

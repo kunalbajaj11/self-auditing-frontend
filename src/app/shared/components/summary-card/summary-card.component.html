@@ -1,0 +1,11 @@
+<mat-card class="summary-card" [ngClass]="accent">
+  <div class="icon">
+    <mat-icon>{{ icon }}</mat-icon>
+  </div>
+  <div class="content">
+    <div class="label">{{ label }}</div>
+    <div class="value">{{ value }}</div>
+    <div class="hint" *ngIf="hint">{{ hint }}</div>
+  </div>
+</mat-card>
+

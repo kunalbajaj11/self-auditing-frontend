@@ -1,0 +1,44 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Edit Category' : 'New Category' }}</h2>
+<form mat-dialog-content [formGroup]="form" class="form">
+  <mat-form-field appearance="outline">
+    <mat-label>Name</mat-label>
+    <input matInput formControlName="name" required />
+    <mat-error *ngIf="form.get('name')?.hasError('required')">
+      Name is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Expense Type</mat-label>
+    <mat-select formControlName="expenseTypeId">
+      <mat-option [value]="null">None (General Category)</mat-option>
+      <mat-option *ngFor="let type of expenseTypes" [value]="type.id">
+        {{ type.displayLabel || type.name }}
+      </mat-option>
+    </mat-select>
+    <mat-hint>Select an expense type to link this category to</mat-hint>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Description</mat-label>
+    <textarea matInput rows="3" formControlName="description"></textarea>
+  </mat-form-field>
+</form>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="submit()"
+    [disabled]="loading"
+  >
+    <mat-progress-spinner
+      *ngIf="loading"
+      [diameter]="20"
+      mode="indeterminate"
+    ></mat-progress-spinner>
+    <span *ngIf="!loading">{{ isEdit ? 'Save' : 'Create' }}</span>
+  </button>
+</mat-dialog-actions>
+

@@ -1,0 +1,10 @@
+.form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+mat-dialog-actions button {
+  min-width: 110px;
+}
+

@@ -1,0 +1,68 @@
+<section class="my-expenses">
+  <header class="header">
+    <div class="header-content">
+      <h1>My Expenses</h1>
+      <p>Track submitted claims and monitor approval status in real time.</p>
+    </div>
+  </header>
+
+  <section class="filters-section">
+    <h3 class="section-title">Filters</h3>
+    <mat-card class="filters-card" [formGroup]="filters">
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select formControlName="status">
+        <mat-option value="">All</mat-option>
+        <mat-option value="pending">Pending</mat-option>
+        <mat-option value="approved">Approved</mat-option>
+        <mat-option value="settled">Settled</mat-option>
+        <mat-option value="auto_settled">Auto Settled</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Start Date</mat-label>
+      <input matInput [matDatepicker]="startDatePicker" formControlName="startDate" placeholder="Select start date" />
+      <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+      <mat-datepicker #startDatePicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>End Date</mat-label>
+      <input matInput [matDatepicker]="endDatePicker" formControlName="endDate" placeholder="Select end date" />
+      <mat-datepicker-toggle matIconSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+      <mat-datepicker #endDatePicker></mat-datepicker>
+    </mat-form-field>
+    </mat-card>
+  </section>
+
+  <section class="expenses-section">
+    <h3 class="section-title">My Expense Claims</h3>
+    <div class="cards">
+    <mat-card *ngFor="let expense of expenses" class="expense-card" [ngClass]="statusColor(expense.status)">
+      <mat-card-header>
+        <mat-card-title>{{ expense.vendorName || 'Unspecified Vendor' }}</mat-card-title>
+        <mat-card-subtitle>
+          {{ expense.expenseDate | date: 'mediumDate' }} •
+          {{ expense.categoryName || 'Uncategorized' }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="amount">AED {{ expense.totalAmount | number: '1.0-2' }}</div>
+        <div class="meta">
+          Type: {{ expense.type | titlecase }} |
+          Status: {{ expense.status | titlecase }}
+        </div>
+        <p *ngIf="expense.description">{{ expense.description }}</p>
+      </mat-card-content>
+    </mat-card>
+    <div class="empty" *ngIf="!loading && expenses.length === 0">
+      <mat-icon>inbox</mat-icon>
+      <p>No expenses submitted yet.</p>
+    </div>
+    <div class="loading" *ngIf="loading">
+      <mat-progress-spinner diameter="48" mode="indeterminate"></mat-progress-spinner>
+    </div>
+  </div>
+</section>
+

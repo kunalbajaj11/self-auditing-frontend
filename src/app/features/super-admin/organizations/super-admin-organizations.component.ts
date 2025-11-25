@@ -1,0 +1,205 @@
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatTableDataSource } from '@angular/material/table';
+import { FormControl } from '@angular/forms';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSort } from '@angular/material/sort';
+import {
+  OrganizationUsage,
+  SuperAdminService,
+} from '../../../core/services/super-admin.service';
+import { OrganizationService } from '../../../core/services/organization.service';
+import { OrganizationFormDialogComponent } from './organization-form-dialog.component';
+import {
+  ActivateOrganizationDialogComponent,
+  ActivateOrganizationDialogData,
+} from './activate-organization-dialog.component';
+import {
+  UpgradeLicenseDialogComponent,
+  UpgradeLicenseDialogData,
+} from './upgrade-license-dialog.component';
+import { PlanType } from '../../../core/models/plan.model';
+
+@Component({
+  selector: 'app-super-admin-organizations',
+  templateUrl: './super-admin-organizations.component.html',
+  styleUrls: ['./super-admin-organizations.component.scss'],
+})
+export class SuperAdminOrganizationsComponent implements OnInit {
+  displayedColumns = [
+    'name',
+    'planType',
+    'status',
+    'userCount',
+    'expenseCount',
+    'accrualCount',
+    'storage',
+    'createdAt',
+    'actions',
+  ] as const;
+  readonly dataSource = new MatTableDataSource<OrganizationUsage>([]);
+
+  readonly searchControl = new FormControl('');
+  loading = false;
+  error: string | null = null;
+
+  @ViewChild(MatSort) sort!: MatSort;
+
+  constructor(
+    private readonly superAdminService: SuperAdminService,
+    private readonly organizationService: OrganizationService,
+    private readonly dialog: MatDialog,
+    private readonly snackBar: MatSnackBar,
+  ) {}
+
+  ngOnInit(): void {
+    this.dataSource.filterPredicate = (data, filter) =>
+      `${data.name} ${data.planType} ${data.status}`
+        .toLowerCase()
+        .includes(filter);
+    this.loadOrganizations();
+    this.searchControl.valueChanges
+      .pipe(debounceTime(250), distinctUntilChanged())
+      .subscribe((value) => this.applyFilter(value ?? ''));
+  }
+
+  refresh(): void {
+    this.loadOrganizations();
+  }
+
+  openCreateDialog(): void {
+    const dialogRef = this.dialog.open(OrganizationFormDialogComponent, {
+      width: '480px',
+      data: null,
+    });
+    dialogRef.afterClosed().subscribe((created) => {
+      if (created) {
+        this.snackBar.open('Organization created successfully', 'Close', {
+          duration: 3000,
+        });
+        this.loadOrganizations();
+      }
+    });
+  }
+
+  upgradeLicense(org: OrganizationUsage): void {
+    const dialogRef = this.dialog.open<
+      UpgradeLicenseDialogComponent,
+      UpgradeLicenseDialogData,
+      string | null
+    >(UpgradeLicenseDialogComponent, {
+      width: '480px',
+      data: {
+        organizationName: org.name,
+        currentPlanType: org.planType as PlanType,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((licenseKey) => {
+      if (licenseKey) {
+        this.organizationService.upgradeLicense(org.id, licenseKey).subscribe({
+          next: (updated) => {
+            org.planType = updated.planType;
+            if (updated.storageQuotaMb) {
+              // Update storage quota if available in the response
+            }
+            this.snackBar.open(
+              `License upgraded successfully to ${updated.planType}`,
+              'Close',
+              { duration: 3000 },
+            );
+            this.dataSource.data = [...this.dataSource.data];
+          },
+          error: (error) => {
+            const message =
+              error?.error?.message ??
+              'Failed to upgrade license. Please check the license key and try again.';
+            this.snackBar.open(message, 'Close', {
+              duration: 4000,
+              panelClass: ['snack-error'],
+            });
+          },
+        });
+      }
+    });
+  }
+
+  toggleStatus(org: OrganizationUsage): void {
+    if (org.status === 'active') {
+      // Deactivate: simple status change
+      this.organizationService.changeStatus(org.id, 'inactive').subscribe({
+        next: () => {
+          org.status = 'inactive';
+          this.snackBar.open('Organization deactivated', 'Close', {
+            duration: 3000,
+          });
+          this.dataSource.data = [...this.dataSource.data];
+        },
+        error: () => {
+          this.snackBar.open(
+            'Failed to deactivate organization. Please retry.',
+            'Close',
+            { duration: 4000, panelClass: ['snack-error'] },
+          );
+        },
+      });
+    } else {
+      // Activate: show dialog for expiry date
+      const dialogRef = this.dialog.open<
+        ActivateOrganizationDialogComponent,
+        ActivateOrganizationDialogData,
+        string | null
+      >(ActivateOrganizationDialogComponent, {
+        width: '480px',
+        data: { organizationName: org.name },
+      });
+
+      dialogRef.afterClosed().subscribe((expiryDate) => {
+        if (expiryDate) {
+          this.organizationService.activateWithExpiry(org.id, expiryDate).subscribe({
+            next: () => {
+              org.status = 'active';
+              this.snackBar.open(
+                'Organization activated successfully',
+                'Close',
+                { duration: 3000 },
+              );
+              this.dataSource.data = [...this.dataSource.data];
+            },
+            error: () => {
+              this.snackBar.open(
+                'Failed to activate organization. Please retry.',
+                'Close',
+                { duration: 4000, panelClass: ['snack-error'] },
+              );
+            },
+          });
+        }
+      });
+    }
+  }
+
+  private loadOrganizations(): void {
+    this.loading = true;
+    this.error = null;
+    this.superAdminService.usage().subscribe({
+      next: (usage) => {
+        this.loading = false;
+        this.dataSource.data = usage;
+        if (this.sort) {
+          this.dataSource.sort = this.sort;
+        }
+      },
+      error: () => {
+        this.loading = false;
+        this.error = 'Unable to load organizations right now.';
+      },
+    });
+  }
+
+  private applyFilter(value: string): void {
+    this.dataSource.filter = value.trim().toLowerCase();
+  }
+}
+

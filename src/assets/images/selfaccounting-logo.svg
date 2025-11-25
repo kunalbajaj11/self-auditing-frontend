@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <!-- Frame gradient for the C/D shaped frame -->
+    <linearGradient id="frameGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5dade2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3498db;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- C/D Shaped Frame (enclosing the book) - Light blue frame -->
+  <g id="frame">
+    <!-- Left side (C shape) -->
+    <path d="M 20 40 L 20 160 Q 20 180 40 180 L 80 180" 
+          fill="none" 
+          stroke="url(#frameGradient)" 
+          stroke-width="3" 
+          stroke-linecap="round"/>
+    
+    <!-- Top horizontal line -->
+    <line x1="80" y1="40" x2="120" y2="40" 
+          stroke="url(#frameGradient)" 
+          stroke-width="3" 
+          stroke-linecap="round"/>
+    
+    <!-- Right side (D shape) -->
+    <path d="M 180 40 Q 180 40 180 60 L 180 140 Q 180 180 160 180 L 120 180" 
+          fill="none" 
+          stroke="url(#frameGradient)" 
+          stroke-width="3" 
+          stroke-linecap="round"/>
+    
+    <!-- Bottom curved line (following book contour) -->
+    <path d="M 120 180 Q 100 175 80 180" 
+          fill="none" 
+          stroke="url(#frameGradient)" 
+          stroke-width="3" 
+          stroke-linecap="round"/>
+  </g>
+  
+  <!-- Lightning Bolt above book spine -->
+  <g id="lightning" transform="translate(100, 28)">
+    <path d="M -6 -12 L 2 -4 L -2 0 L 6 12 L -2 8 L 2 4 Z" 
+          fill="#ffffff" 
+          stroke="none"/>
+  </g>
+  
+  <!-- Open Book -->
+  <g id="book" transform="translate(100, 105)">
+    <!-- Book spine (center line) -->
+    <line x1="0" y1="-45" x2="0" y2="45" 
+          stroke="#ffffff" 
+          stroke-width="2.5" 
+          stroke-linecap="round"/>
+    
+    <!-- Left Page -->
+    <g id="leftPage" transform="translate(-42, 0)">
+      <!-- Left page outline (slight curve for realism) -->
+      <path d="M 0 -40 Q -8 -40 -8 -35 L -8 35 Q -8 40 0 40" 
+            fill="none" 
+            stroke="#ffffff" 
+            stroke-width="3" 
+            stroke-linecap="round"/>
+      
+      <!-- Downward triangle with upward triangle inside -->
+      <g transform="translate(-22, -8)">
+        <!-- Outer downward triangle -->
+        <path d="M -12 0 L 0 -18 L 12 0 Z" 
+              fill="none" 
+              stroke="#ffffff" 
+              stroke-width="2.5" 
+              stroke-linecap="round" 
+              stroke-linejoin="round"/>
+        <!-- Inner upward triangle -->
+        <path d="M -6 -6 L 0 6 L 6 -6 Z" 
+              fill="#ffffff" 
+              stroke="none"/>
+      </g>
+      
+      <!-- Two dots on left page -->
+      <circle cx="-30" cy="-15" r="2.5" fill="#ffffff"/>
+      <circle cx="-30" cy="15" r="2.5" fill="#ffffff"/>
+    </g>
+    
+    <!-- Right Page -->
+    <g id="rightPage" transform="translate(42, 0)">
+      <!-- Right page outline (slight curve for realism) -->
+      <path d="M 0 -40 Q 8 -40 8 -35 L 8 35 Q 8 40 0 40" 
+            fill="none" 
+            stroke="#ffffff" 
+            stroke-width="3" 
+            stroke-linecap="round"/>
+      
+      <!-- Upward triangle with downward triangle inside -->
+      <g transform="translate(22, -8)">
+        <!-- Outer upward triangle -->
+        <path d="M -12 0 L 0 18 L 12 0 Z" 
+              fill="none" 
+              stroke="#ffffff" 
+              stroke-width="2.5" 
+              stroke-linecap="round" 
+              stroke-linejoin="round"/>
+        <!-- Inner downward triangle -->
+        <path d="M -6 6 L 0 -6 L 6 6 Z" 
+              fill="#ffffff" 
+              stroke="none"/>
+      </g>
+      
+      <!-- Two dots on right page -->
+      <circle cx="30" cy="-15" r="2.5" fill="#ffffff"/>
+      <circle cx="30" cy="15" r="2.5" fill="#ffffff"/>
+    </g>
+    
+    <!-- Book pages texture (subtle lines for realism) -->
+    <g opacity="0.15">
+      <line x1="-32" y1="-28" x2="-12" y2="-28" stroke="#ffffff" stroke-width="0.8"/>
+      <line x1="-32" y1="-18" x2="-12" y2="-18" stroke="#ffffff" stroke-width="0.8"/>
+      <line x1="-32" y1="-8" x2="-12" y2="-8" stroke="#ffffff" stroke-width="0.8"/>
+      <line x1="-32" y1="2" x2="-12" y2="2" stroke="#ffffff" stroke-width="0.8"/>
+      <line x1="-32" y1="12" x2="-12" y2="12" stroke="#ffffff" stroke-width="0.8"/>
+      <line x1="-32" y1="22" x2="-12" y2="22" stroke="#ffffff" stroke-width="0.8"/>
+      <line x1="-32" y1="32" x2="-12" y2="32" stroke="#ffffff" stroke-width="0.8"/>
+      
+      <line x1="32" y1="-28" x2="12" y2="-28" stroke="#ffffff" stroke-width="0.8"/>
+      <line x1="32" y1="-18" x2="12" y2="-18" stroke="#ffffff" stroke-width="0.8"/>
+      <line x1="32" y1="-8" x2="12" y2="-8" stroke="#ffffff" stroke-width="0.8"/>
+      <line x1="32" y1="2" x2="12" y2="2" stroke="#ffffff" stroke-width="0.8"/>
+      <line x1="32" y1="12" x2="12" y2="12" stroke="#ffffff" stroke-width="0.8"/>
+      <line x1="32" y1="22" x2="12" y2="22" stroke="#ffffff" stroke-width="0.8"/>
+      <line x1="32" y1="32" x2="12" y2="32" stroke="#ffffff" stroke-width="0.8"/>
+    </g>
+  </g>
+</svg>
