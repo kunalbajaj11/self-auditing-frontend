@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://backend-23-nov-env-1.eba-yfnzf2n9.ap-south-1.elasticbeanstalk.com/api',
+  apiUrl: 'https://self-auditing-backend-production.up.railway.app/api',
   storageKey: 'smart-expense-auth',
 };
