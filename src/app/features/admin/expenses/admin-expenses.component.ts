@@ -10,6 +10,8 @@ import { ExpenseFormDialogComponent } from './expense-form-dialog.component';
 import { AttachmentsService } from '../../../core/services/attachments.service';
 import { ApiService } from '../../../core/services/api.service';
 import { TokenService } from '../../../core/services/token.service';
+import { SalesInvoicesService } from '../../../core/services/sales-invoices.service';
+import { InvoiceDetailDialogComponent } from '../sales-invoices/invoice-detail-dialog.component';
 
 @Component({
   selector: 'app-admin-expenses',
@@ -48,6 +50,7 @@ export class AdminExpensesComponent implements OnInit {
     private readonly router: Router,
     private readonly api: ApiService,
     private readonly tokenService: TokenService,
+    private readonly salesInvoicesService: SalesInvoicesService,
   ) {
     this.filters = this.fb.group({
       type: [''],
@@ -381,6 +384,81 @@ export class AdminExpensesComponent implements OnInit {
       cost_of_sales: 'Cost of sales recorded successfully',
     };
     return messages[type] || 'Transaction recorded successfully';
+  }
+
+  isSalesType(expense: Expense): boolean {
+    return expense.type === 'credit';
+  }
+
+  printInvoice(expense: Expense): void {
+    if (!this.isSalesType(expense)) {
+      return;
+    }
+
+    if (!expense.vendorName) {
+      this.snackBar.open('Expense does not have a customer/vendor name', 'Close', {
+        duration: 3000,
+        panelClass: ['snack-error'],
+      });
+      return;
+    }
+
+    // Search for matching sales invoice
+    // Search within a date range (±7 days) to find matching invoices
+    const expenseDate = new Date(expense.expenseDate);
+    const startDate = new Date(expenseDate);
+    startDate.setDate(startDate.getDate() - 7);
+    const endDate = new Date(expenseDate);
+    endDate.setDate(endDate.getDate() + 7);
+
+    this.salesInvoicesService.listInvoices({
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0],
+    }).subscribe({
+      next: (invoices) => {
+        // Find invoice matching customer name and amount (within 1% tolerance)
+        const matchingInvoice = invoices.find((inv) => {
+          const invoiceAmount = parseFloat(inv.totalAmount);
+          const expenseAmount = expense.totalAmount;
+          const amountDiff = Math.abs(invoiceAmount - expenseAmount);
+          const amountMatch = amountDiff < 0.01 || (amountDiff / expenseAmount) < 0.01; // Exact match or within 1%
+
+          const vendorNameLower = expense.vendorName?.toLowerCase().trim() || '';
+          const customerNameLower = inv.customerName?.toLowerCase().trim() || '';
+          
+          const nameMatch = customerNameLower === vendorNameLower ||
+                           customerNameLower.includes(vendorNameLower) ||
+                           vendorNameLower.includes(customerNameLower);
+
+          return amountMatch && nameMatch;
+        });
+
+        if (matchingInvoice) {
+          // Open invoice detail dialog - user can print from there
+          this.dialog.open(InvoiceDetailDialogComponent, {
+            width: '800px',
+            maxWidth: '95vw',
+            data: { invoiceId: matchingInvoice.id },
+          });
+        } else {
+          // No matching invoice found
+          this.snackBar.open(
+            `No matching invoice found for ${expense.vendorName}. Please create an invoice from the Sales section.`,
+            'Close',
+            {
+              duration: 5000,
+              panelClass: ['snack-error'],
+            },
+          );
+        }
+      },
+      error: () => {
+        this.snackBar.open('Unable to search for invoices', 'Close', {
+          duration: 4000,
+          panelClass: ['snack-error'],
+        });
+      },
+    });
   }
 }
 

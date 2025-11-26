@@ -111,6 +111,10 @@ export class InvoiceDetailDialogComponent implements OnInit {
     });
   }
 
+  printInvoice(): void {
+    window.print();
+  }
+
   close(): void {
     this.dialogRef.close();
   }

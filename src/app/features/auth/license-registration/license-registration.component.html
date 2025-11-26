@@ -107,7 +107,9 @@
           <div class="two-column">
             <mat-form-field appearance="outline">
               <mat-label>Fiscal Year Start</mat-label>
-              <input matInput placeholder="YYYY-MM-DD" formControlName="fiscalYearStart" />
+              <input matInput [matDatepicker]="fiscalYearStartPicker" formControlName="fiscalYearStart" placeholder="Select fiscal year start" />
+              <mat-datepicker-toggle matIconSuffix [for]="fiscalYearStartPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fiscalYearStartPicker></mat-datepicker>
             </mat-form-field>
 
             <mat-form-field appearance="outline">

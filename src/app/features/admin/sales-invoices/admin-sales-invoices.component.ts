@@ -25,7 +25,7 @@ export class AdminSalesInvoicesComponent implements OnInit {
   ] as const;
   readonly dataSource = new MatTableDataSource<SalesInvoice>([]);
   loading = false;
-  currentFilter: 'all' | 'outstanding' | 'overdue' = 'all';
+  currentFilter: 'all' | 'outstanding' | 'overdue' | 'payments' = 'all';
 
   constructor(
     private readonly invoicesService: SalesInvoicesService,
@@ -43,6 +43,8 @@ export class AdminSalesInvoicesComponent implements OnInit {
         this.currentFilter = 'outstanding';
       } else if (params['filter'] === 'overdue') {
         this.currentFilter = 'overdue';
+      } else if (params['filter'] === 'payments') {
+        this.currentFilter = 'payments';
       } else {
         this.currentFilter = 'all';
       }
@@ -58,6 +60,8 @@ export class AdminSalesInvoicesComponent implements OnInit {
       filters.paymentStatus = 'unpaid';
     } else if (this.currentFilter === 'overdue') {
       filters.paymentStatus = 'overdue';
+    } else if (this.currentFilter === 'payments') {
+      filters.paymentStatus = 'paid'; // Show invoices with payments
     }
 
     this.invoicesService.listInvoices(filters).subscribe({

@@ -20,7 +20,9 @@
 
         <mat-form-field appearance="outline" class="flex-1">
           <mat-label>Credit Note Date *</mat-label>
-          <input matInput type="date" formControlName="creditNoteDate" required />
+          <input matInput [matDatepicker]="creditNoteDatePicker" formControlName="creditNoteDate" placeholder="Select date" required />
+          <mat-datepicker-toggle matIconSuffix [for]="creditNoteDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #creditNoteDatePicker></mat-datepicker>
           <mat-error *ngIf="form.get('creditNoteDate')?.hasError('required')">
             Date is required
           </mat-error>

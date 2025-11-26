@@ -36,7 +36,9 @@
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Payment Date *</mat-label>
-      <input matInput type="date" formControlName="paymentDate" required />
+      <input matInput [matDatepicker]="paymentDatePicker" formControlName="paymentDate" placeholder="Select payment date" required />
+      <mat-datepicker-toggle matIconSuffix [for]="paymentDatePicker"></mat-datepicker-toggle>
+      <mat-datepicker #paymentDatePicker></mat-datepicker>
       <mat-error *ngIf="form.get('paymentDate')?.hasError('required')">
         Payment date is required
       </mat-error>

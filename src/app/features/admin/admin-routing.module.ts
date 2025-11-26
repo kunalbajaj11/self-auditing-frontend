@@ -28,74 +28,65 @@ const routes: Routes = [
         nav: [
           { label: 'Dashboard', icon: 'space_dashboard', route: '/admin/dashboard' },
           {
+            label: 'Sales',
+            icon: 'point_of_sale',
+            children: [
+              { label: 'Invoices', route: '/admin/sales-invoices' },
+              { label: 'Payments Received', route: '/admin/sales-invoices', queryParams: { filter: 'payments' } },
+              { label: 'Credit Notes', route: '/admin/credit-notes' },
+              { label: 'Customers', route: '/admin/customers' },
+            ],
+          },
+          {
             label: 'Expenses',
             icon: 'receipt_long',
             badgeKey: 'pendingAccruals',
             children: [
-              { label: 'Upload Bill / Manual Entry', route: '/admin/expenses', queryParams: { view: 'upload' } },
-              { label: 'Pending Accruals', route: '/admin/expenses', queryParams: { filter: 'pending' } },
-              { label: 'Credits & Adjustments', route: '/admin/expenses', queryParams: { filter: 'credits' } },
-              { label: 'Archived', route: '/admin/expenses', queryParams: { filter: 'archived' } },
+              { label: 'Expenses', route: '/admin/expenses' },
+              { label: 'Accruals', route: '/admin/expenses', queryParams: { filter: 'pending' } },
+              { label: 'Vendors', route: '/admin/vendors' },
             ],
           },
           {
-            label: 'Sales Invoices',
-            icon: 'description',
+            label: 'Banking',
+            icon: 'account_balance',
             children: [
-              { label: 'All Invoices', route: '/admin/sales-invoices' },
-              { label: 'Create Invoice', route: '/admin/sales-invoices', queryParams: { view: 'create' } },
-              { label: 'Outstanding', route: '/admin/sales-invoices', queryParams: { filter: 'outstanding' } },
-              { label: 'Overdue', route: '/admin/sales-invoices', queryParams: { filter: 'overdue' } },
-            ],
-          },
-          {
-            label: 'Credit Notes',
-            icon: 'note',
-            children: [
-              { label: 'All Credit Notes', route: '/admin/credit-notes' },
-              { label: 'Create Credit Note', route: '/admin/credit-notes', queryParams: { view: 'create' } },
-            ],
-          },
-          {
-            label: 'Customers',
-            icon: 'people',
-            children: [
-              { label: 'All Customers', route: '/admin/customers' },
-              { label: 'Add Customer', route: '/admin/customers', queryParams: { view: 'create' } },
+              { label: 'Bank Accounts', route: '/admin/banking/accounts' },
+              { label: 'Upload Bank Statement', route: '/admin/bank-reconciliation/upload' },
+              { label: 'Reconciliation', route: '/admin/bank-reconciliation' },
             ],
           },
           {
             label: 'Reports',
             icon: 'bar_chart',
             children: [
-              { label: 'Monthly Summary', route: '/admin/reports', queryParams: { type: 'monthly' } },
-              { label: 'VAT-Ready Export', route: '/admin/reports', queryParams: { type: 'vat' } },
-              { label: 'By Category / Department', route: '/admin/reports', queryParams: { type: 'category' } },
-              { label: 'Audit Trail', route: '/admin/reports', queryParams: { type: 'audit' } },
+              { label: 'Financial Reports', route: '/admin/reports', queryParams: { type: 'financial' } },
+              { label: 'VAT Reports', route: '/admin/reports', queryParams: { type: 'vat' } },
+              { label: 'Sales Reports', route: '/admin/reports', queryParams: { type: 'sales' } },
+              { label: 'Payment Collection', route: '/admin/reports', queryParams: { type: 'payments' } },
+              { label: 'Expense Reports', route: '/admin/reports', queryParams: { type: 'expense' } },
             ],
           },
           {
-            label: 'Bank Reconciliation',
-            icon: 'account_balance',
+            label: 'Contacts',
+            icon: 'contacts',
             children: [
-              { label: 'All Reconciliations', route: '/admin/bank-reconciliation' },
-              { label: 'Upload Statement', route: '/admin/bank-reconciliation/upload' },
+              { label: 'Customers', route: '/admin/contacts/customers' },
+              { label: 'Vendors', route: '/admin/contacts/vendors' },
             ],
-          },
-          {
-            label: 'Reminders & Notifications',
-            icon: 'notifications',
-            route: '/admin/notifications',
-            badgeKey: 'unreadNotifications',
           },
           {
             label: 'Settings',
             icon: 'settings',
             children: [
-              { label: 'Company Profile', route: '/admin/company' },
-              { label: 'Users & Roles', route: '/admin/users' },
+              { label: 'Organization Settings', route: '/admin/company' },
+              { label: 'User Management', route: '/admin/users' },
+              { label: 'Invoice Template', route: '/admin/settings/invoice-template' },
+              { label: 'Tax Settings', route: '/admin/settings/tax' },
+              { label: 'Currency & Exchange Rates', route: '/admin/settings/currency' },
+              { label: 'Numbering Sequences', route: '/admin/settings/numbering' },
+              { label: 'Email / Notifications', route: '/admin/notifications', badgeKey: 'unreadNotifications' },
               { label: 'Chart of Accounts', route: '/admin/chart-of-accounts' },
-              { label: 'Vendors', route: '/admin/vendors' },
               { label: 'Expense Types', route: '/admin/expense-types' },
               { label: 'Expense Categories', route: '/admin/categories' },
             ],
@@ -163,6 +154,41 @@ const routes: Routes = [
         path: 'customers',
         component: AdminCustomersComponent,
         data: { shell: { title: 'Customer Management' } },
+      },
+      {
+        path: 'contacts/customers',
+        component: AdminCustomersComponent,
+        data: { shell: { title: 'Customers' } },
+      },
+      {
+        path: 'contacts/vendors',
+        component: AdminVendorsComponent,
+        data: { shell: { title: 'Vendors' } },
+      },
+      {
+        path: 'banking/accounts',
+        component: ReconciliationListComponent, // Placeholder - will need to create BankAccountsComponent
+        data: { shell: { title: 'Bank Accounts' } },
+      },
+      {
+        path: 'settings/invoice-template',
+        component: AdminCompanyComponent, // Placeholder - will need to create InvoiceTemplateComponent
+        data: { shell: { title: 'Invoice Template Settings' } },
+      },
+      {
+        path: 'settings/tax',
+        component: AdminCompanyComponent, // Placeholder - will need to create TaxSettingsComponent
+        data: { shell: { title: 'Tax Settings' } },
+      },
+      {
+        path: 'settings/currency',
+        component: AdminCompanyComponent, // Placeholder - will need to create CurrencySettingsComponent
+        data: { shell: { title: 'Currency & Exchange Rates' } },
+      },
+      {
+        path: 'settings/numbering',
+        component: AdminCompanyComponent, // Placeholder - will need to create NumberingSequencesComponent
+        data: { shell: { title: 'Numbering Sequences' } },
       },
       {
         path: 'sales-invoices',

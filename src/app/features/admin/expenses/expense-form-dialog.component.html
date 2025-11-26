@@ -54,12 +54,16 @@
 
   <mat-form-field appearance="outline">
     <mat-label>Expense Date</mat-label>
-    <input matInput type="date" formControlName="expenseDate" required />
+    <input matInput [matDatepicker]="expenseDatePicker" formControlName="expenseDate" placeholder="Select expense date" required />
+    <mat-datepicker-toggle matIconSuffix [for]="expenseDatePicker"></mat-datepicker-toggle>
+    <mat-datepicker #expenseDatePicker></mat-datepicker>
   </mat-form-field>
 
   <mat-form-field appearance="outline">
     <mat-label>Payment Date</mat-label>
-    <input matInput type="date" formControlName="expectedPaymentDate" />
+    <input matInput [matDatepicker]="expectedPaymentDatePicker" formControlName="expectedPaymentDate" placeholder="Select expected payment date" />
+    <mat-datepicker-toggle matIconSuffix [for]="expectedPaymentDatePicker"></mat-datepicker-toggle>
+    <mat-datepicker #expectedPaymentDatePicker></mat-datepicker>
     <mat-hint>Required for accrual entries</mat-hint>
   </mat-form-field>
 

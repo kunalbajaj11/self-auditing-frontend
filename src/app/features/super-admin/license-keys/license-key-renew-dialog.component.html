@@ -14,7 +14,9 @@
 
   <mat-form-field appearance="outline">
     <mat-label>Set new expiry date</mat-label>
-    <input matInput type="date" formControlName="newExpiry" />
+    <input matInput [matDatepicker]="newExpiryPicker" formControlName="newExpiry" placeholder="Select expiry date" />
+    <mat-datepicker-toggle matIconSuffix [for]="newExpiryPicker"></mat-datepicker-toggle>
+    <mat-datepicker #newExpiryPicker></mat-datepicker>
   </mat-form-field>
   <small class="hint">
     Leave either the extension or the new expiry blank. If both are provided, the new expiry date takes

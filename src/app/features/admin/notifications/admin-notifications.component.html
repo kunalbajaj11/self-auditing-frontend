@@ -45,7 +45,9 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Schedule Date (optional)</mat-label>
-        <input matInput type="date" formControlName="scheduledFor" />
+        <input matInput [matDatepicker]="scheduledForPicker" formControlName="scheduledFor" placeholder="Select schedule date" />
+        <mat-datepicker-toggle matIconSuffix [for]="scheduledForPicker"></mat-datepicker-toggle>
+        <mat-datepicker #scheduledForPicker></mat-datepicker>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full">

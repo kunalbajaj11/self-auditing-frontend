@@ -193,6 +193,15 @@
           <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let expense">
             <button
+              mat-icon-button
+              matTooltip="Print Invoice"
+              *ngIf="isSalesType(expense)"
+              (click)="printInvoice(expense)"
+              color="primary"
+            >
+              <mat-icon>print</mat-icon>
+            </button>
+            <button
               mat-button
               (click)="updateStatus(expense, 'approved')"
               [disabled]="expense.status !== 'pending'"

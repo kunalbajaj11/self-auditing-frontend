@@ -38,6 +38,7 @@ export class ShellComponent implements OnInit, OnDestroy {
   pageTitle = 'selfAccounting.AI';
   navItems: ShellNavItem[] = [];
   isEnterprise = false;
+  expandedGroups = new Set<string>(); // Track expanded nav groups
 
   private readonly destroy$ = new Subject<void>();
 
@@ -104,6 +105,49 @@ export class ShellComponent implements OnInit, OnDestroy {
       this.pageTitle = title;
     }
     this.navItems = this.transformNavItems(nav ?? []);
+    this.autoExpandActiveGroups();
+  }
+
+  toggleNavGroup(itemLabel: string): void {
+    if (this.expandedGroups.has(itemLabel)) {
+      this.expandedGroups.delete(itemLabel);
+    } else {
+      this.expandedGroups.add(itemLabel);
+    }
+  }
+
+  isNavGroupExpanded(itemLabel: string): boolean {
+    return this.expandedGroups.has(itemLabel);
+  }
+
+  private autoExpandActiveGroups(): void {
+    const currentUrl = this.router.url.split('?')[0]; // Get path without query params
+    const currentQueryParams = this.route.snapshot.queryParams;
+    
+    this.navItems.forEach((item) => {
+      if (item.children && item.children.length > 0) {
+        // Check if any child route matches the current URL
+        const hasActiveChild = item.children.some((child) => {
+          if (!child.route) return false;
+          
+          // Check route path match
+          const routeMatches = currentUrl === child.route || currentUrl.startsWith(child.route + '/');
+          
+          // If child has query params, check if they match
+          if (routeMatches && child.queryParams) {
+            return Object.keys(child.queryParams).every(
+              (key) => currentQueryParams[key] === child.queryParams?.[key]
+            );
+          }
+          
+          return routeMatches;
+        });
+        
+        if (hasActiveChild) {
+          this.expandedGroups.add(item.label);
+        }
+      }
+    });
   }
 
   private collectShellData(): {

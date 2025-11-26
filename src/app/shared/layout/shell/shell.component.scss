@@ -112,27 +112,81 @@
     }
   }
 
+  .nav-group {
+    margin-bottom: 4px;
+  }
+
   .nav-group-header {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 12px 6px;
+    padding: 10px 12px;
     font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: #888888;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 10px;
+    margin: 4px 6px;
+    transition: background 150ms ease, color 150ms ease;
 
-    mat-icon {
+    &:hover {
+      background: rgba(0, 119, 200, 0.08);
+      color: #0077c8;
+    }
+
+    &.expanded {
+      color: #0077c8;
+    }
+
+    .nav-group-icon {
       font-size: 16px;
       width: 16px;
       height: 16px;
-      color: #aaa;
+      color: inherit;
+      transition: color 150ms ease;
+    }
+
+    .badge {
+      margin-left: 8px;
+      background: rgba(0, 191, 165, 0.15);
+      color: #0077c8;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    .nav-group-chevron {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: inherit;
+      margin-left: auto;
+      transition: transform 200ms ease, color 150ms ease;
+    }
+
+    &.expanded .nav-group-chevron {
+      transform: rotate(0deg);
+    }
+  }
+
+  .nav-group-children {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 300ms ease-out, opacity 200ms ease-out;
+    opacity: 0;
+
+    &.expanded {
+      max-height: 1000px; // Large enough to accommodate all children
+      opacity: 1;
     }
   }
 
   .nav-child {
     margin-left: 20px;
     font-size: 14px;
+    transition: transform 200ms ease;
   }
 
   .side-footer {

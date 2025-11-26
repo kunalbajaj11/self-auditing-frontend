@@ -16,12 +16,16 @@
     <div class="form-row">
       <mat-form-field appearance="outline">
         <mat-label>Statement Period Start</mat-label>
-        <input matInput type="date" formControlName="statementPeriodStart" />
+        <input matInput [matDatepicker]="statementPeriodStartPicker" formControlName="statementPeriodStart" placeholder="Select start date" />
+        <mat-datepicker-toggle matIconSuffix [for]="statementPeriodStartPicker"></mat-datepicker-toggle>
+        <mat-datepicker #statementPeriodStartPicker></mat-datepicker>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>Statement Period End</mat-label>
-        <input matInput type="date" formControlName="statementPeriodEnd" />
+        <input matInput [matDatepicker]="statementPeriodEndPicker" formControlName="statementPeriodEnd" placeholder="Select end date" />
+        <mat-datepicker-toggle matIconSuffix [for]="statementPeriodEndPicker"></mat-datepicker-toggle>
+        <mat-datepicker #statementPeriodEndPicker></mat-datepicker>
       </mat-form-field>
     </div>
 
