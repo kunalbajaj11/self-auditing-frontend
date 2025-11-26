@@ -1,0 +1,53 @@
+mat-dialog-content {
+  min-width: 500px;
+  max-width: 600px;
+}
+
+.credit-note-info {
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+}
+
+.invoice-info {
+  margin: 16px 0;
+  padding: 12px;
+  background-color: #f1f5f9;
+  border-radius: 8px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .label {
+    font-weight: 500;
+    color: #64748b;
+  }
+
+  .value {
+    font-weight: 600;
+    color: #0f172a;
+
+    &.remaining {
+      color: #ef4444;
+    }
+  }
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.inline-spinner {
+  display: inline-block;
+  margin-right: 8px;
+}
+

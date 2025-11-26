@@ -67,6 +67,22 @@
             accent="warn"
             [hint]="vm.pendingApprovals > 0 ? 'Awaiting review' : 'All clear'"
           ></app-summary-card>
+
+          <app-summary-card
+            label="Total Invoices"
+            icon="description"
+            [value]="vm.totalInvoices || 0"
+            accent="primary"
+            [hint]="vm.outstandingInvoices ? vm.outstandingInvoices + ' outstanding' : undefined"
+          ></app-summary-card>
+
+          <app-summary-card
+            label="Outstanding Amount"
+            icon="account_balance_wallet"
+            [value]="'AED ' + ((vm.outstandingAmount || 0) | number: '1.0-2')"
+            accent="accent"
+            [hint]="vm.overdueInvoices ? vm.overdueInvoices + ' overdue' : undefined"
+          ></app-summary-card>
         </div>
       </section>
 

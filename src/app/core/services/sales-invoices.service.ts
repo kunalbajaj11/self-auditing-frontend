@@ -1,0 +1,111 @@
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ApiService } from './api.service';
+
+export interface InvoiceLineItem {
+  id?: string;
+  productId?: string;
+  itemName: string;
+  description?: string;
+  quantity: number;
+  unitPrice: number;
+  unitOfMeasure?: string;
+  vatRate?: number;
+  vatTaxType?: string;
+  amount: number;
+  vatAmount: number;
+  totalAmount: number;
+  accountId?: string;
+}
+
+export interface SalesInvoice {
+  id: string;
+  invoiceNumber: string;
+  customerId?: string | null;
+  customerName?: string | null;
+  customerTrn?: string | null;
+  invoiceDate: string;
+  dueDate?: string | null;
+  amount: string;
+  vatAmount: string;
+  totalAmount: string;
+  currency: string;
+  status: string;
+  paymentStatus: string;
+  paidAmount: string;
+  paidDate?: string | null;
+  description?: string | null;
+  notes?: string | null;
+  lineItems?: InvoiceLineItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateSalesInvoicePayload {
+  customerId?: string;
+  customerName?: string;
+  customerTrn?: string;
+  invoiceDate: string;
+  dueDate?: string;
+  amount?: number;
+  vatAmount?: number;
+  lineItems?: InvoiceLineItem[];
+  currency?: string;
+  description?: string;
+  notes?: string;
+  status?: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class SalesInvoicesService {
+  constructor(private readonly api: ApiService) {}
+
+  listInvoices(filters?: {
+    status?: string;
+    paymentStatus?: string;
+    customerId?: string;
+    startDate?: string;
+    endDate?: string;
+  }): Observable<SalesInvoice[]> {
+    return this.api.get<SalesInvoice[]>('/sales-invoices', filters || {});
+  }
+
+  getInvoice(id: string): Observable<SalesInvoice> {
+    return this.api.get<SalesInvoice>(`/sales-invoices/${id}`);
+  }
+
+  createInvoice(payload: CreateSalesInvoicePayload): Observable<SalesInvoice> {
+    return this.api.post<SalesInvoice>('/sales-invoices', payload);
+  }
+
+  updateInvoice(id: string, payload: Partial<CreateSalesInvoicePayload>): Observable<SalesInvoice> {
+    return this.api.patch<SalesInvoice>(`/sales-invoices/${id}`, payload);
+  }
+
+  deleteInvoice(id: string): Observable<void> {
+    return this.api.delete<void>(`/sales-invoices/${id}`);
+  }
+
+  getNextInvoiceNumber(): Observable<{ invoiceNumber: string }> {
+    return this.api.get<{ invoiceNumber: string }>('/sales-invoices/next-invoice-number');
+  }
+
+  recordPayment(invoiceId: string, payment: {
+    amount: number;
+    paymentDate: string;
+    paymentMethod?: string;
+    referenceNumber?: string;
+    notes?: string;
+  }): Observable<any> {
+    return this.api.post(`/sales-invoices/${invoiceId}/payments`, payment);
+  }
+
+  sendInvoiceEmail(invoiceId: string, emailData: {
+    recipientEmail: string;
+    subject?: string;
+    message?: string;
+  }): Observable<any> {
+    return this.api.post(`/sales-invoices/${invoiceId}/send-email`, emailData);
+  }
+}
+

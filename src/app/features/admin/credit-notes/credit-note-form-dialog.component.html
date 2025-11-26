@@ -1,0 +1,138 @@
+<h2 mat-dialog-title>
+  {{ data ? 'Edit Credit Note' : 'Create Credit Note' }}
+</h2>
+
+<mat-dialog-content class="credit-note-form-content">
+  <form [formGroup]="form">
+    <!-- Header Section -->
+    <div class="form-section">
+      <h3>Credit Note Details</h3>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-2">
+          <mat-label>Related Invoice (Optional)</mat-label>
+          <mat-select formControlName="invoiceId" (selectionChange)="onInvoiceChange($event.value)">
+            <mat-option [value]="null">No Invoice</mat-option>
+            <mat-option *ngFor="let invoice of invoices" [value]="invoice.id">
+              {{ invoice.invoiceNumber }} - {{ invoice.customerName || 'N/A' }} ({{ invoice.totalAmount | number: '1.2-2' }} {{ invoice.currency }})
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Credit Note Date *</mat-label>
+          <input matInput type="date" formControlName="creditNoteDate" required />
+          <mat-error *ngIf="form.get('creditNoteDate')?.hasError('required')">
+            Date is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Reason *</mat-label>
+          <mat-select formControlName="reason" required>
+            <mat-option *ngFor="let reason of creditNoteReasons" [value]="reason.value">
+              {{ reason.label }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('reason')?.hasError('required')">
+            Reason is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-2">
+          <mat-label>Customer</mat-label>
+          <mat-select formControlName="customerId" (selectionChange)="onCustomerChange($event.value)">
+            <mat-option [value]="null">Select Customer</mat-option>
+            <mat-option *ngFor="let customer of customers" [value]="customer.id">
+              {{ customer.name }} {{ customer.customerTrn ? '(' + customer.customerTrn + ')' : '' }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Customer Name</mat-label>
+          <input matInput formControlName="customerName" placeholder="Or enter manually" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Customer TRN</mat-label>
+          <input matInput formControlName="customerTrn" />
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Amount *</mat-label>
+          <input matInput type="number" formControlName="amount" step="0.01" min="0.01" required />
+          <span matSuffix>{{ form.get('currency')?.value }}</span>
+          <mat-error *ngIf="form.get('amount')?.hasError('required')">
+            Amount is required
+          </mat-error>
+          <mat-error *ngIf="form.get('amount')?.hasError('min')">
+            Amount must be greater than 0
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>VAT Amount</mat-label>
+          <input matInput type="number" formControlName="vatAmount" step="0.01" min="0" />
+          <span matSuffix>{{ form.get('currency')?.value }}</span>
+          <button mat-icon-button matSuffix type="button" (click)="calculateVat()" matTooltip="Auto-calculate 5% VAT">
+            <mat-icon>calculate</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Currency</mat-label>
+          <mat-select formControlName="currency">
+            <mat-option *ngFor="let curr of currencies" [value]="curr">
+              {{ curr }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            <mat-option *ngFor="let status of creditNoteStatuses" [value]="status">
+              {{ status | titlecase }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="totals-row">
+        <span class="total-label">Total Amount:</span>
+        <span class="total-value">{{ totalAmount | number: '1.2-2' }} {{ form.get('currency')?.value }}</span>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="2"></textarea>
+      </mat-form-field>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="form-section">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Notes</mat-label>
+        <textarea matInput formControlName="notes" rows="3"></textarea>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="save()"
+    [disabled]="form.invalid || loading"
+  >
+    <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
+    <span *ngIf="!loading">{{ data ? 'Update' : 'Create' }}</span>
+  </button>
+</mat-dialog-actions>
+

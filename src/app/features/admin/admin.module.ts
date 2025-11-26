@@ -16,6 +16,21 @@ import { ExpenseFormDialogComponent } from './expenses/expense-form-dialog.compo
 import { ReconciliationListComponent } from './bank-reconciliation/reconciliation-list.component';
 import { ReconciliationDetailComponent } from './bank-reconciliation/reconciliation-detail.component';
 import { UploadBankStatementComponent } from './bank-reconciliation/upload-bank-statement.component';
+import { AdminCustomersComponent } from './customers/admin-customers.component';
+import { CustomerFormDialogComponent } from './customers/customer-form-dialog.component';
+import { AdminSalesInvoicesComponent } from './sales-invoices/admin-sales-invoices.component';
+import { InvoiceFormDialogComponent } from './sales-invoices/invoice-form-dialog.component';
+import { InvoiceDetailDialogComponent } from './sales-invoices/invoice-detail-dialog.component';
+import { InvoicePaymentDialogComponent } from './sales-invoices/invoice-payment-dialog.component';
+import { AdminCreditNotesComponent } from './credit-notes/admin-credit-notes.component';
+import { CreditNoteFormDialogComponent } from './credit-notes/credit-note-form-dialog.component';
+import { CreditNoteDetailDialogComponent } from './credit-notes/credit-note-detail-dialog.component';
+import { CreditNoteApplyDialogComponent } from './credit-notes/credit-note-apply-dialog.component';
+import { InvoiceEmailDialogComponent } from './sales-invoices/invoice-email-dialog.component';
+import { AdminVendorsComponent } from './vendors/admin-vendors.component';
+import { VendorFormDialogComponent } from './vendors/vendor-form-dialog.component';
+import { AdminChartOfAccountsComponent } from './chart-of-accounts/admin-chart-of-accounts.component';
+import { ChartOfAccountFormDialogComponent } from './chart-of-accounts/chart-of-account-form-dialog.component';
 
 @NgModule({
   declarations: [
@@ -34,6 +49,21 @@ import { UploadBankStatementComponent } from './bank-reconciliation/upload-bank-
     ReconciliationListComponent,
     ReconciliationDetailComponent,
     UploadBankStatementComponent,
+    AdminCustomersComponent,
+    CustomerFormDialogComponent,
+    AdminSalesInvoicesComponent,
+    InvoiceFormDialogComponent,
+    InvoiceDetailDialogComponent,
+    InvoicePaymentDialogComponent,
+    AdminCreditNotesComponent,
+    CreditNoteFormDialogComponent,
+    CreditNoteDetailDialogComponent,
+    CreditNoteApplyDialogComponent,
+    InvoiceEmailDialogComponent,
+    AdminVendorsComponent,
+    VendorFormDialogComponent,
+    AdminChartOfAccountsComponent,
+    ChartOfAccountFormDialogComponent,
   ],
   imports: [SharedModule, AdminRoutingModule],
 })

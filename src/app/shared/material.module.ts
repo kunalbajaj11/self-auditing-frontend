@@ -21,6 +21,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 const MATERIAL_MODULES = [
   MatButtonModule,
@@ -45,6 +47,8 @@ const MATERIAL_MODULES = [
   MatProgressSpinnerModule,
   MatSlideToggleModule,
   MatTooltipModule,
+  MatCheckboxModule,
+  MatButtonToggleModule,
 ];
 
 @NgModule({

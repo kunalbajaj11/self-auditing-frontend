@@ -1,0 +1,19 @@
+.form-row {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.inline-spinner {
+  display: inline-block;
+  margin-right: 8px;
+}
+

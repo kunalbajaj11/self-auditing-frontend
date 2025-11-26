@@ -53,6 +53,11 @@ interface AdminDashboardViewModel {
   vatSummary: VatSummary;
   recentExpenses: Expense[];
   period: string; // Current period label
+  // Invoice metrics (to be populated when frontend services implemented)
+  totalInvoices?: number;
+  outstandingInvoices?: number;
+  outstandingAmount?: number;
+  overdueInvoices?: number;
 }
 
 @Component({

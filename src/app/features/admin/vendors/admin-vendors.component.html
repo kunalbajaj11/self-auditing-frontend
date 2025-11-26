@@ -1,0 +1,125 @@
+<section class="vendors">
+  <header class="header">
+    <div class="header-content">
+      <h1>Vendors</h1>
+      <p>Manage vendor information for expense tracking and procurement.</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openDialog()">
+      <mat-icon>add</mat-icon>
+      Add Vendor
+    </button>
+  </header>
+
+  <section class="vendors-section">
+    <div class="filters">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search vendors</mat-label>
+        <input
+          matInput
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Search by name, TRN, email..."
+        />
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-checkbox
+        [(ngModel)]="showActiveOnly"
+        (change)="toggleActiveFilter()"
+      >
+        Active only
+      </mat-checkbox>
+    </div>
+
+    <mat-card class="vendors-card">
+      <mat-card-header>
+        <div class="card-title-with-icon">
+          <mat-icon>store</mat-icon>
+          <mat-card-title>Vendor List</mat-card-title>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="dataSource" class="vendors-table">
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Name</th>
+              <td mat-cell *matCellDef="let vendor">
+                <div class="primary">{{ vendor.name }}</div>
+                <div class="secondary" *ngIf="vendor.displayName">
+                  {{ vendor.displayName }}
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="vendorTrn">
+              <th mat-header-cell *matHeaderCellDef>TRN</th>
+              <td mat-cell *matCellDef="let vendor">
+                {{ vendor.vendorTrn || '—' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef>Category</th>
+              <td mat-cell *matCellDef="let vendor">
+                {{ vendor.category || '—' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="email">
+              <th mat-header-cell *matHeaderCellDef>Email</th>
+              <td mat-cell *matCellDef="let vendor">
+                {{ vendor.email || '—' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="phone">
+              <th mat-header-cell *matHeaderCellDef>Phone</th>
+              <td mat-cell *matCellDef="let vendor">
+                {{ vendor.phone || '—' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="paymentTerms">
+              <th mat-header-cell *matHeaderCellDef>Payment Terms</th>
+              <td mat-cell *matCellDef="let vendor">
+                {{ vendor.paymentTerms ? vendor.paymentTerms + ' days' : '—' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="isActive">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let vendor">
+                <mat-chip [color]="vendor.isActive ? 'primary' : 'warn'" selected>
+                  {{ vendor.isActive ? 'Active' : 'Inactive' }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let vendor">
+                <button mat-button (click)="openDialog(vendor)">Edit</button>
+                <button mat-button color="warn" (click)="delete(vendor)">
+                  Delete
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columns" class="table-header"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns" class="table-row"></tr>
+          </table>
+
+          <div class="table-overlay" *ngIf="loading">
+            <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+          </div>
+        </div>
+
+        <div class="empty" *ngIf="!loading && dataSource.data.length === 0">
+          <mat-icon>store</mat-icon>
+          <p>No vendors yet. Add your first vendor to start tracking expenses.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</section>
+

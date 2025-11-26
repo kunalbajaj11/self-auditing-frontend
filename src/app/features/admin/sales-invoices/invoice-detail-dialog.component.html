@@ -1,0 +1,144 @@
+<div class="invoice-detail">
+  <div class="header" *ngIf="invoice">
+    <h2 mat-dialog-title>Invoice Details - {{ invoice.invoiceNumber }}</h2>
+    <button mat-icon-button (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content *ngIf="loading">
+    <div class="loading">
+      <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+      <p>Loading invoice details...</p>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-content *ngIf="!loading && invoice" class="invoice-content">
+    <!-- Invoice Header -->
+    <div class="invoice-header">
+      <div class="invoice-info">
+        <div class="info-row">
+          <span class="label">Invoice Number:</span>
+          <span class="value">{{ invoice.invoiceNumber }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Invoice Date:</span>
+          <span class="value">{{ invoice.invoiceDate | date: 'mediumDate' }}</span>
+        </div>
+        <div class="info-row" *ngIf="invoice.dueDate">
+          <span class="label">Due Date:</span>
+          <span class="value">{{ invoice.dueDate | date: 'mediumDate' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Status:</span>
+          <mat-chip [color]="getStatusColor(invoice.status)" selected>
+            {{ invoice.status | titlecase }}
+          </mat-chip>
+        </div>
+        <div class="info-row">
+          <span class="label">Payment Status:</span>
+          <mat-chip [color]="getPaymentStatusColor(invoice.paymentStatus)" selected>
+            {{ invoice.paymentStatus | titlecase }}
+          </mat-chip>
+        </div>
+      </div>
+
+      <div class="customer-info">
+        <h3>Customer Information</h3>
+        <div class="info-row">
+          <span class="label">Name:</span>
+          <span class="value">{{ invoice.customerName || '—' }}</span>
+        </div>
+        <div class="info-row" *ngIf="invoice.customerTrn">
+          <span class="label">TRN:</span>
+          <span class="value">{{ invoice.customerTrn }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Line Items -->
+    <div class="line-items-section" *ngIf="invoice.lineItems && invoice.lineItems.length > 0">
+      <h3>Line Items</h3>
+      <table class="line-items-table">
+        <thead>
+          <tr>
+            <th>Item Name</th>
+            <th>Description</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>VAT Rate</th>
+            <th>VAT Type</th>
+            <th>Amount</th>
+            <th>VAT</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of invoice.lineItems">
+            <td>{{ item.itemName }}</td>
+            <td>{{ item.description || '—' }}</td>
+            <td>{{ item.quantity }} {{ item.unitOfMeasure || 'unit' }}</td>
+            <td>{{ item.unitPrice | number: '1.2-2' }} {{ invoice.currency }}</td>
+            <td>{{ item.vatRate }}%</td>
+            <td>{{ item.vatTaxType || 'STANDARD' }}</td>
+            <td>{{ item.amount | number: '1.2-2' }} {{ invoice.currency }}</td>
+            <td>{{ item.vatAmount | number: '1.2-2' }} {{ invoice.currency }}</td>
+            <td>{{ item.totalAmount | number: '1.2-2' }} {{ invoice.currency }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Totals -->
+    <div class="totals-section">
+      <div class="totals-row">
+        <span class="label">Subtotal:</span>
+        <span class="value">{{ invoice.amount | number: '1.2-2' }} {{ invoice.currency }}</span>
+      </div>
+      <div class="totals-row">
+        <span class="label">Total VAT:</span>
+        <span class="value">{{ invoice.vatAmount | number: '1.2-2' }} {{ invoice.currency }}</span>
+      </div>
+      <div class="totals-row total-line">
+        <span class="label">Total Amount:</span>
+        <span class="value">{{ invoice.totalAmount | number: '1.2-2' }} {{ invoice.currency }}</span>
+      </div>
+      <div class="totals-row" *ngIf="getPaidAmount() > 0">
+        <span class="label">Paid Amount:</span>
+        <span class="value paid">{{ invoice.paidAmount | number: '1.2-2' }} {{ invoice.currency }}</span>
+      </div>
+      <div class="totals-row" *ngIf="outstandingAmount > 0">
+        <span class="label">Outstanding:</span>
+        <span class="value outstanding">{{ outstandingAmount | number: '1.2-2' }} {{ invoice.currency }}</span>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="notes-section" *ngIf="invoice.description || invoice.notes">
+      <h3>Notes</h3>
+      <p *ngIf="invoice.description">{{ invoice.description }}</p>
+      <p *ngIf="invoice.notes">{{ invoice.notes }}</p>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" *ngIf="!loading && invoice">
+    <button mat-button (click)="close()">Close</button>
+    <button
+      mat-button
+      (click)="sendInvoiceEmail()"
+      *ngIf="invoice.status !== 'cancelled'"
+    >
+      <mat-icon>email</mat-icon>
+      Send Email
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="openPaymentDialog()"
+      *ngIf="outstandingAmount > 0 && invoice.paymentStatus !== 'paid'"
+    >
+      Record Payment
+    </button>
+  </mat-dialog-actions>
+</div>
+

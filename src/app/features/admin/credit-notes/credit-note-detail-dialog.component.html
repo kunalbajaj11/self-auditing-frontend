@@ -1,0 +1,101 @@
+<div class="credit-note-detail">
+  <div class="header" *ngIf="creditNote">
+    <h2 mat-dialog-title>Credit Note Details - {{ creditNote.creditNoteNumber }}</h2>
+    <button mat-icon-button (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content *ngIf="loading">
+    <div class="loading">
+      <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+      <p>Loading credit note details...</p>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-content *ngIf="!loading && creditNote" class="credit-note-content">
+    <!-- Credit Note Header -->
+    <div class="credit-note-header">
+      <div class="credit-note-info">
+        <div class="info-row">
+          <span class="label">Credit Note Number:</span>
+          <span class="value">{{ creditNote.creditNoteNumber }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Credit Note Date:</span>
+          <span class="value">{{ creditNote.creditNoteDate | date: 'mediumDate' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Reason:</span>
+          <span class="value">{{ creditNote.reason | titlecase }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Status:</span>
+          <mat-chip [color]="getStatusColor(creditNote.status)" selected>
+            {{ creditNote.status | titlecase }}
+          </mat-chip>
+        </div>
+      </div>
+
+      <div class="customer-info">
+        <h3>Customer Information</h3>
+        <div class="info-row">
+          <span class="label">Name:</span>
+          <span class="value">{{ creditNote.customerName || '—' }}</span>
+        </div>
+        <div class="info-row" *ngIf="creditNote.customerTrn">
+          <span class="label">TRN:</span>
+          <span class="value">{{ creditNote.customerTrn }}</span>
+        </div>
+        <div class="info-row" *ngIf="creditNote.invoiceId">
+          <span class="label">Related Invoice:</span>
+          <span class="value">{{ creditNote.invoiceId }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Amounts -->
+    <div class="amounts-section">
+      <div class="totals-row">
+        <span class="label">Amount:</span>
+        <span class="value">{{ creditNote.amount | number: '1.2-2' }} {{ creditNote.currency }}</span>
+      </div>
+      <div class="totals-row">
+        <span class="label">VAT Amount:</span>
+        <span class="value">{{ creditNote.vatAmount | number: '1.2-2' }} {{ creditNote.currency }}</span>
+      </div>
+      <div class="totals-row total-line">
+        <span class="label">Total Amount:</span>
+        <span class="value">{{ creditNote.totalAmount | number: '1.2-2' }} {{ creditNote.currency }}</span>
+      </div>
+      <div class="totals-row" *ngIf="getAppliedAmount() > 0">
+        <span class="label">Applied Amount:</span>
+        <span class="value applied">{{ creditNote.appliedAmount | number: '1.2-2' }} {{ creditNote.currency }}</span>
+      </div>
+      <div class="totals-row" *ngIf="remainingAmount > 0">
+        <span class="label">Remaining Amount:</span>
+        <span class="value remaining">{{ remainingAmount | number: '1.2-2' }} {{ creditNote.currency }}</span>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="notes-section" *ngIf="creditNote.description || creditNote.notes">
+      <h3>Notes</h3>
+      <p *ngIf="creditNote.description">{{ creditNote.description }}</p>
+      <p *ngIf="creditNote.notes">{{ creditNote.notes }}</p>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" *ngIf="!loading && creditNote">
+    <button mat-button (click)="close()">Close</button>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="openApplyDialog()"
+      *ngIf="remainingAmount > 0 && creditNote.status !== 'applied' && creditNote.status !== 'cancelled'"
+    >
+      Apply to Invoice
+    </button>
+  </mat-dialog-actions>
+</div>
+

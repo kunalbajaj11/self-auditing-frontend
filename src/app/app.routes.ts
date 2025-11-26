@@ -43,6 +43,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'invoices/public/:token',
+    loadComponent: () =>
+      import('./features/public/public-invoice-view.component').then(
+        (m) => m.PublicInvoiceViewComponent,
+      ),
+  },
+  {
     path: '**',
     redirectTo: 'auth/login',
   },

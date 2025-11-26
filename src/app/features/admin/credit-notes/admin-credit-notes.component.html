@@ -1,0 +1,108 @@
+<section class="credit-notes">
+  <header class="header">
+    <div class="header-content">
+      <h1>Credit Notes</h1>
+      <p>Manage credit notes for invoice adjustments and refunds.</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Create Credit Note
+    </button>
+  </header>
+
+  <section class="credit-notes-section">
+    <mat-card class="credit-notes-card">
+      <mat-card-header>
+        <div class="card-title-with-icon">
+          <mat-icon>note</mat-icon>
+          <mat-card-title>Credit Note List</mat-card-title>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="dataSource" class="credit-notes-table">
+            <ng-container matColumnDef="creditNoteNumber">
+              <th mat-header-cell *matHeaderCellDef>Credit Note #</th>
+              <td mat-cell *matCellDef="let creditNote">{{ creditNote.creditNoteNumber }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="customerName">
+              <th mat-header-cell *matHeaderCellDef>Customer</th>
+              <td mat-cell *matCellDef="let creditNote">
+                {{ creditNote.customerName || '—' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="creditNoteDate">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let creditNote">
+                {{ creditNote.creditNoteDate | date: 'shortDate' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="reason">
+              <th mat-header-cell *matHeaderCellDef>Reason</th>
+              <td mat-cell *matCellDef="let creditNote">
+                {{ creditNote.reason | titlecase }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="totalAmount">
+              <th mat-header-cell *matHeaderCellDef>Total Amount</th>
+              <td mat-cell *matCellDef="let creditNote">
+                {{ creditNote.totalAmount | number: '1.2-2' }} {{ creditNote.currency }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let creditNote">
+                <mat-chip [color]="getStatusColor(creditNote.status)" selected>
+                  {{ creditNote.status | titlecase }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="appliedAmount">
+              <th mat-header-cell *matHeaderCellDef>Applied</th>
+              <td mat-cell *matCellDef="let creditNote">
+                {{ creditNote.appliedAmount | number: '1.2-2' }} {{ creditNote.currency }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="remainingAmount">
+              <th mat-header-cell *matHeaderCellDef>Remaining</th>
+              <td mat-cell *matCellDef="let creditNote">
+                {{ creditNote.remainingAmount | number: '1.2-2' }} {{ creditNote.currency }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let creditNote">
+                <button mat-button (click)="viewCreditNote(creditNote)">View</button>
+                <button mat-button (click)="editCreditNote(creditNote)">Edit</button>
+                <button mat-button color="warn" (click)="deleteCreditNote(creditNote)">
+                  Delete
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columns" class="table-header"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns" class="table-row"></tr>
+          </table>
+
+          <div class="table-overlay" *ngIf="loading">
+            <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+          </div>
+        </div>
+
+        <div class="empty" *ngIf="!loading && dataSource.data.length === 0">
+          <mat-icon>note</mat-icon>
+          <p>No credit notes yet. Create your first credit note to get started.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</section>
+

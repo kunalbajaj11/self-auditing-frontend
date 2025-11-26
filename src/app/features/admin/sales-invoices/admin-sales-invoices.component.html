@@ -1,0 +1,103 @@
+<section class="sales-invoices">
+  <header class="header">
+    <div class="header-content">
+      <h1>Sales Invoices</h1>
+      <p>Manage customer invoices, track payments, and monitor outstanding amounts.</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Create Invoice
+    </button>
+  </header>
+
+  <section class="invoices-section">
+    <mat-card class="invoices-card">
+      <mat-card-header>
+        <div class="card-title-with-icon">
+          <mat-icon>description</mat-icon>
+          <mat-card-title>Invoice List</mat-card-title>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="dataSource" class="invoices-table">
+            <ng-container matColumnDef="invoiceNumber">
+              <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+              <td mat-cell *matCellDef="let invoice">{{ invoice.invoiceNumber }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="customerName">
+              <th mat-header-cell *matHeaderCellDef>Customer</th>
+              <td mat-cell *matCellDef="let invoice">
+                {{ invoice.customerName || '—' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="invoiceDate">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let invoice">
+                {{ invoice.invoiceDate | date: 'shortDate' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="dueDate">
+              <th mat-header-cell *matHeaderCellDef>Due Date</th>
+              <td mat-cell *matCellDef="let invoice">
+                {{ invoice.dueDate ? (invoice.dueDate | date: 'shortDate') : '—' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="totalAmount">
+              <th mat-header-cell *matHeaderCellDef>Total Amount</th>
+              <td mat-cell *matCellDef="let invoice">
+                {{ invoice.totalAmount | number: '1.2-2' }} {{ invoice.currency }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let invoice">
+                <mat-chip [color]="getStatusColor(invoice.status)" selected>
+                  {{ invoice.status | titlecase }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="paymentStatus">
+              <th mat-header-cell *matHeaderCellDef>Payment</th>
+              <td mat-cell *matCellDef="let invoice">
+                <mat-chip [color]="getPaymentStatusColor(invoice.paymentStatus)" selected>
+                  {{ invoice.paymentStatus | titlecase }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let invoice">
+                <button mat-button (click)="viewInvoice(invoice)">View</button>
+                <button mat-button (click)="editInvoice(invoice)">Edit</button>
+                <button mat-button color="warn" (click)="deleteInvoice(invoice)">
+                  Delete
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columns" class="table-header"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns" class="table-row"></tr>
+          </table>
+
+          <div class="table-overlay" *ngIf="loading">
+            <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+          </div>
+        </div>
+
+        <div class="empty" *ngIf="!loading && dataSource.data.length === 0">
+          <mat-icon>description</mat-icon>
+          <p>No invoices yet. Create your first invoice to get started.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</section>
+

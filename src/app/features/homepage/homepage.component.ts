@@ -62,9 +62,9 @@ export class HomepageComponent implements OnInit {
   }
 
   private setSEOMetaTags(): void {
-    const title = 'SelfAccounting.AI - AI-Powered Expense Tracker & Auditing Software for UAE';
-    const description = 'Leading expense tracker and auditing software for UAE businesses. AI-powered OCR receipt scanning, VAT compliance, bank reconciliation, and automated financial reporting. Trusted by audit firms across UAE.';
-    const keywords = 'expense tracker UAE, auditing software UAE, expense management UAE, VAT compliance UAE, receipt scanning UAE, bank reconciliation UAE, accounting software UAE, financial reporting UAE, audit software UAE, expense tracking app UAE, FTA compliance UAE, OCR receipt UAE, automated accounting UAE, multi-currency expense tracker UAE';
+    const title = 'SelfAccounting.AI - Complete Financial Management Platform for UAE | Expense Tracking & Invoice Management';
+    const description = 'Complete financial management platform for UAE businesses. Expense tracking, sales invoice management, payment tracking, credit notes, AI-powered OCR receipt scanning, VAT compliance, bank reconciliation, and automated financial reporting. Trusted by audit firms across UAE.';
+    const keywords = 'expense tracker UAE, invoice management UAE, payment tracking UAE, credit notes UAE, auditing software UAE, expense management UAE, VAT compliance UAE, receipt scanning UAE, bank reconciliation UAE, accounting software UAE, financial reporting UAE, audit software UAE, expense tracking app UAE, FTA compliance UAE, OCR receipt UAE, automated accounting UAE, multi-currency expense tracker UAE, sales invoice software UAE';
     const imageUrl = 'https://selfaccounting.ai/assets/images/app-logo.jpg';
     const siteUrl = 'https://selfaccounting.ai/';
 
@@ -107,9 +107,13 @@ export class HomepageComponent implements OnInit {
         ratingValue: '4.8',
         ratingCount: '150',
       },
-      description: 'AI-powered expense tracker and auditing software for UAE businesses. Features OCR receipt scanning, VAT compliance, bank reconciliation, and automated financial reporting.',
+      description: 'AI-powered expense tracker and financial management software for UAE businesses. Features OCR receipt scanning, sales invoice management, payment tracking, credit notes, VAT compliance, bank reconciliation, and automated financial reporting.',
       featureList: [
         'AI-Powered OCR Receipt Scanning',
+        'Sales Invoice Management',
+        'Payment Tracking & Collections',
+        'Credit Notes & Adjustments',
+        'Customer Management',
         'VAT Compliance & Reporting',
         'Bank Reconciliation',
         'Multi-User & Role-Based Access',
@@ -117,6 +121,7 @@ export class HomepageComponent implements OnInit {
         'Audit Trail & Compliance',
         'Real-Time Dashboards',
         'Automated Notifications',
+        'Multi-Currency Support',
       ],
       screenshot: 'https://selfaccounting.ai/assets/images/app-logo.jpg',
       softwareVersion: '1.0',
@@ -186,6 +191,30 @@ export class HomepageComponent implements OnInit {
         'Upload receipts and invoices. Our AI-powered OCR automatically extracts vendor details, amounts, VAT, dates, and invoice numbers with high accuracy.',
     },
     {
+      icon: 'description',
+      title: 'Sales Invoice Management',
+      description:
+        'Create, manage, and track customer invoices with automatic numbering (INV-YYYY-NNN), payment tracking, and email delivery. Complete invoice lifecycle management from draft to paid.',
+    },
+    {
+      icon: 'payment',
+      title: 'Payment Tracking & Collections',
+      description:
+        'Record full and partial payments with automatic status updates. Track payment history, outstanding amounts, and collection rates. Support for multiple payment methods.',
+    },
+    {
+      icon: 'note',
+      title: 'Credit Notes & Adjustments',
+      description:
+        'Issue credit notes for returns, refunds, and corrections. Apply credit notes to invoices with automatic payment recalculation. Complete credit note lifecycle management.',
+    },
+    {
+      icon: 'people',
+      title: 'Customer Management',
+      description:
+        'Maintain comprehensive customer database with TRN tracking, payment terms, and contact information. Automatic due date calculation from customer payment terms.',
+    },
+    {
       icon: 'account_balance',
       title: 'Bank Reconciliation',
       description:
@@ -204,12 +233,6 @@ export class HomepageComponent implements OnInit {
         'Track expenses from accrual to settlement with intelligent matching, tolerance controls, and automated reminders.',
     },
     {
-      icon: 'people',
-      title: 'Multi-User & Role-Based Access',
-      description:
-        'Support for Super Admin, Admin, Accountant, and Employee roles with granular permissions and tenant isolation.',
-    },
-    {
       icon: 'store',
       title: 'Vendor Management',
       description:
@@ -225,13 +248,13 @@ export class HomepageComponent implements OnInit {
       icon: 'notification_important',
       title: 'Automated Notifications',
       description:
-        'Get reminders for pending approvals, accrual settlements, and important expense updates via email.',
+        'Get reminders for pending approvals, accrual settlements, overdue invoices, and important expense updates via email.',
     },
     {
       icon: 'assessment',
       title: 'Comprehensive Reports',
       description:
-        'Generate detailed financial reports, VAT summaries, and expense analytics. Export to PDF, Excel, or CSV formats.',
+        'Generate detailed financial reports, VAT summaries, expense analytics, invoice reports, and payment collection reports. Export to PDF, Excel, or CSV formats.',
     },
     {
       icon: 'security',
@@ -249,7 +272,13 @@ export class HomepageComponent implements OnInit {
       icon: 'dashboard',
       title: 'Real-Time Dashboards',
       description:
-        'Interactive dashboards with charts and KPIs for expenses, VAT, accruals, and financial insights.',
+        'Interactive dashboards with charts and KPIs for expenses, invoices, payments, VAT, accruals, and financial insights.',
+    },
+    {
+      icon: 'attach_money',
+      title: 'Multi-Currency Support',
+      description:
+        'Handle multiple currencies with automatic exchange rate fetching and base currency conversion for unified reporting.',
     },
   ];
 

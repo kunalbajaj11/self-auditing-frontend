@@ -1,0 +1,184 @@
+<h2 mat-dialog-title>
+  {{ data ? 'Edit Invoice' : 'Create Invoice' }}
+</h2>
+
+<mat-dialog-content class="invoice-form-content">
+  <form [formGroup]="form">
+    <!-- Header Section -->
+    <div class="form-section">
+      <h3>Invoice Details</h3>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-2">
+          <mat-label>Customer</mat-label>
+          <mat-select formControlName="customerId" (selectionChange)="onCustomerChange($event.value)">
+            <mat-option [value]="null">Select Customer</mat-option>
+            <mat-option *ngFor="let customer of customers" [value]="customer.id">
+              {{ customer.name }} {{ customer.customerTrn ? '(' + customer.customerTrn + ')' : '' }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Invoice Date *</mat-label>
+          <input matInput type="date" formControlName="invoiceDate" required />
+          <mat-error *ngIf="form.get('invoiceDate')?.hasError('required')">
+            Invoice date is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Due Date</mat-label>
+          <input matInput type="date" formControlName="dueDate" />
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Customer Name</mat-label>
+          <input matInput formControlName="customerName" placeholder="Or enter manually" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Customer TRN</mat-label>
+          <input matInput formControlName="customerTrn" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Currency</mat-label>
+          <mat-select formControlName="currency">
+            <mat-option *ngFor="let curr of currencies" [value]="curr">
+              {{ curr }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            <mat-option *ngFor="let status of invoiceStatuses" [value]="status">
+              {{ status | titlecase }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="2"></textarea>
+      </mat-form-field>
+    </div>
+
+    <!-- Line Items Section -->
+    <div class="form-section">
+      <div class="section-header">
+        <h3>Line Items</h3>
+        <button mat-button type="button" color="primary" (click)="addLineItem()">
+          <mat-icon>add</mat-icon>
+          Add Item
+        </button>
+      </div>
+
+      <div class="line-items-container" formArrayName="lineItems">
+        <table class="line-items-table" *ngIf="lineItems.length > 0">
+          <thead>
+            <tr>
+              <th>Item Name *</th>
+              <th>Description</th>
+              <th>Qty</th>
+              <th>Unit</th>
+              <th>Unit Price *</th>
+              <th>VAT Rate</th>
+              <th>VAT Type</th>
+              <th>Amount</th>
+              <th>VAT</th>
+              <th>Total</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let lineItem of lineItems.controls; let i = index" [formGroupName]="i">
+              <td>
+                <input class="form-input" formControlName="itemName" placeholder="Item name" />
+                <small class="error-text" *ngIf="lineItem.get('itemName')?.hasError('required') && lineItem.get('itemName')?.touched">
+                  Required
+                </small>
+              </td>
+              <td>
+                <input class="form-input" formControlName="description" placeholder="Description" />
+              </td>
+              <td>
+                <input class="form-input" type="number" formControlName="quantity" step="0.001" min="0.001" style="width: 70px;" />
+              </td>
+              <td>
+                <input class="form-input" formControlName="unitOfMeasure" placeholder="unit" style="width: 70px;" />
+              </td>
+              <td>
+                <input class="form-input" type="number" formControlName="unitPrice" step="0.01" min="0" style="width: 100px;" />
+              </td>
+              <td>
+                <input class="form-input" type="number" formControlName="vatRate" step="0.01" min="0" max="100" style="width: 70px;" />
+              </td>
+              <td>
+                <select class="form-select" formControlName="vatTaxType" style="width: 120px;">
+                  <option *ngFor="let type of vatTaxTypes" [value]="type">
+                    {{ type }}
+                  </option>
+                </select>
+              </td>
+              <td class="readonly">{{ lineItem.get('amount')?.value | number: '1.2-2' }}</td>
+              <td class="readonly">{{ lineItem.get('vatAmount')?.value | number: '1.2-2' }}</td>
+              <td class="readonly">{{ lineItem.get('totalAmount')?.value | number: '1.2-2' }}</td>
+              <td>
+                <button mat-icon-button type="button" color="warn" (click)="removeLineItem(i)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="lineItems.length === 0" class="empty-line-items">
+          <p>No line items. Click "Add Item" to add items to this invoice.</p>
+        </div>
+      </div>
+
+      <!-- Totals -->
+      <div class="totals-section" *ngIf="lineItems.length > 0">
+        <div class="totals-row">
+          <span class="total-label">Subtotal:</span>
+          <span class="total-value">{{ subtotal | number: '1.2-2' }} {{ form.get('currency')?.value }}</span>
+        </div>
+        <div class="totals-row">
+          <span class="total-label">Total VAT:</span>
+          <span class="total-value">{{ totalVat | number: '1.2-2' }} {{ form.get('currency')?.value }}</span>
+        </div>
+        <div class="totals-row total-amount">
+          <span class="total-label">Total Amount:</span>
+          <span class="total-value">{{ totalAmount | number: '1.2-2' }} {{ form.get('currency')?.value }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="form-section">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Notes</mat-label>
+        <textarea matInput formControlName="notes" rows="3"></textarea>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="save()"
+    [disabled]="form.invalid || loading || lineItems.length === 0"
+  >
+    <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
+    <span *ngIf="!loading">{{ data ? 'Update' : 'Create' }}</span>
+  </button>
+</mat-dialog-actions>
+

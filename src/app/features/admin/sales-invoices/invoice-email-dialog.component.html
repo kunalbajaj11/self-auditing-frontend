@@ -1,0 +1,61 @@
+<h2 mat-dialog-title>Send Invoice via Email</h2>
+
+<mat-dialog-content>
+  <div class="invoice-info" *ngIf="invoice">
+    <div class="info-row">
+      <span class="label">Invoice:</span>
+      <span class="value">{{ invoice.invoiceNumber }}</span>
+    </div>
+    <div class="info-row">
+      <span class="label">Customer:</span>
+      <span class="value">{{ invoice.customerName || '—' }}</span>
+    </div>
+    <div class="info-row">
+      <span class="label">Total Amount:</span>
+      <span class="value">{{ invoice.totalAmount | number: '1.2-2' }} {{ invoice.currency }}</span>
+    </div>
+  </div>
+
+  <form [formGroup]="form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Recipient Email *</mat-label>
+      <input matInput type="email" formControlName="recipientEmail" required />
+      <mat-error *ngIf="form.get('recipientEmail')?.hasError('required')">
+        Email is required
+      </mat-error>
+      <mat-error *ngIf="form.get('recipientEmail')?.hasError('email')">
+        Invalid email format
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Subject *</mat-label>
+      <input matInput formControlName="subject" required />
+      <mat-error *ngIf="form.get('subject')?.hasError('required')">
+        Subject is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Message *</mat-label>
+      <textarea matInput formControlName="message" rows="5" required></textarea>
+      <mat-error *ngIf="form.get('message')?.hasError('required')">
+        Message is required
+      </mat-error>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="send()"
+    [disabled]="form.invalid || loading"
+  >
+    <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
+    <span *ngIf="!loading">Send Email</span>
+  </button>
+</mat-dialog-actions>
+

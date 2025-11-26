@@ -12,6 +12,11 @@ import { AdminNotificationsComponent } from './notifications/admin-notifications
 import { ReconciliationListComponent } from './bank-reconciliation/reconciliation-list.component';
 import { ReconciliationDetailComponent } from './bank-reconciliation/reconciliation-detail.component';
 import { UploadBankStatementComponent } from './bank-reconciliation/upload-bank-statement.component';
+import { AdminCustomersComponent } from './customers/admin-customers.component';
+import { AdminSalesInvoicesComponent } from './sales-invoices/admin-sales-invoices.component';
+import { AdminCreditNotesComponent } from './credit-notes/admin-credit-notes.component';
+import { AdminVendorsComponent } from './vendors/admin-vendors.component';
+import { AdminChartOfAccountsComponent } from './chart-of-accounts/admin-chart-of-accounts.component';
 
 const routes: Routes = [
   {
@@ -31,6 +36,32 @@ const routes: Routes = [
               { label: 'Pending Accruals', route: '/admin/expenses', queryParams: { filter: 'pending' } },
               { label: 'Credits & Adjustments', route: '/admin/expenses', queryParams: { filter: 'credits' } },
               { label: 'Archived', route: '/admin/expenses', queryParams: { filter: 'archived' } },
+            ],
+          },
+          {
+            label: 'Sales Invoices',
+            icon: 'description',
+            children: [
+              { label: 'All Invoices', route: '/admin/sales-invoices' },
+              { label: 'Create Invoice', route: '/admin/sales-invoices', queryParams: { view: 'create' } },
+              { label: 'Outstanding', route: '/admin/sales-invoices', queryParams: { filter: 'outstanding' } },
+              { label: 'Overdue', route: '/admin/sales-invoices', queryParams: { filter: 'overdue' } },
+            ],
+          },
+          {
+            label: 'Credit Notes',
+            icon: 'note',
+            children: [
+              { label: 'All Credit Notes', route: '/admin/credit-notes' },
+              { label: 'Create Credit Note', route: '/admin/credit-notes', queryParams: { view: 'create' } },
+            ],
+          },
+          {
+            label: 'Customers',
+            icon: 'people',
+            children: [
+              { label: 'All Customers', route: '/admin/customers' },
+              { label: 'Add Customer', route: '/admin/customers', queryParams: { view: 'create' } },
             ],
           },
           {
@@ -63,6 +94,8 @@ const routes: Routes = [
             children: [
               { label: 'Company Profile', route: '/admin/company' },
               { label: 'Users & Roles', route: '/admin/users' },
+              { label: 'Chart of Accounts', route: '/admin/chart-of-accounts' },
+              { label: 'Vendors', route: '/admin/vendors' },
               { label: 'Expense Types', route: '/admin/expense-types' },
               { label: 'Expense Categories', route: '/admin/categories' },
             ],
@@ -126,7 +159,32 @@ const routes: Routes = [
         component: ReconciliationDetailComponent,
         data: { shell: { title: 'Reconciliation Detail' } },
       },
-      { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+      {
+        path: 'customers',
+        component: AdminCustomersComponent,
+        data: { shell: { title: 'Customer Management' } },
+      },
+      {
+        path: 'sales-invoices',
+        component: AdminSalesInvoicesComponent,
+        data: { shell: { title: 'Sales Invoice Management' } },
+      },
+          {
+            path: 'credit-notes',
+            component: AdminCreditNotesComponent,
+            data: { shell: { title: 'Credit Note Management' } },
+          },
+          {
+            path: 'vendors',
+            component: AdminVendorsComponent,
+            data: { shell: { title: 'Vendor Management' } },
+          },
+          {
+            path: 'chart-of-accounts',
+            component: AdminChartOfAccountsComponent,
+            data: { shell: { title: 'Chart of Accounts' } },
+          },
+          { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },
 ];

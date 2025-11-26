@@ -1,0 +1,118 @@
+<div class="public-invoice-view" *ngIf="!loading && !error && invoice">
+  <div class="invoice-header">
+    <div class="company-info">
+      <h1>Invoice</h1>
+      <p class="invoice-number">Invoice #: {{ invoice.invoiceNumber }}</p>
+    </div>
+    <div class="actions">
+      <button mat-button (click)="printInvoice()">
+        <mat-icon>print</mat-icon>
+        Print
+      </button>
+      <button mat-button (click)="downloadInvoice()">
+        <mat-icon>download</mat-icon>
+        Download PDF
+      </button>
+    </div>
+  </div>
+
+  <div class="invoice-content">
+    <!-- Invoice Details -->
+    <div class="details-section">
+      <div class="detail-row">
+        <span class="label">Invoice Date:</span>
+        <span class="value">{{ invoice.invoiceDate | date: 'mediumDate' }}</span>
+      </div>
+      <div class="detail-row" *ngIf="invoice.dueDate">
+        <span class="label">Due Date:</span>
+        <span class="value">{{ invoice.dueDate | date: 'mediumDate' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Status:</span>
+        <span class="value status-badge" [class]="getStatusClass(invoice.paymentStatus)">
+          {{ invoice.paymentStatus | titlecase }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Customer Information -->
+    <div class="customer-section">
+      <h3>Bill To:</h3>
+      <p class="customer-name">{{ invoice.customerName || '—' }}</p>
+      <p *ngIf="invoice.customerTrn" class="customer-trn">TRN: {{ invoice.customerTrn }}</p>
+    </div>
+
+    <!-- Line Items -->
+    <div class="line-items-section" *ngIf="invoice.lineItems && invoice.lineItems.length > 0">
+      <table class="line-items-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Description</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>VAT Rate</th>
+            <th>Amount</th>
+            <th>VAT</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of invoice.lineItems">
+            <td>{{ item.itemName }}</td>
+            <td>{{ item.description || '—' }}</td>
+            <td>{{ item.quantity }} {{ item.unitOfMeasure || 'unit' }}</td>
+            <td>{{ item.unitPrice | number: '1.2-2' }}</td>
+            <td>{{ item.vatRate }}%</td>
+            <td>{{ item.amount | number: '1.2-2' }}</td>
+            <td>{{ item.vatAmount | number: '1.2-2' }}</td>
+            <td>{{ item.totalAmount | number: '1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Totals -->
+    <div class="totals-section">
+      <div class="totals-row">
+        <span class="label">Subtotal:</span>
+        <span class="value">{{ invoice.amount | number: '1.2-2' }} {{ invoice.currency }}</span>
+      </div>
+      <div class="totals-row">
+        <span class="label">Total VAT:</span>
+        <span class="value">{{ invoice.vatAmount | number: '1.2-2' }} {{ invoice.currency }}</span>
+      </div>
+      <div class="totals-row total-line">
+        <span class="label">Total Amount:</span>
+        <span class="value">{{ invoice.totalAmount | number: '1.2-2' }} {{ invoice.currency }}</span>
+      </div>
+      <div class="totals-row" *ngIf="getPaidAmount() > 0">
+        <span class="label">Paid Amount:</span>
+        <span class="value paid">{{ invoice.paidAmount | number: '1.2-2' }} {{ invoice.currency }}</span>
+      </div>
+      <div class="totals-row" *ngIf="outstandingAmount > 0">
+        <span class="label">Outstanding:</span>
+        <span class="value outstanding">{{ outstandingAmount | number: '1.2-2' }} {{ invoice.currency }}</span>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="notes-section" *ngIf="invoice.description || invoice.notes">
+      <h3>Notes</h3>
+      <p *ngIf="invoice.description">{{ invoice.description }}</p>
+      <p *ngIf="invoice.notes">{{ invoice.notes }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="loading-container" *ngIf="loading">
+  <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  <p>Loading invoice...</p>
+</div>
+
+<div class="error-container" *ngIf="error && !loading">
+  <mat-icon>error_outline</mat-icon>
+  <h2>Invoice Not Found</h2>
+  <p>{{ error }}</p>
+  <p class="help-text">Please check the link or contact support if you believe this is an error.</p>
+</div>
