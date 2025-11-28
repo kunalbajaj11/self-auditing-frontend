@@ -1,0 +1,88 @@
+@import '../settings-shared.scss';
+
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.currencies-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.currency-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  background: #f8fafc;
+
+  .currency-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .currency-code {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      strong {
+        font-size: 1.1rem;
+        color: #0f172a;
+      }
+
+      .currency-name {
+        font-size: 0.875rem;
+        color: #64748b;
+      }
+    }
+  }
+
+  .currency-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+}
+
+.exchange-rates-table {
+  overflow-x: auto;
+  margin-top: 16px;
+
+  table {
+    width: 100%;
+    min-width: 600px;
+
+    th {
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    td {
+      padding: 12px 16px;
+    }
+  }
+}
+
+.form-actions {
+  margin-top: 16px;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+mat-chip {
+  font-size: 0.75rem;
+  height: 24px;
+}
+

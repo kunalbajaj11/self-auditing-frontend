@@ -1,0 +1,152 @@
+@import '../settings-shared.scss';
+
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.sequences-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.sequence-item {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  padding: 20px;
+  background: #f8fafc;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+  }
+}
+
+.sequence-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+
+  .sequence-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    mat-icon {
+      color: #1e3a8a;
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+
+    h3 {
+      margin: 0 0 4px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .sequence-preview {
+      font-size: 0.875rem;
+      color: #64748b;
+      font-family: 'Courier New', monospace;
+      background: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+  }
+}
+
+.sequence-details {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+
+  .full {
+    grid-column: 1 / -1;
+  }
+}
+
+.sequence-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.format-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+
+  .example-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+
+    code {
+      font-family: 'Courier New', monospace;
+      background: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      min-width: 200px;
+    }
+
+    span {
+      color: #64748b;
+      font-family: 'Courier New', monospace;
+    }
+  }
+}
+
+.format-help {
+  p {
+    margin: 0 0 12px;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 24px;
+    color: #64748b;
+
+    li {
+      margin-bottom: 8px;
+
+      code {
+        background: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+

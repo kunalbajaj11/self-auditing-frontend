@@ -56,6 +56,72 @@
   gap: 20px;
 }
 
+// Mobile responsive styles
+@media (max-width: 768px) {
+  .sales-invoices {
+    gap: 16px;
+  }
+
+  .header {
+    padding: 20px 16px;
+    border-radius: 12px;
+    flex-direction: column;
+    gap: 16px;
+
+    .header-content {
+      h1 {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+      }
+
+      p {
+        font-size: 0.875rem;
+      }
+    }
+
+    button {
+      width: 100%;
+      min-height: 48px;
+      justify-content: center;
+    }
+  }
+
+  .invoices-card {
+    border-radius: 12px;
+
+    mat-card-header {
+      padding: 16px;
+    }
+
+    mat-card-content {
+      padding: 16px !important;
+    }
+  }
+
+  // Table responsive wrapper
+  .invoices-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -16px;
+    padding: 0 16px;
+
+    table {
+      min-width: 900px;
+    }
+  }
+
+  // Action buttons
+  .table-actions {
+    flex-direction: column;
+    gap: 8px;
+
+    button {
+      width: 100%;
+      min-height: 44px;
+    }
+  }
+}
+
 .invoices-card {
   border-radius: 20px;
   box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);

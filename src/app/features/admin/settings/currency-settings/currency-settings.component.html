@@ -1,0 +1,271 @@
+<section class="settings">
+  <header class="header">
+    <div class="header-content">
+      <h1>Currency & Exchange Rates</h1>
+      <p>Configure base currency, multi-currency support, and exchange rate management for your organization.</p>
+    </div>
+  </header>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <!-- Base Currency -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>account_balance</mat-icon>
+            <mat-card-title>Base Currency</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="form">
+            <mat-form-field appearance="outline">
+              <mat-label>Base Currency</mat-label>
+              <mat-select formControlName="baseCurrency" required>
+                <mat-option *ngFor="let currency of currencies" [value]="currency.code">
+                  {{ currency.code }} - {{ currency.name }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="form.get('baseCurrency')?.hasError('required')">
+                Base currency is required
+              </mat-error>
+              <mat-hint>All amounts will be converted to this currency for reporting</mat-hint>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Active Currencies -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>attach_money</mat-icon>
+            <mat-card-title>Active Currencies</mat-card-title>
+          </div>
+          <button mat-icon-button (click)="addCurrency()" matTooltip="Add Currency">
+            <mat-icon>add</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="currencies-list">
+            <div *ngFor="let currency of currencies" class="currency-item">
+              <div class="currency-info">
+                <div class="currency-code">
+                  <strong>{{ currency.code }}</strong>
+                  <span class="currency-name">{{ currency.name }} ({{ currency.symbol }})</span>
+                </div>
+                <mat-chip *ngIf="currency.isBase" color="primary">Base Currency</mat-chip>
+              </div>
+              <div class="currency-actions">
+                <button mat-icon-button *ngIf="!currency.isBase" (click)="setBaseCurrency(currency)" matTooltip="Set as Base">
+                  <mat-icon>star_border</mat-icon>
+                </button>
+                <mat-slide-toggle [checked]="currency.isActive" (change)="toggleCurrency(currency)"></mat-slide-toggle>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Exchange Rate Settings -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>trending_up</mat-icon>
+            <mat-card-title>Exchange Rate Settings</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="form">
+            <mat-form-field appearance="outline">
+              <mat-label>Exchange Rate Source</mat-label>
+              <mat-select formControlName="exchangeRateSource" required>
+                <mat-option *ngFor="let source of exchangeRateSources" [value]="source.value">
+                  {{ source.label }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="form.get('exchangeRateSource')?.hasError('required')">
+                Exchange rate source is required
+              </mat-error>
+            </mat-form-field>
+
+            <div class="checkbox-group">
+              <mat-checkbox formControlName="autoUpdateRates">Auto Update Exchange Rates</mat-checkbox>
+            </div>
+
+            <mat-form-field appearance="outline" *ngIf="form.get('autoUpdateRates')?.value">
+              <mat-label>Update Frequency</mat-label>
+              <mat-select formControlName="updateFrequency">
+                <mat-option value="daily">Daily</mat-option>
+                <mat-option value="weekly">Weekly</mat-option>
+                <mat-option value="monthly">Monthly</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <div class="form-actions">
+              <button mat-raised-button type="button" (click)="updateRatesFromAPI()" [disabled]="loading">
+                <mat-icon>refresh</mat-icon>
+                Update Rates from API
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Exchange Rates -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>swap_horiz</mat-icon>
+            <mat-card-title>Exchange Rates</mat-card-title>
+          </div>
+          <button mat-icon-button (click)="addExchangeRate()" matTooltip="Add Exchange Rate">
+            <mat-icon>add</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="exchange-rates-table">
+            <table mat-table [dataSource]="exchangeRates" class="mat-elevation-z2">
+              <ng-container matColumnDef="fromCurrency">
+                <th mat-header-cell *matHeaderCellDef>From</th>
+                <td mat-cell *matCellDef="let rate">{{ rate.fromCurrency }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="toCurrency">
+                <th mat-header-cell *matHeaderCellDef>To</th>
+                <td mat-cell *matCellDef="let rate">{{ rate.toCurrency }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="rate">
+                <th mat-header-cell *matHeaderCellDef>Rate</th>
+                <td mat-cell *matCellDef="let rate">{{ rate.rate | number:'1.4-4' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <td mat-cell *matCellDef="let rate">{{ rate.date | date:'shortDate' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="source">
+                <th mat-header-cell *matHeaderCellDef>Source</th>
+                <td mat-cell *matCellDef="let rate">
+                  <mat-chip [color]="rate.source === 'api' ? 'primary' : 'accent'">
+                    {{ rate.source | titlecase }}
+                  </mat-chip>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let rate">
+                  <button mat-icon-button (click)="editExchangeRate(rate)" matTooltip="Edit">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="deleteExchangeRate(rate)" matTooltip="Delete" color="warn">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="['fromCurrency', 'toCurrency', 'rate', 'date', 'source', 'actions']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['fromCurrency', 'toCurrency', 'rate', 'date', 'source', 'actions']"></tr>
+            </table>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- FX Gain/Loss -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>show_chart</mat-icon>
+            <mat-card-title>FX Gain/Loss Tracking</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="checkbox-group">
+            <mat-checkbox formControlName="trackFxGainLoss">
+              Track Foreign Exchange Gain/Loss
+            </mat-checkbox>
+          </div>
+          <div class="form" *ngIf="form.get('trackFxGainLoss')?.value">
+            <mat-form-field appearance="outline">
+              <mat-label>FX Gain/Loss Account</mat-label>
+              <input matInput formControlName="fxGainLossAccount" placeholder="Account code or name" />
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Display Options -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>visibility</mat-icon>
+            <mat-card-title>Display Options</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="form">
+            <mat-form-field appearance="outline">
+              <mat-label>Currency Display Format</mat-label>
+              <mat-select formControlName="currencyDisplayFormat">
+                <mat-option value="symbol">Symbol Only (e.g., $)</mat-option>
+                <mat-option value="code">Code Only (e.g., USD)</mat-option>
+                <mat-option value="both">Symbol + Code (e.g., $ USD)</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Currency Rounding (Decimal Places)</mat-label>
+              <input matInput type="number" formControlName="currencyRounding" required min="0" max="4" />
+              <mat-error *ngIf="form.get('currencyRounding')?.hasError('required')">
+                Currency rounding is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Rounding Method</mat-label>
+              <mat-select formControlName="roundingMethod">
+                <mat-option value="standard">Standard Rounding</mat-option>
+                <mat-option value="up">Round Up</mat-option>
+                <mat-option value="down">Round Down</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="checkbox-group">
+            <mat-checkbox formControlName="showCurrencyOnInvoices">Show Currency on Invoices</mat-checkbox>
+            <mat-checkbox formControlName="showExchangeRateOnInvoices">Show Exchange Rate on Invoices</mat-checkbox>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Actions -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-actions align="end">
+          <button mat-raised-button color="primary" type="submit" [disabled]="saving || loading">
+            <mat-progress-spinner
+              *ngIf="saving"
+              diameter="20"
+              mode="indeterminate"
+            ></mat-progress-spinner>
+            <span *ngIf="!saving">Save Changes</span>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </section>
+  </form>
+</section>
+

@@ -6,6 +6,7 @@ export interface Organization {
   planType: PlanType;
   status: 'active' | 'inactive';
   currency: string;
+  baseCurrency?: string;
   storageQuotaMb: number;
   vatNumber?: string;
   address?: string;

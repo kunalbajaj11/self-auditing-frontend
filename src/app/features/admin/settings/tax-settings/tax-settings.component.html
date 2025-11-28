@@ -1,0 +1,257 @@
+<section class="settings">
+  <header class="header">
+    <div class="header-content">
+      <h1>Tax Settings</h1>
+      <p>Configure VAT rates, tax registration, and tax calculation methods for your organization.</p>
+    </div>
+  </header>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <!-- Tax Registration -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>assignment_ind</mat-icon>
+            <mat-card-title>Tax Registration</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="form">
+            <mat-form-field appearance="outline">
+              <mat-label>VAT Number (TRN)</mat-label>
+              <input matInput formControlName="vatNumber" placeholder="123456789012345" />
+              <mat-hint>15-digit UAE TRN</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tax Registration Number</mat-label>
+              <input matInput formControlName="taxRegistrationNumber" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Registration Date</mat-label>
+              <input matInput [matDatepicker]="regDatePicker" formControlName="taxRegistrationDate" />
+              <mat-datepicker-toggle matIconSuffix [for]="regDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #regDatePicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tax Authority</mat-label>
+              <input matInput formControlName="taxAuthority" />
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Tax Calculation -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>calculate</mat-icon>
+            <mat-card-title>Tax Calculation</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="form">
+            <mat-form-field appearance="outline">
+              <mat-label>Tax Calculation Method</mat-label>
+              <mat-select formControlName="taxCalculationMethod" required>
+                <mat-option value="inclusive">Tax Inclusive (Price includes tax)</mat-option>
+                <mat-option value="exclusive">Tax Exclusive (Tax added to price)</mat-option>
+              </mat-select>
+              <mat-error *ngIf="form.get('taxCalculationMethod')?.hasError('required')">
+                Tax calculation method is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Default Tax Rate (%)</mat-label>
+              <input matInput type="number" formControlName="defaultTaxRate" required min="0" max="100" step="0.01" />
+              <mat-error *ngIf="form.get('defaultTaxRate')?.hasError('required')">
+                Default tax rate is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Rounding Method</mat-label>
+              <mat-select formControlName="roundingMethod">
+                <mat-option value="standard">Standard Rounding</mat-option>
+                <mat-option value="up">Round Up</mat-option>
+                <mat-option value="down">Round Down</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Default Tax Code</mat-label>
+              <input matInput formControlName="defaultTaxCode" placeholder="e.g., VAT5" />
+            </mat-form-field>
+          </div>
+
+          <div class="checkbox-group">
+            <mat-checkbox formControlName="calculateTaxOnShipping">Calculate Tax on Shipping</mat-checkbox>
+            <mat-checkbox formControlName="calculateTaxOnDiscounts">Calculate Tax on Discounts</mat-checkbox>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Tax Rates Management -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>percent</mat-icon>
+            <mat-card-title>Tax Rates</mat-card-title>
+          </div>
+          <button mat-icon-button (click)="addTaxRate()" matTooltip="Add Tax Rate">
+            <mat-icon>add</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="tax-rates-table">
+            <table mat-table [dataSource]="taxRates" class="mat-elevation-z2">
+              <ng-container matColumnDef="code">
+                <th mat-header-cell *matHeaderCellDef>Code</th>
+                <td mat-cell *matCellDef="let rate">{{ rate.code }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let rate">{{ rate.name }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="rate">
+                <th mat-header-cell *matHeaderCellDef>Rate</th>
+                <td mat-cell *matCellDef="let rate">{{ rate.rate }}%</td>
+              </ng-container>
+
+              <ng-container matColumnDef="type">
+                <th mat-header-cell *matHeaderCellDef>Type</th>
+                <td mat-cell *matCellDef="let rate">
+                  <mat-chip [color]="rate.type === 'standard' ? 'primary' : 'accent'">
+                    {{ rate.type | titlecase }}
+                  </mat-chip>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let rate">
+                  <mat-slide-toggle [checked]="rate.isActive" (change)="toggleTaxRate(rate)"></mat-slide-toggle>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let rate">
+                  <button mat-icon-button (click)="editTaxRate(rate)" matTooltip="Edit">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="deleteTaxRate(rate)" matTooltip="Delete" color="warn">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="['code', 'name', 'rate', 'type', 'status', 'actions']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['code', 'name', 'rate', 'type', 'status', 'actions']"></tr>
+            </table>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Tax Reporting -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>assessment</mat-icon>
+            <mat-card-title>Tax Reporting</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="form">
+            <mat-form-field appearance="outline">
+              <mat-label>Tax Reporting Period</mat-label>
+              <mat-select formControlName="taxReportingPeriod">
+                <mat-option value="monthly">Monthly</mat-option>
+                <mat-option value="quarterly">Quarterly</mat-option>
+                <mat-option value="annually">Annually</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tax Year End</mat-label>
+              <input matInput formControlName="taxYearEnd" placeholder="MM-DD" />
+              <mat-hint>Format: MM-DD (e.g., 12-31)</mat-hint>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Reverse Charge -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>swap_horiz</mat-icon>
+            <mat-card-title>Reverse Charge</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="checkbox-group">
+            <mat-checkbox formControlName="enableReverseCharge">
+              Enable Reverse Charge Mechanism
+            </mat-checkbox>
+          </div>
+          <div class="form" *ngIf="form.get('enableReverseCharge')?.value">
+            <mat-form-field appearance="outline">
+              <mat-label>Reverse Charge Rate (%)</mat-label>
+              <input matInput type="number" formControlName="reverseChargeRate" min="0" max="100" step="0.01" />
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Display Options -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>visibility</mat-icon>
+            <mat-card-title>Display Options</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="checkbox-group">
+            <mat-checkbox formControlName="showTaxOnInvoices">Show Tax on Invoices</mat-checkbox>
+            <mat-checkbox formControlName="showTaxBreakdown">Show Tax Breakdown</mat-checkbox>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Actions -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-actions align="end">
+          <button mat-raised-button color="primary" type="submit" [disabled]="saving || loading">
+            <mat-progress-spinner
+              *ngIf="saving"
+              diameter="20"
+              mode="indeterminate"
+            ></mat-progress-spinner>
+            <span *ngIf="!saving">Save Changes</span>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </section>
+  </form>
+</section>
+

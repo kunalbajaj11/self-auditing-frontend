@@ -17,6 +17,10 @@ import { AdminSalesInvoicesComponent } from './sales-invoices/admin-sales-invoic
 import { AdminCreditNotesComponent } from './credit-notes/admin-credit-notes.component';
 import { AdminVendorsComponent } from './vendors/admin-vendors.component';
 import { AdminChartOfAccountsComponent } from './chart-of-accounts/admin-chart-of-accounts.component';
+import { InvoiceTemplateComponent } from './settings/invoice-template/invoice-template.component';
+import { TaxSettingsComponent } from './settings/tax-settings/tax-settings.component';
+import { CurrencySettingsComponent } from './settings/currency-settings/currency-settings.component';
+import { NumberingSequencesComponent } from './settings/numbering-sequences/numbering-sequences.component';
 
 const routes: Routes = [
   {
@@ -172,22 +176,22 @@ const routes: Routes = [
       },
       {
         path: 'settings/invoice-template',
-        component: AdminCompanyComponent, // Placeholder - will need to create InvoiceTemplateComponent
+        component: InvoiceTemplateComponent,
         data: { shell: { title: 'Invoice Template Settings' } },
       },
       {
         path: 'settings/tax',
-        component: AdminCompanyComponent, // Placeholder - will need to create TaxSettingsComponent
+        component: TaxSettingsComponent,
         data: { shell: { title: 'Tax Settings' } },
       },
       {
         path: 'settings/currency',
-        component: AdminCompanyComponent, // Placeholder - will need to create CurrencySettingsComponent
+        component: CurrencySettingsComponent,
         data: { shell: { title: 'Currency & Exchange Rates' } },
       },
       {
         path: 'settings/numbering',
-        component: AdminCompanyComponent, // Placeholder - will need to create NumberingSequencesComponent
+        component: NumberingSequencesComponent,
         data: { shell: { title: 'Numbering Sequences' } },
       },
       {

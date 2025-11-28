@@ -31,6 +31,12 @@ import { AdminVendorsComponent } from './vendors/admin-vendors.component';
 import { VendorFormDialogComponent } from './vendors/vendor-form-dialog.component';
 import { AdminChartOfAccountsComponent } from './chart-of-accounts/admin-chart-of-accounts.component';
 import { ChartOfAccountFormDialogComponent } from './chart-of-accounts/chart-of-account-form-dialog.component';
+import { InvoiceTemplateComponent } from './settings/invoice-template/invoice-template.component';
+import { TaxSettingsComponent } from './settings/tax-settings/tax-settings.component';
+import { TaxRateFormDialogComponent } from './settings/tax-settings/tax-rate-form-dialog.component';
+import { CurrencySettingsComponent } from './settings/currency-settings/currency-settings.component';
+import { ExchangeRateFormDialogComponent } from './settings/currency-settings/exchange-rate-form-dialog.component';
+import { NumberingSequencesComponent } from './settings/numbering-sequences/numbering-sequences.component';
 
 @NgModule({
   declarations: [
@@ -64,6 +70,12 @@ import { ChartOfAccountFormDialogComponent } from './chart-of-accounts/chart-of-
     VendorFormDialogComponent,
     AdminChartOfAccountsComponent,
     ChartOfAccountFormDialogComponent,
+    InvoiceTemplateComponent,
+    TaxSettingsComponent,
+    TaxRateFormDialogComponent,
+    CurrencySettingsComponent,
+    ExchangeRateFormDialogComponent,
+    NumberingSequencesComponent,
   ],
   imports: [SharedModule, AdminRoutingModule],
 })

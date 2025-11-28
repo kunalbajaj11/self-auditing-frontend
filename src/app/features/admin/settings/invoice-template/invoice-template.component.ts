@@ -1,0 +1,203 @@
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, Validators } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { OrganizationService } from '../../../../core/services/organization.service';
+import { SettingsService, InvoiceTemplateSettings } from '../../../../core/services/settings.service';
+
+@Component({
+  selector: 'app-invoice-template',
+  templateUrl: './invoice-template.component.html',
+  styleUrls: ['./invoice-template.component.scss'],
+})
+export class InvoiceTemplateComponent implements OnInit {
+  loading = false;
+  saving = false;
+
+  readonly form;
+  readonly paymentTermOptions = [
+    { value: 'Due on receipt', label: 'Due on receipt' },
+    { value: 'Net 7', label: 'Net 7' },
+    { value: 'Net 15', label: 'Net 15' },
+    { value: 'Net 30', label: 'Net 30' },
+    { value: 'Net 45', label: 'Net 45' },
+    { value: 'Net 60', label: 'Net 60' },
+    { value: 'Custom', label: 'Custom' },
+  ];
+
+  readonly colorSchemes = [
+    { value: 'blue', label: 'Blue', color: '#1976d2' },
+    { value: 'green', label: 'Green', color: '#2e7d32' },
+    { value: 'purple', label: 'Purple', color: '#7b1fa2' },
+    { value: 'orange', label: 'Orange', color: '#f57c00' },
+    { value: 'red', label: 'Red', color: '#d32f2f' },
+    { value: 'custom', label: 'Custom', color: '#000000' },
+  ];
+
+  constructor(
+    private readonly fb: FormBuilder,
+    private readonly snackBar: MatSnackBar,
+    private readonly organizationService: OrganizationService,
+    private readonly settingsService: SettingsService,
+  ) {
+    this.form = this.fb.group({
+      // Branding
+      logoUrl: [''],
+      headerText: [''],
+      colorScheme: ['blue'],
+      customColor: ['#1976d2'],
+      
+      // Content
+      showCompanyDetails: [true],
+      showVatDetails: [true],
+      showPaymentTerms: [true],
+      showPaymentMethods: [true],
+      showBankDetails: [false],
+      showTermsAndConditions: [true],
+      
+      // Defaults
+      defaultPaymentTerms: ['Net 30'],
+      customPaymentTerms: [''],
+      defaultNotes: [''],
+      termsAndConditions: [''],
+      
+      // Layout
+      invoiceTitle: ['TAX INVOICE'],
+      showItemDescription: [true],
+      showItemQuantity: [true],
+      showItemUnitPrice: [true],
+      showItemTotal: [true],
+      
+      // Footer
+      footerText: [''],
+      showFooter: [true],
+      
+      // Email
+      emailSubject: ['Invoice {{invoiceNumber}} from {{companyName}}'],
+      emailMessage: ['Please find attached invoice {{invoiceNumber}} for {{totalAmount}} {{currency}}.'],
+    });
+  }
+
+  ngOnInit(): void {
+    this.loadSettings();
+  }
+
+  private loadSettings(): void {
+    this.loading = true;
+    this.settingsService.getInvoiceTemplate().subscribe({
+      next: (settings) => {
+        this.form.patchValue({
+          logoUrl: settings.invoiceLogoUrl ?? '',
+          headerText: settings.invoiceHeaderText ?? '',
+          colorScheme: settings.invoiceColorScheme ?? 'blue',
+          customColor: settings.invoiceCustomColor ?? '#1976d2',
+          invoiceTitle: settings.invoiceTitle ?? 'TAX INVOICE',
+          showCompanyDetails: settings.invoiceShowCompanyDetails ?? true,
+          showVatDetails: settings.invoiceShowVatDetails ?? true,
+          showPaymentTerms: settings.invoiceShowPaymentTerms ?? true,
+          showPaymentMethods: settings.invoiceShowPaymentMethods ?? true,
+          showBankDetails: settings.invoiceShowBankDetails ?? false,
+          showTermsAndConditions: settings.invoiceShowTermsConditions ?? true,
+          defaultPaymentTerms: settings.invoiceDefaultPaymentTerms ?? 'Net 30',
+          customPaymentTerms: settings.invoiceCustomPaymentTerms ?? '',
+          defaultNotes: settings.invoiceDefaultNotes ?? '',
+          termsAndConditions: settings.invoiceTermsConditions ?? '',
+          footerText: settings.invoiceFooterText ?? '',
+          showFooter: settings.invoiceShowFooter ?? true,
+          showItemDescription: settings.invoiceShowItemDescription ?? true,
+          showItemQuantity: settings.invoiceShowItemQuantity ?? true,
+          showItemUnitPrice: settings.invoiceShowItemUnitPrice ?? true,
+          showItemTotal: settings.invoiceShowItemTotal ?? true,
+          emailSubject: settings.invoiceEmailSubject ?? 'Invoice {{invoiceNumber}} from {{companyName}}',
+          emailMessage: settings.invoiceEmailMessage ?? 'Please find attached invoice {{invoiceNumber}} for {{totalAmount}} {{currency}}.',
+        });
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      },
+    });
+  }
+
+  save(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    this.saving = true;
+    const payload: Partial<InvoiceTemplateSettings> = {
+      invoiceLogoUrl: this.form.get('logoUrl')?.value || null,
+      invoiceHeaderText: this.form.get('headerText')?.value || null,
+      invoiceColorScheme: this.form.get('colorScheme')?.value,
+      invoiceCustomColor: this.showCustomColor ? this.form.get('customColor')?.value : null,
+      invoiceTitle: this.form.get('invoiceTitle')?.value,
+      invoiceShowCompanyDetails: this.form.get('showCompanyDetails')?.value,
+      invoiceShowVatDetails: this.form.get('showVatDetails')?.value,
+      invoiceShowPaymentTerms: this.form.get('showPaymentTerms')?.value,
+      invoiceShowPaymentMethods: this.form.get('showPaymentMethods')?.value,
+      invoiceShowBankDetails: this.form.get('showBankDetails')?.value,
+      invoiceShowTermsConditions: this.form.get('showTermsAndConditions')?.value,
+      invoiceDefaultPaymentTerms: this.form.get('defaultPaymentTerms')?.value,
+      invoiceCustomPaymentTerms: this.showCustomPaymentTerms ? this.form.get('customPaymentTerms')?.value : null,
+      invoiceDefaultNotes: this.form.get('defaultNotes')?.value || null,
+      invoiceTermsConditions: this.form.get('termsAndConditions')?.value || null,
+      invoiceFooterText: this.form.get('footerText')?.value || null,
+      invoiceShowFooter: this.form.get('showFooter')?.value,
+      invoiceShowItemDescription: this.form.get('showItemDescription')?.value,
+      invoiceShowItemQuantity: this.form.get('showItemQuantity')?.value,
+      invoiceShowItemUnitPrice: this.form.get('showItemUnitPrice')?.value,
+      invoiceShowItemTotal: this.form.get('showItemTotal')?.value,
+      invoiceEmailSubject: this.form.get('emailSubject')?.value,
+      invoiceEmailMessage: this.form.get('emailMessage')?.value,
+    };
+
+    this.settingsService.updateInvoiceTemplate(payload).subscribe({
+      next: () => {
+        this.saving = false;
+        this.snackBar.open('Invoice template settings saved successfully', 'Close', {
+          duration: 3000,
+        });
+      },
+      error: () => {
+        this.saving = false;
+        this.snackBar.open('Failed to save invoice template settings', 'Close', {
+          duration: 4000,
+          panelClass: ['snack-error'],
+        });
+      },
+    });
+  }
+
+  preview(): void {
+    // Open preview in new window or modal
+    this.snackBar.open('Preview will show a sample invoice with current settings', 'Close', {
+      duration: 3000,
+    });
+  }
+
+  uploadLogo(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      // For now, we'll just store the file name/URL
+      // In production, you'd upload to a file storage service
+      const reader = new FileReader();
+      reader.onload = () => {
+        const logoUrl = reader.result as string;
+        this.form.patchValue({ logoUrl });
+        this.snackBar.open('Logo loaded. Click Save to apply.', 'Close', {
+          duration: 3000,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  get showCustomPaymentTerms(): boolean {
+    return this.form.get('defaultPaymentTerms')?.value === 'Custom';
+  }
+
+  get showCustomColor(): boolean {
+    return this.form.get('colorScheme')?.value === 'custom';
+  }
+}
+

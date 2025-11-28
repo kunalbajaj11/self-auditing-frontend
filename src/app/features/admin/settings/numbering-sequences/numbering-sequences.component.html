@@ -1,0 +1,183 @@
+<section class="settings">
+  <header class="header">
+    <div class="header-content">
+      <h1>Numbering Sequences</h1>
+      <p>Configure automatic numbering formats for invoices, credit notes, quotes, and other documents.</p>
+    </div>
+  </header>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <!-- Global Settings -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>settings</mat-icon>
+            <mat-card-title>Global Settings</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="checkbox-group">
+            <mat-checkbox formControlName="useSequentialNumbering">
+              Use Sequential Numbering
+            </mat-checkbox>
+            <mat-checkbox formControlName="allowManualNumbering">
+              Allow Manual Number Entry
+            </mat-checkbox>
+            <mat-checkbox formControlName="warnOnDuplicateNumbers">
+              Warn on Duplicate Numbers
+            </mat-checkbox>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Numbering Sequences -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>format_list_numbered</mat-icon>
+            <mat-card-title>Numbering Sequences</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="sequences-list">
+            <div *ngFor="let sequence of sequences" class="sequence-item">
+              <div class="sequence-header">
+                <div class="sequence-info">
+                  <mat-icon>{{ getSequenceIcon(sequence.type) }}</mat-icon>
+                  <div>
+                    <h3>{{ getSequenceLabel(sequence.type) }}</h3>
+                    <span class="sequence-preview">{{ previewFormat(sequence) }}</span>
+                  </div>
+                </div>
+                <div class="sequence-status">
+                  <mat-slide-toggle [checked]="sequence.isActive" (change)="toggleSequence(sequence)"></mat-slide-toggle>
+                </div>
+              </div>
+
+              <div class="sequence-details" *ngIf="sequence.isActive">
+                <div class="form-row">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Prefix</mat-label>
+                    <input matInput [(ngModel)]="sequence.prefix" [ngModelOptions]="{standalone: true}" (blur)="updateFormat(sequence)" />
+                    <mat-hint>e.g., INV, CN</mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Suffix</mat-label>
+                    <input matInput [(ngModel)]="sequence.suffix" [ngModelOptions]="{standalone: true}" (blur)="updateFormat(sequence)" />
+                    <mat-hint>Optional suffix</mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Number Length</mat-label>
+                    <input matInput type="number" [(ngModel)]="sequence.numberLength" [ngModelOptions]="{standalone: true}" min="3" max="10" />
+                    <mat-hint>Padding zeros</mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Next Number</mat-label>
+                    <input matInput type="number" [(ngModel)]="sequence.nextNumber" [ngModelOptions]="{standalone: true}" min="1" />
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Reset Period</mat-label>
+                    <mat-select [(ngModel)]="sequence.resetPeriod" [ngModelOptions]="{standalone: true}">
+                      <mat-option *ngFor="let period of resetPeriods" [value]="period.value">
+                        {{ period.label }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full">
+                    <mat-label>Format</mat-label>
+                    <input matInput [(ngModel)]="sequence.format" [ngModelOptions]="{standalone: true}" />
+                    <mat-hint>Use &#123;YYYY&#125;, &#123;MMYY&#125;, &#123;YYYYMMDD&#125;, &#123;NNNNN&#125; as placeholders</mat-hint>
+                  </mat-form-field>
+                </div>
+
+                <div class="sequence-actions">
+                  <button mat-button (click)="resetSequence(sequence)" color="warn">
+                    <mat-icon>refresh</mat-icon>
+                    Reset to 1
+                  </button>
+                  <button mat-button (click)="editSequence(sequence)">
+                    <mat-icon>edit</mat-icon>
+                    Advanced Settings
+                  </button>
+                  <button mat-raised-button color="primary" (click)="saveSequence(sequence)">
+                    Save
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Format Examples -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>help_outline</mat-icon>
+            <mat-card-title>Format Examples</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="format-examples">
+            <div class="example-item">
+              <code>INV-&#123;YYYY&#125;-&#123;NNNNN&#125;</code>
+              <span>→ INV-2024-00001</span>
+            </div>
+            <div class="example-item">
+              <code>CN-&#123;MMYY&#125;-&#123;NNNN&#125;</code>
+              <span>→ CN-1124-0001</span>
+            </div>
+            <div class="example-item">
+              <code>QTE-&#123;YYYYMMDD&#125;-&#123;NNN&#125;</code>
+              <span>→ QTE-20241128-001</span>
+            </div>
+            <div class="example-item">
+              <code>&#123;NNNNN&#125;</code>
+              <span>→ 00001</span>
+            </div>
+          </div>
+          <div class="format-help">
+            <p><strong>Placeholders:</strong></p>
+            <ul>
+              <li><code>&#123;YYYY&#125;</code> - Full year (e.g., 2024)</li>
+              <li><code>&#123;MMYY&#125;</code> - Month and year (e.g., 1124)</li>
+              <li><code>&#123;YYYYMMDD&#125;</code> - Full date (e.g., 20241128)</li>
+              <li><code>&#123;NNNNN&#125;</code> - Sequential number with padding (e.g., 00001)</li>
+              <li><code>&#123;NNNN&#125;</code> - 4-digit number (e.g., 0001)</li>
+              <li><code>&#123;NNN&#125;</code> - 3-digit number (e.g., 001)</li>
+            </ul>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Actions -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-actions align="end">
+          <button mat-raised-button color="primary" type="submit" [disabled]="saving || loading">
+            <mat-progress-spinner
+              *ngIf="saving"
+              diameter="20"
+              mode="indeterminate"
+            ></mat-progress-spinner>
+            <span *ngIf="!saving">Save All Changes</span>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </section>
+  </form>
+</section>
+

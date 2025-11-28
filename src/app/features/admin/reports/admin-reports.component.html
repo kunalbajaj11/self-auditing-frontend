@@ -2,10 +2,10 @@
   <header class="header">
     <div class="header-content">
       <h1>Reports & Analytics</h1>
-      <p>Generate VAT-ready exports, accrual reconciliations, and audit logs.</p>
+      <p>Generate comprehensive reports across expenses, finances, VAT, and operations</p>
     </div>
     <div class="header-actions">
-      <button mat-stroked-button (click)="currentView = 'generate'" [class.active]="currentView === 'generate'">
+      <button mat-stroked-button (click)="currentView = 'generate'; showReportConfig = false" [class.active]="currentView === 'generate' && !showReportConfig">
         <mat-icon>assessment</mat-icon>
         Generate
       </button>
@@ -24,32 +24,116 @@
     </div>
   </header>
 
-  <!-- Quick Report Actions -->
-  <section class="quick-reports-section" *ngIf="currentView === 'generate'">
-    <h3 class="section-title">Quick Reports</h3>
-    <mat-card class="quick-actions-card">
-      <mat-card-content>
-      <div class="quick-buttons">
-        <button mat-stroked-button (click)="showQuickReport('lastMonth')">
-          <mat-icon>calendar_month</mat-icon>
-          Last Month Summary
+  <!-- Category Navigation & Report Grid View -->
+  <div class="reports-layout" *ngIf="currentView === 'generate' && !showReportConfig">
+    <!-- Category Sidebar -->
+    <aside class="category-sidebar">
+      <h3 class="sidebar-title">Report Categories</h3>
+      <nav class="category-nav">
+        <button 
+          *ngFor="let category of reportCategories"
+          class="category-button"
+          [class.active]="selectedCategory === category.id"
+          (click)="selectCategory(category.id)"
+          [style.border-left-color]="category.color">
+          <mat-icon [style.color]="category.color">{{ category.icon }}</mat-icon>
+          <div class="category-info">
+            <span class="category-label">{{ category.label }}</span>
+            <span class="category-count">{{ reportTypesByCategory[category.id]?.length || 0 }} reports</span>
+          </div>
         </button>
-        <button mat-stroked-button (click)="showQuickReport('vatQuarter')">
-          <mat-icon>receipt</mat-icon>
-          VAT This Quarter
-        </button>
-        <button mat-stroked-button (click)="showQuickReport('ytd')">
-          <mat-icon>trending_up</mat-icon>
-          Year to Date
-        </button>
-      </div>
-      </mat-card-content>
-    </mat-card>
-  </section>
+      </nav>
+    </aside>
 
-  <!-- Generate Report Section -->
-  <section class="generate-section" *ngIf="currentView === 'generate'">
-    <h3 class="section-title">Generate Custom Report</h3>
+    <!-- Report Cards Grid -->
+    <main class="reports-main">
+      <div class="category-header">
+        <div>
+          <h2>
+            <mat-icon [style.color]="getCategoryInfo('color')">
+              {{ getCategoryInfo('icon') }}
+            </mat-icon>
+            {{ getCategoryInfo('label') }} Reports
+          </h2>
+          <p>{{ getCategoryInfo('description') }}</p>
+        </div>
+      </div>
+
+      <div class="report-cards-grid">
+        <mat-card 
+          *ngFor="let report of reportTypesByCategory[selectedCategory]"
+          class="report-card"
+          (click)="selectReportType(report.value)"
+          [style.border-top-color]="report.color || getCategoryInfo('color')">
+          <mat-card-header>
+            <div class="report-card-icon" [style.background-color]="(report.color || getCategoryInfo('color')) + '15'">
+              <mat-icon [style.color]="report.color || getCategoryInfo('color')">
+                {{ report.icon }}
+              </mat-icon>
+            </div>
+            <mat-card-title>{{ report.label }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="report-description">{{ report.description }}</p>
+            <div class="report-actions">
+              <button mat-button color="primary" (click)="selectReportType(report.value); $event.stopPropagation()">
+                <mat-icon>play_arrow</mat-icon>
+                Generate Report
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-category" *ngIf="!reportTypesByCategory[selectedCategory] || reportTypesByCategory[selectedCategory].length === 0">
+        <mat-icon>description</mat-icon>
+        <p>No reports available in this category</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Report Configuration View (when a report type is selected) -->
+  <div class="report-config-view" *ngIf="currentView === 'generate' && showReportConfig && selectedReportType">
+    <div class="config-header">
+      <button mat-icon-button (click)="backToCategoryView()" class="back-button">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="config-header-info">
+        <h2>
+          <mat-icon>{{ getSelectedReportInfo('icon') }}</mat-icon>
+          {{ getSelectedReportInfo('label') }}
+        </h2>
+        <p>{{ getSelectedReportInfo('description') }}</p>
+      </div>
+    </div>
+
+    <!-- Quick Report Actions -->
+    <section class="quick-reports-section">
+      <h3 class="section-title">Quick Reports</h3>
+      <mat-card class="quick-actions-card">
+        <mat-card-content>
+        <div class="quick-buttons">
+          <button mat-stroked-button (click)="showQuickReport('lastMonth')">
+            <mat-icon>calendar_month</mat-icon>
+            Last Month Summary
+          </button>
+          <button mat-stroked-button (click)="showQuickReport('vatQuarter')">
+            <mat-icon>receipt</mat-icon>
+            VAT This Quarter
+          </button>
+          <button mat-stroked-button (click)="showQuickReport('ytd')">
+            <mat-icon>trending_up</mat-icon>
+            Year to Date
+          </button>
+        </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Generate Report Section -->
+    <section class="generate-section">
+      <h3 class="section-title">Report Configuration</h3>
     <mat-card class="generator-card" [formGroup]="form">
       <mat-card-header>
         <div class="card-title-with-icon">
@@ -238,6 +322,7 @@
         </div>
       </mat-card-content>
     </mat-card>
+    </section>
 
     <!-- Generated Report Preview -->
     <mat-card 
@@ -525,7 +610,7 @@
       </div>
       </mat-card-content>
     </mat-card>
-  </section>
+  </div>
 
   <!-- Material dialog template for row details -->
   <ng-template #detailsDialog let-data>

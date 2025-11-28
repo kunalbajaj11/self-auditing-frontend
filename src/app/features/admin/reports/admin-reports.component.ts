@@ -18,6 +18,61 @@ import { AuthUser } from '../../../core/models/user.model';
   styleUrls: ['./admin-reports.component.scss'],
 })
 export class AdminReportsComponent implements OnInit {
+  // Report categories with icons and colors (like Xero/Zoho)
+  readonly reportCategories = [
+    {
+      id: 'expenses',
+      label: 'Expenses',
+      icon: 'receipt_long',
+      color: '#1976d2',
+      description: 'Track and analyze expense data',
+    },
+    {
+      id: 'financial',
+      label: 'Financial',
+      icon: 'account_balance',
+      color: '#2e7d32',
+      description: 'Financial statements and balances',
+    },
+    {
+      id: 'vat',
+      label: 'VAT & Tax',
+      icon: 'gavel',
+      color: '#ed6c02',
+      description: 'VAT reports and tax compliance',
+    },
+    {
+      id: 'operations',
+      label: 'Operations',
+      icon: 'settings',
+      color: '#9c27b0',
+      description: 'Operational and audit reports',
+    },
+  ];
+
+  // Report types organized by category
+  readonly reportTypesByCategory: Record<string, Array<{ value: ReportType; label: string; icon: string; description: string; color?: string }>> = {
+    expenses: [
+      { value: 'expense_summary', label: 'Expense Summary', icon: 'summarize', description: 'Overview of expenses by category and period' },
+      { value: 'expense_detail', label: 'Expense Detail', icon: 'list_alt', description: 'Detailed line-by-line expense records' },
+      { value: 'employee_report', label: 'Employee Expenses', icon: 'people', description: 'Expenses grouped by employee' },
+      { value: 'vendor_report', label: 'Vendor Analysis', icon: 'store', description: 'Expenses by vendor and payment trends' },
+    ],
+    financial: [
+      { value: 'trial_balance', label: 'Trial Balance', icon: 'balance', description: 'Account balances and financial position' },
+      { value: 'bank_reconciliation', label: 'Bank Reconciliation', icon: 'sync_alt', description: 'Reconcile bank statements with expenses' },
+      { value: 'accrual_report', label: 'Accrual Report', icon: 'pending_actions', description: 'Pending and settled accruals' },
+    ],
+    vat: [
+      { value: 'vat_report', label: 'VAT Report', icon: 'receipt', description: 'VAT input, output, and payable calculations' },
+    ],
+    operations: [
+      { value: 'trend_report', label: 'Monthly Trends', icon: 'trending_up', description: 'Expense trends and patterns over time' },
+      { value: 'audit_trail', label: 'Audit Trail', icon: 'history', description: 'Complete audit log of all transactions' },
+      { value: 'attachments_report', label: 'Attachments Report', icon: 'attach_file', description: 'Report of all expense attachments' },
+    ],
+  };
+
   readonly reportTypes: { value: ReportType; label: string }[] = [
     { value: 'expense_summary', label: 'Expense Summary' },
     { value: 'expense_detail', label: 'Expense Detail' },
@@ -63,6 +118,11 @@ export class AdminReportsComponent implements OnInit {
   loadingFilters = false;
   showScheduleDialog = false;
   currentView: 'generate' | 'schedule' | 'history' | 'compare' = 'generate';
+  
+  // Category-based navigation
+  selectedCategory: string = 'expenses';
+  selectedReportType: ReportType | null = null;
+  showReportConfig = false;
 
   currentReportType: ReportType = 'expense_summary';
   comparisonMode = false;
@@ -135,25 +195,101 @@ export class AdminReportsComponent implements OnInit {
     });
   }
 
+  selectCategory(categoryId: string): void {
+    this.selectedCategory = categoryId;
+    this.selectedReportType = null;
+    this.showReportConfig = false;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { category: categoryId },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  selectReportType(reportType: ReportType): void {
+    this.selectedReportType = reportType;
+    this.showReportConfig = true;
+    this.form.patchValue({ type: reportType });
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { category: this.selectedCategory, report: reportType },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  backToCategoryView(): void {
+    this.selectedReportType = null;
+    this.showReportConfig = false;
+    this.generatedReport = null;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { category: this.selectedCategory },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  getSelectedReportInfo(property: 'icon' | 'label' | 'description'): string {
+    if (!this.selectedReportType || !this.selectedCategory) {
+      return '';
+    }
+    const reports = this.reportTypesByCategory[this.selectedCategory];
+    if (!reports) {
+      return '';
+    }
+    const report = reports.find(r => r.value === this.selectedReportType);
+    return report ? report[property] : '';
+  }
+
+  getCategoryInfo(property: 'icon' | 'label' | 'description' | 'color'): string {
+    if (!this.selectedCategory) {
+      return '';
+    }
+    const category = this.reportCategories.find(c => c.id === this.selectedCategory);
+    return category ? category[property] : '';
+  }
+
   ngOnInit(): void {
     this.loadFilterOptions();
     this.loadHistory();
 
-    // Check query params to set report type
+    // Check query params to set category and report type
     this.route.queryParams.subscribe((params) => {
+      if (params['category']) {
+        this.selectedCategory = params['category'];
+      }
+      if (params['report']) {
+        this.selectedReportType = params['report'] as ReportType;
+        this.showReportConfig = true;
+        this.form.patchValue({ type: params['report'] });
+      }
       if (params['type']) {
         const typeMap: Record<string, ReportType> = {
           'monthly': 'trend_report',
           'vat': 'vat_report',
           'category': 'expense_summary',
           'audit': 'expense_summary',
+          'expense': 'expense_summary',
+          'financial': 'trial_balance',
+          'sales': 'expense_summary',
+          'payments': 'expense_summary',
         };
+        // Map to category
+        const categoryMap: Record<string, string> = {
+          'expense': 'expenses',
+          'vat': 'vat',
+          'financial': 'financial',
+          'sales': 'expenses',
+          'payments': 'expenses',
+        };
+        if (categoryMap[params['type']]) {
+          this.selectedCategory = categoryMap[params['type']];
+        }
         const reportType = typeMap[params['type']] || 'expense_summary';
         this.currentReportType = reportType;
         this.form.patchValue({ type: reportType });
       }
       if (params['view']) {
-        this.currentView = params['view'] as 'generate' | 'schedule' | 'history';
+        this.currentView = params['view'] as 'generate' | 'schedule' | 'history' | 'compare';
       }
     });
   }

@@ -1,0 +1,195 @@
+<section class="settings">
+  <header class="header">
+    <div class="header-content">
+      <h1>Invoice Template Settings</h1>
+      <p>Customize the appearance, branding, and content of your sales invoices to match your business style.</p>
+    </div>
+  </header>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <!-- Branding Section -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>palette</mat-icon>
+            <mat-card-title>Branding & Appearance</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="form">
+            <div class="logo-upload-section full">
+              <label>Company Logo</label>
+              <div class="logo-upload">
+                <input type="file" accept="image/*" (change)="uploadLogo($event)" style="display: none" #logoInput>
+                <button mat-stroked-button type="button" (click)="logoInput.click()">
+                  <mat-icon>upload</mat-icon>
+                  Upload Logo
+                </button>
+                <span class="logo-hint">Recommended: 200x50px, PNG or JPG</span>
+              </div>
+              <mat-form-field appearance="outline" class="full">
+                <mat-label>Or enter Logo URL</mat-label>
+                <input matInput formControlName="logoUrl" placeholder="https://example.com/logo.png" />
+              </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Header Text</mat-label>
+              <input matInput formControlName="headerText" placeholder="Company Name or Custom Header" />
+              <mat-hint>Leave empty to use company name</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Color Scheme</mat-label>
+              <mat-select formControlName="colorScheme">
+                <mat-option *ngFor="let scheme of colorSchemes" [value]="scheme.value">
+                  <span class="color-option">
+                    <span class="color-dot" [style.background-color]="scheme.color"></span>
+                    {{ scheme.label }}
+                  </span>
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" *ngIf="showCustomColor">
+              <mat-label>Custom Color</mat-label>
+              <input matInput type="color" formControlName="customColor" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Invoice Title</mat-label>
+              <input matInput formControlName="invoiceTitle" placeholder="TAX INVOICE" />
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Content Display Options -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>view_module</mat-icon>
+            <mat-card-title>Content Display Options</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="checkbox-group">
+            <mat-checkbox formControlName="showCompanyDetails">Show Company Details</mat-checkbox>
+            <mat-checkbox formControlName="showVatDetails">Show VAT/Tax Details</mat-checkbox>
+            <mat-checkbox formControlName="showPaymentTerms">Show Payment Terms</mat-checkbox>
+            <mat-checkbox formControlName="showPaymentMethods">Show Payment Methods</mat-checkbox>
+            <mat-checkbox formControlName="showBankDetails">Show Bank Account Details</mat-checkbox>
+            <mat-checkbox formControlName="showTermsAndConditions">Show Terms & Conditions</mat-checkbox>
+          </div>
+
+          <div class="form">
+            <mat-form-field appearance="outline">
+              <mat-label>Default Payment Terms</mat-label>
+              <mat-select formControlName="defaultPaymentTerms">
+                <mat-option *ngFor="let term of paymentTermOptions" [value]="term.value">
+                  {{ term.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" *ngIf="showCustomPaymentTerms">
+              <mat-label>Custom Payment Terms</mat-label>
+              <input matInput formControlName="customPaymentTerms" placeholder="e.g., Payment due within 15 days" />
+            </mat-form-field>
+          </div>
+
+          <div class="item-display-options">
+            <h4>Invoice Line Items Display</h4>
+            <div class="checkbox-group">
+              <mat-checkbox formControlName="showItemDescription">Description</mat-checkbox>
+              <mat-checkbox formControlName="showItemQuantity">Quantity</mat-checkbox>
+              <mat-checkbox formControlName="showItemUnitPrice">Unit Price</mat-checkbox>
+              <mat-checkbox formControlName="showItemTotal">Line Total</mat-checkbox>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Default Content -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>text_fields</mat-icon>
+            <mat-card-title>Default Content</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="form">
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Default Notes</mat-label>
+              <textarea matInput rows="3" formControlName="defaultNotes" placeholder="Additional notes to appear on invoices"></textarea>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full" *ngIf="form.get('showTermsAndConditions')?.value">
+              <mat-label>Terms & Conditions</mat-label>
+              <textarea matInput rows="4" formControlName="termsAndConditions" placeholder="Standard terms and conditions"></textarea>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full" *ngIf="form.get('showFooter')?.value">
+              <mat-label>Footer Text</mat-label>
+              <textarea matInput rows="2" formControlName="footerText" placeholder="Footer text (e.g., contact information, website)"></textarea>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Email Settings -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>email</mat-icon>
+            <mat-card-title>Email Template</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="form">
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Email Subject</mat-label>
+              <input matInput formControlName="emailSubject" />
+              <mat-hint ngNonBindable>Use {{invoiceNumber}}, {{companyName}}, {{totalAmount}}, {{currency}} as variables</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Email Message</mat-label>
+              <textarea matInput rows="4" formControlName="emailMessage"></textarea>
+              <mat-hint ngNonBindable>Use {{invoiceNumber}}, {{totalAmount}}, {{currency}} as variables</mat-hint>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Actions -->
+    <section class="settings-section">
+      <mat-card class="settings-card">
+        <mat-card-actions align="end">
+          <button mat-button type="button" (click)="preview()">
+            <mat-icon>preview</mat-icon>
+            Preview Invoice
+          </button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="saving || loading">
+            <mat-progress-spinner
+              *ngIf="saving"
+              diameter="20"
+              mode="indeterminate"
+            ></mat-progress-spinner>
+            <span *ngIf="!saving">Save Changes</span>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </section>
+  </form>
+</section>
+

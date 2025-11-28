@@ -2,7 +2,10 @@ export type NotificationType =
   | 'accrual_reminder'
   | 'ocr_pending'
   | 'budget_alert'
-  | 'system';
+  | 'system'
+  | 'invoice_due_soon'
+  | 'invoice_overdue'
+  | 'expense_approval_pending';
 
 export type NotificationChannel = 'email' | 'inapp' | 'sms';
 
