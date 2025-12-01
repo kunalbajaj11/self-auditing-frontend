@@ -14,6 +14,7 @@ export interface LicenseKey {
   consumedByOrganizationId?: string | null;
   consumedByUserId?: string | null;
   notes?: string | null;
+  email?: string | null;
   createdAt: string;
   updatedAt: string;
 }

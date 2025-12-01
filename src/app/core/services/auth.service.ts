@@ -130,6 +130,19 @@ export class AuthService {
     return roleList.includes(current.role);
   }
 
+  forgotPassword(email: string): Observable<{ success: boolean }> {
+    return this.api.post<{ success: boolean }>('/auth/forgot-password', {
+      email,
+    });
+  }
+
+  resetPassword(token: string, password: string): Observable<{ success: boolean }> {
+    return this.api.post<{ success: boolean }>('/auth/reset-password', {
+      token,
+      password,
+    });
+  }
+
   private hydrateSession(response: LoginResponse) {
     this.tokenService.setTokens(response.tokens);
     this.currentUserSubject.next(response.user);

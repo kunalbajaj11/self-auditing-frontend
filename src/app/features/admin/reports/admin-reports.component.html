@@ -39,7 +39,7 @@
           <mat-icon [style.color]="category.color">{{ category.icon }}</mat-icon>
           <div class="category-info">
             <span class="category-label">{{ category.label }}</span>
-            <span class="category-count">{{ reportTypesByCategory[category.id]?.length || 0 }} reports</span>
+            <span class="category-count">{{ reportTypesByCategory[category.id].length || 0 }} reports</span>
           </div>
         </button>
       </nav>

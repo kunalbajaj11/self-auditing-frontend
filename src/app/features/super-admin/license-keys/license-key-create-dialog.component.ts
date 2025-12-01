@@ -32,6 +32,7 @@ export class LicenseKeyCreateDialogComponent {
       storageQuotaMb: [null as number | null],
       validityDays: [365, [Validators.required, Validators.min(1)]],
       notes: [''],
+      email: ['', [Validators.required, Validators.email]],
     });
   }
 
@@ -47,6 +48,7 @@ export class LicenseKeyCreateDialogComponent {
       storageQuotaMb: raw.storageQuotaMb ?? undefined,
       validityDays: raw.validityDays ?? undefined,
       notes: raw.notes ?? undefined,
+      email: raw.email ?? '',
     };
     this.loading = true;
     this.licenseKeysService.create(payload).subscribe({

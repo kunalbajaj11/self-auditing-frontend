@@ -20,7 +20,7 @@ import {
 export class LicenseKeyManagementComponent implements OnInit {
   loading = false;
   licenseKeys: LicenseKey[] = [];
-  displayedColumns = ['key', 'plan', 'status', 'expires', 'created', 'actions'];
+  displayedColumns = ['key', 'plan', 'status', 'email', 'expires', 'created', 'actions'];
 
   constructor(
     private readonly licenseKeysService: LicenseKeysService,

@@ -10,6 +10,7 @@ export interface CreateLicenseKeyPayload {
   storageQuotaMb?: number;
   notes?: string;
   validityDays?: number;
+  email: string;
 }
 
 export interface RenewLicenseKeyPayload {
