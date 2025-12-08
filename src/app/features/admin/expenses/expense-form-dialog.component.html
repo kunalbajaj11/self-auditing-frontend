@@ -69,7 +69,44 @@
 
   <mat-form-field appearance="outline" class="full">
     <mat-label>{{ form.get('type')?.value === 'credit' ? 'Customer' : 'Vendor' }}</mat-label>
-    <input matInput formControlName="vendorName" />
+    <input
+      type="text"
+      matInput
+      formControlName="vendorName"
+      [matAutocomplete]="vendorAuto"
+      placeholder="Search or type vendor name"
+    />
+    <mat-autocomplete
+      #vendorAuto="matAutocomplete"
+      [displayWith]="displayVendor"
+      (optionSelected)="onVendorSelected($event.option.value)"
+    >
+      <mat-option *ngFor="let vendor of filteredVendors$ | async" [value]="vendor">
+        <div class="vendor-option">
+          <span class="vendor-name">{{ vendor.name }}</span>
+          <span *ngIf="vendor.vendorTrn" class="vendor-trn">TRN: {{ vendor.vendorTrn }}</span>
+        </div>
+      </mat-option>
+      <mat-option *ngIf="(filteredVendors$ | async)?.length === 0 && form.get('vendorName')?.value" [value]="null">
+        <span class="no-vendor-found">No vendor found. Will create new entry.</span>
+      </mat-option>
+    </mat-autocomplete>
+    <button
+      *ngIf="selectedVendor"
+      matSuffix
+      mat-icon-button
+      (click)="clearVendorSelection()"
+      type="button"
+      matTooltip="Clear vendor selection"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+    <mat-hint *ngIf="selectedVendor">
+      Selected: {{ selectedVendor.name }}
+    </mat-hint>
+    <mat-hint *ngIf="!selectedVendor">
+      Start typing to search vendors from master, or type a new vendor name
+    </mat-hint>
   </mat-form-field>
 
   <mat-form-field appearance="outline" class="full">

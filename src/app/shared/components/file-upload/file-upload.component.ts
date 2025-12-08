@@ -92,18 +92,25 @@ export class FileUploadComponent {
         this.uploadedFiles.push(uploadResult);
         this.fileUploaded.emit(uploadResult);
 
-        // Process OCR if enabled
-        if (this.enableOcr && this.isImageFile(file)) {
+        // Process OCR if enabled and file type is supported (images or PDFs)
+        if (this.enableOcr && this.isOcrSupported(file)) {
           // Continue showing loader, just update message
           this.loadingMessage = 'Extracting data from document...';
           await this.processOcr(file);
           // Don't show "File uploaded" message if OCR is processing - OCR will show its own message
         } else {
-          // Only show success message if OCR is not enabled
+          // Only show success message if OCR is not enabled or file type not supported
           this.uploading = false;
-          this.snackBar.open('File uploaded successfully', 'Close', {
-            duration: 3000,
-          });
+          if (this.enableOcr && !this.isOcrSupported(file)) {
+            // OCR is enabled but file type not supported
+            this.snackBar.open('File uploaded. OCR is only supported for images and PDFs.', 'Close', {
+              duration: 4000,
+            });
+          } else {
+            this.snackBar.open('File uploaded successfully', 'Close', {
+              duration: 3000,
+            });
+          }
         }
       }
     } catch (error) {
@@ -143,6 +150,24 @@ export class FileUploadComponent {
 
   private isImageFile(file: File): boolean {
     return file.type.startsWith('image/');
+  }
+
+  /**
+   * Check if file type is supported for OCR processing
+   * Supports images (jpg, png, etc.) and PDFs
+   */
+  private isOcrSupported(file: File): boolean {
+    // Check if it's an image file
+    if (file.type.startsWith('image/')) {
+      return true;
+    }
+    
+    // Check if it's a PDF file
+    if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+      return true;
+    }
+    
+    return false;
   }
 
   removeFile(index: number): void {

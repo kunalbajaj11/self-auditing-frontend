@@ -215,20 +215,25 @@ export class AdminExpensesComponent implements OnInit {
   onFileUploaded(result: any): void {
     // Store attachment
     this.pendingAttachment = result;
+    console.log('[AdminExpenses] File uploaded:', result);
     
     // If OCR is not enabled or file is not an image, open dialog immediately
     // Otherwise, wait for OCR result
     // Note: We can't easily detect if OCR is enabled here, so we'll use a timeout
-    // If OCR doesn't complete within 5 seconds, open dialog with just attachment
+    // If OCR doesn't complete within 8 seconds, open dialog with just attachment
     if (this.ocrTimeout) {
       clearTimeout(this.ocrTimeout);
     }
     this.ocrTimeout = setTimeout(() => {
       if (this.pendingAttachment && !this.dialogOpened) {
         // OCR didn't complete or wasn't enabled, open dialog with just attachment
+        console.log('[AdminExpenses] OCR timeout - opening dialog without OCR data');
+        this.snackBar.open('Opening form. OCR may still be processing.', 'Close', {
+          duration: 3000,
+        });
         this.openExpenseDialog(this.pendingAttachment, null);
       }
-    }, 5000); // Wait 5 seconds for OCR
+    }, 8000); // Wait 8 seconds for OCR (increased from 5)
   }
 
   onOcrResult(result: any): void {
@@ -238,12 +243,25 @@ export class AdminExpensesComponent implements OnInit {
       this.ocrTimeout = null;
     }
     
+    console.log('[AdminExpenses] OCR result received:', result);
+    
     // OCR result available, open expense form with both attachment and OCR data
     if (this.dialogOpened) {
+      console.warn('[AdminExpenses] Dialog already opened, ignoring OCR result');
       return; // Prevent opening dialog twice
     }
     
-    this.openExpenseDialog(this.pendingAttachment, result);
+    // Validate OCR result has useful data
+    if (result && (result.amount || result.vendorName || result.expenseDate)) {
+      this.openExpenseDialog(this.pendingAttachment, result);
+    } else {
+      // OCR completed but no useful data extracted
+      console.log('[AdminExpenses] OCR completed but no useful data extracted');
+      this.snackBar.open('OCR completed but no data extracted. Please fill form manually.', 'Close', {
+        duration: 4000,
+      });
+      this.openExpenseDialog(this.pendingAttachment, null);
+    }
   }
 
   private openExpenseDialog(attachment: any, ocrResult: any): void {
