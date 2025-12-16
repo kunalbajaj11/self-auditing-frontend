@@ -23,7 +23,12 @@ export class InvoiceFormDialogComponent implements OnInit {
   loadingCustomers = false;
 
   readonly vatTaxTypes = ['STANDARD', 'ZERO_RATED', 'EXEMPT', 'REVERSE_CHARGE'];
-  readonly invoiceStatuses = ['draft', 'sent', 'paid', 'cancelled'];
+  readonly invoiceStatuses = ['proforma_invoice', 'tax_invoice_receivable', 'tax_invoice_bank_received'];
+  readonly statusDisplayMap: Record<string, string> = {
+    'proforma_invoice': 'Performa Invoice',
+    'tax_invoice_receivable': 'Tax Invoice - Receivable',
+    'tax_invoice_bank_received': 'Tax Invoice - Bank Received',
+  };
   readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
 
   get lineItems(): FormArray {
@@ -48,6 +53,10 @@ export class InvoiceFormDialogComponent implements OnInit {
     return this.subtotal + this.totalVat;
   }
 
+  getStatusDisplayLabel(status: string): string {
+    return this.statusDisplayMap[status] || status;
+  }
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly dialogRef: MatDialogRef<InvoiceFormDialogComponent>,
@@ -63,7 +72,7 @@ export class InvoiceFormDialogComponent implements OnInit {
       invoiceDate: [new Date().toISOString().substring(0, 10), Validators.required],
       dueDate: [''],
       currency: ['AED'],
-      status: ['draft'],
+      status: ['proforma_invoice'],
       description: [''],
       notes: [''],
       lineItems: this.fb.array([]),
@@ -267,7 +276,7 @@ export class InvoiceFormDialogComponent implements OnInit {
       invoiceDate: formValue.invoiceDate,
       dueDate: formValue.dueDate || undefined,
       currency: formValue.currency || 'AED',
-      status: formValue.status || 'draft',
+      status: formValue.status || 'proforma_invoice',
       description: formValue.description || undefined,
       notes: formValue.notes || undefined,
       lineItems: lineItems,

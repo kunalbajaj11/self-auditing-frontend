@@ -1,0 +1,108 @@
+<section class="debit-notes">
+  <header class="header">
+    <div class="header-content">
+      <h1>Debit Notes</h1>
+      <p>Manage debit notes for invoice adjustments and additional charges.</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Create Debit Note
+    </button>
+  </header>
+
+  <section class="debit-notes-section">
+    <mat-card class="debit-notes-card">
+      <mat-card-header>
+        <div class="card-title-with-icon">
+          <mat-icon>note</mat-icon>
+          <mat-card-title>Debit Note List</mat-card-title>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="dataSource" class="debit-notes-table">
+            <ng-container matColumnDef="debitNoteNumber">
+              <th mat-header-cell *matHeaderCellDef>Debit Note #</th>
+              <td mat-cell *matCellDef="let debitNote">{{ debitNote.debitNoteNumber }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="customerName">
+              <th mat-header-cell *matHeaderCellDef>Customer</th>
+              <td mat-cell *matCellDef="let debitNote">
+                {{ debitNote.customerName || '—' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="debitNoteDate">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let debitNote">
+                {{ debitNote.debitNoteDate | date: 'shortDate' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="reason">
+              <th mat-header-cell *matHeaderCellDef>Reason</th>
+              <td mat-cell *matCellDef="let debitNote">
+                {{ debitNote.reason | titlecase }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="totalAmount">
+              <th mat-header-cell *matHeaderCellDef>Total Amount</th>
+              <td mat-cell *matCellDef="let debitNote">
+                {{ debitNote.totalAmount | number: '1.2-2' }} {{ debitNote.currency }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let debitNote">
+                <mat-chip [color]="getStatusColor(debitNote.status)" selected>
+                  {{ debitNote.status | titlecase }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="appliedAmount">
+              <th mat-header-cell *matHeaderCellDef>Applied</th>
+              <td mat-cell *matCellDef="let debitNote">
+                {{ debitNote.appliedAmount | number: '1.2-2' }} {{ debitNote.currency }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="remainingAmount">
+              <th mat-header-cell *matHeaderCellDef>Remaining</th>
+              <td mat-cell *matCellDef="let debitNote">
+                {{ debitNote.remainingAmount | number: '1.2-2' }} {{ debitNote.currency }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let debitNote">
+                <button mat-button (click)="viewDebitNote(debitNote)">View</button>
+                <button mat-button (click)="editDebitNote(debitNote)">Edit</button>
+                <button mat-button color="warn" (click)="deleteDebitNote(debitNote)">
+                  Delete
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columns" class="table-header"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns" class="table-row"></tr>
+          </table>
+
+          <div class="table-overlay" *ngIf="loading">
+            <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+          </div>
+        </div>
+
+        <div class="empty" *ngIf="!loading && dataSource.data.length === 0">
+          <mat-icon>note</mat-icon>
+          <p>No debit notes yet. Create your first debit note to get started.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</section>
+

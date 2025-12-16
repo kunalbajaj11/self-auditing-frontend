@@ -52,11 +52,30 @@ export class InvoiceDetailDialogComponent implements OnInit {
     return parseFloat(this.invoice.paidAmount || '0');
   }
 
+  readonly statusDisplayMap: Record<string, string> = {
+    'proforma_invoice': 'Performa Invoice',
+    'tax_invoice_receivable': 'Tax Invoice - Receivable',
+    'tax_invoice_bank_received': 'Tax Invoice - Bank Received',
+    // Legacy statuses for backward compatibility
+    'draft': 'Draft',
+    'sent': 'Sent',
+    'paid': 'Paid',
+    'cancelled': 'Cancelled',
+    'overdue': 'Overdue',
+  };
+
+  getStatusDisplayLabel(status: string): string {
+    return this.statusDisplayMap[status?.toLowerCase()] || status || 'Unknown';
+  }
+
   getStatusColor(status: string): 'primary' | 'accent' | 'warn' {
     switch (status?.toLowerCase()) {
+      case 'tax_invoice_bank_received':
       case 'paid':
       case 'sent':
         return 'primary';
+      case 'proforma_invoice':
+      case 'tax_invoice_receivable':
       case 'draft':
         return 'accent';
       case 'cancelled':

@@ -1,12 +1,12 @@
 <h2 mat-dialog-title>
-  {{ data ? 'Edit Credit Note' : 'Create Credit Note' }}
+  {{ data ? 'Edit Debit Note' : 'Create Debit Note' }}
 </h2>
 
-<mat-dialog-content class="credit-note-form-content">
+<mat-dialog-content class="debit-note-form-content">
   <form [formGroup]="form" style="margin: 24px;">
     <!-- Header Section -->
     <div class="form-section">
-      <h3>Credit Note Details</h3>
+      <h3>Debit Note Details</h3>
       <div class="form-row">
         <mat-form-field appearance="outline" class="flex-2">
           <mat-label>Related Invoice (Optional)</mat-label>
@@ -19,11 +19,11 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Credit Note Date *</mat-label>
-          <input matInput [matDatepicker]="creditNoteDatePicker" formControlName="creditNoteDate" placeholder="Select date" required />
-          <mat-datepicker-toggle matIconSuffix [for]="creditNoteDatePicker"></mat-datepicker-toggle>
-          <mat-datepicker #creditNoteDatePicker></mat-datepicker>
-          <mat-error *ngIf="form.get('creditNoteDate')?.hasError('required')">
+          <mat-label>Debit Note Date *</mat-label>
+          <input matInput [matDatepicker]="debitNoteDatePicker" formControlName="debitNoteDate" placeholder="Select date" required />
+          <mat-datepicker-toggle matIconSuffix [for]="debitNoteDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #debitNoteDatePicker></mat-datepicker>
+          <mat-error *ngIf="form.get('debitNoteDate')?.hasError('required')">
             Date is required
           </mat-error>
         </mat-form-field>
@@ -31,7 +31,7 @@
         <mat-form-field appearance="outline" class="flex-1">
           <mat-label>Reason *</mat-label>
           <mat-select formControlName="reason" required>
-            <mat-option *ngFor="let reason of creditNoteReasons" [value]="reason.value">
+            <mat-option *ngFor="let reason of debitNoteReasons" [value]="reason.value">
               {{ reason.label }}
             </mat-option>
           </mat-select>
@@ -97,7 +97,7 @@
         <mat-form-field appearance="outline" class="flex-1">
           <mat-label>Status</mat-label>
           <mat-select formControlName="status">
-            <mat-option *ngFor="let status of creditNoteStatuses" [value]="status">
+            <mat-option *ngFor="let status of debitNoteStatuses" [value]="status">
               {{ status | titlecase }}
             </mat-option>
           </mat-select>

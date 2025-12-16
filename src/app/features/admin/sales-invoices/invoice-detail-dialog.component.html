@@ -32,7 +32,7 @@
         <div class="info-row">
           <span class="label">Status:</span>
           <mat-chip [color]="getStatusColor(invoice.status)" selected>
-            {{ invoice.status | titlecase }}
+            {{ getStatusDisplayLabel(invoice.status) }}
           </mat-chip>
         </div>
         <div class="info-row">

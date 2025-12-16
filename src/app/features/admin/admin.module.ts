@@ -26,6 +26,9 @@ import { AdminCreditNotesComponent } from './credit-notes/admin-credit-notes.com
 import { CreditNoteFormDialogComponent } from './credit-notes/credit-note-form-dialog.component';
 import { CreditNoteDetailDialogComponent } from './credit-notes/credit-note-detail-dialog.component';
 import { CreditNoteApplyDialogComponent } from './credit-notes/credit-note-apply-dialog.component';
+import { AdminDebitNotesComponent } from './debit-notes/admin-debit-notes.component';
+import { DebitNoteFormDialogComponent } from './debit-notes/debit-note-form-dialog.component';
+import { DebitNoteDetailDialogComponent } from './debit-notes/debit-note-detail-dialog.component';
 import { InvoiceEmailDialogComponent } from './sales-invoices/invoice-email-dialog.component';
 import { AdminVendorsComponent } from './vendors/admin-vendors.component';
 import { VendorFormDialogComponent } from './vendors/vendor-form-dialog.component';
@@ -65,6 +68,9 @@ import { NumberingSequencesComponent } from './settings/numbering-sequences/numb
     CreditNoteFormDialogComponent,
     CreditNoteDetailDialogComponent,
     CreditNoteApplyDialogComponent,
+    AdminDebitNotesComponent,
+    DebitNoteFormDialogComponent,
+    DebitNoteDetailDialogComponent,
     InvoiceEmailDialogComponent,
     AdminVendorsComponent,
     VendorFormDialogComponent,

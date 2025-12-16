@@ -153,11 +153,30 @@ export class AdminSalesInvoicesComponent implements OnInit {
     });
   }
 
+  readonly statusDisplayMap: Record<string, string> = {
+    'proforma_invoice': 'Performa Invoice',
+    'tax_invoice_receivable': 'Tax Invoice - Receivable',
+    'tax_invoice_bank_received': 'Tax Invoice - Bank Received',
+    // Legacy statuses for backward compatibility
+    'draft': 'Draft',
+    'sent': 'Sent',
+    'paid': 'Paid',
+    'cancelled': 'Cancelled',
+    'overdue': 'Overdue',
+  };
+
+  getStatusDisplayLabel(status: string): string {
+    return this.statusDisplayMap[status?.toLowerCase()] || status || 'Unknown';
+  }
+
   getStatusColor(status: string): 'primary' | 'accent' | 'warn' {
     switch (status?.toLowerCase()) {
+      case 'tax_invoice_bank_received':
       case 'paid':
       case 'sent':
         return 'primary';
+      case 'proforma_invoice':
+      case 'tax_invoice_receivable':
       case 'draft':
         return 'accent';
       case 'cancelled':
@@ -180,6 +199,27 @@ export class AdminSalesInvoicesComponent implements OnInit {
       default:
         return 'accent';
     }
+  }
+
+  get pageTitle(): string {
+    if (this.currentFilter === 'payments') {
+      return 'Payments Received';
+    }
+    return 'Sales Invoices';
+  }
+
+  get pageDescription(): string {
+    if (this.currentFilter === 'payments') {
+      return 'View and manage payment receipts received from customers.';
+    }
+    return 'Manage customer invoices, track payments, and monitor outstanding amounts.';
+  }
+
+  get buttonLabel(): string {
+    if (this.currentFilter === 'payments') {
+      return 'Add Receipt';
+    }
+    return 'Create Invoice';
   }
 }
 

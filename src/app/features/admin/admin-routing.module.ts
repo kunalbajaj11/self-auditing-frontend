@@ -15,6 +15,7 @@ import { UploadBankStatementComponent } from './bank-reconciliation/upload-bank-
 import { AdminCustomersComponent } from './customers/admin-customers.component';
 import { AdminSalesInvoicesComponent } from './sales-invoices/admin-sales-invoices.component';
 import { AdminCreditNotesComponent } from './credit-notes/admin-credit-notes.component';
+import { AdminDebitNotesComponent } from './debit-notes/admin-debit-notes.component';
 import { AdminVendorsComponent } from './vendors/admin-vendors.component';
 import { AdminChartOfAccountsComponent } from './chart-of-accounts/admin-chart-of-accounts.component';
 import { InvoiceTemplateComponent } from './settings/invoice-template/invoice-template.component';
@@ -35,10 +36,11 @@ const routes: Routes = [
             label: 'Sales',
             icon: 'point_of_sale',
             children: [
+              { label: 'Customers', route: '/admin/customers' },
               { label: 'Invoices', route: '/admin/sales-invoices' },
               { label: 'Payments Received', route: '/admin/sales-invoices', queryParams: { filter: 'payments' } },
               { label: 'Credit Notes', route: '/admin/credit-notes' },
-              { label: 'Customers', route: '/admin/customers' },
+              { label: 'Debit Notes', route: '/admin/debit-notes' },
             ],
           },
           {
@@ -203,6 +205,11 @@ const routes: Routes = [
             path: 'credit-notes',
             component: AdminCreditNotesComponent,
             data: { shell: { title: 'Credit Note Management' } },
+          },
+          {
+            path: 'debit-notes',
+            component: AdminDebitNotesComponent,
+            data: { shell: { title: 'Debit Note Management' } },
           },
           {
             path: 'vendors',

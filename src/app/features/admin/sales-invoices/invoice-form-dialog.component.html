@@ -60,7 +60,7 @@
           <mat-label>Status</mat-label>
           <mat-select formControlName="status">
             <mat-option *ngFor="let status of invoiceStatuses" [value]="status">
-              {{ status | titlecase }}
+              {{ getStatusDisplayLabel(status) }}
             </mat-option>
           </mat-select>
         </mat-form-field>

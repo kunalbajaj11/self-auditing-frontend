@@ -6,16 +6,16 @@ import {
 } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CreditNotesService, CreditNote } from '../../../core/services/credit-notes.service';
+import { DebitNotesService, DebitNote } from '../../../core/services/debit-notes.service';
 import { CustomersService, Customer } from '../../../core/services/customers.service';
 import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales-invoices.service';
 
 @Component({
-  selector: 'app-credit-note-form-dialog',
-  templateUrl: './credit-note-form-dialog.component.html',
-  styleUrls: ['./credit-note-form-dialog.component.scss'],
+  selector: 'app-debit-note-form-dialog',
+  templateUrl: './debit-note-form-dialog.component.html',
+  styleUrls: ['./debit-note-form-dialog.component.scss'],
 })
-export class CreditNoteFormDialogComponent implements OnInit {
+export class DebitNoteFormDialogComponent implements OnInit {
   form: FormGroup;
   loading = false;
   customers: Customer[] = [];
@@ -24,7 +24,7 @@ export class CreditNoteFormDialogComponent implements OnInit {
   loadingInvoices = false;
   selectedInvoice: SalesInvoice | null = null;
 
-  readonly creditNoteReasons = [
+  readonly debitNoteReasons = [
     { value: 'return', label: 'Return' },
     { value: 'refund', label: 'Refund' },
     { value: 'correction', label: 'Correction' },
@@ -32,7 +32,7 @@ export class CreditNoteFormDialogComponent implements OnInit {
     { value: 'other', label: 'Other' },
   ];
 
-  readonly creditNoteStatuses = ['draft', 'issued', 'cancelled'];
+  readonly debitNoteStatuses = ['draft', 'issued', 'cancelled'];
   readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
 
   get totalAmount(): number {
@@ -43,19 +43,19 @@ export class CreditNoteFormDialogComponent implements OnInit {
 
   constructor(
     private readonly fb: FormBuilder,
-    private readonly dialogRef: MatDialogRef<CreditNoteFormDialogComponent>,
-    private readonly creditNotesService: CreditNotesService,
+    private readonly dialogRef: MatDialogRef<DebitNoteFormDialogComponent>,
+    private readonly debitNotesService: DebitNotesService,
     private readonly customersService: CustomersService,
     private readonly invoicesService: SalesInvoicesService,
     private readonly snackBar: MatSnackBar,
-    @Inject(MAT_DIALOG_DATA) public data: CreditNote | null,
+    @Inject(MAT_DIALOG_DATA) public data: DebitNote | null,
   ) {
     this.form = this.fb.group({
       invoiceId: [''],
       customerId: [''],
       customerName: [''],
       customerTrn: [''],
-      creditNoteDate: [new Date().toISOString().substring(0, 10), Validators.required],
+      debitNoteDate: [new Date().toISOString().substring(0, 10), Validators.required],
       reason: ['return', Validators.required],
       amount: [0, [Validators.required, Validators.min(0.01)]],
       vatAmount: [0, [Validators.min(0)]],
@@ -71,7 +71,7 @@ export class CreditNoteFormDialogComponent implements OnInit {
     this.loadInvoices();
     
     if (this.data) {
-      this.loadCreditNoteData();
+      this.loadDebitNoteData();
     }
   }
 
@@ -101,14 +101,14 @@ export class CreditNoteFormDialogComponent implements OnInit {
     });
   }
 
-  loadCreditNoteData(): void {
+  loadDebitNoteData(): void {
     if (!this.data) return;
 
-    const creditNote = this.data;
+    const debitNote = this.data;
 
     // Load customer data if customerId exists
-    if (creditNote.customerId) {
-      this.customersService.getCustomer(creditNote.customerId).subscribe({
+    if (debitNote.customerId) {
+      this.customersService.getCustomer(debitNote.customerId).subscribe({
         next: (customer) => {
           this.form.patchValue({
             customerId: customer.id,
@@ -118,15 +118,15 @@ export class CreditNoteFormDialogComponent implements OnInit {
         },
         error: () => {
           this.form.patchValue({
-            customerName: creditNote.customerName || '',
-            customerTrn: creditNote.customerTrn || '',
+            customerName: debitNote.customerName || '',
+            customerTrn: debitNote.customerTrn || '',
           });
         },
       });
     }
 
-    if (creditNote.invoiceId) {
-      this.invoicesService.getInvoice(creditNote.invoiceId).subscribe({
+    if (debitNote.invoiceId) {
+      this.invoicesService.getInvoice(debitNote.invoiceId).subscribe({
         next: (invoice) => {
           this.selectedInvoice = invoice;
           this.form.patchValue({
@@ -141,14 +141,14 @@ export class CreditNoteFormDialogComponent implements OnInit {
     }
 
     this.form.patchValue({
-      creditNoteDate: creditNote.creditNoteDate,
-      reason: creditNote.reason,
-      amount: parseFloat(creditNote.amount || '0'),
-      vatAmount: parseFloat(creditNote.vatAmount || '0'),
-      currency: creditNote.currency || 'AED',
-      status: creditNote.status,
-      description: creditNote.description || '',
-      notes: creditNote.notes || '',
+      debitNoteDate: debitNote.debitNoteDate,
+      reason: debitNote.reason,
+      amount: parseFloat(debitNote.amount || '0'),
+      vatAmount: parseFloat(debitNote.vatAmount || '0'),
+      currency: debitNote.currency || 'AED',
+      status: debitNote.status,
+      description: debitNote.description || '',
+      notes: debitNote.notes || '',
     });
   }
 
@@ -161,16 +161,16 @@ export class CreditNoteFormDialogComponent implements OnInit {
       const invoiceAmount = parseFloat(invoice.amount || '0');
       const invoiceVatAmount = parseFloat(invoice.vatAmount || '0');
       
-      // Only populate if creating a new credit note (not editing)
-      const isNewCreditNote = !this.data;
+      // Only populate if creating a new debit note (not editing)
+      const isNewDebitNote = !this.data;
       
       this.form.patchValue({
         customerId: invoice.customerId || '',
         customerName: invoice.customerName || '',
         customerTrn: invoice.customerTrn || '',
         currency: invoice.currency || 'AED',
-        // Populate amount and VAT if creating new credit note
-        ...(isNewCreditNote && {
+        // Populate amount and VAT if creating new debit note
+        ...(isNewDebitNote && {
           amount: invoiceAmount > 0 ? invoiceAmount : 0,
           vatAmount: invoiceVatAmount > 0 ? invoiceVatAmount : 0,
           description: invoice.description || '',
@@ -218,7 +218,7 @@ export class CreditNoteFormDialogComponent implements OnInit {
       customerId: formValue.customerId || undefined,
       customerName: formValue.customerName || undefined,
       customerTrn: formValue.customerTrn || undefined,
-      creditNoteDate: formValue.creditNoteDate,
+      debitNoteDate: formValue.debitNoteDate,
       reason: formValue.reason,
       amount: parseFloat(formValue.amount),
       vatAmount: parseFloat(formValue.vatAmount || '0'),
@@ -236,8 +236,8 @@ export class CreditNoteFormDialogComponent implements OnInit {
     });
 
     const operation = this.data
-      ? this.creditNotesService.updateCreditNote(this.data.id, payload)
-      : this.creditNotesService.createCreditNote(payload);
+      ? this.debitNotesService.updateDebitNote(this.data.id, payload)
+      : this.debitNotesService.createDebitNote(payload);
 
     operation.subscribe({
       next: () => {
@@ -247,7 +247,7 @@ export class CreditNoteFormDialogComponent implements OnInit {
       error: (error) => {
         this.loading = false;
         this.snackBar.open(
-          error?.error?.message || 'Failed to save credit note',
+          error?.error?.message || 'Failed to save debit note',
           'Close',
           { duration: 4000, panelClass: ['snack-error'] },
         );
