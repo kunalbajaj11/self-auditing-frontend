@@ -19,6 +19,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -46,6 +47,7 @@ const MATERIAL_MODULES = [
   MatBadgeModule,
   MatChipsModule,
   MatProgressSpinnerModule,
+  MatProgressBarModule,
   MatSlideToggleModule,
   MatTooltipModule,
   MatCheckboxModule,

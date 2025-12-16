@@ -1,0 +1,229 @@
+mat-dialog-content {
+  min-width: 600px;
+  max-width: 700px;
+  padding: 24px;
+}
+
+.payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-title {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.full-width {
+  width: 100%;
+}
+
+// Expense Selection Dropdown
+.expense-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+
+  .expense-option-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+
+    .vendor-name {
+      font-weight: 600;
+      color: #0f172a;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .expense-amount {
+      font-weight: 600;
+      color: #1976d2;
+      white-space: nowrap;
+    }
+  }
+
+  .expense-option-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.875rem;
+
+    .expense-date {
+      color: #64748b;
+    }
+
+    .outstanding-badge {
+      color: #ef4444;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+  }
+}
+
+.loading-spinner {
+  margin-right: 8px;
+}
+
+// Expense Details Card
+.expense-details-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 8px;
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .clear-button {
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+    }
+  }
+
+  .card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 8px 0;
+    border-bottom: 1px solid #e2e8f0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &.highlight {
+      background: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #fecaca;
+      margin: 4px 0;
+    }
+
+    .detail-label {
+      font-weight: 500;
+      color: #64748b;
+      min-width: 140px;
+    }
+
+    .detail-value {
+      font-weight: 600;
+      color: #0f172a;
+      text-align: right;
+      flex: 1;
+
+      &.outstanding {
+        color: #ef4444;
+        font-size: 1.1rem;
+      }
+    }
+  }
+}
+
+// Empty State
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: #64748b;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+    color: #94a3b8;
+  }
+
+  p {
+    margin: 8px 0;
+    font-size: 1rem;
+    color: #64748b;
+
+    &.empty-state-hint {
+      font-size: 0.875rem;
+      color: #94a3b8;
+    }
+  }
+}
+
+// Inline Spinner
+.inline-spinner {
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+// Form Field Spacing
+mat-form-field {
+  margin-bottom: 8px;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  mat-dialog-content {
+    min-width: auto;
+    max-width: 100%;
+    padding: 16px;
+  }
+
+  .expense-option {
+    .expense-option-main,
+    .expense-option-details {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+  }
+
+  .detail-row {
+    flex-direction: column;
+    gap: 4px;
+
+    .detail-label {
+      min-width: auto;
+    }
+
+    .detail-value {
+      text-align: left;
+    }
+  }
+}

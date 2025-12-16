@@ -7,6 +7,8 @@ import { AdminUsersComponent } from './users/admin-users.component';
 import { AdminCategoriesComponent } from './categories/admin-categories.component';
 import { AdminExpenseTypesComponent } from './expense-types/admin-expense-types.component';
 import { AdminExpensesComponent } from './expenses/admin-expenses.component';
+import { AdminPaymentsComponent } from './payments/admin-payments.component';
+import { PaymentFormDialogComponent } from './payments/payment-form-dialog.component';
 import { AdminReportsComponent } from './reports/admin-reports.component';
 import { AdminNotificationsComponent } from './notifications/admin-notifications.component';
 import { UserFormDialogComponent } from './users/user-form-dialog.component';
@@ -40,6 +42,11 @@ import { TaxRateFormDialogComponent } from './settings/tax-settings/tax-rate-for
 import { CurrencySettingsComponent } from './settings/currency-settings/currency-settings.component';
 import { ExchangeRateFormDialogComponent } from './settings/currency-settings/exchange-rate-form-dialog.component';
 import { NumberingSequencesComponent } from './settings/numbering-sequences/numbering-sequences.component';
+import { CashAccountsComponent } from './cash-accounts/cash-accounts.component';
+import { BankAccountsComponent } from './bank-accounts/bank-accounts.component';
+import { BankTransactionFormDialogComponent } from './bank-accounts/bank-transaction-form-dialog.component';
+import { AdminJournalEntriesComponent } from './journal-entries/admin-journal-entries.component';
+import { JournalEntryFormDialogComponent } from './journal-entries/journal-entry-form-dialog.component';
 
 @NgModule({
   declarations: [
@@ -49,6 +56,8 @@ import { NumberingSequencesComponent } from './settings/numbering-sequences/numb
     AdminCategoriesComponent,
     AdminExpenseTypesComponent,
     AdminExpensesComponent,
+    AdminPaymentsComponent,
+    PaymentFormDialogComponent,
     AdminReportsComponent,
     AdminNotificationsComponent,
     UserFormDialogComponent,
@@ -82,6 +91,11 @@ import { NumberingSequencesComponent } from './settings/numbering-sequences/numb
     CurrencySettingsComponent,
     ExchangeRateFormDialogComponent,
     NumberingSequencesComponent,
+    CashAccountsComponent,
+    BankAccountsComponent,
+    BankTransactionFormDialogComponent,
+    AdminJournalEntriesComponent,
+    JournalEntryFormDialogComponent,
   ],
   imports: [SharedModule, AdminRoutingModule],
 })

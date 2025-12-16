@@ -23,11 +23,12 @@ export class InvoiceFormDialogComponent implements OnInit {
   loadingCustomers = false;
 
   readonly vatTaxTypes = ['STANDARD', 'ZERO_RATED', 'EXEMPT', 'REVERSE_CHARGE'];
-  readonly invoiceStatuses = ['proforma_invoice', 'tax_invoice_receivable', 'tax_invoice_bank_received'];
+  readonly invoiceStatuses = ['proforma_invoice', 'tax_invoice_receivable', 'tax_invoice_cash_received'];
   readonly statusDisplayMap: Record<string, string> = {
     'proforma_invoice': 'Performa Invoice',
     'tax_invoice_receivable': 'Tax Invoice - Receivable',
-    'tax_invoice_bank_received': 'Tax Invoice - Bank Received',
+    'tax_invoice_bank_received': 'Tax Invoice - Bank Received', // Kept for backward compatibility
+    'tax_invoice_cash_received': 'Tax Invoice - Cash received',
   };
   readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
 

@@ -1,0 +1,116 @@
+<section class="payments">
+  <header class="header">
+    <div class="header-content">
+      <h1>Payments</h1>
+      <p>View and manage payments made for expenses.</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Create Payment
+    </button>
+  </header>
+
+  <section class="payments-section">
+    <mat-card class="payments-card">
+      <mat-card-header>
+        <div class="card-title-with-icon">
+          <mat-icon>payment</mat-icon>
+          <mat-card-title>Payment List</mat-card-title>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="dataSource" class="payments-table">
+    <ng-container matColumnDef="expense">
+      <th mat-header-cell *matHeaderCellDef>Expense</th>
+      <td mat-cell *matCellDef="let payment">
+        <div *ngIf="payment.expense">
+          <div class="expense-info">
+            <span class="expense-date">{{ payment.expense.expenseDate | date: 'shortDate' }}</span>
+            <span class="expense-description" *ngIf="payment.expense.description">
+              {{ payment.expense.description }}
+            </span>
+          </div>
+        </div>
+        <span *ngIf="!payment.expense">N/A</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="vendor">
+      <th mat-header-cell *matHeaderCellDef>Vendor</th>
+      <td mat-cell *matCellDef="let payment">
+        <div *ngIf="payment.expense">
+          <div>{{ payment.expense.vendorName || 'N/A' }}</div>
+          <div class="vendor-trn" *ngIf="payment.expense.vendorTrn">
+            TRN: {{ payment.expense.vendorTrn }}
+          </div>
+        </div>
+        <span *ngIf="!payment.expense">N/A</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="amount">
+      <th mat-header-cell *matHeaderCellDef>Amount</th>
+      <td mat-cell *matCellDef="let payment">
+        {{ payment.amount | number: '1.2-2' }} {{ payment.expense?.currency || 'AED' }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="paymentDate">
+      <th mat-header-cell *matHeaderCellDef>Payment Date</th>
+      <td mat-cell *matCellDef="let payment">
+        {{ payment.paymentDate | date: 'shortDate' }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="paymentMethod">
+      <th mat-header-cell *matHeaderCellDef>Payment Method</th>
+      <td mat-cell *matCellDef="let payment">
+        <span *ngIf="payment.paymentMethod">
+          {{ payment.paymentMethod | titlecase }}
+        </span>
+        <span *ngIf="!payment.paymentMethod">-</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="referenceNumber">
+      <th mat-header-cell *matHeaderCellDef>Reference</th>
+      <td mat-cell *matCellDef="let payment">
+        {{ payment.referenceNumber || '-' }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Actions</th>
+      <td mat-cell *matCellDef="let payment">
+        <button
+          mat-icon-button
+          color="warn"
+          (click)="deletePayment(payment)"
+          matTooltip="Delete payment"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columns"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns"></tr>
+          </table>
+
+          <div class="no-data" *ngIf="!loading && dataSource.data.length === 0">
+            <mat-icon>payment</mat-icon>
+            <p>No payments found</p>
+          </div>
+
+        <mat-progress-bar
+          *ngIf="loading"
+          mode="indeterminate"
+          class="loading-bar"
+        ></mat-progress-bar>
+      </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</section>
+

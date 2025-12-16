@@ -32,6 +32,7 @@ export interface Expense {
   currency: string;
   expenseDate: string;
   expectedPaymentDate?: string;
+  purchaseStatus?: string; // 'Purchase - Cash Paid' or 'Purchase - Accruals'
   vendorName?: string;
   vendorTrn?: string;
   description?: string;

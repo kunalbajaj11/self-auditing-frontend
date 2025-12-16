@@ -1,0 +1,97 @@
+<h2 mat-dialog-title>
+  {{ isEditMode ? 'Edit Journal Entry' : 'Add Journal Entry' }}
+</h2>
+
+<form mat-dialog-content [formGroup]="form" class="form">
+  <mat-form-field appearance="outline">
+    <mat-label>Type *</mat-label>
+    <mat-select formControlName="type" required>
+      <mat-option *ngFor="let option of typeOptions" [value]="option.value">
+        {{ option.label }}
+      </mat-option>
+    </mat-select>
+    <mat-error *ngIf="form.get('type')?.hasError('required')">
+      Type is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Category *</mat-label>
+    <mat-select formControlName="category" required>
+      <mat-option *ngFor="let option of categoryOptions" [value]="option.value">
+        {{ option.label }}
+      </mat-option>
+    </mat-select>
+    <mat-error *ngIf="form.get('category')?.hasError('required')">
+      Category is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Status *</mat-label>
+    <mat-select formControlName="status" required>
+      <mat-option *ngFor="let option of statusOptions" [value]="option.value">
+        {{ option.label }}
+      </mat-option>
+    </mat-select>
+    <mat-error *ngIf="form.get('status')?.hasError('required')">
+      Status is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Amount (AED) *</mat-label>
+    <input matInput type="number" formControlName="amount" required step="0.01" min="0.01" />
+    <mat-error *ngIf="form.get('amount')?.hasError('required')">
+      Amount is required
+    </mat-error>
+    <mat-error *ngIf="form.get('amount')?.hasError('min')">
+      Amount must be greater than 0
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Entry Date *</mat-label>
+    <input
+      matInput
+      [matDatepicker]="entryDatePicker"
+      formControlName="entryDate"
+      placeholder="Select entry date"
+      required
+    />
+    <mat-datepicker-toggle matIconSuffix [for]="entryDatePicker"></mat-datepicker-toggle>
+    <mat-datepicker #entryDatePicker></mat-datepicker>
+    <mat-error *ngIf="form.get('entryDate')?.hasError('required')">
+      Entry date is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Description</mat-label>
+    <textarea matInput formControlName="description" rows="3"></textarea>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Reference Number</mat-label>
+    <input matInput formControlName="referenceNumber" placeholder="e.g., Transaction ID, Reference #" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Notes</mat-label>
+    <textarea matInput formControlName="notes" rows="3"></textarea>
+  </mat-form-field>
+</form>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="save()"
+    [disabled]="form.invalid || loading"
+  >
+    <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
+    <span *ngIf="!loading">{{ isEditMode ? 'Update' : 'Create' }} Entry</span>
+  </button>
+</mat-dialog-actions>
+

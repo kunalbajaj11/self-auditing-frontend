@@ -7,6 +7,8 @@ import { AdminUsersComponent } from './users/admin-users.component';
 import { AdminCategoriesComponent } from './categories/admin-categories.component';
 import { AdminExpenseTypesComponent } from './expense-types/admin-expense-types.component';
 import { AdminExpensesComponent } from './expenses/admin-expenses.component';
+import { AdminPaymentsComponent } from './payments/admin-payments.component';
+import { AdminJournalEntriesComponent } from './journal-entries/admin-journal-entries.component';
 import { AdminReportsComponent } from './reports/admin-reports.component';
 import { AdminNotificationsComponent } from './notifications/admin-notifications.component';
 import { ReconciliationListComponent } from './bank-reconciliation/reconciliation-list.component';
@@ -22,6 +24,8 @@ import { InvoiceTemplateComponent } from './settings/invoice-template/invoice-te
 import { TaxSettingsComponent } from './settings/tax-settings/tax-settings.component';
 import { CurrencySettingsComponent } from './settings/currency-settings/currency-settings.component';
 import { NumberingSequencesComponent } from './settings/numbering-sequences/numbering-sequences.component';
+import { CashAccountsComponent } from './cash-accounts/cash-accounts.component';
+import { BankAccountsComponent } from './bank-accounts/bank-accounts.component';
 
 const routes: Routes = [
   {
@@ -46,10 +50,10 @@ const routes: Routes = [
           {
             label: 'Expenses',
             icon: 'receipt_long',
-            badgeKey: 'pendingAccruals',
             children: [
               { label: 'Expenses', route: '/admin/expenses' },
-              { label: 'Accruals', route: '/admin/expenses', queryParams: { filter: 'pending' } },
+              { label: 'Payments', route: '/admin/payments' },
+              { label: 'Journal Entries', route: '/admin/journal-entries' },
               { label: 'Vendors', route: '/admin/vendors' },
             ],
           },
@@ -58,6 +62,7 @@ const routes: Routes = [
             icon: 'account_balance',
             children: [
               { label: 'Bank Accounts', route: '/admin/banking/accounts' },
+              { label: 'Cash Accounts', route: '/admin/banking/cash-accounts' },
               { label: 'Upload Bank Statement', route: '/admin/bank-reconciliation/upload' },
               { label: 'Reconciliation', route: '/admin/bank-reconciliation' },
             ],
@@ -132,6 +137,16 @@ const routes: Routes = [
         data: { shell: { title: 'Expense Management' } },
       },
       {
+        path: 'payments',
+        component: AdminPaymentsComponent,
+        data: { shell: { title: 'Payment Management' } },
+      },
+      {
+        path: 'journal-entries',
+        component: AdminJournalEntriesComponent,
+        data: { shell: { title: 'Journal Entries' } },
+      },
+      {
         path: 'reports',
         component: AdminReportsComponent,
         data: { shell: { title: 'Reports & Analytics' } },
@@ -173,8 +188,13 @@ const routes: Routes = [
       },
       {
         path: 'banking/accounts',
-        component: ReconciliationListComponent, // Placeholder - will need to create BankAccountsComponent
+        component: BankAccountsComponent,
         data: { shell: { title: 'Bank Accounts' } },
+      },
+      {
+        path: 'banking/cash-accounts',
+        component: CashAccountsComponent,
+        data: { shell: { title: 'Cash Accounts' } },
       },
       {
         path: 'settings/invoice-template',

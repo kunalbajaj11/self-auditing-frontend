@@ -56,6 +56,7 @@ export class InvoiceDetailDialogComponent implements OnInit {
     'proforma_invoice': 'Performa Invoice',
     'tax_invoice_receivable': 'Tax Invoice - Receivable',
     'tax_invoice_bank_received': 'Tax Invoice - Bank Received',
+    'tax_invoice_cash_received': 'Tax Invoice - Cash received',
     // Legacy statuses for backward compatibility
     'draft': 'Draft',
     'sent': 'Sent',
@@ -71,6 +72,7 @@ export class InvoiceDetailDialogComponent implements OnInit {
   getStatusColor(status: string): 'primary' | 'accent' | 'warn' {
     switch (status?.toLowerCase()) {
       case 'tax_invoice_bank_received':
+      case 'tax_invoice_cash_received':
       case 'paid':
       case 'sent':
         return 'primary';

@@ -1,0 +1,122 @@
+<h2 mat-dialog-title>Add Bank Transaction</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="bank-transaction-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Transaction Type *</mat-label>
+      <mat-select formControlName="type" required>
+        <mat-option *ngFor="let type of transactionTypes" [value]="type.value">
+          {{ type.label }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('type')?.hasError('required')">
+        Transaction type is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Date *</mat-label>
+      <input
+        matInput
+        [matDatepicker]="datePicker"
+        formControlName="date"
+        placeholder="Select date"
+        required
+      />
+      <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
+      <mat-datepicker #datePicker></mat-datepicker>
+      <mat-error *ngIf="form.get('date')?.hasError('required')">
+        Date is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ form.get('type')?.value === 'expense' ? 'Vendor' : 'Customer' }} *</mat-label>
+      <input
+        matInput
+        formControlName="vendorOrCustomer"
+        placeholder="Enter name"
+        required
+      />
+      <mat-error *ngIf="form.get('vendorOrCustomer')?.hasError('required')">
+        {{ form.get('type')?.value === 'expense' ? 'Vendor' : 'Customer' }} name is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description *</mat-label>
+      <input
+        matInput
+        formControlName="description"
+        placeholder="Enter description"
+        required
+      />
+      <mat-error *ngIf="form.get('description')?.hasError('required')">
+        Description is required
+      </mat-error>
+    </mat-form-field>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="amount-field">
+        <mat-label>Amount *</mat-label>
+        <input
+          matInput
+          type="number"
+          formControlName="amount"
+          step="0.01"
+          min="0.01"
+          placeholder="0.00"
+          required
+        />
+        <mat-error *ngIf="form.get('amount')?.hasError('required')">
+          Amount is required
+        </mat-error>
+        <mat-error *ngIf="form.get('amount')?.hasError('min')">
+          Amount must be greater than 0
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="currency-field">
+        <mat-label>Currency *</mat-label>
+        <mat-select formControlName="currency" required>
+          <mat-option *ngFor="let currency of currencies" [value]="currency">
+            {{ currency }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Reference Number</mat-label>
+      <input
+        matInput
+        formControlName="referenceNumber"
+        placeholder="e.g., Transaction ID, Cheque #"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notes</mat-label>
+      <textarea
+        matInput
+        formControlName="notes"
+        rows="3"
+        placeholder="Additional notes about this transaction"
+      ></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="save()"
+    [disabled]="form.invalid || loading"
+  >
+    <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
+    <span *ngIf="!loading">Add Transaction</span>
+  </button>
+</mat-dialog-actions>
+

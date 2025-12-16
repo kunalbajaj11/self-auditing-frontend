@@ -17,14 +17,7 @@ import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'r
 export class ExpenseFormDialogComponent implements OnInit {
   readonly typeOptions: ExpenseType[] = [
     'expense',
-    'credit',
-    'adjustment',
-    'advance',
-    'accrual',
     'fixed_assets',
-    'share_capital',
-    'retained_earnings',
-    'shareholder_account',
     'cost_of_sales',
   ];
   categories: Category[] = [];
@@ -60,6 +53,7 @@ export class ExpenseFormDialogComponent implements OnInit {
         Validators.required,
       ],
       expectedPaymentDate: [''],
+      purchaseStatus: ['Purchase - Cash Paid', Validators.required],
       vendorId: [''], // Vendor ID from vendor master
       vendorName: [''],
       vendorTrn: [''],
@@ -95,6 +89,17 @@ export class ExpenseFormDialogComponent implements OnInit {
       }
     });
 
+    // Watch for purchase status changes to require expected payment date for accruals
+    this.form.get('purchaseStatus')?.valueChanges.subscribe((status) => {
+      const expectedPaymentDateControl = this.form.get('expectedPaymentDate');
+      if (status === 'Purchase - Accruals') {
+        expectedPaymentDateControl?.setValidators([Validators.required]);
+      } else {
+        expectedPaymentDateControl?.clearValidators();
+      }
+      expectedPaymentDateControl?.updateValueAndValidity();
+    });
+
     // Handle different data types
     if (this.data) {
       if ('id' in this.data) {
@@ -107,6 +112,7 @@ export class ExpenseFormDialogComponent implements OnInit {
           vatAmount: expense.vatAmount,
           expenseDate: expense.expenseDate,
           expectedPaymentDate: expense.expectedPaymentDate ?? '',
+          purchaseStatus: (expense as any).purchaseStatus ?? 'Purchase - Cash Paid',
           vendorId: (expense as any).vendorId ?? '',
           vendorName: expense.vendorName ?? '',
           vendorTrn: expense.vendorTrn ?? '',
@@ -215,6 +221,16 @@ export class ExpenseFormDialogComponent implements OnInit {
       return;
     }
     
+    // Validate purchase status - if "Purchase - Accruals" is selected, require expected payment date
+    if (value.purchaseStatus === 'Purchase - Accruals' && !value.expectedPaymentDate) {
+      this.snackBar.open(
+        'Purchase - Accruals requires an expected payment date.',
+        'Close',
+        { duration: 4000, panelClass: ['snack-error'] },
+      );
+      return;
+    }
+    
     // Validate amount
     const amount = Number(value.amount ?? 0);
     if (amount <= 0) {
@@ -245,6 +261,7 @@ export class ExpenseFormDialogComponent implements OnInit {
       vatAmount: Number(value.vatAmount ?? 0),
       expenseDate: value.expenseDate ?? new Date().toISOString().substring(0, 10),
       expectedPaymentDate: value.expectedPaymentDate || undefined,
+      purchaseStatus: value.purchaseStatus || undefined,
       description: value.description || undefined,
       attachments,
     };

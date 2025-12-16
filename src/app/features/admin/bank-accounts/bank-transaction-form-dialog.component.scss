@@ -1,0 +1,49 @@
+.bank-transaction-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 500px;
+  max-width: 600px;
+  padding: 8px 0;
+
+  .full-width {
+    width: 100%;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+
+    .amount-field {
+      flex: 2;
+    }
+
+    .currency-field {
+      flex: 1;
+    }
+  }
+}
+
+.inline-spinner {
+  display: inline-block;
+  margin-right: 8px;
+}
+
+@media (max-width: 768px) {
+  .bank-transaction-form {
+    min-width: 100%;
+    max-width: 100%;
+
+    .form-row {
+      flex-direction: column;
+      gap: 0;
+
+      .amount-field,
+      .currency-field {
+        width: 100%;
+      }
+    }
+  }
+}
+
