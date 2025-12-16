@@ -135,11 +135,15 @@ export class FileUploadComponent {
         this.ocrResult.emit(ocrResult);
         // Don't show snackbar here - let the parent component handle the dialog opening
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing OCR:', error);
       this.uploading = false;
-      this.snackBar.open('OCR processing failed', 'Close', {
-        duration: 4000,
+      const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+      const errorMessage = isPdf 
+        ? 'Failed to extract data from PDF. Please try again or enter details manually.'
+        : 'OCR processing failed. Please try again or enter details manually.';
+      this.snackBar.open(errorMessage, 'Close', {
+        duration: 5000,
         panelClass: ['snack-error'],
       });
     } finally {

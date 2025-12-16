@@ -134,24 +134,44 @@ export class ExpenseFormDialogComponent implements OnInit {
           // Format date properly (YYYY-MM-DD) with validation
           const expenseDate = this.parseDate(this.ocrResult.expenseDate);
           
+          // Clean vendor name from OCR result (remove "To: " prefix, etc.)
+          const cleanedVendorName = this.cleanVendorName(this.ocrResult.vendorName);
+          
           console.log('[ExpenseForm] Parsed OCR values:', {
             amount,
             vatAmount,
             expenseDate,
             vendorName: this.ocrResult.vendorName,
+            cleanedVendorName,
             vendorTrn: this.ocrResult.vendorTrn,
           });
           
           // Pre-fill form with OCR data
+          // Use emitEvent: false to prevent autocomplete from interfering
           this.form.patchValue({
             categoryId: this.ocrResult.suggestedCategoryId || '',
-            vendorName: this.ocrResult.vendorName || '',
+            vendorName: cleanedVendorName,
             vendorTrn: this.ocrResult.vendorTrn || '',
             amount: amount,
             vatAmount: vatAmount,
             expenseDate: expenseDate,
             description: this.ocrResult.description || '',
+          }, { emitEvent: false });
+          
+          // Verify vendor name was set and log it
+          const setVendorName = this.form.get('vendorName')?.value;
+          console.log('[ExpenseForm] Vendor name set in form:', {
+            original: this.ocrResult.vendorName,
+            cleaned: cleanedVendorName,
+            inForm: setVendorName,
+            matches: setVendorName === cleanedVendorName
           });
+          
+          // Double-check: if vendor name is not set, set it again
+          if (!setVendorName || setVendorName.trim() === '') {
+            console.warn('[ExpenseForm] Vendor name was not set, setting it again');
+            this.form.patchValue({ vendorName: cleanedVendorName }, { emitEvent: false });
+          }
           
           // Trigger validation after OCR population
           this.form.markAllAsTouched();
@@ -230,20 +250,29 @@ export class ExpenseFormDialogComponent implements OnInit {
     };
 
     // Add vendorId if selected, otherwise use vendorName
+    // Always clean vendor name before sending
+    const cleanedVendorName = this.cleanVendorName(value.vendorName);
+    
     if (value.vendorId) {
       expensePayload.vendorId = value.vendorId;
-      // Still send vendorName as fallback
-      if (value.vendorName) {
-        expensePayload.vendorName = value.vendorName;
+      // Still send vendorName as fallback (cleaned)
+      if (cleanedVendorName) {
+        expensePayload.vendorName = cleanedVendorName;
       }
-    } else if (value.vendorName) {
-      expensePayload.vendorName = value.vendorName;
+    } else if (cleanedVendorName) {
+      expensePayload.vendorName = cleanedVendorName;
     }
 
     // Add vendorTrn if provided
     if (value.vendorTrn) {
       expensePayload.vendorTrn = value.vendorTrn;
     }
+    
+    console.log('[ExpenseForm] Vendor data in payload:', {
+      vendorId: expensePayload.vendorId,
+      vendorName: expensePayload.vendorName,
+      vendorTrn: expensePayload.vendorTrn,
+    });
 
     // Add OCR-related fields if OCR result is available
     if (this.ocrResult) {
@@ -268,6 +297,30 @@ export class ExpenseFormDialogComponent implements OnInit {
         next: (expense) => {
           this.loading = false;
           console.log('[ExpenseForm] Expense created successfully:', expense);
+          
+          // If a vendor was created or linked, refresh the vendor list
+          // Check if expense has vendorId or if we sent vendorName (which might have created a vendor)
+          if (expensePayload.vendorName || (expense as any).vendorId) {
+            console.log('[ExpenseForm] Refreshing vendor list after expense creation');
+            // Force refresh to get the newly created vendor
+            this.loadVendors(true);
+            
+            // Also try to select the vendor if it was just created
+            const cleanedVendorName = this.cleanVendorName(expensePayload.vendorName);
+            if (cleanedVendorName && !expensePayload.vendorId) {
+              // Vendor was likely just created, try to find and select it
+              setTimeout(() => {
+                const newVendor = this.vendors.find(v => 
+                  v.name.toLowerCase() === cleanedVendorName.toLowerCase()
+                );
+                if (newVendor) {
+                  this.onVendorSelected(newVendor);
+                  console.log('[ExpenseForm] Auto-selected newly created vendor:', newVendor.name);
+                }
+              }, 500);
+            }
+          }
+          
           const message = this.getTransactionTypeMessage(type);
           this.snackBar.open(message, 'Close', {
             duration: 3000,
@@ -349,23 +402,32 @@ export class ExpenseFormDialogComponent implements OnInit {
     return messages[type] || 'Transaction recorded successfully';
   }
 
-  private loadVendors(): void {
-    this.vendorsService.listVendors({ isActive: true }).subscribe({
+  private loadVendors(forceRefresh: boolean = false): void {
+    // Force refresh by adding timestamp to prevent 304 cache responses
+    const filters: any = { isActive: true };
+    if (forceRefresh) {
+      filters._refresh = Date.now();
+    }
+    
+    this.vendorsService.listVendors(filters).subscribe({
       next: (vendors) => {
         this.vendors = vendors;
-        console.log('[ExpenseForm] Vendors loaded:', vendors.length);
+        console.log('[ExpenseForm] Vendors loaded:', vendors.length, vendors.map(v => v.name));
         
         // If OCR result has vendor name, try to match after vendors are loaded
         // This ensures vendors are available before matching
         if (this.ocrResult?.vendorName) {
-          if (vendors.length > 0) {
-            // Vendors loaded, match immediately
-            setTimeout(() => {
-              this.matchVendorFromOcr(this.ocrResult.vendorName);
-            }, 100);
-          } else {
-            // No vendors in master, but OCR found vendor name
-            console.log('[ExpenseForm] No vendors in master, OCR vendor name will be used as-is');
+          const cleanedVendorName = this.cleanVendorName(this.ocrResult.vendorName);
+          if (cleanedVendorName) {
+            if (vendors.length > 0) {
+              // Vendors loaded, match immediately
+              setTimeout(() => {
+                this.matchVendorFromOcr(cleanedVendorName);
+              }, 100);
+            } else {
+              // No vendors in master, but OCR found vendor name
+              console.log('[ExpenseForm] No vendors in master, OCR vendor name will be used as-is');
+            }
           }
         }
       },
@@ -373,9 +435,12 @@ export class ExpenseFormDialogComponent implements OnInit {
         console.error('[ExpenseForm] Error loading vendors:', error);
         // Even if vendors fail to load, still try to match via API search
         if (this.ocrResult?.vendorName) {
-          setTimeout(() => {
-            this.matchVendorFromOcr(this.ocrResult.vendorName);
-          }, 500);
+          const cleanedVendorName = this.cleanVendorName(this.ocrResult.vendorName);
+          if (cleanedVendorName) {
+            setTimeout(() => {
+              this.matchVendorFromOcr(cleanedVendorName);
+            }, 500);
+          }
         }
       },
     });
@@ -383,8 +448,10 @@ export class ExpenseFormDialogComponent implements OnInit {
 
   private setupVendorAutocomplete(): void {
     // Setup filtered vendors observable for autocomplete
+    // Get initial value from form to preserve OCR-set values
+    const initialValue = this.form.get('vendorName')?.value || '';
     this.filteredVendors$ = this.form.get('vendorName')!.valueChanges.pipe(
-      startWith(''),
+      startWith(initialValue), // Use initial form value to preserve OCR data
       debounceTime(300),
       distinctUntilChanged(),
       switchMap((searchTerm: string | null) => {
@@ -403,6 +470,38 @@ export class ExpenseFormDialogComponent implements OnInit {
         );
       }),
     );
+    
+    // If OCR data is set after autocomplete setup, update the observable
+    // This handles the case where OCR data is set after ngOnInit
+    if (this.ocrResult?.vendorName) {
+      const cleanedVendorName = this.cleanVendorName(this.ocrResult.vendorName);
+      if (cleanedVendorName) {
+        // Re-initialize with the OCR vendor name
+        setTimeout(() => {
+          const currentValue = this.form.get('vendorName')?.value;
+          if (currentValue !== cleanedVendorName) {
+            // Update the observable with the correct initial value
+            this.filteredVendors$ = this.form.get('vendorName')!.valueChanges.pipe(
+              startWith(cleanedVendorName),
+              debounceTime(300),
+              distinctUntilChanged(),
+              switchMap((searchTerm: string | null) => {
+                const search = searchTerm || '';
+                if (this.selectedVendor) {
+                  return of([this.selectedVendor]);
+                }
+                if (!search || search.length < 2) {
+                  return of(this.vendors.slice(0, 10));
+                }
+                return this.vendorsService.searchVendors(search).pipe(
+                  map((vendors) => vendors.slice(0, 10)),
+                );
+              }),
+            );
+          }
+        }, 100);
+      }
+    }
 
     // Watch for vendor selection changes
     this.form.get('vendorId')?.valueChanges.subscribe((vendorId) => {
@@ -424,8 +523,17 @@ export class ExpenseFormDialogComponent implements OnInit {
     // Clear vendorId when vendorName is manually changed (not from selection)
     this.form.get('vendorName')?.valueChanges.subscribe(() => {
       // Only clear if user is typing (not when we programmatically set it)
+      // Check if this is a programmatic change by checking if selectedVendor exists
+      // or if vendorId was just set (within a short time window)
       if (!this.selectedVendor && this.form.get('vendorId')?.value) {
-        this.form.patchValue({ vendorId: '' }, { emitEvent: false });
+        // Use setTimeout to allow programmatic changes to complete first
+        setTimeout(() => {
+          // Only clear if vendorId is still set but selectedVendor is null
+          // This means the user typed something that doesn't match a selected vendor
+          if (!this.selectedVendor && this.form.get('vendorId')?.value) {
+            this.form.patchValue({ vendorId: '' }, { emitEvent: false });
+          }
+        }, 100);
       }
     });
   }
@@ -452,12 +560,40 @@ export class ExpenseFormDialogComponent implements OnInit {
     });
   }
 
+  /**
+   * Clean vendor name by removing common prefixes like "To: ", "From: ", etc.
+   */
+  private cleanVendorName(vendorName: string | null | undefined): string {
+    if (!vendorName) {
+      return '';
+    }
+    
+    let cleaned = vendorName.trim();
+    
+    // Remove common prefixes
+    const prefixes = ['To:', 'From:', 'Vendor:', 'Supplier:', 'Company:'];
+    for (const prefix of prefixes) {
+      if (cleaned.toLowerCase().startsWith(prefix.toLowerCase())) {
+        cleaned = cleaned.substring(prefix.length).trim();
+        break; // Only remove one prefix
+      }
+    }
+    
+    return cleaned;
+  }
+
   private matchVendorFromOcr(vendorName: string): void {
     if (!vendorName || vendorName.trim().length === 0) {
       return;
     }
     
-    const searchName = vendorName.trim().toLowerCase();
+    // Clean the vendor name before matching
+    const cleanedName = this.cleanVendorName(vendorName);
+    if (!cleanedName) {
+      return;
+    }
+    
+    const searchName = cleanedName.toLowerCase();
     
     // Try exact match first
     let matchedVendor = this.vendors.find(
@@ -474,7 +610,9 @@ export class ExpenseFormDialogComponent implements OnInit {
     
     // Try searching via API if not found locally
     if (!matchedVendor) {
-      this.vendorsService.searchVendors(vendorName).subscribe({
+      // Use cleaned name for API search
+      const cleanedSearchName = this.cleanVendorName(vendorName);
+      this.vendorsService.searchVendors(cleanedSearchName).subscribe({
         next: (vendors) => {
           if (vendors && vendors.length > 0) {
             const vendor = vendors[0]; // Use first match
@@ -486,8 +624,18 @@ export class ExpenseFormDialogComponent implements OnInit {
             });
           } else {
             console.log('[ExpenseForm] No vendor match found for OCR vendor:', vendorName);
+            // Ensure vendor name is preserved in the form even if no match found
+            // The vendor name should already be set from OCR, but ensure it's still there
+            const currentVendorName = this.form.get('vendorName')?.value;
+            if (!currentVendorName || currentVendorName.trim() === '') {
+              // If vendor name was cleared somehow, restore it
+              this.form.patchValue({
+                vendorName: cleanedSearchName,
+              }, { emitEvent: false });
+              console.log('[ExpenseForm] Restored vendor name in form:', cleanedSearchName);
+            }
             // Show info that vendor will be created as new
-            this.snackBar.open(`Vendor "${vendorName}" not found in master. Will create new entry.`, 'Close', {
+            this.snackBar.open(`Vendor "${cleanedSearchName}" not found in master. Will create new entry.`, 'Close', {
               duration: 4000,
             });
           }

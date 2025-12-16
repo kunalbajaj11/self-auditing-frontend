@@ -22,7 +22,10 @@ export class ApiService {
   }
 
   get<T>(endpoint: string, params?: Record<string, any>): Observable<T> {
-    return this.request<T>('get', endpoint, { params });
+    // Add cache-busting for vendor list to prevent 304 responses
+    const cacheBust = endpoint.includes('/vendors') ? { _t: Date.now() } : {};
+    const mergedParams = { ...cacheBust, ...params };
+    return this.request<T>('get', endpoint, { params: mergedParams });
   }
 
   post<T>(endpoint: string, body?: unknown): Observable<T> {

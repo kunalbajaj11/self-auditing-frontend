@@ -50,11 +50,13 @@ export class VendorsService {
     search?: string;
     category?: string;
     isActive?: boolean;
+    _refresh?: number; // Cache-busting parameter
   }): Observable<Vendor[]> {
     const params: Record<string, any> = {};
     if (filters?.search) params['search'] = filters.search;
     if (filters?.category) params['category'] = filters.category;
     if (filters?.isActive !== undefined) params['isActive'] = filters.isActive;
+    if (filters?._refresh) params['_refresh'] = filters._refresh;
     return this.api.get<Vendor[]>('/vendors', params);
   }
 
