@@ -19,7 +19,13 @@ import {
   UpgradeLicenseDialogComponent,
   UpgradeLicenseDialogData,
 } from './upgrade-license-dialog.component';
+import {
+  AllocateUploadsDialogComponent,
+  AllocateUploadsDialogData,
+} from './allocate-uploads-dialog.component';
 import { PlanType } from '../../../core/models/plan.model';
+import { LicenseKeysService } from '../../../core/services/license-keys.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-super-admin-organizations',
@@ -49,6 +55,7 @@ export class SuperAdminOrganizationsComponent implements OnInit {
   constructor(
     private readonly superAdminService: SuperAdminService,
     private readonly organizationService: OrganizationService,
+    private readonly licenseKeysService: LicenseKeysService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
   ) {}
@@ -122,6 +129,57 @@ export class SuperAdminOrganizationsComponent implements OnInit {
           },
         });
       }
+    });
+  }
+
+  allocateUploads(org: OrganizationUsage): void {
+    // Get license and upload usage for this organization
+    forkJoin({
+      license: this.licenseKeysService.getByOrganizationId(org.id),
+      usage: this.licenseKeysService.getUploadUsage(org.id),
+    }).subscribe({
+      next: ({ license, usage }) => {
+        if (!license) {
+          this.snackBar.open(
+            'No license found for this organization',
+            'Close',
+            { duration: 3000, panelClass: ['snack-error'] },
+          );
+          return;
+        }
+
+        const dialogRef = this.dialog.open<
+          AllocateUploadsDialogComponent,
+          AllocateUploadsDialogData,
+          boolean
+        >(AllocateUploadsDialogComponent, {
+          width: '600px',
+          data: {
+            organizationId: org.id,
+            organizationName: org.name,
+            licenseId: license.id,
+            currentUsage: usage,
+          },
+        });
+
+        dialogRef.afterClosed().subscribe((allocated) => {
+          if (allocated) {
+            this.snackBar.open(
+              'Upload allocation updated successfully',
+              'Close',
+              { duration: 3000 },
+            );
+            // Optionally refresh the list
+          }
+        });
+      },
+      error: () => {
+        this.snackBar.open(
+          'Failed to load license information',
+          'Close',
+          { duration: 3000, panelClass: ['snack-error'] },
+        );
+      },
     });
   }
 

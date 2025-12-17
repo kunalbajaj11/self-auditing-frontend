@@ -7,6 +7,33 @@
   </header>
 
   <mat-card>
+    <!-- Upload Usage Indicator -->
+    <mat-card *ngIf="uploadUsage$ | async as usage" class="upload-usage-card" 
+              [ngClass]="{
+                'warning': (usage.usedUploads / usage.totalAllowed) >= 0.8 && usage.remainingUploads > 0,
+                'critical': usage.remainingUploads <= 0
+              }">
+      <mat-card-content>
+        <div class="usage-content">
+          <mat-icon>{{ usage.remainingUploads <= 0 ? 'error' : 'cloud_upload' }}</mat-icon>
+          <div class="usage-text">
+            <strong>Upload Usage:</strong>
+            <span *ngIf="usage.remainingUploads <= 0" class="critical-text">
+              You have reached your upload limit ({{ usage.totalAllowed | number }} uploads). 
+              Please contact your administrator or sales team: <a href="mailto:support&#64;selfaccounting.ai">support&#64;selfaccounting.ai</a>
+            </span>
+            <span *ngIf="usage.remainingUploads > 0">
+              {{ usage.usedUploads | number }} of {{ usage.totalAllowed | number }} uploads used 
+              ({{ usage.remainingUploads | number }} remaining)
+              <span *ngIf="(usage.usedUploads / usage.totalAllowed) >= 0.8" class="warning-text">
+                - Running low! Contact administrator to request more uploads.
+              </span>
+            </span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
     <form [formGroup]="form" class="form">
       <mat-form-field appearance="outline">
         <mat-label>Vendor</mat-label>

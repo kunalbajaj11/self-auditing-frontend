@@ -15,6 +15,28 @@
 
   <ng-container *ngIf="dashboard$ | async as vm; else loadingState">
     <div *ngIf="vm; else errorState" class="dashboard-content">
+      <!-- Upload Limit Warning Banner -->
+      <mat-card *ngIf="vm.uploadUsage" class="upload-warning-banner" 
+                [ngClass]="{
+                  'warning': (vm.uploadUsage.usedUploads / vm.uploadUsage.totalAllowed) >= 0.8 && (vm.uploadUsage.usedUploads / vm.uploadUsage.totalAllowed) < 1,
+                  'critical': vm.uploadUsage.remainingUploads <= 0 || (vm.uploadUsage.usedUploads / vm.uploadUsage.totalAllowed) >= 1
+                }">
+        <div class="banner-content">
+          <mat-icon>{{ vm.uploadUsage.remainingUploads <= 0 ? 'error' : 'warning' }}</mat-icon>
+          <div class="banner-text">
+            <strong *ngIf="vm.uploadUsage.remainingUploads <= 0">Upload Limit Reached!</strong>
+            <strong *ngIf="vm.uploadUsage.remainingUploads > 0 && (vm.uploadUsage.usedUploads / vm.uploadUsage.totalAllowed) >= 0.8">Upload Limit Warning</strong>
+            <span *ngIf="vm.uploadUsage.remainingUploads <= 0">
+              You have used all {{ vm.uploadUsage.totalAllowed | number }} uploads. Please contact your administrator or sales team to request additional uploads.
+            </span>
+            <span *ngIf="vm.uploadUsage.remainingUploads > 0 && (vm.uploadUsage.usedUploads / vm.uploadUsage.totalAllowed) >= 0.8">
+              You have {{ vm.uploadUsage.remainingUploads | number }} uploads remaining ({{ ((vm.uploadUsage.usedUploads / vm.uploadUsage.totalAllowed) * 100) | number:'1.0-0' }}% used). 
+              Contact your administrator or sales team to request more uploads: <a href="mailto:support&#64;selfaccounting.ai">support&#64;selfaccounting.ai</a>
+            </span>
+          </div>
+        </div>
+      </mat-card>
+
       <div class="period-indicator">
         <mat-icon>calendar_today</mat-icon>
         <span>Showing data for <strong>{{ vm.period }}</strong></span>
@@ -82,6 +104,15 @@
             [value]="'AED ' + ((vm.outstandingAmount || 0) | number: '1.0-2')"
             accent="accent"
             [hint]="vm.overdueInvoices ? vm.overdueInvoices + ' overdue' : undefined"
+          ></app-summary-card>
+
+          <app-summary-card
+            *ngIf="vm.uploadUsage"
+            label="Upload Usage"
+            icon="cloud_upload"
+            [value]="(vm.uploadUsage.usedUploads | number) + ' / ' + (vm.uploadUsage.totalAllowed | number)"
+            [accent]="(vm.uploadUsage.usedUploads / vm.uploadUsage.totalAllowed) >= 0.8 ? 'warn' : 'primary'"
+            [hint]="vm.uploadUsage.remainingUploads + ' remaining'"
           ></app-summary-card>
         </div>
       </section>

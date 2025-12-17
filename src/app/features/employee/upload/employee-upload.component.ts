@@ -4,8 +4,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { CategoriesService, Category } from '../../../core/services/categories.service';
 import { ExpensesService } from '../../../core/services/expenses.service';
 import { LicenseService } from '../../../core/services/license.service';
+import { LicenseKeysService } from '../../../core/services/license-keys.service';
+import { OrganizationService } from '../../../core/services/organization.service';
+import { UploadUsage } from '../../../core/models/license-key.model';
 import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-employee-upload',
@@ -16,6 +19,7 @@ export class EmployeeUploadComponent implements OnInit {
   categories: Category[] = [];
   loading = false;
   isEnterprise$: Observable<boolean>;
+  uploadUsage$!: Observable<UploadUsage | null>;
 
   readonly form;
 
@@ -25,6 +29,8 @@ export class EmployeeUploadComponent implements OnInit {
     private readonly expensesService: ExpensesService,
     private readonly snackBar: MatSnackBar,
     private readonly licenseService: LicenseService,
+    private readonly licenseKeysService: LicenseKeysService,
+    private readonly organizationService: OrganizationService,
   ) {
     this.isEnterprise$ = this.licenseService.isEnterprise().pipe(
       catchError(() => of(false)),
@@ -47,6 +53,16 @@ export class EmployeeUploadComponent implements OnInit {
     this.categoriesService.listCategories().subscribe((categories) => {
       this.categories = categories;
     });
+
+    // Load upload usage
+    this.uploadUsage$ = this.organizationService.getMyOrganization().pipe(
+      switchMap((org) => 
+        this.licenseKeysService.getUploadUsage(org.id).pipe(
+          catchError(() => of(null)),
+        )
+      ),
+      catchError(() => of(null)),
+    );
   }
 
   submit(): void {
@@ -97,13 +113,15 @@ export class EmployeeUploadComponent implements OnInit {
             attachmentUrl: '',
           });
         },
-        error: () => {
+        error: (error) => {
           this.loading = false;
-          this.snackBar.open(
-            'Unable to submit expense. Please check the details.',
-            'Close',
-            { duration: 4000, panelClass: ['snack-error'] },
-          );
+          const message =
+            error?.error?.message ??
+            'Unable to submit expense. Please check the details.';
+          this.snackBar.open(message, 'Close', {
+            duration: 5000,
+            panelClass: ['snack-error'],
+          });
         },
       });
   }

@@ -8,6 +8,7 @@ import { SuperAdminAuditLogsComponent } from './audit-logs/super-admin-audit-log
 import { OrganizationFormDialogComponent } from './organizations/organization-form-dialog.component';
 import { ActivateOrganizationDialogComponent } from './organizations/activate-organization-dialog.component';
 import { UpgradeLicenseDialogComponent } from './organizations/upgrade-license-dialog.component';
+import { AllocateUploadsDialogComponent } from './organizations/allocate-uploads-dialog.component';
 import { PlanFormDialogComponent } from './plans/plan-form-dialog.component';
 import { LicenseKeyManagementComponent } from './license-keys/license-key-management.component';
 import { LicenseKeyCreateDialogComponent } from './license-keys/license-key-create-dialog.component';
@@ -22,6 +23,7 @@ import { LicenseKeyRenewDialogComponent } from './license-keys/license-key-renew
     OrganizationFormDialogComponent,
     ActivateOrganizationDialogComponent,
     UpgradeLicenseDialogComponent,
+    AllocateUploadsDialogComponent,
     PlanFormDialogComponent,
     LicenseKeyManagementComponent,
     LicenseKeyCreateDialogComponent,

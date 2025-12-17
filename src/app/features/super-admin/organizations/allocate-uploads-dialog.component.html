@@ -1,0 +1,98 @@
+<h2 mat-dialog-title>Allocate Additional Uploads</h2>
+<mat-dialog-content [formGroup]="form" class="dialog-content">
+  <div class="usage-info">
+    <h3>{{ data.organizationName }}</h3>
+    <div class="usage-stats">
+      <div class="stat-item">
+        <span class="label">Base Upload Limit:</span>
+        <span class="value">{{ currentUsage.maxUploads | number }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="label">Previously Allocated:</span>
+        <span class="value">{{ currentUsage.allocatedUploads | number }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="label">Total Allowed:</span>
+        <span class="value">{{ currentUsage.totalAllowed | number }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="label">Used Uploads:</span>
+        <span class="value">{{ currentUsage.usedUploads | number }}</span>
+      </div>
+      <div class="stat-item highlight">
+        <span class="label">Remaining Uploads:</span>
+        <span class="value">{{ currentUsage.remainingUploads | number }}</span>
+      </div>
+    </div>
+  </div>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Additional Uploads to Allocate</mat-label>
+    <input
+      matInput
+      type="number"
+      formControlName="additionalUploads"
+      placeholder="0"
+    />
+    <mat-hint
+      >Enter the number of additional uploads to allocate. This will be added
+      to the current allocated uploads.</mat-hint
+    >
+    <mat-error *ngIf="form.controls.additionalUploads.hasError('required')">
+      Number of uploads is required
+    </mat-error>
+    <mat-error *ngIf="form.controls.additionalUploads.hasError('min')">
+      Number must be 0 or greater
+    </mat-error>
+    <mat-error *ngIf="form.controls.additionalUploads.hasError('max')">
+      Number cannot exceed 100,000
+    </mat-error>
+  </mat-form-field>
+
+  <div class="preview" *ngIf="(form.controls.additionalUploads.value ?? 0) > 0">
+    <p>
+      <strong>After allocation:</strong>
+    </p>
+    <ul>
+      <li>
+        Total Allowed:
+        <strong>{{ totalAfterAllocation | number }}</strong>
+      </li>
+      <li>
+        Remaining:
+        <strong
+          >{{
+            totalAfterAllocation - currentUsage.usedUploads | number
+          }}</strong
+        >
+      </li>
+    </ul>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button
+    mat-button
+    type="button"
+    (click)="cancel()"
+    [disabled]="loading"
+  >
+    Cancel
+  </button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="submit()"
+    [disabled]="loading || form.invalid"
+  >
+    <mat-progress-spinner
+      *ngIf="loading"
+      mode="indeterminate"
+      diameter="16"
+      strokeWidth="3"
+    ></mat-progress-spinner>
+    <span *ngIf="!loading">Allocate Uploads</span>
+  </button>
+</mat-dialog-actions>
+

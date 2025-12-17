@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, forkJoin, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { Organization } from '../../../core/models/organization.model';
 import { OrganizationService } from '../../../core/services/organization.service';
 import { ReportsService } from '../../../core/services/reports.service';
@@ -8,6 +8,8 @@ import { GeneratedReport, ReportType } from '../../../core/models/report.model';
 import { ExpensesService } from '../../../core/services/expenses.service';
 import { Expense } from '../../../core/models/expense.model';
 import { SalesInvoicesService } from '../../../core/services/sales-invoices.service';
+import { LicenseKeysService } from '../../../core/services/license-keys.service';
+import { UploadUsage } from '../../../core/models/license-key.model';
 
 interface ExpenseSummaryRow {
   category: string;
@@ -59,6 +61,7 @@ interface AdminDashboardViewModel {
   outstandingInvoices?: number;
   outstandingAmount?: number;
   overdueInvoices?: number;
+  uploadUsage?: UploadUsage;
 }
 
 @Component({
@@ -76,6 +79,7 @@ export class AdminDashboardComponent implements OnInit {
     private readonly reportsService: ReportsService,
     private readonly expensesService: ExpensesService,
     private readonly salesInvoicesService: SalesInvoicesService,
+    private readonly licenseKeysService: LicenseKeysService,
   ) {}
 
   ngOnInit(): void {
@@ -104,9 +108,14 @@ export class AdminDashboardComponent implements OnInit {
       endDate,
     });
 
-    this.dashboard$ = forkJoin({
-      organization: this.organizationService.getMyOrganization(),
-      profitAndLoss: this.reportsService
+    this.dashboard$ = this.organizationService.getMyOrganization().pipe(
+      switchMap((organization) => {
+        return forkJoin({
+          organization: of(organization),
+          uploadUsage: this.licenseKeysService.getUploadUsage(organization.id).pipe(
+            catchError(() => of(undefined)),
+          ),
+          profitAndLoss: this.reportsService
         .generateReport({ 
           type: 'profit_and_loss' as ReportType,
           filters: { startDate, endDate }
@@ -151,6 +160,7 @@ export class AdminDashboardComponent implements OnInit {
       map(
         ({
           organization,
+          uploadUsage,
           profitAndLoss,
           payables,
           receivables,
@@ -264,6 +274,7 @@ export class AdminDashboardComponent implements OnInit {
             outstandingInvoices,
             outstandingAmount,
             overdueInvoices,
+            uploadUsage,
           };
         },
       ),
@@ -272,6 +283,8 @@ export class AdminDashboardComponent implements OnInit {
         this.loading = false;
         this.error = 'Unable to load dashboard data.';
         return of(null);
+      }),
+        );
       }),
     );
   }

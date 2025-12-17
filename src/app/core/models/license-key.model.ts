@@ -9,6 +9,8 @@ export interface LicenseKey {
   planType?: PlanType | null;
   maxUsers?: number | null;
   storageQuotaMb?: number | null;
+  maxUploads: number;
+  allocatedUploads: number;
   expiresAt: string;
   consumedAt?: string | null;
   consumedByOrganizationId?: string | null;
@@ -17,5 +19,13 @@ export interface LicenseKey {
   email?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface UploadUsage {
+  maxUploads: number;
+  allocatedUploads: number;
+  totalAllowed: number;
+  usedUploads: number;
+  remainingUploads: number;
 }
 

@@ -115,6 +115,15 @@
               <button
                 mat-stroked-button
                 color="primary"
+                (click)="allocateUploads(org)"
+                matTooltip="Allocate additional uploads for this organization"
+              >
+                <mat-icon>cloud_upload</mat-icon>
+                Allocate Uploads
+              </button>
+              <button
+                mat-stroked-button
+                color="primary"
                 (click)="toggleStatus(org)"
               >
                 {{ org.status === 'active' ? 'Deactivate' : 'Activate' }}
