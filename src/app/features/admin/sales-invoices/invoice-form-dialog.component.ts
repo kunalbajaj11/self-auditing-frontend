@@ -10,6 +10,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SalesInvoicesService, SalesInvoice, InvoiceLineItem } from '../../../core/services/sales-invoices.service';
 import { CustomersService, Customer } from '../../../core/services/customers.service';
+import { SettingsService, TaxRate } from '../../../core/services/settings.service';
 
 @Component({
   selector: 'app-invoice-form-dialog',
@@ -21,6 +22,8 @@ export class InvoiceFormDialogComponent implements OnInit {
   loading = false;
   customers: Customer[] = [];
   loadingCustomers = false;
+  taxRates: TaxRate[] = [];
+  defaultTaxRate = 5; // Fallback default
 
   readonly vatTaxTypes = ['STANDARD', 'ZERO_RATED', 'EXEMPT', 'REVERSE_CHARGE'];
   readonly invoiceStatuses = ['proforma_invoice', 'tax_invoice_receivable', 'tax_invoice_cash_received'];
@@ -63,6 +66,7 @@ export class InvoiceFormDialogComponent implements OnInit {
     private readonly dialogRef: MatDialogRef<InvoiceFormDialogComponent>,
     private readonly invoicesService: SalesInvoicesService,
     private readonly customersService: CustomersService,
+    private readonly settingsService: SettingsService,
     private readonly snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) public data: SalesInvoice | null,
   ) {
@@ -82,12 +86,43 @@ export class InvoiceFormDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCustomers();
+    this.loadTaxSettings();
     if (this.data) {
       this.loadInvoiceData();
     } else {
       // Add one empty line item for new invoice
       this.addLineItem();
     }
+  }
+
+  loadTaxSettings(): void {
+    // Load tax settings for default rate
+    this.settingsService.getTaxSettings().subscribe({
+      next: (settings) => {
+        this.defaultTaxRate = settings.taxDefaultRate || 5;
+      },
+      error: () => {
+        // Use fallback if settings fail to load
+        this.defaultTaxRate = 5;
+      },
+    });
+
+    // Load tax rates for selection
+    this.settingsService.getTaxRates().subscribe({
+      next: (rates) => {
+        this.taxRates = rates.filter((rate) => rate.isActive);
+      },
+      error: () => {
+        this.taxRates = [];
+      },
+    });
+  }
+
+  getTaxRateForType(taxType: string): number {
+    const matchingRate = this.taxRates.find(
+      (rate) => rate.type.toLowerCase() === taxType.toLowerCase(),
+    );
+    return matchingRate ? matchingRate.rate : this.defaultTaxRate;
   }
 
   loadCustomers(): void {
@@ -149,7 +184,7 @@ export class InvoiceFormDialogComponent implements OnInit {
           itemName: invoice.description || 'Invoice Item',
           quantity: 1,
           unitPrice: parseFloat(invoice.amount),
-          vatRate: parseFloat(invoice.vatAmount || '0') > 0 ? 5 : 0,
+          vatRate: parseFloat(invoice.vatAmount || '0') > 0 ? this.defaultTaxRate : 0,
           vatTaxType: 'STANDARD',
           amount: parseFloat(invoice.amount),
           vatAmount: parseFloat(invoice.vatAmount || '0'),
@@ -188,7 +223,7 @@ export class InvoiceFormDialogComponent implements OnInit {
       quantity: [item?.quantity || 1, [Validators.required, Validators.min(0.001)]],
       unitPrice: [item?.unitPrice || 0, [Validators.required, Validators.min(0)]],
       unitOfMeasure: [item?.unitOfMeasure || 'unit'],
-      vatRate: [item?.vatRate || 5, [Validators.min(0), Validators.max(100)]],
+      vatRate: [item?.vatRate || this.defaultTaxRate, [Validators.min(0), Validators.max(100)]],
       vatTaxType: [item?.vatTaxType || 'STANDARD'],
       amount: [{ value: item?.amount || (item?.quantity || 1) * (item?.unitPrice || 0), disabled: true }],
       vatAmount: [{ value: item?.vatAmount || 0, disabled: true }],
@@ -199,7 +234,16 @@ export class InvoiceFormDialogComponent implements OnInit {
     lineItemGroup.get('quantity')?.valueChanges.subscribe(() => this.calculateLineItem(lineItemGroup));
     lineItemGroup.get('unitPrice')?.valueChanges.subscribe(() => this.calculateLineItem(lineItemGroup));
     lineItemGroup.get('vatRate')?.valueChanges.subscribe(() => this.calculateLineItem(lineItemGroup));
-    lineItemGroup.get('vatTaxType')?.valueChanges.subscribe(() => this.calculateLineItem(lineItemGroup));
+    lineItemGroup.get('vatTaxType')?.valueChanges.subscribe((taxType) => {
+      // Auto-set VAT rate based on tax type if rate is default
+      const vatRateValue = lineItemGroup.get('vatRate')?.value;
+      const currentRate = typeof vatRateValue === 'number' ? vatRateValue : parseFloat(String(vatRateValue || '0'));
+      if (currentRate === this.defaultTaxRate || currentRate === 0) {
+        const rateForType = this.getTaxRateForType(taxType || 'STANDARD');
+        lineItemGroup.patchValue({ vatRate: rateForType }, { emitEvent: false });
+      }
+      this.calculateLineItem(lineItemGroup);
+    });
 
     // Initial calculation
     this.calculateLineItem(lineItemGroup);
@@ -212,9 +256,12 @@ export class InvoiceFormDialogComponent implements OnInit {
   }
 
   calculateLineItem(lineItemGroup: FormGroup): void {
-    const quantity = parseFloat(lineItemGroup.get('quantity')?.value || '0');
-    const unitPrice = parseFloat(lineItemGroup.get('unitPrice')?.value || '0');
-    const vatRate = parseFloat(lineItemGroup.get('vatRate')?.value || '0');
+    const quantityValue = lineItemGroup.get('quantity')?.value;
+    const unitPriceValue = lineItemGroup.get('unitPrice')?.value;
+    const vatRateValue = lineItemGroup.get('vatRate')?.value;
+    const quantity = typeof quantityValue === 'number' ? quantityValue : parseFloat(String(quantityValue || '0'));
+    const unitPrice = typeof unitPriceValue === 'number' ? unitPriceValue : parseFloat(String(unitPriceValue || '0'));
+    const vatRate = typeof vatRateValue === 'number' ? vatRateValue : parseFloat(String(vatRateValue || '0'));
     const vatTaxType = lineItemGroup.get('vatTaxType')?.value || 'STANDARD';
 
     const amount = quantity * unitPrice;
@@ -261,7 +308,7 @@ export class InvoiceFormDialogComponent implements OnInit {
         quantity: parseFloat(value.quantity),
         unitPrice: parseFloat(value.unitPrice),
         unitOfMeasure: value.unitOfMeasure || 'unit',
-        vatRate: parseFloat(value.vatRate || '5'),
+        vatRate: parseFloat(value.vatRate || String(this.defaultTaxRate)),
         vatTaxType: value.vatTaxType || 'STANDARD',
         amount: parseFloat(value.amount),
         vatAmount: parseFloat(value.vatAmount),

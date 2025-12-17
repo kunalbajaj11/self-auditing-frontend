@@ -5,6 +5,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ExpensesService } from '../../../core/services/expenses.service';
 import { CategoriesService, Category } from '../../../core/services/categories.service';
 import { VendorsService, Vendor } from '../../../core/services/vendors.service';
+import { SettingsService, TaxSettings } from '../../../core/services/settings.service';
 import { Expense, ExpenseType } from '../../../core/models/expense.model';
 import { Observable, of } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
@@ -34,12 +35,18 @@ export class ExpenseFormDialogComponent implements OnInit {
   filteredVendors$!: Observable<Vendor[]>; // Will be initialized in setupVendorAutocomplete()
   selectedVendor: Vendor | null = null;
 
+  // Tax settings
+  taxSettings: TaxSettings | null = null;
+  defaultTaxRate = 5;
+  taxCalculationMethod: 'inclusive' | 'exclusive' = 'inclusive';
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly dialogRef: MatDialogRef<ExpenseFormDialogComponent>,
     private readonly expensesService: ExpensesService,
     private readonly categoriesService: CategoriesService,
     private readonly vendorsService: VendorsService,
+    private readonly settingsService: SettingsService,
     private readonly snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) readonly data: Expense | { attachment?: any; ocrResult?: any } | null,
   ) {
@@ -62,6 +69,9 @@ export class ExpenseFormDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Load tax settings
+    this.loadTaxSettings();
+
     // Load all categories initially
     this.categoriesService.listCategories().subscribe((categories) => {
       this.allCategories = categories;
@@ -100,6 +110,23 @@ export class ExpenseFormDialogComponent implements OnInit {
       expectedPaymentDateControl?.updateValueAndValidity();
     });
 
+    // Watch for amount changes to auto-calculate VAT
+    this.form.get('amount')?.valueChanges.subscribe(() => {
+      this.autoCalculateVat();
+    });
+
+    // Watch for VAT amount manual changes - if user clears it, recalculate
+    this.form.get('vatAmount')?.valueChanges.subscribe((vatValue) => {
+      const vatNum = typeof vatValue === 'number' ? vatValue : parseFloat(String(vatValue || '0'));
+      const isEmpty = vatValue === null || vatValue === undefined || 
+                     (typeof vatValue === 'string' && vatValue === '') || 
+                     vatNum === 0;
+      if (isEmpty) {
+        // User cleared VAT, recalculate
+        setTimeout(() => this.autoCalculateVat(), 100);
+      }
+    });
+
     // Handle different data types
     if (this.data) {
       if ('id' in this.data) {
@@ -108,8 +135,8 @@ export class ExpenseFormDialogComponent implements OnInit {
         this.form.patchValue({
           type: expense.type,
           categoryId: expense.categoryId ?? '',
-          amount: expense.amount,
-          vatAmount: expense.vatAmount,
+          amount: typeof expense.amount === 'number' ? expense.amount : parseFloat(String(expense.amount || '0')),
+          vatAmount: typeof expense.vatAmount === 'number' ? expense.vatAmount : parseFloat(String(expense.vatAmount || '0')),
           expenseDate: expense.expenseDate,
           expectedPaymentDate: expense.expectedPaymentDate ?? '',
           purchaseStatus: (expense as any).purchaseStatus ?? 'Purchase - Cash Paid',
@@ -417,6 +444,57 @@ export class ExpenseFormDialogComponent implements OnInit {
       cost_of_sales: 'Cost of sales recorded successfully',
     };
     return messages[type] || 'Transaction recorded successfully';
+  }
+
+  loadTaxSettings(): void {
+    this.settingsService.getTaxSettings().subscribe({
+      next: (settings) => {
+        this.taxSettings = settings;
+        this.defaultTaxRate = settings.taxDefaultRate || 5;
+        this.taxCalculationMethod = (settings.taxCalculationMethod as 'inclusive' | 'exclusive') || 'inclusive';
+        // Auto-calculate VAT if amount is already set
+        if (this.form.get('amount')?.value) {
+          this.autoCalculateVat();
+        }
+      },
+      error: () => {
+        // Use fallback defaults
+        this.defaultTaxRate = 5;
+        this.taxCalculationMethod = 'inclusive';
+      },
+    });
+  }
+
+  autoCalculateVat(): void {
+    const amountValue = this.form.get('amount')?.value;
+    const vatFormValue = this.form.get('vatAmount')?.value;
+    const amount = typeof amountValue === 'number' ? amountValue : parseFloat(String(amountValue || '0'));
+    const currentVat = typeof vatFormValue === 'number' ? vatFormValue : parseFloat(String(vatFormValue || '0'));
+    
+    // Only auto-calculate if VAT is 0 or empty (user hasn't manually entered it)
+    const isVatEmpty = vatFormValue === null || 
+                      vatFormValue === undefined || 
+                      (typeof vatFormValue === 'string' && vatFormValue === '') || 
+                      currentVat === 0;
+    if (amount > 0 && isVatEmpty) {
+      let calculatedVat = 0;
+      
+      if (this.taxCalculationMethod === 'inclusive') {
+        // VAT is included in the amount
+        // VAT = Amount * (TaxRate / (100 + TaxRate))
+        calculatedVat = (amount * this.defaultTaxRate) / (100 + this.defaultTaxRate);
+      } else {
+        // VAT is exclusive (added on top)
+        // VAT = Amount * (TaxRate / 100)
+        calculatedVat = (amount * this.defaultTaxRate) / 100;
+      }
+      
+      // Round to 2 decimal places
+      calculatedVat = Math.round(calculatedVat * 100) / 100;
+      
+      // Update VAT amount without triggering change event to avoid loop
+      this.form.patchValue({ vatAmount: calculatedVat }, { emitEvent: false });
+    }
   }
 
   private loadVendors(forceRefresh: boolean = false): void {
