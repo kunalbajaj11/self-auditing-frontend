@@ -16,6 +16,7 @@ import { ReconciliationDetailComponent } from './bank-reconciliation/reconciliat
 import { UploadBankStatementComponent } from './bank-reconciliation/upload-bank-statement.component';
 import { AdminCustomersComponent } from './customers/admin-customers.component';
 import { AdminSalesInvoicesComponent } from './sales-invoices/admin-sales-invoices.component';
+import { InvoicePreviewComponent } from './sales-invoices/invoice-preview.component';
 import { AdminCreditNotesComponent } from './credit-notes/admin-credit-notes.component';
 import { AdminDebitNotesComponent } from './debit-notes/admin-debit-notes.component';
 import { AdminVendorsComponent } from './vendors/admin-vendors.component';
@@ -250,6 +251,11 @@ const routes: Routes = [
         path: 'sales-invoices',
         component: AdminSalesInvoicesComponent,
         data: { shell: { title: 'Sales Invoice Management' } },
+      },
+      {
+        path: 'sales-invoices/:id/preview',
+        component: InvoicePreviewComponent,
+        data: { shell: { title: 'Invoice Preview' } },
       },
           {
             path: 'credit-notes',

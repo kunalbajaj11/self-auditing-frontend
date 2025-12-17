@@ -23,6 +23,7 @@ import { CustomerFormDialogComponent } from './customers/customer-form-dialog.co
 import { AdminSalesInvoicesComponent } from './sales-invoices/admin-sales-invoices.component';
 import { InvoiceFormDialogComponent } from './sales-invoices/invoice-form-dialog.component';
 import { InvoiceDetailDialogComponent } from './sales-invoices/invoice-detail-dialog.component';
+import { InvoicePreviewComponent } from './sales-invoices/invoice-preview.component';
 import { InvoicePaymentDialogComponent } from './sales-invoices/invoice-payment-dialog.component';
 import { AdminCreditNotesComponent } from './credit-notes/admin-credit-notes.component';
 import { CreditNoteFormDialogComponent } from './credit-notes/credit-note-form-dialog.component';
@@ -72,6 +73,7 @@ import { JournalEntryFormDialogComponent } from './journal-entries/journal-entry
     AdminSalesInvoicesComponent,
     InvoiceFormDialogComponent,
     InvoiceDetailDialogComponent,
+    InvoicePreviewComponent,
     InvoicePaymentDialogComponent,
     AdminCreditNotesComponent,
     CreditNoteFormDialogComponent,

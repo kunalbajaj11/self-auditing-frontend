@@ -1,6 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales-invoices.service';
 import { InvoicePaymentDialogComponent } from './invoice-payment-dialog.component';
 import { InvoiceEmailDialogComponent } from './invoice-email-dialog.component';
@@ -19,6 +20,7 @@ export class InvoiceDetailDialogComponent implements OnInit {
     private readonly dialogRef: MatDialogRef<InvoiceDetailDialogComponent>,
     private readonly invoicesService: SalesInvoicesService,
     private readonly dialog: MatDialog,
+    private readonly router: Router,
     @Inject(MAT_DIALOG_DATA) public data: { invoiceId: string },
   ) {}
 
@@ -156,6 +158,12 @@ export class InvoiceDetailDialogComponent implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  previewInvoice(): void {
+    if (!this.invoice) return;
+    this.dialogRef.close();
+    this.router.navigate(['/admin/sales-invoices', this.invoice.id, 'preview']);
   }
 
   close(): void {

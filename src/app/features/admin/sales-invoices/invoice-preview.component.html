@@ -1,0 +1,284 @@
+<div class="invoice-preview-container">
+  <!-- Header Actions -->
+  <div class="preview-header">
+    <button mat-icon-button (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Back to Invoices</span>
+    </button>
+    <div class="actions">
+      <button mat-raised-button color="primary" (click)="downloadPDF()">
+        <mat-icon>download</mat-icon>
+        Download PDF
+      </button>
+      <button mat-raised-button (click)="printInvoice()">
+        <mat-icon>print</mat-icon>
+        Print
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+    <p>Loading invoice preview...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button (click)="goBack()">Go Back</button>
+  </div>
+
+  <!-- Invoice Preview -->
+  <div *ngIf="previewData && !loading" class="invoice-preview">
+    <div class="invoice-paper" [style.border-top-color]="getColorScheme()">
+      <!-- Logo and Header -->
+      <div class="invoice-header">
+        <div class="logo-section" *ngIf="previewData.templateSettings.logoUrl">
+          <img
+            [src]="previewData.templateSettings.logoUrl"
+            alt="Company Logo"
+            class="company-logo"
+          />
+        </div>
+        <div class="header-text-section">
+          <h1
+            class="invoice-title"
+            [style.color]="getColorScheme()"
+            *ngIf="previewData.templateSettings.title"
+          >
+            {{ previewData.templateSettings.title }}
+          </h1>
+          <p
+            class="header-text"
+            *ngIf="previewData.templateSettings.headerText"
+          >
+            {{ previewData.templateSettings.headerText }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Company Details -->
+      <div
+        class="company-details"
+        *ngIf="previewData.templateSettings.showCompanyDetails"
+      >
+        <div class="company-info">
+          <h3>{{ previewData.invoice.organization?.name }}</h3>
+          <p *ngIf="previewData.invoice.organization?.address">
+            {{ previewData.invoice.organization.address }}
+          </p>
+          <p *ngIf="previewData.invoice.organization?.phone">
+            Phone: {{ previewData.invoice.organization.phone }}
+          </p>
+          <p *ngIf="previewData.invoice.organization?.contactEmail">
+            Email: {{ previewData.invoice.organization.contactEmail }}
+          </p>
+          <p
+            *ngIf="
+              previewData.templateSettings.showVatDetails &&
+              previewData.invoice.organization?.vatNumber
+            "
+          >
+            TRN: {{ previewData.invoice.organization.vatNumber }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Invoice Details -->
+      <div class="invoice-details-section">
+        <div class="invoice-meta">
+          <div class="meta-row">
+            <span class="meta-label">Invoice Number:</span>
+            <span class="meta-value">{{
+              previewData.invoice.invoiceNumber
+            }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Invoice Date:</span>
+            <span class="meta-value">{{
+              previewData.invoice.invoiceDate | date: 'mediumDate'
+            }}</span>
+          </div>
+          <div class="meta-row" *ngIf="previewData.invoice.dueDate">
+            <span class="meta-label">Due Date:</span>
+            <span class="meta-value">{{
+              previewData.invoice.dueDate | date: 'mediumDate'
+            }}</span>
+          </div>
+          <div
+            class="meta-row"
+            *ngIf="
+              previewData.templateSettings.showPaymentTerms &&
+              (previewData.templateSettings.defaultPaymentTerms || previewData.templateSettings.customPaymentTerms)
+            "
+          >
+            <span class="meta-label">Payment Terms:</span>
+            <span class="meta-value">{{
+              previewData.templateSettings.customPaymentTerms || previewData.templateSettings.defaultPaymentTerms
+            }}</span>
+          </div>
+        </div>
+
+        <div class="customer-info">
+          <h3>Bill To:</h3>
+          <p class="customer-name">
+            {{ previewData.invoice.customerName || '—' }}
+          </p>
+          <p
+            *ngIf="
+              previewData.templateSettings.showVatDetails &&
+              previewData.invoice.customerTrn
+            "
+          >
+            TRN: {{ previewData.invoice.customerTrn }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Line Items -->
+      <div class="line-items-section">
+        <table class="line-items-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th
+                *ngIf="
+                  previewData?.templateSettings?.showItemDescription !== false
+                "
+              >
+                Description
+              </th>
+              <th
+                *ngIf="previewData?.templateSettings?.showItemQuantity !== false"
+              >
+                Qty
+              </th>
+              <th
+                *ngIf="
+                  previewData?.templateSettings?.showItemUnitPrice !== false
+                "
+              >
+                Unit Price
+              </th>
+              <th
+                *ngIf="previewData?.templateSettings?.showItemTotal !== false"
+              >
+                Total
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of previewData.invoice.lineItems">
+              <td>{{ item.itemName }}</td>
+              <td
+                *ngIf="
+                  previewData?.templateSettings?.showItemDescription !== false
+                "
+              >
+                {{ item.description || '—' }}
+              </td>
+              <td
+                *ngIf="previewData?.templateSettings?.showItemQuantity !== false"
+              >
+                {{ item.quantity }} {{ item.unitOfMeasure || 'unit' }}
+              </td>
+              <td
+                *ngIf="
+                  previewData?.templateSettings?.showItemUnitPrice !== false
+                "
+              >
+                {{ item.unitPrice | number: '1.2-2' }}
+                {{ previewData.invoice?.currency || 'AED' }}
+              </td>
+              <td
+                *ngIf="previewData?.templateSettings?.showItemTotal !== false"
+              >
+                {{ item.totalAmount | number: '1.2-2' }}
+                {{ previewData.invoice?.currency || 'AED' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Totals -->
+      <div class="totals-section">
+        <div class="totals-row">
+          <span class="totals-label">Subtotal:</span>
+          <span class="totals-value">
+            {{ previewData.invoice.amount | number: '1.2-2' }}
+            {{ previewData.invoice?.currency || 'AED' }}
+          </span>
+        </div>
+        <div class="totals-row">
+          <span class="totals-label">VAT:</span>
+          <span class="totals-value">
+            {{ previewData.invoice.vatAmount | number: '1.2-2' }}
+            {{ previewData.invoice?.currency || 'AED' }}
+          </span>
+        </div>
+        <div class="totals-row total-line">
+          <span class="totals-label">Total Amount:</span>
+          <span class="totals-value" [style.color]="getColorScheme()">
+            {{ previewData.invoice.totalAmount | number: '1.2-2' }}
+            {{ previewData.invoice?.currency || 'AED' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Default Notes -->
+      <div
+        class="notes-section"
+        *ngIf="previewData.templateSettings.defaultNotes"
+      >
+        <h4>Notes</h4>
+        <p>{{ previewData.templateSettings.defaultNotes }}</p>
+      </div>
+
+      <!-- Bank Details -->
+      <div
+        class="bank-details-section"
+        *ngIf="
+          previewData.templateSettings.showBankDetails &&
+          (previewData.invoice.organization?.bankAccountNumber ||
+            previewData.invoice.organization?.bankIban)
+        "
+      >
+        <h4>Bank Details</h4>
+        <p *ngIf="previewData.invoice.organization?.bankAccountNumber">
+          Account Number:
+          {{ previewData.invoice.organization.bankAccountNumber }}
+        </p>
+        <p *ngIf="previewData.invoice.organization?.bankIban">
+          IBAN: {{ previewData.invoice.organization.bankIban }}
+        </p>
+        <p *ngIf="previewData.invoice.organization?.bankName">
+          Bank: {{ previewData.invoice.organization.bankName }}
+        </p>
+      </div>
+
+      <!-- Terms & Conditions -->
+      <div
+        class="terms-section"
+        *ngIf="
+          previewData.templateSettings.showTermsAndConditions &&
+          previewData.templateSettings.termsAndConditions
+        "
+      >
+        <h4>Terms & Conditions</h4>
+        <p>{{ previewData.templateSettings.termsAndConditions }}</p>
+      </div>
+
+      <!-- Footer -->
+      <div
+        class="invoice-footer"
+        *ngIf="previewData.templateSettings.showFooter"
+      >
+        <p>{{ previewData.templateSettings.footerText || 'This is a Computer Generated Invoice' }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
