@@ -3,7 +3,7 @@ import { FormBuilder } from '@angular/forms';
 import { Subject, combineLatest } from 'rxjs';
 import { startWith, switchMap, takeUntil } from 'rxjs/operators';
 import { ExpensesService } from '../../../core/services/expenses.service';
-import { Expense, ExpenseStatus } from '../../../core/models/expense.model';
+import { Expense } from '../../../core/models/expense.model';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -25,7 +25,6 @@ export class EmployeeExpensesComponent implements OnInit, OnDestroy {
     private readonly authService: AuthService,
   ) {
     this.filters = this.fb.group({
-      status: [''],
       startDate: [''],
       endDate: [''],
     });
@@ -58,7 +57,6 @@ export class EmployeeExpensesComponent implements OnInit, OnDestroy {
           
           return this.expensesService.listExpenses({
             createdBy: user.id,
-            status: filterValues.status || undefined,
             startDate: formatDate(filterValues.startDate),
             endDate: formatDate(filterValues.endDate),
           });
@@ -81,18 +79,5 @@ export class EmployeeExpensesComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  statusColor(status: ExpenseStatus): string {
-    switch (status) {
-      case 'pending':
-        return 'pending';
-      case 'approved':
-        return 'approved';
-      case 'settled':
-      case 'auto_settled':
-        return 'settled';
-      default:
-        return '';
-    }
-  }
 }
 

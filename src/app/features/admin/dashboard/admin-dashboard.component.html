@@ -205,9 +205,6 @@
                 <div class="expense-details">
                   <div class="expense-header">
                     <span class="vendor-name">{{ expense.vendorName || 'Unspecified vendor' }}</span>
-                    <span class="status-badge" [ngClass]="expense.status">
-                      {{ expense.status | titlecase }}
-                    </span>
                   </div>
                   <div class="expense-meta">
                     <span class="amount">AED {{ expense.totalAmount | number: '1.0-2' }}</span>

@@ -1,15 +1,9 @@
 export type ReportType =
-  | 'expense_summary'
-  | 'expense_detail'
-  | 'accrual_report'
-  | 'vat_report'
-  | 'vendor_report'
-  | 'employee_report'
-  | 'trend_report'
-  | 'audit_trail'
-  | 'bank_reconciliation'
-  | 'attachments_report'
-  | 'trial_balance';
+  | 'trial_balance'
+  | 'balance_sheet'
+  | 'profit_and_loss'
+  | 'payables'
+  | 'receivables';
 
 export interface ReportHistoryItem {
   id: string;

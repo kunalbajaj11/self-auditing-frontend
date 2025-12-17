@@ -71,11 +71,11 @@ const routes: Routes = [
             label: 'Reports',
             icon: 'bar_chart',
             children: [
-              { label: 'Financial Reports', route: '/admin/reports', queryParams: { type: 'financial' } },
-              { label: 'VAT Reports', route: '/admin/reports', queryParams: { type: 'vat' } },
-              { label: 'Sales Reports', route: '/admin/reports', queryParams: { type: 'sales' } },
-              { label: 'Payment Collection', route: '/admin/reports', queryParams: { type: 'payments' } },
-              { label: 'Expense Reports', route: '/admin/reports', queryParams: { type: 'expense' } },
+              { label: 'Trial Balance', route: '/admin/reports/trial-balance', icon: 'balance' },
+              { label: 'Balance Sheet', route: '/admin/reports/balance-sheet', icon: 'account_balance' },
+              { label: 'Profit and Loss', route: '/admin/reports/profit-and-loss', icon: 'trending_up' },
+              { label: 'Payables', route: '/admin/reports/payables', icon: 'account_balance_wallet' },
+              { label: 'Receivables', route: '/admin/reports/receivables', icon: 'receipt_long' },
             ],
           },
           {
@@ -148,8 +148,38 @@ const routes: Routes = [
       },
       {
         path: 'reports',
-        component: AdminReportsComponent,
-        data: { shell: { title: 'Reports & Analytics' } },
+        children: [
+          {
+            path: 'trial-balance',
+            component: AdminReportsComponent,
+            data: { shell: { title: 'Trial Balance' }, reportType: 'trial_balance' },
+          },
+          {
+            path: 'balance-sheet',
+            component: AdminReportsComponent,
+            data: { shell: { title: 'Balance Sheet' }, reportType: 'balance_sheet' },
+          },
+          {
+            path: 'profit-and-loss',
+            component: AdminReportsComponent,
+            data: { shell: { title: 'Profit and Loss Statement' }, reportType: 'profit_and_loss' },
+          },
+          {
+            path: 'payables',
+            component: AdminReportsComponent,
+            data: { shell: { title: 'Payables (Accruals)' }, reportType: 'payables' },
+          },
+          {
+            path: 'receivables',
+            component: AdminReportsComponent,
+            data: { shell: { title: 'Receivables' }, reportType: 'receivables' },
+          },
+          {
+            path: '',
+            redirectTo: 'trial-balance',
+            pathMatch: 'full',
+          },
+        ],
       },
       {
         path: 'notifications',

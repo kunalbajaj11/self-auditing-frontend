@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ExpensesService } from '../../../core/services/expenses.service';
-import { Expense, ExpenseStatus, ExpenseType, Attachment } from '../../../core/models/expense.model';
+import { Expense, ExpenseType, Attachment } from '../../../core/models/expense.model';
 import { ExpenseFormDialogComponent } from './expense-form-dialog.component';
 import { AttachmentsService } from '../../../core/services/attachments.service';
 import { ApiService } from '../../../core/services/api.service';
@@ -24,7 +24,6 @@ export class AdminExpensesComponent implements OnInit {
     'category',
     'amount',
     'type',
-    'status',
     'date',
     'attachments',
     'actions',
@@ -54,7 +53,6 @@ export class AdminExpensesComponent implements OnInit {
   ) {
     this.filters = this.fb.group({
       type: [''],
-      status: [''],
       startDate: [''],
       endDate: [''],
       vendorName: [''],
@@ -73,14 +71,14 @@ export class AdminExpensesComponent implements OnInit {
         
         // Apply filters based on query params
         if (params['filter'] === 'pending') {
-          this.filters.patchValue({ status: 'pending', type: 'accrual' });
+          this.filters.patchValue({ type: 'accrual' });
         } else if (params['filter'] === 'credits') {
-          this.filters.patchValue({ type: 'credit', status: '' });
+          this.filters.patchValue({ type: 'credit' });
         } else if (params['filter'] === 'archived') {
-          this.filters.patchValue({ status: 'settled', type: '' });
+          this.filters.patchValue({ type: '' });
         } else {
-          // Default to "All" for type and status when no filter
-          this.filters.patchValue({ type: '', status: '' }, { emitEvent: false });
+          // Default to "All" for type when no filter
+          this.filters.patchValue({ type: '' }, { emitEvent: false });
         }
       }
       this.loadExpenses();
@@ -108,6 +106,20 @@ export class AdminExpensesComponent implements OnInit {
     });
   }
 
+  viewOrEditExpense(expense: Expense): void {
+    const dialogRef = this.dialog.open(ExpenseFormDialogComponent, {
+      width: '750px',
+      maxWidth: '95vw',
+      data: expense,
+    });
+    dialogRef.afterClosed().subscribe((updated) => {
+      if (updated) {
+        this.snackBar.open('Expense updated successfully', 'Close', { duration: 3000 });
+        this.loadExpenses();
+      }
+    });
+  }
+
   showUploadView(): void {
     this.router.navigate(['/admin/expenses'], { queryParams: { view: 'upload' } });
   }
@@ -120,33 +132,11 @@ export class AdminExpensesComponent implements OnInit {
     // Reset filters to "All" when showing list view
     this.filters.patchValue({
       type: '',
-      status: '',
       startDate: '',
       endDate: '',
       vendorName: '',
     }, { emitEvent: false });
     this.router.navigate(['/admin/expenses'], { queryParams });
-  }
-
-  updateStatus(expense: Expense, status: ExpenseStatus): void {
-    this.expensesService.updateStatus(expense.id, status).subscribe({
-      next: (updated) => {
-        this.snackBar.open(`Expense marked as ${status}`, 'Close', {
-          duration: 3000,
-        });
-        const index = this.dataSource.data.findIndex((e) => e.id === expense.id);
-        if (index !== -1) {
-          this.dataSource.data[index] = updated;
-          this.dataSource.data = [...this.dataSource.data];
-        }
-      },
-      error: () => {
-        this.snackBar.open('Failed to update expense status', 'Close', {
-          duration: 4000,
-          panelClass: ['snack-error'],
-        });
-      },
-    });
   }
 
   reload(): void {
@@ -191,10 +181,6 @@ export class AdminExpensesComponent implements OnInit {
         });
       },
     });
-  }
-
-  get statusOptions(): ExpenseStatus[] {
-    return ['pending', 'approved', 'settled', 'auto_settled'];
   }
 
   get typeOptions(): ExpenseType[] {

@@ -4,9 +4,10 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { Organization } from '../../../core/models/organization.model';
 import { OrganizationService } from '../../../core/services/organization.service';
 import { ReportsService } from '../../../core/services/reports.service';
-import { GeneratedReport } from '../../../core/models/report.model';
+import { GeneratedReport, ReportType } from '../../../core/models/report.model';
 import { ExpensesService } from '../../../core/services/expenses.service';
 import { Expense } from '../../../core/models/expense.model';
+import { SalesInvoicesService } from '../../../core/services/sales-invoices.service';
 
 interface ExpenseSummaryRow {
   category: string;
@@ -74,6 +75,7 @@ export class AdminDashboardComponent implements OnInit {
     private readonly organizationService: OrganizationService,
     private readonly reportsService: ReportsService,
     private readonly expensesService: ExpensesService,
+    private readonly salesInvoicesService: SalesInvoicesService,
   ) {}
 
   ngOnInit(): void {
@@ -104,23 +106,34 @@ export class AdminDashboardComponent implements OnInit {
 
     this.dashboard$ = forkJoin({
       organization: this.organizationService.getMyOrganization(),
-      expenseSummary: this.reportsService
+      profitAndLoss: this.reportsService
         .generateReport({ 
-          type: 'expense_summary',
+          type: 'profit_and_loss' as ReportType,
           filters: { startDate, endDate }
         })
-        .pipe(map((report: GeneratedReport<ExpenseSummaryRow[]>) => report.data)),
-      accrualSummary: this.reportsService
-        .generateReport({ type: 'accrual_report' })
-        .pipe(map((report: GeneratedReport<AccrualSummaryRow[]>) => report.data)),
-      vatSummary: this.reportsService
-        .generateReport({ 
-          type: 'vat_report',
-          filters: { startDate, endDate }
-        })
-        .pipe(map((report: GeneratedReport<VatSummary>) => report.data)),
+        .pipe(
+          catchError(() => of({ type: 'profit_and_loss' as ReportType, generatedAt: new Date().toISOString(), data: null } as GeneratedReport<any>)),
+          map((report: GeneratedReport<any>) => report.data)
+        ),
+      payables: this.reportsService
+        .generateReport({ type: 'payables' as ReportType })
+        .pipe(
+          catchError(() => of({ type: 'payables' as ReportType, generatedAt: new Date().toISOString(), data: null } as GeneratedReport<any>)),
+          map((report: GeneratedReport<any>) => report.data)
+        ),
+      receivables: this.reportsService
+        .generateReport({ type: 'receivables' as ReportType, filters: { endDate } })
+        .pipe(
+          catchError(() => of({ type: 'receivables' as ReportType, generatedAt: new Date().toISOString(), data: null } as GeneratedReport<any>)),
+          map((report: GeneratedReport<any>) => report.data)
+        ),
+      allInvoices: this.salesInvoicesService
+        .listInvoices({ startDate, endDate })
+        .pipe(
+          catchError(() => of([]))
+        ),
       recentExpenses: this.expensesService
-        .listExpenses({ status: 'pending' })
+        .listExpenses({})
         .pipe(
           map((expenses) =>
             expenses
@@ -138,17 +151,53 @@ export class AdminDashboardComponent implements OnInit {
       map(
         ({
           organization,
-          expenseSummary,
-          accrualSummary,
-          vatSummary,
+          profitAndLoss,
+          payables,
+          receivables,
+          allInvoices,
           recentExpenses,
           allExpenses,
         }) => {
-          // Define transaction types according to accounting principles
-          // Income/Revenue types (positive, increase profit)
-          const revenueTypes = ['credit'];
+          // Extract data from profit and loss report
+          // Revenue is from sales invoices only (not expenses)
+          const totalRevenue = profitAndLoss?.revenue?.amount ?? 0;
+          const totalExpenses = profitAndLoss?.expenses?.total ?? 0;
+          // Calculate net profit explicitly: Revenue (sales only) - Expenses
+          const netProfit = totalRevenue - totalExpenses;
+          const revenueVat = profitAndLoss?.revenue?.vat ?? 0;
+          const expenseVat = profitAndLoss?.expenses?.vat ?? 0;
           
-          // Expense types (negative, reduce profit)
+          // Calculate VAT summary from P&L data
+          const inputVat = expenseVat;
+          const outputVat = revenueVat;
+          const netVatPayable = outputVat - inputVat;
+          const taxableAmount = totalRevenue + totalExpenses;
+
+          // Convert expense items from P&L to expense summary format
+          const expenseSummary: ExpenseSummaryRow[] = (profitAndLoss?.expenses?.items ?? []).map((item: any) => ({
+            category: item.category,
+            type: 'expense',
+            amount: item.amount,
+            vatAmount: item.vat,
+            totalAmount: item.total,
+          }));
+
+          // Convert payables to accrual summary format
+          const accrualSummary: AccrualSummaryRow[] = [];
+          if (payables?.summary) {
+            accrualSummary.push({
+              status: 'pending_settlement',
+              count: payables.summary.pendingItems ?? 0,
+              amount: payables.summary.totalAmount ?? 0,
+            });
+            accrualSummary.push({
+              status: 'settled',
+              count: payables.summary.paidItems ?? 0,
+              amount: 0, // Settled items have 0 outstanding
+            });
+          }
+
+          // Count expenses
           const expenseTypes = [
             'expense',
             'adjustment',
@@ -157,93 +206,47 @@ export class AdminDashboardComponent implements OnInit {
             'fixed_assets',
             'cost_of_sales',
           ];
-          
-          // Balance sheet items (excluded from profit/loss calculations)
-          const balanceSheetTypes = [
-            'share_capital',
-            'retained_earnings',
-            'shareholder_account',
-          ];
-
-          // Calculate total revenue (income) - only credits/sales
-          // Use amount (excluding VAT) for revenue calculation, as VAT is a separate liability
-          const revenueRows = expenseSummary.filter((row) => {
-            // Check both 'type' and 'expenseType' fields for compatibility
-            const transactionType = row.type || (row as any).expenseType || '';
-            return revenueTypes.includes(transactionType.toLowerCase());
-          });
-          const totalRevenue = revenueRows.reduce(
-            (acc, row) => {
-              // For revenue, use amount (base amount excluding VAT)
-              // baseAmount is preferred for multi-currency, fallback to amount, then totalAmount
-              const revenueAmount = Number(
-                (row as any).baseAmount ?? row.amount ?? row.totalAmount ?? 0
-              );
-              return acc + revenueAmount;
-            },
-            0,
-          );
-
-          // Calculate total expenses - all expense types including accruals
-          // Use amount (excluding VAT) for expense calculation, as VAT is handled separately
-          const expenseRows = expenseSummary.filter((row) => {
-            // Check both 'type' and 'expenseType' fields for compatibility
-            const transactionType = row.type || (row as any).expenseType || '';
-            return expenseTypes.includes(transactionType.toLowerCase());
-          });
-          const totalExpenses = expenseRows.reduce(
-            (acc, row) => {
-              // For expenses, use amount (base amount excluding VAT)
-              // baseAmount is preferred for multi-currency, fallback to amount, then totalAmount
-              const expenseAmount = Number(
-                (row as any).baseAmount ?? row.amount ?? row.totalAmount ?? 0
-              );
-              return acc + expenseAmount;
-            },
-            0,
-          );
-
-          // Net Profit = Revenue - Expenses (positive = profit, negative = loss)
-          const netProfit = totalRevenue - totalExpenses;
-
-          // Count expenses (excluding credits, balance sheet items, but including accruals)
-          // Only count processed expenses (approved, settled, auto_settled) - exclude pending/rejected
           const expenseCount = allExpenses.filter(
-            (exp) =>
-              expenseTypes.includes(exp.type) &&
-              (exp.status === 'approved' ||
-                exp.status === 'settled' ||
-                exp.status === 'auto_settled')
+            (exp) => expenseTypes.includes(exp.type)
           ).length;
 
-          // Average expense amount (based on total expenses, not net profit)
+          // Average expense amount
           const averageExpense = expenseCount > 0 ? totalExpenses / expenseCount : 0;
 
-          // Pending accruals
-          const pendingAccrualRow = accrualSummary.find(
-            (row) => row.status === 'pending_settlement',
-          );
-          const pendingAccruals = pendingAccrualRow?.count ?? 0;
-          const pendingAccrualAmount = pendingAccrualRow?.amount ?? 0;
+          // Pending accruals from payables report
+          const pendingAccruals = payables?.summary?.pendingItems ?? 0;
+          const pendingAccrualAmount = payables?.summary?.totalAmount ?? 0;
 
-          // Pending approvals
-          const pendingApprovals = recentExpenses.filter(
-            (expense) => expense.status === 'pending',
-          ).length;
+          // Pending approvals (removed - no longer tracking status)
+          const pendingApprovals = 0;
 
-          // Extract VAT information from summary
-          // Net VAT Payable = Output VAT (from sales) - Input VAT (from expenses)
-          const netVatPayable = vatSummary?.netVatPayable ?? vatSummary?.vatAmount ?? 0;
-          const inputVat = vatSummary?.inputVat ?? 0;
-          const outputVat = vatSummary?.outputVat ?? 0;
-          const taxableAmount = vatSummary?.taxableAmount ?? vatSummary?.taxableSupplies ?? 0;
+          // Invoice metrics
+          // Total invoices: count all invoices in the period
+          const totalInvoices = allInvoices?.length ?? 0;
+          // Outstanding invoices and amounts from receivables report (unpaid + partial)
+          const outstandingInvoices = (receivables?.summary?.unpaidInvoices ?? 0) + (receivables?.summary?.partialInvoices ?? 0);
+          const outstandingAmount = receivables?.summary?.totalOutstanding ?? 0;
+          const overdueInvoices = receivables?.summary?.overdueInvoices ?? 0;
+
+          // VAT summary object for compatibility
+          const vatSummary: VatSummary = {
+            taxableAmount,
+            taxableSupplies: totalExpenses,
+            taxableSales: totalRevenue,
+            vatAmount: netVatPayable,
+            inputVat,
+            outputVat,
+            netVatPayable,
+            vatPercentage: totalExpenses > 0 ? (inputVat / totalExpenses) * 100 : 0,
+            outputVatPercentage: totalRevenue > 0 ? (outputVat / totalRevenue) * 100 : 0,
+          };
 
           return {
             organization,
             totalRevenue,
             totalExpenses,
             netProfit,
-            vatAmount: netVatPayable, // Net VAT Payable for dashboard display
+            vatAmount: netVatPayable,
             inputVat,
             outputVat,
             taxableAmount,
@@ -252,11 +255,15 @@ export class AdminDashboardComponent implements OnInit {
             pendingAccruals,
             pendingAccrualAmount,
             pendingApprovals,
-            expenseSummary: expenseRows, // Only show expense types (exclude revenue and balance sheet items)
+            expenseSummary,
             accrualSummary,
             vatSummary,
             recentExpenses,
             period: periodLabel,
+            totalInvoices,
+            outstandingInvoices,
+            outstandingAmount,
+            overdueInvoices,
           };
         },
       ),

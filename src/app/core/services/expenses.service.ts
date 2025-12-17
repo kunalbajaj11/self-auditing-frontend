@@ -4,7 +4,6 @@ import { map } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import {
   Expense,
-  ExpenseStatus,
   ExpenseType,
   AccrualSummary,
   Attachment,
@@ -35,12 +34,6 @@ export class ExpensesService {
   updateExpense(id: string, payload: Partial<Expense>): Observable<Expense> {
     return this.api
       .patch<Expense>(`/expenses/${id}`, payload)
-      .pipe(map((item) => this.normalizeExpense(item)));
-  }
-
-  updateStatus(id: string, status: ExpenseStatus): Observable<Expense> {
-    return this.api
-      .patch<Expense>(`/expenses/${id}/status`, { status })
       .pipe(map((item) => this.normalizeExpense(item)));
   }
 

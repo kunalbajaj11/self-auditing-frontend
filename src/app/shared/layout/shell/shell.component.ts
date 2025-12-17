@@ -1,9 +1,9 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { NavigationEnd, Router, ActivatedRoute } from '@angular/router';
 import { MatSidenav } from '@angular/material/sidenav';
 import { Observable, Subject, of, combineLatest } from 'rxjs';
-import { catchError, filter, map, shareReplay, startWith, take, takeUntil } from 'rxjs/operators';
+import { catchError, filter, map, shareReplay, startWith, take, takeUntil, delay } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { ExpensesService } from '../../../core/services/expenses.service';
 import { NotificationsService } from '../../../core/services/notifications.service';
@@ -31,7 +31,7 @@ interface ShellNavItem extends ShellNavItemConfig {
   templateUrl: './shell.component.html',
   styleUrls: ['./shell.component.scss'],
 })
-export class ShellComponent implements OnInit, OnDestroy {
+export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly user$: Observable<AuthUser | null>;
   readonly isHandset$: Observable<boolean>;
 
@@ -40,6 +40,9 @@ export class ShellComponent implements OnInit, OnDestroy {
   isEnterprise = false;
   expandedGroups = new Set<string>(); // Track expanded nav groups
 
+  @ViewChild('sideNavList', { static: false }) sideNavList?: ElementRef<HTMLElement>;
+
+  private sidebarScrollPosition = 0;
   private readonly destroy$ = new Subject<void>();
 
   constructor(
@@ -76,7 +79,71 @@ export class ShellComponent implements OnInit, OnDestroy {
         startWith(null),
         takeUntil(this.destroy$),
       )
-      .subscribe(() => this.updateShellFromRoute());
+      .subscribe(() => {
+        this.updateShellFromRoute();
+        // Restore sidebar scroll position after navigation
+        this.restoreSidebarScroll();
+      });
+  }
+
+  ngAfterViewInit(): void {
+    // Save scroll position when sidebar is scrolled
+    // Use a small delay to ensure the element is available
+    setTimeout(() => {
+      this.attachScrollListener();
+    }, 200);
+  }
+
+  private attachScrollListener(): void {
+    if (this.sideNavList) {
+      const element = this.sideNavList.nativeElement;
+      // Find the actual scrollable container - could be the element itself or a parent
+      const scrollableElement = this.findScrollableElement(element);
+      
+      if (scrollableElement) {
+        scrollableElement.addEventListener('scroll', () => {
+          this.sidebarScrollPosition = scrollableElement.scrollTop;
+        }, { passive: true });
+      }
+    }
+  }
+
+  private findScrollableElement(element: HTMLElement): HTMLElement | null {
+    // Check if element itself is scrollable
+    const style = getComputedStyle(element);
+    if ((style.overflow === 'auto' || style.overflowY === 'auto' || style.overflow === 'scroll' || style.overflowY === 'scroll') &&
+        element.scrollHeight > element.clientHeight) {
+      return element;
+    }
+    
+    // Check parent elements
+    let parent = element.parentElement;
+    while (parent && parent !== document.body) {
+      const parentStyle = getComputedStyle(parent);
+      if ((parentStyle.overflow === 'auto' || parentStyle.overflowY === 'auto' || 
+           parentStyle.overflow === 'scroll' || parentStyle.overflowY === 'scroll') &&
+          parent.scrollHeight > parent.clientHeight) {
+        return parent;
+      }
+      parent = parent.parentElement;
+    }
+    
+    // Fallback: return the element itself
+    return element;
+  }
+
+  private restoreSidebarScroll(): void {
+    // Use setTimeout to ensure DOM is updated after navigation
+    setTimeout(() => {
+      if (this.sideNavList && this.sidebarScrollPosition > 0) {
+        const element = this.sideNavList.nativeElement;
+        const scrollableElement = this.findScrollableElement(element);
+        
+        if (scrollableElement) {
+          scrollableElement.scrollTop = this.sidebarScrollPosition;
+        }
+      }
+    }, 100);
   }
 
   ngOnDestroy(): void {

@@ -10,8 +10,6 @@ export type ExpenseType =
   | 'shareholder_account'
   | 'cost_of_sales';
 
-export type ExpenseStatus = 'pending' | 'approved' | 'settled' | 'auto_settled';
-
 export interface Attachment {
   id?: string;
   fileName: string;
@@ -36,7 +34,6 @@ export interface Expense {
   vendorName?: string;
   vendorTrn?: string;
   description?: string;
-  status: ExpenseStatus;
   ocrConfidence?: number;
   linkedAccrualExpenseId?: string;
   attachments?: Attachment[];

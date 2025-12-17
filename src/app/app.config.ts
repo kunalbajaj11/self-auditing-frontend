@@ -1,5 +1,5 @@
 import { ApplicationConfig, APP_INITIALIZER, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import {
   provideHttpClient,
@@ -13,7 +13,12 @@ import { IdleService } from './core/services/idle.service';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes),
+    provideRouter(
+      routes,
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'disabled', // Disable automatic scroll to top
+      })
+    ),
     provideAnimations(),
     {
       provide: HTTP_INTERCEPTORS,
