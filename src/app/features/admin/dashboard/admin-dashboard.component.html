@@ -16,9 +16,12 @@
   <ng-container *ngIf="dashboard$ | async as vm; else loadingState">
     <div *ngIf="vm; else errorState" class="dashboard-content">
       <!-- Upload Limit Warning Banner -->
-      <mat-card *ngIf="vm.uploadUsage" class="upload-warning-banner" 
+      <mat-card *ngIf="vm.uploadUsage && 
+                      vm.uploadUsage.totalAllowed > 0 && 
+                      (vm.uploadUsage.remainingUploads <= 0 || (vm.uploadUsage.usedUploads / vm.uploadUsage.totalAllowed) >= 0.8)" 
+                class="upload-warning-banner" 
                 [ngClass]="{
-                  'warning': (vm.uploadUsage.usedUploads / vm.uploadUsage.totalAllowed) >= 0.8 && (vm.uploadUsage.usedUploads / vm.uploadUsage.totalAllowed) < 1,
+                  'warning': vm.uploadUsage.remainingUploads > 0 && (vm.uploadUsage.usedUploads / vm.uploadUsage.totalAllowed) >= 0.8,
                   'critical': vm.uploadUsage.remainingUploads <= 0 || (vm.uploadUsage.usedUploads / vm.uploadUsage.totalAllowed) >= 1
                 }">
         <div class="banner-content">
