@@ -80,6 +80,16 @@ export class AdminReportsComponent implements OnInit {
   generatedReport: GeneratedReport | null = null;
   loading = false;
 
+  // Cached chart data to prevent re-rendering
+  profitAndLossChartData: ChartConfiguration<'bar'>['data'] | null = null;
+  expensesByCategoryChartData: ChartConfiguration<'pie'>['data'] | null = null;
+  payablesChartData: ChartConfiguration<'bar'>['data'] | null = null;
+  receivablesChartData: ChartConfiguration<'bar'>['data'] | null = null;
+  trialBalanceChartData: ChartConfiguration<'bar'>['data'] | null = null;
+  trialBalanceAccountsChartData: ChartConfiguration<'pie'>['data'] | null = null;
+  balanceSheetChartData: ChartConfiguration<'pie'>['data'] | null = null;
+  balanceSheetAssetsChartData: ChartConfiguration<'bar'>['data'] | null = null;
+
   @ViewChild('reportPreviewCard') reportPreviewCard?: ElementRef;
 
   constructor(
@@ -104,16 +114,33 @@ export class AdminReportsComponent implements OnInit {
     });
   }
 
-  // Chart options
+  // Chart options - Fixed to prevent re-rendering on hover
   chartOptions: ChartOptions<'bar' | 'line' | 'pie'> = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: {
+      duration: 0, // Disable animations to prevent re-renders
+    },
+    interaction: {
+      intersect: false,
+      mode: 'index',
+    },
+    onHover: (event, activeElements) => {
+      // Prevent chart from re-rendering on hover
+      if (event.native) {
+        (event.native.target as HTMLElement).style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+      }
+    },
     plugins: {
       legend: {
         display: true,
         position: 'top',
       },
       tooltip: {
+        enabled: true,
+        animation: {
+          duration: 0, // Disable tooltip animations
+        },
         callbacks: {
           label: (context) => {
             const label = context.label || '';
@@ -138,12 +165,28 @@ export class AdminReportsComponent implements OnInit {
   pieChartOptions: ChartOptions<'pie'> = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: {
+      duration: 0, // Disable animations to prevent re-renders
+    },
+    interaction: {
+      intersect: false,
+    },
+    onHover: (event, activeElements) => {
+      // Prevent chart from re-rendering on hover
+      if (event.native) {
+        (event.native.target as HTMLElement).style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+      }
+    },
     plugins: {
       legend: {
         display: true,
         position: 'right',
       },
       tooltip: {
+        enabled: true,
+        animation: {
+          duration: 0, // Disable tooltip animations
+        },
         callbacks: {
           label: (context) => {
             const label = context.label || '';
@@ -276,6 +319,8 @@ export class AdminReportsComponent implements OnInit {
         next: (report) => {
           this.loading = false;
           this.generatedReport = report;
+          // Cache chart data to prevent re-rendering on hover
+          this.updateCachedChartData(report);
           this.snackBar.open('Report generated successfully', 'Close', {
             duration: 3000,
           });
@@ -291,6 +336,40 @@ export class AdminReportsComponent implements OnInit {
           });
         },
       });
+  }
+
+  private updateCachedChartData(report: GeneratedReport): void {
+    // Reset all chart data
+    this.profitAndLossChartData = null;
+    this.expensesByCategoryChartData = null;
+    this.payablesChartData = null;
+    this.receivablesChartData = null;
+    this.trialBalanceChartData = null;
+    this.trialBalanceAccountsChartData = null;
+    this.balanceSheetChartData = null;
+    this.balanceSheetAssetsChartData = null;
+
+    // Update chart data based on report type
+    switch (report.type) {
+      case 'profit_and_loss':
+        this.profitAndLossChartData = this.getProfitAndLossChartData(report);
+        this.expensesByCategoryChartData = this.getExpensesByCategoryChartData(report);
+        break;
+      case 'payables':
+        this.payablesChartData = this.getPayablesChartData(report);
+        break;
+      case 'receivables':
+        this.receivablesChartData = this.getReceivablesChartData(report);
+        break;
+      case 'trial_balance':
+        this.trialBalanceChartData = this.getTrialBalanceChartData(report);
+        this.trialBalanceAccountsChartData = this.getTrialBalanceAccountsChartData(report);
+        break;
+      case 'balance_sheet':
+        this.balanceSheetChartData = this.getBalanceSheetChartData(report);
+        this.balanceSheetAssetsChartData = this.getBalanceSheetAssetsChartData(report);
+        break;
+    }
   }
 
   generateAndDownload(format: 'pdf' | 'xlsx' | 'csv' = 'pdf'): void {
