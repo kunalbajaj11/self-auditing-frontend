@@ -168,9 +168,11 @@ export class InvoiceTemplateComponent implements OnInit {
   }
 
   preview(): void {
-    // Open preview in new window or modal
-    this.snackBar.open('Preview will show a sample invoice with current settings', 'Close', {
-      duration: 3000,
+    // Get a sample invoice ID or create preview data
+    // For now, we'll show a message that preview requires an existing invoice
+    // In a real implementation, you might want to create a sample invoice or use the latest invoice
+    this.snackBar.open('Preview feature: Use the preview button on an existing invoice to see template settings applied.', 'Close', {
+      duration: 5000,
     });
   }
 
@@ -178,17 +180,46 @@ export class InvoiceTemplateComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      // For now, we'll just store the file name/URL
-      // In production, you'd upload to a file storage service
-      const reader = new FileReader();
-      reader.onload = () => {
-        const logoUrl = reader.result as string;
-        this.form.patchValue({ logoUrl });
-        this.snackBar.open('Logo loaded. Click Save to apply.', 'Close', {
-          duration: 3000,
+      
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/svg+xml'];
+      if (!allowedTypes.includes(file.type)) {
+        this.snackBar.open('Invalid file type. Only JPEG, PNG, and SVG images are allowed.', 'Close', {
+          duration: 4000,
+          panelClass: ['snack-error'],
         });
-      };
-      reader.readAsDataURL(file);
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        this.snackBar.open('File size exceeds 5MB limit.', 'Close', {
+          duration: 4000,
+          panelClass: ['snack-error'],
+        });
+        return;
+      }
+
+      // Upload to server
+      this.saving = true;
+      this.settingsService.uploadInvoiceLogo(file).subscribe({
+        next: (result) => {
+          this.form.patchValue({ logoUrl: result.logoUrl });
+          this.saving = false;
+          this.snackBar.open('Logo uploaded successfully', 'Close', {
+            duration: 3000,
+          });
+        },
+        error: (error) => {
+          this.saving = false;
+          const errorMessage = error?.error?.message || 'Failed to upload logo';
+          this.snackBar.open(errorMessage, 'Close', {
+            duration: 4000,
+            panelClass: ['snack-error'],
+          });
+        },
+      });
     }
   }
 

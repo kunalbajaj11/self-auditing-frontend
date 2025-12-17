@@ -111,6 +111,14 @@ export class SettingsService {
     return this.api.patch<InvoiceTemplateSettings>('/settings/invoice-template', payload);
   }
 
+  uploadInvoiceLogo(file: File): Observable<{ logoUrl: string }> {
+    return this.api.uploadFile('/settings/invoice-template/upload-logo', file) as Observable<{ logoUrl: string }>;
+  }
+
+  getInvoicePreview(invoiceId: string): Observable<any> {
+    return this.api.get<any>(`/sales-invoices/${invoiceId}/preview`);
+  }
+
   // Tax Settings
   getTaxSettings(): Observable<TaxSettings> {
     return this.api.get<TaxSettings>('/settings/tax');

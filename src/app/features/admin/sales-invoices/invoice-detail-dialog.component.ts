@@ -136,6 +136,28 @@ export class InvoiceDetailDialogComponent implements OnInit {
     window.print();
   }
 
+  downloadPDF(): void {
+    if (!this.invoice) return;
+
+    this.loading = true;
+    this.invoicesService.downloadInvoicePDF(this.invoice.id).subscribe({
+      next: (blob) => {
+        this.loading = false;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `invoice-${this.invoice?.invoiceNumber || 'invoice'}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.loading = false;
+      },
+    });
+  }
+
   close(): void {
     this.dialogRef.close();
   }

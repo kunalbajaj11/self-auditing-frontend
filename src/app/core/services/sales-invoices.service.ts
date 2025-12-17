@@ -107,5 +107,13 @@ export class SalesInvoicesService {
   }): Observable<any> {
     return this.api.post(`/sales-invoices/${invoiceId}/send-email`, emailData);
   }
+
+  getInvoicePreview(invoiceId: string): Observable<any> {
+    return this.api.get<any>(`/sales-invoices/${invoiceId}/preview`);
+  }
+
+  downloadInvoicePDF(invoiceId: string): Observable<Blob> {
+    return this.api.download(`/sales-invoices/${invoiceId}/pdf`);
+  }
 }
 

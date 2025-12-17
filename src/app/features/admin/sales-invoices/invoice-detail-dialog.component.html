@@ -122,6 +122,10 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end" *ngIf="!loading && invoice">
+    <button mat-button (click)="downloadPDF()" [disabled]="loading">
+      <mat-icon>download</mat-icon>
+      Download PDF
+    </button>
     <button mat-button (click)="printInvoice()">
       <mat-icon>print</mat-icon>
       Print Invoice
