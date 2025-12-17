@@ -6,6 +6,7 @@ import { ExpensesService } from '../../../core/services/expenses.service';
 import { CategoriesService, Category } from '../../../core/services/categories.service';
 import { VendorsService, Vendor } from '../../../core/services/vendors.service';
 import { SettingsService, TaxSettings } from '../../../core/services/settings.service';
+import { ExpenseTypesService, ExpenseType as ExpenseTypeEntity } from '../../../core/services/expense-types.service';
 import { Expense, ExpenseType, VatTaxType } from '../../../core/models/expense.model';
 import { Observable, of } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
@@ -16,11 +17,7 @@ import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'r
   styleUrls: ['./expense-form-dialog.component.scss'],
 })
 export class ExpenseFormDialogComponent implements OnInit {
-  readonly typeOptions: ExpenseType[] = [
-    'expense',
-    'fixed_assets',
-    'cost_of_sales',
-  ];
+  expenseTypes: ExpenseTypeEntity[] = [];
   categories: Category[] = [];
   allCategories: Category[] = [];
   loading = false;
@@ -57,6 +54,7 @@ export class ExpenseFormDialogComponent implements OnInit {
     private readonly categoriesService: CategoriesService,
     private readonly vendorsService: VendorsService,
     private readonly settingsService: SettingsService,
+    private readonly expenseTypesService: ExpenseTypesService,
     private readonly snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) readonly data: Expense | { attachment?: any; ocrResult?: any } | null,
   ) {
@@ -82,6 +80,11 @@ export class ExpenseFormDialogComponent implements OnInit {
   ngOnInit(): void {
     // Load tax settings
     this.loadTaxSettings();
+
+    // Load expense types dynamically
+    this.expenseTypesService.listExpenseTypes().subscribe((expenseTypes) => {
+      this.expenseTypes = expenseTypes;
+    });
 
     // Load all categories initially
     this.categoriesService.listCategories().subscribe((categories) => {
