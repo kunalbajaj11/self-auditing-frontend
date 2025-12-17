@@ -19,6 +19,8 @@ export interface Attachment {
   fileSize: number;
 }
 
+export type VatTaxType = 'standard' | 'zero_rated' | 'exempt' | 'reverse_charge';
+
 export interface Expense {
   id: string;
   type: ExpenseType;
@@ -27,6 +29,7 @@ export interface Expense {
   amount: number;
   vatAmount: number;
   totalAmount: number;
+  vatTaxType?: VatTaxType;
   currency: string;
   expenseDate: string;
   expectedPaymentDate?: string;

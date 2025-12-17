@@ -6,7 +6,7 @@ import { ExpensesService } from '../../../core/services/expenses.service';
 import { CategoriesService, Category } from '../../../core/services/categories.service';
 import { VendorsService, Vendor } from '../../../core/services/vendors.service';
 import { SettingsService, TaxSettings } from '../../../core/services/settings.service';
-import { Expense, ExpenseType } from '../../../core/models/expense.model';
+import { Expense, ExpenseType, VatTaxType } from '../../../core/models/expense.model';
 import { Observable, of } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
@@ -39,6 +39,16 @@ export class ExpenseFormDialogComponent implements OnInit {
   taxSettings: TaxSettings | null = null;
   defaultTaxRate = 5;
   taxCalculationMethod: 'inclusive' | 'exclusive' = 'inclusive';
+  reverseChargeRate = 5;
+  reverseChargeEnabled = false;
+  
+  // VAT tax type options
+  readonly vatTaxTypes: { value: VatTaxType; label: string }[] = [
+    { value: 'standard', label: 'Standard Rate' },
+    { value: 'zero_rated', label: 'Zero Rated' },
+    { value: 'exempt', label: 'Exempt' },
+    { value: 'reverse_charge', label: 'Reverse Charge' },
+  ];
 
   constructor(
     private readonly fb: FormBuilder,
@@ -55,6 +65,7 @@ export class ExpenseFormDialogComponent implements OnInit {
       categoryId: [''],
       amount: [0, [Validators.required, Validators.min(0.01)]],
       vatAmount: [0, [Validators.min(0)]],
+      vatTaxType: ['standard' as VatTaxType],
       expenseDate: [
         new Date().toISOString().substring(0, 10),
         Validators.required,
@@ -127,6 +138,11 @@ export class ExpenseFormDialogComponent implements OnInit {
       }
     });
 
+    // Watch for VAT tax type changes to recalculate VAT
+    this.form.get('vatTaxType')?.valueChanges.subscribe(() => {
+      this.autoCalculateVat();
+    });
+
     // Handle different data types
     if (this.data) {
       if ('id' in this.data) {
@@ -137,6 +153,7 @@ export class ExpenseFormDialogComponent implements OnInit {
           categoryId: expense.categoryId ?? '',
           amount: typeof expense.amount === 'number' ? expense.amount : parseFloat(String(expense.amount || '0')),
           vatAmount: typeof expense.vatAmount === 'number' ? expense.vatAmount : parseFloat(String(expense.vatAmount || '0')),
+          vatTaxType: (expense as any).vatTaxType || 'standard',
           expenseDate: expense.expenseDate,
           expectedPaymentDate: expense.expectedPaymentDate ?? '',
           purchaseStatus: (expense as any).purchaseStatus ?? 'Purchase - Cash Paid',
@@ -286,6 +303,7 @@ export class ExpenseFormDialogComponent implements OnInit {
       categoryId: value.categoryId || undefined,
       amount: amount,
       vatAmount: Number(value.vatAmount ?? 0),
+      vatTaxType: value.vatTaxType || 'standard',
       expenseDate: value.expenseDate ?? new Date().toISOString().substring(0, 10),
       expectedPaymentDate: value.expectedPaymentDate || undefined,
       purchaseStatus: value.purchaseStatus || undefined,
@@ -452,6 +470,8 @@ export class ExpenseFormDialogComponent implements OnInit {
         this.taxSettings = settings;
         this.defaultTaxRate = settings.taxDefaultRate || 5;
         this.taxCalculationMethod = (settings.taxCalculationMethod as 'inclusive' | 'exclusive') || 'inclusive';
+        this.reverseChargeRate = settings.taxReverseChargeRate || 5;
+        this.reverseChargeEnabled = settings.taxEnableReverseCharge || false;
         // Auto-calculate VAT if amount is already set
         if (this.form.get('amount')?.value) {
           this.autoCalculateVat();
@@ -461,6 +481,8 @@ export class ExpenseFormDialogComponent implements OnInit {
         // Use fallback defaults
         this.defaultTaxRate = 5;
         this.taxCalculationMethod = 'inclusive';
+        this.reverseChargeRate = 5;
+        this.reverseChargeEnabled = false;
       },
     });
   }
@@ -468,6 +490,7 @@ export class ExpenseFormDialogComponent implements OnInit {
   autoCalculateVat(): void {
     const amountValue = this.form.get('amount')?.value;
     const vatFormValue = this.form.get('vatAmount')?.value;
+    const vatTaxType = this.form.get('vatTaxType')?.value as VatTaxType || 'standard';
     const amount = typeof amountValue === 'number' ? amountValue : parseFloat(String(amountValue || '0'));
     const currentVat = typeof vatFormValue === 'number' ? vatFormValue : parseFloat(String(vatFormValue || '0'));
     
@@ -479,14 +502,23 @@ export class ExpenseFormDialogComponent implements OnInit {
     if (amount > 0 && isVatEmpty) {
       let calculatedVat = 0;
       
-      if (this.taxCalculationMethod === 'inclusive') {
-        // VAT is included in the amount
-        // VAT = Amount * (TaxRate / (100 + TaxRate))
-        calculatedVat = (amount * this.defaultTaxRate) / (100 + this.defaultTaxRate);
+      if (vatTaxType === 'reverse_charge') {
+        // Reverse charge: use reverse charge rate
+        calculatedVat = (amount * this.reverseChargeRate) / 100;
+      } else if (vatTaxType === 'zero_rated' || vatTaxType === 'exempt') {
+        // Zero rated or exempt: no VAT
+        calculatedVat = 0;
       } else {
-        // VAT is exclusive (added on top)
-        // VAT = Amount * (TaxRate / 100)
-        calculatedVat = (amount * this.defaultTaxRate) / 100;
+        // Standard VAT calculation
+        if (this.taxCalculationMethod === 'inclusive') {
+          // VAT is included in the amount
+          // VAT = Amount * (TaxRate / (100 + TaxRate))
+          calculatedVat = (amount * this.defaultTaxRate) / (100 + this.defaultTaxRate);
+        } else {
+          // VAT is exclusive (added on top)
+          // VAT = Amount * (TaxRate / 100)
+          calculatedVat = (amount * this.defaultTaxRate) / 100;
+        }
       }
       
       // Round to 2 decimal places

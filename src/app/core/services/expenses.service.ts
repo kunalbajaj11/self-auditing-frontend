@@ -61,10 +61,11 @@ export class ExpensesService {
 
     const amount = Number(raw.amount ?? 0);
     const vatAmount = Number(raw.vatAmount ?? 0);
-    const totalAmount =
-      raw.totalAmount !== undefined
-        ? Number(raw.totalAmount)
-        : Number((amount + vatAmount).toFixed(2));
+    // Always use totalAmount from API (correctly calculated for reverse charge)
+    // Don't calculate it here as it would be wrong for reverse charge expenses
+    const totalAmount = raw.totalAmount !== undefined
+      ? Number(raw.totalAmount)
+      : amount; // Fallback to amount only (for reverse charge, total = amount)
 
     return {
       ...raw,
