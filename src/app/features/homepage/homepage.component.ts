@@ -38,6 +38,11 @@ export class HomepageComponent implements OnInit {
   currentYear = new Date().getFullYear();
   contactForm: FormGroup;
   submitting = false;
+  
+  // WhatsApp configuration
+  whatsappPhoneNumber = '971581219019'; // +971-581219019 without special characters
+  whatsappMessage = 'Hello! I am interested in learning more about SelfAccounting.AI. Please provide more information about your expense tracking and financial management platform.';
+  whatsappLink = `https://wa.me/${this.whatsappPhoneNumber}?text=${encodeURIComponent(this.whatsappMessage)}`;
 
   constructor(
     private router: Router,
