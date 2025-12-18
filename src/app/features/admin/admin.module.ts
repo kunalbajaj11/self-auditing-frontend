@@ -35,8 +35,6 @@ import { DebitNoteDetailDialogComponent } from './debit-notes/debit-note-detail-
 import { InvoiceEmailDialogComponent } from './sales-invoices/invoice-email-dialog.component';
 import { AdminVendorsComponent } from './vendors/admin-vendors.component';
 import { VendorFormDialogComponent } from './vendors/vendor-form-dialog.component';
-import { AdminChartOfAccountsComponent } from './chart-of-accounts/admin-chart-of-accounts.component';
-import { ChartOfAccountFormDialogComponent } from './chart-of-accounts/chart-of-account-form-dialog.component';
 import { InvoiceTemplateComponent } from './settings/invoice-template/invoice-template.component';
 import { TaxSettingsComponent } from './settings/tax-settings/tax-settings.component';
 import { TaxRateFormDialogComponent } from './settings/tax-settings/tax-rate-form-dialog.component';
@@ -85,8 +83,6 @@ import { JournalEntryFormDialogComponent } from './journal-entries/journal-entry
     InvoiceEmailDialogComponent,
     AdminVendorsComponent,
     VendorFormDialogComponent,
-    AdminChartOfAccountsComponent,
-    ChartOfAccountFormDialogComponent,
     InvoiceTemplateComponent,
     TaxSettingsComponent,
     TaxRateFormDialogComponent,

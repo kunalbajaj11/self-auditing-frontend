@@ -20,7 +20,6 @@ import { InvoicePreviewComponent } from './sales-invoices/invoice-preview.compon
 import { AdminCreditNotesComponent } from './credit-notes/admin-credit-notes.component';
 import { AdminDebitNotesComponent } from './debit-notes/admin-debit-notes.component';
 import { AdminVendorsComponent } from './vendors/admin-vendors.component';
-import { AdminChartOfAccountsComponent } from './chart-of-accounts/admin-chart-of-accounts.component';
 import { InvoiceTemplateComponent } from './settings/invoice-template/invoice-template.component';
 import { TaxSettingsComponent } from './settings/tax-settings/tax-settings.component';
 import { CurrencySettingsComponent } from './settings/currency-settings/currency-settings.component';
@@ -98,7 +97,6 @@ const routes: Routes = [
               { label: 'Currency & Exchange Rates', route: '/admin/settings/currency' },
               { label: 'Numbering Sequences', route: '/admin/settings/numbering' },
               { label: 'Email / Notifications', route: '/admin/notifications', badgeKey: 'unreadNotifications' },
-              { label: 'Chart of Accounts', route: '/admin/chart-of-accounts' },
               { label: 'Expense Types', route: '/admin/expense-types' },
               { label: 'Expense Categories', route: '/admin/categories' },
             ],
@@ -271,11 +269,6 @@ const routes: Routes = [
             path: 'vendors',
             component: AdminVendorsComponent,
             data: { shell: { title: 'Vendor Management' } },
-          },
-          {
-            path: 'chart-of-accounts',
-            component: AdminChartOfAccountsComponent,
-            data: { shell: { title: 'Chart of Accounts' } },
           },
           { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
