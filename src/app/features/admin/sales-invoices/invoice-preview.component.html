@@ -35,9 +35,9 @@
     <div class="invoice-paper" [style.border-top-color]="getColorScheme()">
       <!-- Logo and Header -->
       <div class="invoice-header">
-        <div class="logo-section" *ngIf="previewData.templateSettings.logoUrl">
+        <div class="logo-section" *ngIf="logoDataUrl">
           <img
-            [src]="previewData.templateSettings.logoUrl"
+            [src]="logoDataUrl"
             alt="Company Logo"
             class="company-logo"
           />

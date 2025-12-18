@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SalesInvoicesService } from '../../../core/services/sales-invoices.service';
+import { ApiService } from '../../../core/services/api.service';
 
 interface InvoicePreviewData {
   invoice: any;
@@ -39,12 +40,14 @@ export class InvoicePreviewComponent implements OnInit {
   previewData: InvoicePreviewData | null = null;
   loading = true;
   error: string | null = null;
+  logoDataUrl: string | null = null;
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly invoicesService: SalesInvoicesService,
     private readonly snackBar: MatSnackBar,
+    private readonly apiService: ApiService,
   ) {}
 
   ngOnInit(): void {
@@ -66,6 +69,10 @@ export class InvoicePreviewComponent implements OnInit {
     this.invoicesService.getInvoicePreview(this.invoiceId).subscribe({
       next: (data) => {
         this.previewData = data;
+        // Load logo with authentication if URL is present
+        if (data.templateSettings?.logoUrl) {
+          this.loadLogoWithAuth(data.templateSettings.logoUrl);
+        }
         this.loading = false;
       },
       error: (err) => {
@@ -76,6 +83,35 @@ export class InvoicePreviewComponent implements OnInit {
           duration: 4000,
           panelClass: ['snack-error'],
         });
+      },
+    });
+  }
+
+  /**
+   * Load logo image with authentication and convert to data URL
+   * This is needed because <img> tags don't send auth headers
+   */
+  private loadLogoWithAuth(logoUrl: string): void {
+    // Convert relative URL to API endpoint path
+    const endpoint = logoUrl.startsWith('/api/') 
+      ? logoUrl.substring(4) // Remove '/api' prefix since apiService adds it
+      : logoUrl.startsWith('/') 
+        ? logoUrl 
+        : `/${logoUrl}`;
+    
+    this.apiService.download(endpoint).subscribe({
+      next: (blob) => {
+        // Convert blob to data URL for display in img tag
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          this.logoDataUrl = reader.result as string;
+        };
+        reader.readAsDataURL(blob);
+      },
+      error: (err) => {
+        console.error('Error loading logo:', err);
+        // Silently fail - invoice will display without logo
+        this.logoDataUrl = null;
       },
     });
   }

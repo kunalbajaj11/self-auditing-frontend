@@ -20,18 +20,20 @@
           <div class="form">
             <div class="logo-upload-section full">
               <label>Company Logo</label>
+              <div class="logo-preview" *ngIf="logoDataUrl">
+                <img [src]="logoDataUrl" alt="Current Logo" class="current-logo" (error)="onLogoError($event)" />
+                <button mat-icon-button color="warn" type="button" (click)="removeLogo()" matTooltip="Remove logo">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
               <div class="logo-upload">
                 <input type="file" accept="image/*" (change)="uploadLogo($event)" style="display: none" #logoInput>
                 <button mat-stroked-button type="button" (click)="logoInput.click()">
                   <mat-icon>upload</mat-icon>
-                  Upload Logo
+                  {{ logoDataUrl ? 'Change Logo' : 'Upload Logo' }}
                 </button>
-                <span class="logo-hint">Recommended: 200x50px, PNG or JPG</span>
+                <span class="logo-hint">Recommended: 200x50px, PNG or JPG (max 5MB)</span>
               </div>
-              <mat-form-field appearance="outline" class="full">
-                <mat-label>Or enter Logo URL</mat-label>
-                <input matInput formControlName="logoUrl" placeholder="https://example.com/logo.png" />
-              </mat-form-field>
             </div>
 
             <mat-form-field appearance="outline" class="full">

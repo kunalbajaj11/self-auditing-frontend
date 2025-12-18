@@ -17,6 +17,24 @@
     color: #0f172a;
   }
 
+  .logo-preview {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+
+    .current-logo {
+      max-width: 150px;
+      max-height: 80px;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+  }
+
   .logo-upload {
     display: flex;
     align-items: center;

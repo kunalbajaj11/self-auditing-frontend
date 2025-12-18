@@ -3,6 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { OrganizationService } from '../../../../core/services/organization.service';
 import { SettingsService, InvoiceTemplateSettings } from '../../../../core/services/settings.service';
+import { ApiService } from '../../../../core/services/api.service';
 
 @Component({
   selector: 'app-invoice-template',
@@ -12,6 +13,7 @@ import { SettingsService, InvoiceTemplateSettings } from '../../../../core/servi
 export class InvoiceTemplateComponent implements OnInit {
   loading = false;
   saving = false;
+  logoDataUrl: string | null = null;
 
   readonly form;
   readonly paymentTermOptions = [
@@ -38,6 +40,7 @@ export class InvoiceTemplateComponent implements OnInit {
     private readonly snackBar: MatSnackBar,
     private readonly organizationService: OrganizationService,
     private readonly settingsService: SettingsService,
+    private readonly apiService: ApiService,
   ) {
     this.form = this.fb.group({
       // Branding
@@ -85,8 +88,11 @@ export class InvoiceTemplateComponent implements OnInit {
     this.loading = true;
     this.settingsService.getInvoiceTemplate().subscribe({
       next: (settings) => {
+        // Store the logo URL path for form value (used when saving)
+        const logoUrl = settings.invoiceLogoUrl || '';
+        
         this.form.patchValue({
-          logoUrl: settings.invoiceLogoUrl ?? '',
+          logoUrl,
           headerText: settings.invoiceHeaderText ?? '',
           colorScheme: settings.invoiceColorScheme ?? 'blue',
           customColor: settings.invoiceCustomColor ?? '#1976d2',
@@ -110,10 +116,45 @@ export class InvoiceTemplateComponent implements OnInit {
           emailSubject: settings.invoiceEmailSubject ?? 'Invoice {{invoiceNumber}} from {{companyName}}',
           emailMessage: settings.invoiceEmailMessage ?? 'Please find attached invoice {{invoiceNumber}} for {{totalAmount}} {{currency}}.',
         });
+        
+        // Load logo with authentication if URL is present
+        if (logoUrl) {
+          this.loadLogoWithAuth(logoUrl);
+        }
+        
         this.loading = false;
       },
       error: () => {
         this.loading = false;
+      },
+    });
+  }
+
+  /**
+   * Load logo image with authentication and convert to data URL
+   * This is needed because <img> tags don't send auth headers
+   */
+  private loadLogoWithAuth(logoUrl: string): void {
+    // Convert relative URL to API endpoint path
+    const endpoint = logoUrl.startsWith('/api/') 
+      ? logoUrl.substring(4) // Remove '/api' prefix since apiService adds it
+      : logoUrl.startsWith('/') 
+        ? logoUrl 
+        : `/${logoUrl}`;
+    
+    this.apiService.download(endpoint).subscribe({
+      next: (blob) => {
+        // Convert blob to data URL for display in img tag
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          this.logoDataUrl = reader.result as string;
+        };
+        reader.readAsDataURL(blob);
+      },
+      error: (err) => {
+        console.error('Error loading logo:', err);
+        // Silently fail - settings will show without logo preview
+        this.logoDataUrl = null;
       },
     });
   }
@@ -205,7 +246,10 @@ export class InvoiceTemplateComponent implements OnInit {
       this.saving = true;
       this.settingsService.uploadInvoiceLogo(file).subscribe({
         next: (result) => {
+          // Store the logo URL path in form
           this.form.patchValue({ logoUrl: result.logoUrl });
+          // Load the newly uploaded logo with authentication
+          this.loadLogoWithAuth(result.logoUrl);
           this.saving = false;
           this.snackBar.open('Logo uploaded successfully', 'Close', {
             duration: 3000,
@@ -221,6 +265,20 @@ export class InvoiceTemplateComponent implements OnInit {
         },
       });
     }
+  }
+
+  removeLogo(): void {
+    this.form.patchValue({ logoUrl: '' });
+    this.logoDataUrl = null;
+    this.snackBar.open('Logo removed. Click Save to apply changes.', 'Close', {
+      duration: 3000,
+    });
+  }
+
+  onLogoError(event: Event): void {
+    // Handle logo loading error - hide the broken image
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
   }
 
   get showCustomPaymentTerms(): boolean {
