@@ -44,6 +44,7 @@ import { NumberingSequencesComponent } from './settings/numbering-sequences/numb
 import { CashAccountsComponent } from './cash-accounts/cash-accounts.component';
 import { BankAccountsComponent } from './bank-accounts/bank-accounts.component';
 import { BankTransactionFormDialogComponent } from './bank-accounts/bank-transaction-form-dialog.component';
+import { AdjustmentsComponent } from './adjustments/adjustments.component';
 import { AdminJournalEntriesComponent } from './journal-entries/admin-journal-entries.component';
 import { JournalEntryFormDialogComponent } from './journal-entries/journal-entry-form-dialog.component';
 
@@ -92,6 +93,7 @@ import { JournalEntryFormDialogComponent } from './journal-entries/journal-entry
     CashAccountsComponent,
     BankAccountsComponent,
     BankTransactionFormDialogComponent,
+    AdjustmentsComponent,
     AdminJournalEntriesComponent,
     JournalEntryFormDialogComponent,
   ],

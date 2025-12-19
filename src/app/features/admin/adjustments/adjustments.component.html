@@ -1,16 +1,12 @@
-<section class="bank-accounts">
+<section class="adjustments">
   <header class="header">
     <div class="header-content">
-      <h1>Bank Accounts</h1>
-      <p>View all bank transactions including expenses paid via bank transfer. Add new bank transactions manually using the "Add Bank Transaction" button.</p>
+      <h1>Adjustments</h1>
+      <p>View all adjustment transactions marked as adjustments in the system.</p>
     </div>
     <div class="header-actions">
       <button mat-icon-button matTooltip="Refresh" (click)="reload()">
         <mat-icon>refresh</mat-icon>
-      </button>
-      <button mat-raised-button color="primary" (click)="openAddTransactionDialog()">
-        <mat-icon>add</mat-icon>
-        <span class="button-label">Add Bank Transaction</span>
       </button>
     </div>
   </header>
@@ -19,8 +15,8 @@
     <mat-card class="transactions-card">
       <mat-card-header>
         <div class="card-title-with-icon">
-          <mat-icon>account_balance</mat-icon>
-          <mat-card-title>Bank Transactions</mat-card-title>
+          <mat-icon>tune</mat-icon>
+          <mat-card-title>Adjustment Transactions</mat-card-title>
         </div>
       </mat-card-header>
       <mat-card-content>
@@ -53,9 +49,6 @@
               <th mat-header-cell *matHeaderCellDef>Description</th>
               <td mat-cell *matCellDef="let transaction">
                 <div class="description">{{ transaction.description }}</div>
-                <div class="reference" *ngIf="transaction.referenceNumber">
-                  Ref: {{ transaction.referenceNumber }}
-                </div>
               </td>
             </ng-container>
 
@@ -66,20 +59,13 @@
               </td>
             </ng-container>
 
-            <ng-container matColumnDef="paymentMethod">
-              <th mat-header-cell *matHeaderCellDef>Payment Method</th>
-              <td mat-cell *matCellDef="let transaction">
-                <span class="payment-method">{{ getPaymentMethodLabel(transaction.paymentMethod) }}</span>
-              </td>
-            </ng-container>
-
             <ng-container matColumnDef="actions">
               <th mat-header-cell *matHeaderCellDef>Actions</th>
               <td mat-cell *matCellDef="let transaction">
                 <button
                   mat-button
                   color="primary"
-                  (click)="transaction.type === 'expense' ? viewExpense(transaction) : (transaction.type === 'sales' || transaction.type === 'payment') ? viewInvoice(transaction) : viewJournalEntry(transaction)"
+                  (click)="transaction.type === 'expense' ? viewExpense(transaction) : viewJournalEntry(transaction)"
                 >
                   <mat-icon>visibility</mat-icon>
                   View
@@ -97,9 +83,9 @@
         </div>
 
         <div class="empty" *ngIf="!loading && dataSource.data.length === 0">
-          <mat-icon>account_balance</mat-icon>
-          <p>No bank transactions found.</p>
-          <p class="hint">Bank transactions include expenses paid via bank transfer, invoice payments with bank transfer payment method, and journal entries with "Bank Paid" or "Bank Received" status. Use "Add Bank Transaction" to record new bank transactions.</p>
+          <mat-icon>tune</mat-icon>
+          <p>No adjustment transactions found.</p>
+          <p class="hint">Adjustment transactions include expenses marked with type "Adjustment".</p>
         </div>
       </mat-card-content>
     </mat-card>

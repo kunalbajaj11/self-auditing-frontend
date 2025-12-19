@@ -26,6 +26,7 @@ import { CurrencySettingsComponent } from './settings/currency-settings/currency
 import { NumberingSequencesComponent } from './settings/numbering-sequences/numbering-sequences.component';
 import { CashAccountsComponent } from './cash-accounts/cash-accounts.component';
 import { BankAccountsComponent } from './bank-accounts/bank-accounts.component';
+import { AdjustmentsComponent } from './adjustments/adjustments.component';
 
 const routes: Routes = [
   {
@@ -63,6 +64,7 @@ const routes: Routes = [
             children: [
               { label: 'Bank Accounts', route: '/admin/banking/accounts' },
               { label: 'Cash Accounts', route: '/admin/banking/cash-accounts' },
+              { label: 'Adjustments', route: '/admin/banking/adjustments' },
               { label: 'Upload Bank Statement', route: '/admin/bank-reconciliation/upload' },
               { label: 'Reconciliation', route: '/admin/bank-reconciliation' },
             ],
@@ -76,6 +78,7 @@ const routes: Routes = [
               { label: 'Profit and Loss', route: '/admin/reports/profit-and-loss', icon: 'trending_up' },
               { label: 'Payables', route: '/admin/reports/payables', icon: 'account_balance_wallet' },
               { label: 'Receivables', route: '/admin/reports/receivables', icon: 'receipt_long' },
+              { label: 'VAT Control Account', route: '/admin/reports/vat-control-account', icon: 'account_balance' },
             ],
           },
           {
@@ -174,6 +177,11 @@ const routes: Routes = [
             data: { shell: { title: 'Receivables' }, reportType: 'receivables' },
           },
           {
+            path: 'vat-control-account',
+            component: AdminReportsComponent,
+            data: { shell: { title: 'VAT Control Account' }, reportType: 'vat_control_account' },
+          },
+          {
             path: '',
             redirectTo: 'trial-balance',
             pathMatch: 'full',
@@ -224,6 +232,11 @@ const routes: Routes = [
         path: 'banking/cash-accounts',
         component: CashAccountsComponent,
         data: { shell: { title: 'Cash Accounts' } },
+      },
+      {
+        path: 'banking/adjustments',
+        component: AdjustmentsComponent,
+        data: { shell: { title: 'Adjustments' } },
       },
       {
         path: 'settings/invoice-template',

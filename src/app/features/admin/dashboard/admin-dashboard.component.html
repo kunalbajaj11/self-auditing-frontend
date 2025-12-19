@@ -7,10 +7,40 @@
         {{ (dashboard$ | async)?.organization?.name || 'your organization' }}.
       </p>
     </div>
+    <div class="header-actions">
+      <mat-card class="date-range-card" [formGroup]="dateRangeForm">
+        <mat-card-content>
+          <div class="date-range-controls">
+            <mat-form-field appearance="outline" class="preset-field">
+              <mat-label>Period</mat-label>
+              <mat-select formControlName="dateRangePreset" (selectionChange)="onDateRangePresetChange($event.value)">
+                <mat-option *ngFor="let preset of dateRangePresets" [value]="preset.value">
+                  {{ preset.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="date-field">
+              <mat-label>Start Date</mat-label>
+              <input matInput [matDatepicker]="startPicker" formControlName="startDate" />
+              <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+              <mat-datepicker #startPicker></mat-datepicker>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="date-field">
+              <mat-label>End Date</mat-label>
+              <input matInput [matDatepicker]="endPicker" formControlName="endDate" />
+              <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+              <mat-datepicker #endPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
     <button mat-raised-button color="primary" (click)="refresh()" class="refresh-btn">
       <mat-icon>refresh</mat-icon>
       Refresh
     </button>
+    </div>
   </header>
 
   <ng-container *ngIf="dashboard$ | async as vm; else loadingState">
@@ -78,19 +108,39 @@
           ></app-summary-card>
 
           <app-summary-card
-            label="Pending Accruals"
-            icon="schedule"
-            [value]="vm.pendingAccruals"
-            accent="warn"
-            [hint]="vm.pendingAccrualAmount > 0 ? 'AED ' + (vm.pendingAccrualAmount | number: '1.0-2') : undefined"
+            label="Receivables"
+            icon="account_balance_wallet"
+            [value]="'AED ' + (vm.receivablesAmount | number: '1.0-2')"
+            accent="primary"
+            [hint]="vm.outstandingInvoices ? vm.outstandingInvoices + ' invoices outstanding' : 'No outstanding invoices'"
           ></app-summary-card>
 
           <app-summary-card
-            label="Pending Approvals"
-            icon="playlist_add_check"
-            [value]="vm.pendingApprovals"
-            accent="warn"
-            [hint]="vm.pendingApprovals > 0 ? 'Awaiting review' : 'All clear'"
+            label="VAT"
+            icon="percent"
+            [value]="'AED ' + (vm.vatPayable | number: '1.0-2')"
+            accent="accent"
+            [hint]="
+              vm.vatSummary && (vm.inputVat > 0 || vm.outputVat > 0)
+                ? 'Output: AED ' + (vm.outputVat | number: '1.0-2') + ' - Input: AED ' + (vm.inputVat | number: '1.0-2')
+                : 'No VAT transactions'
+            "
+          ></app-summary-card>
+
+          <app-summary-card
+            label="Bank"
+            icon="account_balance"
+            [value]="'AED ' + (vm.bankBalance | number: '1.0-2')"
+            accent="primary"
+            [hint]="vm.bankBalance >= 0 ? 'Positive balance' : 'Negative balance'"
+          ></app-summary-card>
+
+          <app-summary-card
+            label="Cash"
+            icon="attach_money"
+            [value]="'AED ' + (vm.cashBalance | number: '1.0-2')"
+            accent="accent"
+            [hint]="vm.cashBalance >= 0 ? 'Positive balance' : 'Negative balance'"
           ></app-summary-card>
 
           <app-summary-card
@@ -99,14 +149,6 @@
             [value]="vm.totalInvoices || 0"
             accent="primary"
             [hint]="vm.outstandingInvoices ? vm.outstandingInvoices + ' outstanding' : undefined"
-          ></app-summary-card>
-
-          <app-summary-card
-            label="Outstanding Amount"
-            icon="account_balance_wallet"
-            [value]="'AED ' + ((vm.outstandingAmount || 0) | number: '1.0-2')"
-            accent="accent"
-            [hint]="vm.overdueInvoices ? vm.overdueInvoices + ' overdue' : undefined"
           ></app-summary-card>
 
           <app-summary-card

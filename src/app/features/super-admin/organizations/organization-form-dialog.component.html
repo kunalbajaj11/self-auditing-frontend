@@ -48,6 +48,15 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline">
+    <mat-label>Region/Country</mat-label>
+    <mat-select formControlName="region">
+      <mat-option *ngFor="let region of regions" [value]="region.value">
+        {{ region.label }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
     <mat-label>Currency</mat-label>
     <input matInput formControlName="currency" />
   </mat-form-field>

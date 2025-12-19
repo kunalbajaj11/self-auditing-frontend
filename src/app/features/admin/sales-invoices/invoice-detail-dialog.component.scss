@@ -12,7 +12,7 @@
 
   h2 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     font-weight: 600;
   }
 }
@@ -32,7 +32,7 @@
 }
 
 .invoice-content {
-  padding: 24px;
+  padding: 8px 10px;
   max-height: 70vh;
   overflow-y: auto;
 }
@@ -40,7 +40,7 @@
 .invoice-header {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  gap: 16px;
   margin-bottom: 24px;
   padding-bottom: 24px;
   border-bottom: 2px solid rgba(0, 0, 0, 0.12);
@@ -86,7 +86,7 @@
 .line-items-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
 
   thead {
     background-color: #f8fafc;
@@ -120,7 +120,7 @@
 
 .totals-section {
   margin-top: 24px;
-  padding: 16px;
+  padding: 8px 10px;
   background-color: #f8fafc;
   border-radius: 8px;
 }

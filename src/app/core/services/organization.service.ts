@@ -34,6 +34,7 @@ export class OrganizationService {
     contactPerson?: string;
     contactEmail?: string;
     storageQuotaMb?: number;
+    region?: string;
   }): Observable<Organization> {
     return this.api.post<Organization>('/organizations', payload);
   }

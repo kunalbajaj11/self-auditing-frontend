@@ -89,15 +89,24 @@
 
           <div class="two-column">
             <mat-form-field appearance="outline">
-              <mat-label>VAT Number</mat-label>
-              <input matInput formControlName="vatNumber" />
+              <mat-label>Region/Country *</mat-label>
+              <mat-select formControlName="region" required>
+                <mat-option *ngFor="let region of regions" [value]="region.value">
+                  {{ region.label }}
+                </mat-option>
+              </mat-select>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Currency</mat-label>
-              <input matInput formControlName="currency" />
+              <mat-label>VAT Number</mat-label>
+              <input matInput formControlName="vatNumber" />
             </mat-form-field>
           </div>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Currency</mat-label>
+            <input matInput formControlName="currency" />
+          </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Registered Address</mat-label>

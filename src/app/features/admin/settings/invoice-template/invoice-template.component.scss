@@ -22,7 +22,7 @@
     align-items: center;
     gap: 16px;
     margin-bottom: 16px;
-    padding: 16px;
+    padding: 8px 10px;
     background: #f8fafc;
     border-radius: 8px;
     border: 1px solid #e2e8f0;
@@ -49,7 +49,7 @@
 
     .logo-hint {
       color: #64748b;
-      font-size: 0.875rem;
+      font-size: 0.75rem;
     }
   }
 }
@@ -74,7 +74,7 @@
 
   h4 {
     margin: 0 0 16px;
-    font-size: 1rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: #0f172a;
   }

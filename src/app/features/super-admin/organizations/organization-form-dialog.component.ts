@@ -12,6 +12,12 @@ import { PlanType } from '../../../core/models/plan.model';
 })
 export class OrganizationFormDialogComponent {
   readonly planTypes: PlanType[] = ['free', 'standard', 'enterprise'];
+  readonly regions: Array<{ value: string; label: string }> = [
+    { value: 'UAE', label: 'United Arab Emirates (UAE)' },
+    { value: 'SAUDI', label: 'Saudi Arabia' },
+    { value: 'OMAN', label: 'Oman' },
+    { value: 'INDIA', label: 'India' },
+  ];
   loading = false;
 
   readonly form;
@@ -32,6 +38,7 @@ export class OrganizationFormDialogComponent {
       contactEmail: ['', [Validators.email]],
       storageQuotaMb: [500, [Validators.required, Validators.min(100)]],
       currency: ['AED', Validators.required],
+      region: ['UAE'],
       address: [''],
     });
   }

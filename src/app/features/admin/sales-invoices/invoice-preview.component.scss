@@ -1,5 +1,5 @@
 .invoice-preview-container {
-  padding: 24px;
+  padding: 8px 10px;
   background: #f5f5f5;
   min-height: 100vh;
 
@@ -8,7 +8,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
-    padding: 16px;
+    padding: 8px 10px;
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -44,9 +44,9 @@
 
   .error-container {
     mat-icon {
-      font-size: 48px;
-      width: 48px;
-      height: 48px;
+      font-size: 36px;
+      width: 36px;
+      height: 36px;
       margin-bottom: 16px;
     }
   }
@@ -128,7 +128,7 @@
         display: flex;
         justify-content: space-between;
         margin-bottom: 32px;
-        padding: 16px;
+        padding: 8px 10px;
         background: #fafafa;
         border-radius: 4px;
 
@@ -251,7 +251,7 @@
       .bank-details-section,
       .terms-section {
         margin-bottom: 24px;
-        padding: 16px;
+        padding: 8px 10px;
         background: #fafafa;
         border-radius: 4px;
 

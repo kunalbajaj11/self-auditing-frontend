@@ -18,9 +18,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
+  padding: 8px 10px;
   border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 12px;
+  border-radius: 8px;
   background: #f8fafc;
 
   .currency-info {
@@ -39,7 +39,7 @@
       }
 
       .currency-name {
-        font-size: 0.875rem;
+        font-size: 0.75rem;
         color: #64748b;
       }
     }
@@ -83,6 +83,6 @@
 
 mat-chip {
   font-size: 0.75rem;
-  height: 24px;
+  height: 20px;
 }
 

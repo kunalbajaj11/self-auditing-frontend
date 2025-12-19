@@ -19,10 +19,10 @@
   mat-dialog-actions {
     flex-direction: column-reverse;
     gap: 8px;
-    padding: 16px;
+    padding: 8px 10px;
     button {
       width: 100%;
-      min-height: 44px;
+      min-height: 40px;
     }
   }
 }

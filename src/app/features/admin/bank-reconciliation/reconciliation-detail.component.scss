@@ -1,5 +1,5 @@
 .reconciliation-detail-container {
-  padding: 24px;
+  padding: 8px 10px;
 
   .header {
     display: flex;
@@ -52,7 +52,7 @@
   .transactions-section {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 24px;
+    gap: 16px;
     margin-bottom: 24px;
 
     .transactions-panel {

@@ -1,4 +1,4 @@
-.organizations {
+.adjustments {
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -10,7 +10,7 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
-  padding: 14px;
+  padding: 20px;
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border-radius: 8px;
   border: 1px solid rgba(15, 23, 42, 0.08);
@@ -21,7 +21,7 @@
 
     h1 {
       margin: 0 0 8px;
-      font-size: 1.1rem;
+      font-size: 1.5rem;
       font-weight: 700;
       color: #0f172a;
       letter-spacing: -0.02em;
@@ -30,74 +30,27 @@
     p {
       margin: 0;
       color: #64748b;
-      font-size: 0.875rem;
+      font-size: 0.75rem;
       line-height: 1.6;
       max-width: 600px;
     }
   }
 
-  button {
-    height: 36px;
-    padding: 0 18px;
-    border-radius: 8px;
-    font-weight: 600;
-    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.2);
-
-    mat-icon {
-      margin-right: 8px;
-    }
-  }
-}
-
-.filters-section {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.section-title {
-  margin: 0 0 16px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.01em;
-}
-
-.filters-card {
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);
-  border: 1px solid rgba(15, 23, 42, 0.08);
-
-  mat-card-content {
+  .header-actions {
     display: flex;
+    gap: 12px;
     align-items: center;
-    gap: 16px;
-    padding: 16px;
-
-    mat-form-field {
-      flex: 1;
-    }
-
-    button {
-      height: 56px;
-      padding: 0 16px;
-      border-radius: 8px;
-      font-weight: 600;
-
-      mat-icon {
-        margin-right: 8px;
-      }
-    }
+    flex-wrap: wrap;
   }
 }
 
-.organizations-section {
+.transactions-section {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
-.organizations-card {
+.transactions-card {
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);
   border: 1px solid rgba(15, 23, 42, 0.08);
@@ -137,18 +90,17 @@
   }
 
   mat-card-content {
-    padding: 16px;
+    padding: 8px 10px;
   }
 }
 
 .table-container {
-  position: relative;
   overflow-x: auto;
   border-radius: 8px;
-  min-height: 200px;
+  position: relative;
 }
 
-.organizations-table {
+.transactions-table {
   width: 100%;
   background: transparent;
 
@@ -157,12 +109,16 @@
 
     th {
       font-weight: 700;
-      font-size: 0.875rem;
+      font-size: 0.75rem;
       color: #475569;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      padding: 16px;
+      padding: 8px 10px;
       border-bottom: 2px solid rgba(15, 23, 42, 0.08);
+
+      &.text-right {
+        text-align: right;
+      }
     }
   }
 
@@ -174,9 +130,14 @@
     }
 
     td {
-      padding: 16px;
+      padding: 8px 10px;
       border-bottom: 1px solid rgba(15, 23, 42, 0.06);
       color: #0f172a;
+
+      &.text-right {
+        text-align: right;
+        font-family: 'SF Mono', 'Monaco', monospace;
+      }
 
       .primary {
         font-weight: 600;
@@ -184,30 +145,14 @@
         margin-bottom: 4px;
       }
 
-      .secondary {
+      .description {
         color: #64748b;
-        font-size: 0.875rem;
+        font-size: 0.75rem;
       }
 
-      mat-chip {
-        font-weight: 600;
-        font-size: 0.875rem;
-        padding: 4px 12px;
-      }
-
-      .action-buttons {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-
-        button {
-          mat-icon {
-            font-size: 18px;
-            width: 18px;
-            height: 18px;
-            margin-right: 4px;
-          }
-        }
+      strong {
+        font-weight: 700;
+        color: #0f172a;
       }
     }
   }
@@ -226,8 +171,7 @@
   z-index: 10;
 }
 
-.empty,
-.error {
+.empty {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -246,14 +190,20 @@
 
   p {
     margin: 0;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: #64748b;
+
+    &.hint {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-top: 8px;
+    }
   }
 }
 
 // Mobile Responsive Styles
 @media (max-width: 768px) {
-  .organizations {
+  .adjustments {
     gap: 16px;
   }
 
@@ -261,11 +211,11 @@
     flex-direction: column;
     align-items: stretch;
     gap: 16px;
-    padding: 16px;
+    padding: 8px 10px;
 
     .header-content {
       h1 {
-        font-size: 1.1rem;
+        font-size: 1.5rem;
       }
 
       p {
@@ -273,34 +223,13 @@
       }
     }
 
-    button {
+    .header-actions {
       width: 100%;
-      min-height: 40px;
+      flex-wrap: wrap;
     }
   }
 
-  .section-title {
-    font-size: 1.1rem;
-    margin-bottom: 16px;
-  }
-
-  .filters-card {
-    mat-card-content {
-      flex-direction: column;
-      padding: 14px;
-
-      mat-form-field {
-        width: 100%;
-      }
-
-      button {
-        width: 100%;
-        min-height: 40px;
-      }
-    }
-  }
-
-  .organizations-card {
+  .transactions-card {
     mat-card-header {
       padding: 20px 20px 12px;
 
@@ -322,7 +251,7 @@
     }
   }
 
-  .organizations-table {
+  .transactions-table {
     .table-header th,
     .table-row td {
       padding: 12px 8px;
@@ -330,3 +259,4 @@
     }
   }
 }
+

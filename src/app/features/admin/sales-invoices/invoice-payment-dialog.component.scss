@@ -1,46 +1,239 @@
 mat-dialog-content {
-  min-width: 500px;
-  max-width: 600px;
+  min-width: 600px;
+  max-width: 700px;
+  padding: 8px 10px;
 }
 
-.payment-info {
-  margin-bottom: 24px;
-  padding: 16px;
-  background-color: #f8fafc;
-  border-radius: 8px;
-}
-
-.info-row {
+.payment-form {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
+  flex-direction: column;
+  gap: 16px;
+}
 
-  &:last-child {
-    margin-bottom: 0;
-  }
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
-  .label {
-    font-weight: 500;
-    color: #64748b;
-  }
-
-  .value {
-    font-weight: 600;
-    color: #0f172a;
-
-    &.outstanding {
-      color: #ef4444;
-    }
-  }
+.section-title {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0f172a;
 }
 
 .full-width {
   width: 100%;
-  margin-bottom: 16px;
 }
 
+// Invoice Selection Dropdown
+.invoice-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+
+  .invoice-option-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+
+    .invoice-number {
+      font-weight: 600;
+      color: #0f172a;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .invoice-amount {
+      font-weight: 600;
+      color: #1976d2;
+      white-space: nowrap;
+    }
+  }
+
+  .invoice-option-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.75rem;
+
+    .invoice-date {
+      color: #64748b;
+    }
+
+    .customer-name {
+      color: #64748b;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .outstanding-badge {
+      color: #ef4444;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+  }
+}
+
+.loading-spinner {
+  margin-right: 8px;
+}
+
+// Invoice Details Card
+.invoice-details-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-top: 8px;
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    h3 {
+      margin: 0;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .clear-button {
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+    }
+  }
+
+  .card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 8px 0;
+    border-bottom: 1px solid #e2e8f0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &.highlight {
+      background: #fff;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #fecaca;
+      margin: 4px 0;
+    }
+
+    .detail-label {
+      font-weight: 500;
+      color: #64748b;
+      min-width: 140px;
+    }
+
+    .detail-value {
+      font-weight: 600;
+      color: #0f172a;
+      text-align: right;
+      flex: 1;
+
+      &.outstanding {
+        color: #ef4444;
+        font-size: 1.1rem;
+      }
+    }
+  }
+}
+
+// Empty State
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  text-align: center;
+  color: #64748b;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+    color: #94a3b8;
+  }
+
+  p {
+    margin: 8px 0;
+    font-size: 0.75rem;
+    color: #64748b;
+
+    &.empty-state-hint {
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+  }
+}
+
+// Inline Spinner
 .inline-spinner {
   display: inline-block;
   margin-right: 8px;
+  vertical-align: middle;
+}
+
+// Form Field Spacing
+mat-form-field {
+  margin-bottom: 8px;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  mat-dialog-content {
+    min-width: auto;
+    max-width: 100%;
+    padding: 8px 10px;
+  }
+
+  .invoice-option {
+    .invoice-option-main,
+    .invoice-option-details {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+  }
+
+  .detail-row {
+    flex-direction: column;
+    gap: 4px;
+
+    .detail-label {
+      min-width: auto;
+    }
+
+    .detail-value {
+      text-align: left;
+    }
+  }
 }
 

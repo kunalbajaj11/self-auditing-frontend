@@ -1,13 +1,13 @@
 mat-dialog-content {
   min-width: 600px;
   max-width: 700px;
-  padding: 24px;
+  padding: 8px 10px;
 }
 
 .payment-form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
 .form-section {
@@ -62,7 +62,7 @@ mat-dialog-content {
     justify-content: space-between;
     align-items: center;
     gap: 12px;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
 
     .expense-date {
       color: #64748b;
@@ -84,8 +84,8 @@ mat-dialog-content {
 .expense-details-card {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 8px;
+  padding: 8px 10px;
   margin-top: 8px;
 
   .card-header {
@@ -96,7 +96,7 @@ mat-dialog-content {
 
     h3 {
       margin: 0;
-      font-size: 1rem;
+      font-size: 0.75rem;
       font-weight: 600;
       color: #0f172a;
     }
@@ -128,7 +128,7 @@ mat-dialog-content {
 
     &.highlight {
       background: #fff;
-      padding: 12px;
+      padding: 8px 10px;
       border-radius: 8px;
       border: 1px solid #fecaca;
       margin: 4px 0;
@@ -160,7 +160,7 @@ mat-dialog-content {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
+  padding: 32px 20px;
   text-align: center;
   color: #64748b;
 
@@ -175,11 +175,11 @@ mat-dialog-content {
 
   p {
     margin: 8px 0;
-    font-size: 1rem;
+    font-size: 0.75rem;
     color: #64748b;
 
     &.empty-state-hint {
-      font-size: 0.875rem;
+      font-size: 0.75rem;
       color: #94a3b8;
     }
   }
@@ -202,7 +202,7 @@ mat-form-field {
   mat-dialog-content {
     min-width: auto;
     max-width: 100%;
-    padding: 16px;
+    padding: 8px 10px;
   }
 
   .expense-option {

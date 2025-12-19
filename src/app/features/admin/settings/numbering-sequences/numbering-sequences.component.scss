@@ -16,8 +16,8 @@
 
 .sequence-item {
   border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 8px;
+  padding: 14px;
   background: #f8fafc;
   transition: all 0.3s ease;
 
@@ -52,7 +52,7 @@
     }
 
     .sequence-preview {
-      font-size: 0.875rem;
+      font-size: 0.75rem;
       color: #64748b;
       font-family: 'Courier New', monospace;
       background: white;
@@ -104,7 +104,7 @@
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 12px;
+    padding: 8px 10px;
     background: #f8fafc;
     border-radius: 8px;
 
@@ -126,7 +126,7 @@
 
 .format-help {
   p {
-    margin: 0 0 12px;
+    margin: 0 0 8px;
     font-weight: 600;
     color: #0f172a;
   }
@@ -144,7 +144,7 @@
         padding: 2px 6px;
         border-radius: 4px;
         font-family: 'Courier New', monospace;
-        font-size: 0.875rem;
+        font-size: 0.75rem;
       }
     }
   }

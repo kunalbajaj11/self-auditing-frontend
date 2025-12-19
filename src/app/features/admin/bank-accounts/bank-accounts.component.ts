@@ -16,7 +16,7 @@ import { JournalEntryFormDialogComponent } from '../journal-entries/journal-entr
 
 interface BankTransaction {
   id: string;
-  type: 'expense' | 'sales' | 'journal';
+  type: 'expense' | 'sales' | 'journal' | 'payment';
   date: string;
   description: string;
   vendorOrCustomer: string;
@@ -25,6 +25,7 @@ interface BankTransaction {
   expense?: Expense;
   invoice?: SalesInvoice;
   journalEntry?: JournalEntry;
+  invoicePayment?: any; // InvoicePayment
   paymentMethod?: string;
   referenceNumber?: string;
 }
@@ -63,7 +64,7 @@ export class BankAccountsComponent implements OnInit {
   loadBankTransactions(): void {
     this.loading = true;
 
-    // Load expenses, payments, invoices, and journal entries in parallel
+    // Load expenses, payments, invoices, invoice payments, and journal entries in parallel
     forkJoin({
       expenses: this.expensesService.listExpenses({}).pipe(
         catchError(() => {
@@ -92,6 +93,15 @@ export class BankAccountsComponent implements OnInit {
           return of([]);
         }),
       ),
+      invoicePayments: this.salesInvoicesService.listAllPayments('bank_transfer').pipe(
+        catchError(() => {
+          this.snackBar.open('Failed to load invoice payments', 'Close', {
+            duration: 4000,
+            panelClass: ['snack-error'],
+          });
+          return of([]);
+        }),
+      ),
       journalEntries: this.journalEntriesService.listEntries({}).pipe(
         catchError(() => {
           this.snackBar.open('Failed to load journal entries', 'Close', {
@@ -102,7 +112,7 @@ export class BankAccountsComponent implements OnInit {
         }),
       ),
     }).subscribe({
-      next: ({ expenses, payments, invoices, journalEntries }) => {
+      next: ({ expenses, payments, invoices, invoicePayments, journalEntries }) => {
         const transactions: BankTransaction[] = [];
 
         // Filter payments with bank_transfer method
@@ -168,8 +178,23 @@ export class BankAccountsComponent implements OnInit {
           });
         });
 
-        // Note: Sales invoices with bank received status are no longer tracked here
-        // Bank transactions are now manually added via the "Add Bank Transaction" button
+        // Add invoice payments with payment method = bank_transfer
+        invoicePayments.forEach((payment) => {
+          const invoice = payment.invoice;
+          transactions.push({
+            id: payment.id,
+            type: 'payment',
+            date: payment.paymentDate,
+            description: payment.notes || `Payment for Invoice ${invoice?.invoiceNumber || 'N/A'}`,
+            vendorOrCustomer: invoice?.customerName || '—',
+            amount: parseFloat(payment.amount),
+            currency: invoice?.currency || 'AED',
+            invoice: invoice,
+            invoicePayment: payment,
+            paymentMethod: payment.paymentMethod || 'Bank Transfer',
+            referenceNumber: payment.referenceNumber || undefined,
+          });
+        });
 
         // Sort by date descending (latest first)
         transactions.sort((a, b) => {
@@ -218,9 +243,10 @@ export class BankAccountsComponent implements OnInit {
     });
   }
 
-  getTypeLabel(type: 'expense' | 'sales' | 'journal'): string {
+  getTypeLabel(type: 'expense' | 'sales' | 'journal' | 'payment'): string {
     if (type === 'expense') return 'Expense';
     if (type === 'sales') return 'Sales';
+    if (type === 'payment') return 'Payment';
     return 'Journal Entry';
   }
 

@@ -14,7 +14,7 @@ import { JournalEntryFormDialogComponent } from '../journal-entries/journal-entr
 
 interface CashTransaction {
   id: string;
-  type: 'expense' | 'sales' | 'journal';
+  type: 'expense' | 'sales' | 'journal' | 'payment';
   date: string;
   description: string;
   vendorOrCustomer: string;
@@ -23,6 +23,7 @@ interface CashTransaction {
   expense?: Expense;
   invoice?: SalesInvoice;
   journalEntry?: JournalEntry;
+  invoicePayment?: any; // InvoicePayment
 }
 
 @Component({
@@ -57,7 +58,7 @@ export class CashAccountsComponent implements OnInit {
   loadCashTransactions(): void {
     this.loading = true;
 
-    // Load expenses, invoices, and journal entries in parallel
+    // Load expenses, invoices, invoice payments, and journal entries in parallel
     forkJoin({
       expenses: this.expensesService.listExpenses({}).pipe(
         catchError(() => {
@@ -77,6 +78,15 @@ export class CashAccountsComponent implements OnInit {
           return of([]);
         }),
       ),
+      invoicePayments: this.salesInvoicesService.listAllPayments('cash').pipe(
+        catchError(() => {
+          this.snackBar.open('Failed to load invoice payments', 'Close', {
+            duration: 4000,
+            panelClass: ['snack-error'],
+          });
+          return of([]);
+        }),
+      ),
       journalEntries: this.journalEntriesService.listEntries({}).pipe(
         catchError(() => {
           this.snackBar.open('Failed to load journal entries', 'Close', {
@@ -87,7 +97,7 @@ export class CashAccountsComponent implements OnInit {
         }),
       ),
     }).subscribe({
-      next: ({ expenses, invoices, journalEntries }) => {
+      next: ({ expenses, invoices, invoicePayments, journalEntries }) => {
         const transactions: CashTransaction[] = [];
 
         // Filter and add expenses with purchaseStatus = 'Purchase - Cash Paid'
@@ -108,9 +118,17 @@ export class CashAccountsComponent implements OnInit {
           });
         });
 
+        // Create a set of invoice IDs that have cash payments
+        const invoicesWithCashPayments = new Set(
+          invoicePayments.map((payment) => payment.invoice?.id).filter(Boolean),
+        );
+
         // Filter and add sales invoices with tax_invoice_cash_received status
+        // But exclude invoices that have individual payments shown (to avoid duplicates)
         const cashReceivedInvoices = invoices.filter(
-          (invoice) => invoice.status === 'tax_invoice_cash_received',
+          (invoice) =>
+            invoice.status === 'tax_invoice_cash_received' &&
+            !invoicesWithCashPayments.has(invoice.id),
         );
 
         cashReceivedInvoices.forEach((invoice) => {
@@ -123,6 +141,22 @@ export class CashAccountsComponent implements OnInit {
             amount: parseFloat(invoice.totalAmount),
             currency: invoice.currency || 'AED',
             invoice: invoice,
+          });
+        });
+
+        // Add invoice payments with payment method = cash
+        invoicePayments.forEach((payment) => {
+          const invoice = payment.invoice;
+          transactions.push({
+            id: payment.id,
+            type: 'payment',
+            date: payment.paymentDate,
+            description: payment.notes || `Payment for Invoice ${invoice?.invoiceNumber || 'N/A'}`,
+            vendorOrCustomer: invoice?.customerName || '—',
+            amount: parseFloat(payment.amount),
+            currency: invoice?.currency || 'AED',
+            invoice: invoice,
+            invoicePayment: payment,
           });
         });
 
@@ -193,15 +227,16 @@ export class CashAccountsComponent implements OnInit {
     });
   }
 
-  getTypeLabel(type: 'expense' | 'sales' | 'journal'): string {
+  getTypeLabel(type: 'expense' | 'sales' | 'journal' | 'payment'): string {
     if (type === 'expense') return 'Expense';
     if (type === 'sales') return 'Sales';
+    if (type === 'payment') return 'Payment';
     return 'Journal Entry';
   }
 
-  getTypeColor(type: 'expense' | 'sales' | 'journal'): 'primary' | 'accent' | 'warn' {
+  getTypeColor(type: 'expense' | 'sales' | 'journal' | 'payment'): 'primary' | 'accent' | 'warn' {
     if (type === 'expense') return 'warn';
-    if (type === 'sales') return 'primary';
+    if (type === 'sales' || type === 'payment') return 'primary';
     return 'accent';
   }
 

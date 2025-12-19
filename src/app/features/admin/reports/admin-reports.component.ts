@@ -57,6 +57,13 @@ export class AdminReportsComponent implements OnInit {
       description: 'Outstanding amounts owed by customers',
       color: '#009688',
     },
+    {
+      value: 'vat_control_account',
+      label: 'VAT Control Account',
+      icon: 'account_balance',
+      description: 'VAT input, output, and net VAT position for a period',
+      color: '#d32f2f',
+    },
   ];
 
   readonly formatOptions: { value: 'pdf' | 'xlsx' | 'csv'; label: string; icon: string }[] = [
@@ -89,6 +96,7 @@ export class AdminReportsComponent implements OnInit {
   trialBalanceAccountsChartData: ChartConfiguration<'pie'>['data'] | null = null;
   balanceSheetChartData: ChartConfiguration<'pie'>['data'] | null = null;
   balanceSheetAssetsChartData: ChartConfiguration<'bar'>['data'] | null = null;
+  vatControlAccountChartData: ChartConfiguration<'bar'>['data'] | null = null;
 
   @ViewChild('reportPreviewCard') reportPreviewCard?: ElementRef;
 
@@ -348,6 +356,7 @@ export class AdminReportsComponent implements OnInit {
     this.trialBalanceAccountsChartData = null;
     this.balanceSheetChartData = null;
     this.balanceSheetAssetsChartData = null;
+    this.vatControlAccountChartData = null;
 
     // Update chart data based on report type
     switch (report.type) {
@@ -613,18 +622,34 @@ export class AdminReportsComponent implements OnInit {
     const data = report.data as any;
     if (!data.accounts || data.accounts.length === 0) return null;
 
-    // Show top 10 accounts by balance (absolute value)
-    const sortedAccounts = [...data.accounts]
+    // Separate VAT accounts from other accounts
+    const vatAccounts = data.accounts.filter((acc: any) => 
+      acc.accountName.includes('VAT') || acc.accountName.includes('vat')
+    );
+    const otherAccounts = data.accounts.filter((acc: any) => 
+      !acc.accountName.includes('VAT') && !acc.accountName.includes('vat')
+    );
+
+    // Show top 8 other accounts by balance (absolute value), plus all VAT accounts
+    const sortedOtherAccounts = [...otherAccounts]
       .sort((a: any, b: any) => Math.abs(b.balance) - Math.abs(a.balance))
-      .slice(0, 10);
+      .slice(0, 8);
+
+    // Combine VAT accounts with top other accounts
+    const allAccounts = [...vatAccounts, ...sortedOtherAccounts];
+
+    if (allAccounts.length === 0) return null;
 
     return {
-      labels: sortedAccounts.map((acc: any) => acc.accountName),
+      labels: allAccounts.map((acc: any) => acc.accountName),
       datasets: [
         {
-          data: sortedAccounts.map((acc: any) => Math.abs(acc.balance)),
+          data: allAccounts.map((acc: any) => Math.abs(acc.balance)),
           backgroundColor: [
-            '#1976d2',
+            // Colors for VAT accounts (first)
+            '#d32f2f', // Red for VAT Payable
+            '#1976d2', // Blue for VAT Receivable
+            // Colors for other accounts
             '#42a5f5',
             '#66bb6a',
             '#ef5350',
@@ -683,6 +708,32 @@ export class AdminReportsComponent implements OnInit {
     };
   }
 
+  getVatControlAccountChartData(report: GeneratedReport): ChartConfiguration<'bar'>['data'] | null {
+    if (report.type !== 'vat_control_account' || !report.data) return null;
+
+    const data = report.data as any;
+    if (!data.summary) return null;
+
+    return {
+      labels: ['VAT Input', 'VAT Output', 'Net VAT'],
+      datasets: [
+        {
+          label: 'Amount (AED)',
+          data: [
+            data.summary.vatInput || 0,
+            data.summary.vatOutput || 0,
+            data.summary.netVat || 0,
+          ],
+          backgroundColor: [
+            'rgba(211, 47, 47, 0.7)',
+            'rgba(46, 125, 50, 0.7)',
+            'rgba(25, 118, 210, 0.7)',
+          ],
+        },
+      ],
+    };
+  }
+
   formatCurrency(value: number): string {
     return `AED ${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
@@ -694,5 +745,12 @@ export class AdminReportsComponent implements OnInit {
       month: 'short',
       day: 'numeric',
     });
+  }
+
+  getVatAccounts(accounts: any[] | null | undefined): any[] {
+    if (!accounts || accounts.length === 0) return [];
+    return accounts.filter((acc: any) => 
+      acc.accountName && (acc.accountName.includes('VAT') || acc.accountName.toLowerCase().includes('vat'))
+    );
   }
 }

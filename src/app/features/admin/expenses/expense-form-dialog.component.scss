@@ -5,7 +5,7 @@
   }
 
   mat-dialog-content {
-    padding: 24px !important;
+    padding: 16px !important;
     margin: 0 !important;
     max-height: none;
     overflow: visible;
@@ -13,16 +13,16 @@
   }
 
   .mat-mdc-dialog-content {
-    padding-top: 10px !important;
+    padding-top: 8px !important;
   }
 }
 
 .form {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  padding: 10px;
-  margin-top: 12px;
+  gap: 12px;
+  padding: 8px;
+  margin-top: 10px;
   width: 100%;
   box-sizing: border-box;
   
@@ -50,36 +50,110 @@
       }
       
       .mat-mdc-form-field-infix {
-        min-height: 56px;
-        padding-top: 16px;
-        padding-bottom: 16px;
+        min-height: 56px !important;
+        padding-top: 20px !important;
+        padding-bottom: 8px !important;
         width: 100%;
         box-sizing: border-box;
+        display: block !important;
+      }
+      
+      // Hide placeholder when label is present
+      &:not(.mat-focused):not(.mat-form-field-should-float) {
+        .mdc-text-field__input::placeholder {
+          opacity: 0 !important;
+        }
+      }
+      
+      &.mat-focused,
+      &.mat-form-field-should-float {
+        .mdc-text-field__input::placeholder {
+          opacity: 0.6 !important;
+        }
       }
       
       // Add padding to input fields
       input.mat-mdc-input-element,
-      textarea.mat-mdc-input-element,
+      .mdc-text-field__input,
       input[type="text"],
       input[type="number"],
-      input[type="date"],
-      textarea {
-        padding: 0 12px !important;
+      input[type="date"] {
+        padding: 0 !important;
+        margin: 0 !important;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
         box-sizing: border-box;
+        line-height: 1.5 !important;
+        height: 20px !important;
+        border: none !important;
+        outline: none !important;
+        background: transparent !important;
+        display: block !important;
+        width: 100% !important;
+        
+        &::placeholder {
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+        }
+      }
+      
+      textarea.mat-mdc-input-element,
+      textarea {
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box;
+        line-height: 1.5 !important;
+        vertical-align: middle !important;
       }
       
       // Add padding to select fields
       .mat-mdc-select-value {
-        padding: 0 12px !important;
+        padding: 0 !important;
+        line-height: 1.5 !important;
+        display: inline-block !important;
+      }
+
+      .mat-mdc-select-value-text {
+        line-height: 1.5 !important;
+        display: inline-block !important;
       }
       
       .mat-mdc-select-trigger {
-        padding: 0 12px !important;
+        padding: 0 !important;
+        margin-top: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        line-height: 1.5 !important;
+        height: 20px !important;
       }
       
       // Ensure the input container has proper spacing
       .mdc-text-field__input {
-        padding: 0 12px !important;
+        padding: 0 !important;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+        height: 20px !important;
+      }
+      
+      // Fix label positioning
+      .mat-mdc-form-field-label-wrapper {
+        padding-top: 0 !important;
+        overflow: visible !important;
+      }
+      
+      .mdc-floating-label {
+        top: 16px !important;
+        
+        &.mdc-floating-label--float-above {
+          top: -8px !important;
+        }
+      }
+      
+      &.mat-form-field-should-float {
+        .mdc-floating-label {
+          top: -8px !important;
+        }
       }
       
       .mat-mdc-form-field-label-wrapper {
@@ -151,7 +225,7 @@
   gap: 4px;
   padding: 4px 8px;
   background-color: #e3f2fd;
-  border-radius: 12px;
+  border-radius: 8px;
   font-size: 12px;
   color: #1976d2;
 
@@ -194,7 +268,7 @@
 
       button {
         width: 100%;
-        min-height: 44px; // Touch-friendly
+        min-height: 40px; // Touch-friendly
       }
     }
   }

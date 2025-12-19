@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable, forkJoin, of } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { Observable, forkJoin, of, combineLatest } from 'rxjs';
+import { catchError, map, switchMap, tap, debounceTime, skip } from 'rxjs/operators';
 import { Organization } from '../../../core/models/organization.model';
 import { OrganizationService } from '../../../core/services/organization.service';
 import { ReportsService } from '../../../core/services/reports.service';
@@ -10,6 +11,8 @@ import { Expense } from '../../../core/models/expense.model';
 import { SalesInvoicesService } from '../../../core/services/sales-invoices.service';
 import { LicenseKeysService } from '../../../core/services/license-keys.service';
 import { UploadUsage } from '../../../core/models/license-key.model';
+import { ExpensePaymentsService } from '../../../core/services/expense-payments.service';
+import { JournalEntriesService, JournalEntryStatus } from '../../../core/services/journal-entries.service';
 
 interface ExpenseSummaryRow {
   category: string;
@@ -48,19 +51,23 @@ interface AdminDashboardViewModel {
   taxableAmount: number;
   expenseCount: number;
   averageExpense: number;
-  pendingAccruals: number;
-  pendingAccrualAmount: number;
-  pendingApprovals: number;
   expenseSummary: ExpenseSummaryRow[];
   accrualSummary: AccrualSummaryRow[];
   vatSummary: VatSummary;
   recentExpenses: Expense[];
   period: string; // Current period label
-  // Invoice metrics (to be populated when frontend services implemented)
+  startDate: string;
+  endDate: string;
+  // Invoice metrics
   totalInvoices?: number;
   outstandingInvoices?: number;
   outstandingAmount?: number;
   overdueInvoices?: number;
+  // New metrics
+  receivablesAmount: number;
+  vatPayable: number;
+  bankBalance: number;
+  cashBalance: number;
   uploadUsage?: UploadUsage;
 }
 
@@ -73,6 +80,17 @@ export class AdminDashboardComponent implements OnInit {
   dashboard$!: Observable<AdminDashboardViewModel | null>;
   loading = false;
   error: string | null = null;
+  dateRangeForm: FormGroup;
+  
+  readonly dateRangePresets: { value: string; label: string }[] = [
+    { value: 'thisMonth', label: 'This Month' },
+    { value: 'lastMonth', label: 'Last Month' },
+    { value: 'thisQuarter', label: 'This Quarter' },
+    { value: 'lastQuarter', label: 'Last Quarter' },
+    { value: 'thisYear', label: 'This Year' },
+    { value: 'lastYear', label: 'Last Year' },
+    { value: 'custom', label: 'Custom Range' },
+  ];
 
   constructor(
     private readonly organizationService: OrganizationService,
@@ -80,9 +98,45 @@ export class AdminDashboardComponent implements OnInit {
     private readonly expensesService: ExpensesService,
     private readonly salesInvoicesService: SalesInvoicesService,
     private readonly licenseKeysService: LicenseKeysService,
-  ) {}
+    private readonly expensePaymentsService: ExpensePaymentsService,
+    private readonly journalEntriesService: JournalEntriesService,
+    private readonly fb: FormBuilder,
+  ) {
+    // Initialize date range form with current month as default
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    
+    this.dateRangeForm = this.fb.group({
+      dateRangePreset: ['thisMonth'],
+      startDate: [startOfMonth],
+      endDate: [endOfMonth],
+    });
+  }
 
   ngOnInit(): void {
+    // Watch for date changes (not preset changes) and reload dashboard
+    // When dates are manually changed, switch preset to 'custom'
+    const startDateControl = this.dateRangeForm.get('startDate');
+    const endDateControl = this.dateRangeForm.get('endDate');
+    
+    if (startDateControl && endDateControl) {
+      combineLatest([
+        startDateControl.valueChanges,
+        endDateControl.valueChanges,
+      ])
+        .pipe(
+          skip(1), // Skip initial emission to avoid double loading on init
+          debounceTime(100) // Small debounce to avoid double loading when both dates change
+        )
+        .subscribe(() => {
+          if (this.dateRangeForm.get('dateRangePreset')?.value !== 'custom') {
+            this.dateRangeForm.patchValue({ dateRangePreset: 'custom' }, { emitEvent: false });
+          }
+          this.loadDashboard();
+        });
+    }
+    
     this.loadDashboard();
   }
 
@@ -90,17 +144,97 @@ export class AdminDashboardComponent implements OnInit {
     this.loadDashboard();
   }
 
+  onDateRangePresetChange(preset: string): void {
+    if (preset === 'custom') {
+      // Don't change dates, just allow manual selection
+      return;
+    }
+
+    const today = new Date();
+    let startDate: Date;
+    let endDate: Date;
+
+    switch (preset) {
+      case 'thisMonth':
+        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        break;
+      case 'lastMonth':
+        startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+        break;
+      case 'thisQuarter':
+        const currentQuarter = Math.floor(today.getMonth() / 3);
+        startDate = new Date(today.getFullYear(), currentQuarter * 3, 1);
+        endDate = new Date(today.getFullYear(), (currentQuarter + 1) * 3, 0);
+        break;
+      case 'lastQuarter':
+        const lastQuarter = Math.floor(today.getMonth() / 3) - 1;
+        const lastQuarterYear = lastQuarter < 0 ? today.getFullYear() - 1 : today.getFullYear();
+        const lastQuarterMonth = lastQuarter < 0 ? 9 : lastQuarter * 3;
+        startDate = new Date(lastQuarterYear, lastQuarterMonth, 1);
+        endDate = new Date(lastQuarterYear, lastQuarterMonth + 3, 0);
+        break;
+      case 'thisYear':
+        startDate = new Date(today.getFullYear(), 0, 1);
+        endDate = new Date(today.getFullYear(), 11, 31);
+        break;
+      case 'lastYear':
+        startDate = new Date(today.getFullYear() - 1, 0, 1);
+        endDate = new Date(today.getFullYear() - 1, 11, 31);
+        break;
+      default:
+        return;
+    }
+
+    // Update form values without triggering valueChanges to avoid double load
+    // We use emitEvent: false so the date change subscriptions don't fire
+    this.dateRangeForm.patchValue(
+      {
+        startDate,
+        endDate,
+      },
+      { emitEvent: false }
+    );
+    
+    // Manually trigger dashboard reload
+    this.loadDashboard();
+  }
+
+  private getDateRange(): { startDate: string; endDate: string; periodLabel: string } {
+    const formValue = this.dateRangeForm.getRawValue();
+    const startDate = formValue.startDate instanceof Date 
+      ? formValue.startDate.toISOString().split('T')[0]
+      : new Date(formValue.startDate).toISOString().split('T')[0];
+    const endDate = formValue.endDate instanceof Date
+      ? formValue.endDate.toISOString().split('T')[0]
+      : new Date(formValue.endDate).toISOString().split('T')[0];
+    
+    // Format period label
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    let periodLabel: string;
+    
+    if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+      // Same month
+      periodLabel = start.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    } else if (start.getFullYear() === end.getFullYear()) {
+      // Same year, different months
+      periodLabel = `${start.toLocaleDateString('en-US', { month: 'short' })} - ${end.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
+    } else {
+      // Different years
+      periodLabel = `${start.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
+    }
+    
+    return { startDate, endDate, periodLabel };
+  }
+
   private loadDashboard(): void {
     this.loading = true;
     this.error = null;
 
-    // Get current month date range for accurate calculations
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    const startDate = startOfMonth.toISOString().split('T')[0];
-    const endDate = endOfMonth.toISOString().split('T')[0];
-    const periodLabel = startOfMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    // Get date range from form
+    const { startDate, endDate, periodLabel } = this.getDateRange();
 
     // Get all expenses for accurate calculations
     const allExpenses$ = this.expensesService.listExpenses({
@@ -156,6 +290,16 @@ export class AdminDashboardComponent implements OnInit {
           ),
         ),
       allExpenses: allExpenses$,
+      // Load data for bank and cash balance calculations
+      allPayments: this.expensePaymentsService.listPayments().pipe(
+        catchError(() => of([]))
+      ),
+      allJournalEntries: this.journalEntriesService.listEntries({}).pipe(
+        catchError(() => of([]))
+      ),
+      allInvoicePayments: this.salesInvoicesService.listAllPayments().pipe(
+        catchError(() => of([]))
+      ),
     }).pipe(
       map(
         ({
@@ -167,6 +311,9 @@ export class AdminDashboardComponent implements OnInit {
           allInvoices,
           recentExpenses,
           allExpenses,
+          allPayments,
+          allJournalEntries,
+          allInvoicePayments,
         }) => {
           // Extract data from profit and loss report
           // Revenue is from sales invoices only (not expenses)
@@ -223,13 +370,6 @@ export class AdminDashboardComponent implements OnInit {
           // Average expense amount
           const averageExpense = expenseCount > 0 ? totalExpenses / expenseCount : 0;
 
-          // Pending accruals from payables report
-          const pendingAccruals = payables?.summary?.pendingItems ?? 0;
-          const pendingAccrualAmount = payables?.summary?.totalAmount ?? 0;
-
-          // Pending approvals (removed - no longer tracking status)
-          const pendingApprovals = 0;
-
           // Invoice metrics
           // Total invoices: count all invoices in the period
           const totalInvoices = allInvoices?.length ?? 0;
@@ -237,6 +377,84 @@ export class AdminDashboardComponent implements OnInit {
           const outstandingInvoices = (receivables?.summary?.unpaidInvoices ?? 0) + (receivables?.summary?.partialInvoices ?? 0);
           const outstandingAmount = receivables?.summary?.totalOutstanding ?? 0;
           const overdueInvoices = receivables?.summary?.overdueInvoices ?? 0;
+
+          // Receivables amount (total outstanding)
+          const receivablesAmount = outstandingAmount ?? 0;
+
+          // VAT Payable (net VAT)
+          const vatPayable = netVatPayable;
+
+          // Calculate Bank Balance
+          // Bank transactions include:
+          // 1. Expense payments with paymentMethod = 'bank_transfer'
+          // 2. Invoice payments with paymentMethod = 'bank_transfer'
+          // 3. Journal entries with status = 'BANK_PAID' or 'BANK_RECEIVED'
+          let bankBalance = 0;
+          
+          // Bank payments (expenses paid via bank - negative)
+          const bankPayments = allPayments.filter(p => p.paymentMethod === 'bank_transfer');
+          bankPayments.forEach(payment => {
+            bankBalance -= parseFloat(payment.amount.toString());
+          });
+
+          // Bank invoice payments (invoices paid via bank - positive)
+          const bankInvoicePayments = allInvoicePayments.filter(p => p.paymentMethod === 'bank_transfer');
+          bankInvoicePayments.forEach(payment => {
+            bankBalance += parseFloat(payment.amount);
+          });
+
+          // Bank journal entries
+          const bankJournalEntries = allJournalEntries.filter(
+            entry => entry.status === JournalEntryStatus.BANK_PAID || entry.status === JournalEntryStatus.BANK_RECEIVED
+          );
+          bankJournalEntries.forEach(entry => {
+            if (entry.status === JournalEntryStatus.BANK_RECEIVED) {
+              bankBalance += parseFloat(entry.amount.toString());
+            } else if (entry.status === JournalEntryStatus.BANK_PAID) {
+              bankBalance -= parseFloat(entry.amount.toString());
+            }
+          });
+
+          // Calculate Cash Balance
+          // Cash transactions include:
+          // 1. Expenses with purchaseStatus = 'Purchase - Cash Paid' (negative)
+          // 2. Invoices with status = 'tax_invoice_cash_received' (positive)
+          // 3. Invoice payments with paymentMethod = 'cash' (positive)
+          // 4. Journal entries with status = 'CASH_PAID' or 'CASH_RECEIVED'
+          let cashBalance = 0;
+
+          // Cash expenses (negative)
+          const cashExpenses = allExpenses.filter(exp => exp.purchaseStatus === 'Purchase - Cash Paid');
+          cashExpenses.forEach(expense => {
+            cashBalance -= expense.totalAmount;
+          });
+
+          // Cash invoice payments (positive)
+          const cashInvoicePayments = allInvoicePayments.filter(p => p.paymentMethod === 'cash');
+          cashInvoicePayments.forEach(payment => {
+            cashBalance += parseFloat(payment.amount);
+          });
+
+          // Invoices with cash received status (positive)
+          const cashReceivedInvoices = allInvoices.filter(
+            inv => inv.status === 'tax_invoice_cash_received' && 
+            !cashInvoicePayments.some(p => p.invoice?.id === inv.id) // Exclude if already counted in payments
+          );
+          cashReceivedInvoices.forEach(invoice => {
+            cashBalance += parseFloat(invoice.totalAmount);
+          });
+
+          // Cash journal entries
+          const cashJournalEntries = allJournalEntries.filter(
+            entry => entry.status === JournalEntryStatus.CASH_PAID || entry.status === JournalEntryStatus.CASH_RECEIVED
+          );
+          cashJournalEntries.forEach(entry => {
+            if (entry.status === JournalEntryStatus.CASH_RECEIVED) {
+              cashBalance += parseFloat(entry.amount.toString());
+            } else if (entry.status === JournalEntryStatus.CASH_PAID) {
+              cashBalance -= parseFloat(entry.amount.toString());
+            }
+          });
 
           // VAT summary object for compatibility
           const vatSummary: VatSummary = {
@@ -262,18 +480,21 @@ export class AdminDashboardComponent implements OnInit {
             taxableAmount,
             expenseCount,
             averageExpense,
-            pendingAccruals,
-            pendingAccrualAmount,
-            pendingApprovals,
             expenseSummary,
             accrualSummary,
             vatSummary,
             recentExpenses,
             period: periodLabel,
+            startDate,
+            endDate,
             totalInvoices,
             outstandingInvoices,
             outstandingAmount,
             overdueInvoices,
+            receivablesAmount,
+            vatPayable,
+            bankBalance,
+            cashBalance,
             uploadUsage,
           };
         },

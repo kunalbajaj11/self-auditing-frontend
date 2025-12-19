@@ -65,7 +65,7 @@
                 <button
                   mat-button
                   color="primary"
-                  (click)="transaction.type === 'expense' ? viewExpense(transaction) : transaction.type === 'sales' ? viewInvoice(transaction) : viewJournalEntry(transaction)"
+                  (click)="transaction.type === 'expense' ? viewExpense(transaction) : (transaction.type === 'sales' || transaction.type === 'payment') ? viewInvoice(transaction) : viewJournalEntry(transaction)"
                 >
                   <mat-icon>visibility</mat-icon>
                   View
@@ -85,7 +85,7 @@
         <div class="empty" *ngIf="!loading && dataSource.data.length === 0">
           <mat-icon>account_balance_wallet</mat-icon>
           <p>No cash transactions found.</p>
-          <p class="hint">Cash transactions include expenses with "Purchase - Cash Paid" status, sales invoices with "Tax Invoice - Cash Received" status, and journal entries with "Cash Paid" or "Cash Received" status.</p>
+          <p class="hint">Cash transactions include expenses with "Purchase - Cash Paid" status, sales invoices with "Tax Invoice - Cash Received" status, invoice payments with cash payment method, and journal entries with "Cash Paid" or "Cash Received" status.</p>
         </div>
       </mat-card-content>
     </mat-card>

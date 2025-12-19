@@ -18,6 +18,19 @@ export interface InvoiceLineItem {
   accountId?: string;
 }
 
+export interface InvoicePayment {
+  id: string;
+  invoiceId: string;
+  invoice?: SalesInvoice;
+  paymentDate: string;
+  amount: string;
+  paymentMethod?: string | null;
+  referenceNumber?: string | null;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface SalesInvoice {
   id: string;
   invoiceNumber: string;
@@ -88,6 +101,11 @@ export class SalesInvoicesService {
 
   getNextInvoiceNumber(): Observable<{ invoiceNumber: string }> {
     return this.api.get<{ invoiceNumber: string }>('/sales-invoices/next-invoice-number');
+  }
+
+  listAllPayments(paymentMethod?: string): Observable<InvoicePayment[]> {
+    const params = paymentMethod ? { paymentMethod } : {};
+    return this.api.get<InvoicePayment[]>('/sales-invoices/payments', params);
   }
 
   recordPayment(invoiceId: string, payment: {

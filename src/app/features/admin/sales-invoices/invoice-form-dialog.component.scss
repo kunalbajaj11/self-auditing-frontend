@@ -62,7 +62,7 @@ mat-dialog-content {
 .line-items-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
 
   thead {
     background-color: #f8fafc;
@@ -97,7 +97,7 @@ mat-dialog-content {
           border: 1px solid rgba(0, 0, 0, 0.12);
           border-radius: 4px;
           padding: 6px 8px;
-          font-size: 0.875rem;
+          font-size: 0.75rem;
           font-family: inherit;
 
           &:focus {
@@ -133,7 +133,7 @@ mat-dialog-content {
 }
 
 .empty-line-items {
-  padding: 24px;
+  padding: 8px 10px;
   text-align: center;
   color: #64748b;
   background-color: #f8fafc;
@@ -142,7 +142,7 @@ mat-dialog-content {
 
 .totals-section {
   margin-top: 16px;
-  padding: 16px;
+  padding: 8px 10px;
   background-color: #f8fafc;
   border-radius: 8px;
   text-align: right;

@@ -24,6 +24,12 @@ export class LicenseRegistrationComponent {
   licenseInfo: LicensePreview | null = null;
 
   readonly planTypes: PlanType[] = ['free', 'standard', 'enterprise'];
+  readonly regions: Array<{ value: string; label: string }> = [
+    { value: 'UAE', label: 'United Arab Emirates (UAE)' },
+    { value: 'SAUDI', label: 'Saudi Arabia' },
+    { value: 'OMAN', label: 'Oman' },
+    { value: 'INDIA', label: 'India' },
+  ];
 
   readonly form;
 
@@ -40,6 +46,7 @@ export class LicenseRegistrationComponent {
       vatNumber: [''],
       address: [''],
       currency: ['AED'],
+      region: ['UAE'],
       fiscalYearStart: [''],
       contactPerson: [''],
       contactEmail: ['', [Validators.email]],

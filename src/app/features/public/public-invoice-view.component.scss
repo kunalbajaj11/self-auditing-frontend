@@ -1,7 +1,7 @@
 .public-invoice-view {
   max-width: 900px;
   margin: 0 auto;
-  padding: 32px;
+  padding: 14px;
   background: white;
   min-height: 100vh;
 }
@@ -17,7 +17,7 @@
   .company-info {
     h1 {
       margin: 0 0 8px 0;
-      font-size: 2rem;
+      font-size: 1.1rem;
       font-weight: 700;
       color: #0f172a;
     }
@@ -55,7 +55,7 @@
 
       &.status-badge {
         padding: 4px 12px;
-        border-radius: 12px;
+        border-radius: 8px;
         font-size: 0.875rem;
 
         &.status-paid {
@@ -79,7 +79,7 @@
 
 .customer-section {
   margin-bottom: 32px;
-  padding: 20px;
+  padding: 14px;
   background-color: #f8fafc;
   border-radius: 8px;
 
@@ -145,7 +145,7 @@
 
 .totals-section {
   margin-bottom: 32px;
-  padding: 20px;
+  padding: 14px;
   background-color: #f8fafc;
   border-radius: 8px;
 }
@@ -231,7 +231,7 @@
   min-height: 60vh;
   gap: 16px;
   text-align: center;
-  padding: 32px;
+  padding: 14px;
 
   mat-icon {
     font-size: 64px;
@@ -242,7 +242,7 @@
 
   h2 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: #0f172a;
   }

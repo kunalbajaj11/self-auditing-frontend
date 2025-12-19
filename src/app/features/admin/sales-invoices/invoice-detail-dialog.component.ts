@@ -107,7 +107,8 @@ export class InvoiceDetailDialogComponent implements OnInit {
     if (!this.invoice) return;
 
     const dialogRef = this.dialog.open(InvoicePaymentDialogComponent, {
-      width: '500px',
+      width: '700px',
+      maxWidth: '95vw',
       data: { invoice: this.invoice },
     });
 

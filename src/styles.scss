@@ -257,9 +257,10 @@ button.mat-mdc-raised-button,
 button.mat-mdc-stroked-button,
 button.mat-mdc-unelevated-button,
 button.mat-mdc-outlined-button {
-  border-radius: 8px !important;
+  border-radius: 6px !important;
   font-weight: 500 !important;
-  padding: 10px 20px !important;
+  padding: 8px 16px !important;
+  font-size: 0.875rem !important;
   text-transform: none !important;
 }
 
@@ -283,47 +284,340 @@ button.mat-mdc-outlined-button {
 }
 
 .mat-mdc-card {
-  border-radius: 12px !important;
+  border-radius: 10px !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
   background-color: #ffffff;
   border: 1px solid #e0e0e0;
 }
 
+// Global table styles - streamlined
 .mat-mdc-table {
   background: #ffffff !important;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
   border: 1px solid #e0e0e0;
+  font-size: 0.8rem !important;
+  
+  th {
+    padding: 8px 10px !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+  }
+  
+  td {
+    padding: 8px 10px !important;
+    font-size: 0.8rem !important;
+    line-height: 1.4 !important;
+  }
+  
+  .mat-mdc-header-row {
+    min-height: 40px !important;
+  }
+  
+  .mat-mdc-row {
+    min-height: 40px !important;
+  }
+}
+
+// Additional table styling for custom tables
+table {
+  th {
+    padding: 8px 10px !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+  }
+  
+  td {
+    padding: 8px 10px !important;
+    font-size: 0.8rem !important;
+    line-height: 1.4 !important;
+  }
 }
 
 .mat-form-field-appearance-outline .mat-mdc-form-field-outline {
   border-radius: 6px;
 }
 
-.mat-mdc-text-field-wrapper {
-  border-radius: 6px !important;
-  border: 1px solid #e0e0e0 !important;
+// Reduced form field sizes globally
+.mat-mdc-form-field {
+  font-size: 0.875rem !important;
 
-  &.mdc-text-field--focused {
-    border-color: #0077c8 !important;
-    box-shadow: 0 0 0 2px rgba(0, 119, 200, 0.2) !important;
+  .mat-mdc-text-field-wrapper {
+    border-radius: 6px !important;
+    border: 1px solid #e0e0e0 !important;
+    padding-bottom: 0 !important;
+
+    &.mdc-text-field--focused {
+      border-color: #0077c8 !important;
+      box-shadow: 0 0 0 2px rgba(0, 119, 200, 0.2) !important;
+    }
+  }
+
+  .mat-mdc-form-field-infix {
+    padding-top: 20px !important;
+    padding-bottom: 8px !important;
+    min-height: 56px !important;
+    box-sizing: border-box !important;
+    display: block !important;
+  }
+
+  .mat-mdc-form-field-label {
+    font-size: 0.8rem !important;
+  }
+
+  input.mat-mdc-input-element,
+  .mdc-text-field__input,
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  input[type="time"] {
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    height: 20px !important;
+    box-sizing: border-box !important;
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    display: block !important;
+    width: 100% !important;
+    vertical-align: top !important;
+  }
+
+  textarea.mat-mdc-input-element,
+  textarea {
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    vertical-align: middle !important;
+    resize: vertical !important;
+  }
+
+  .mat-mdc-select {
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+  }
+
+  .mat-mdc-select-trigger {
+    font-size: 0.875rem !important;
+    padding: 0 !important;
+    line-height: 1.5 !important;
+    height: 20px !important;
+    margin-top: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .mat-mdc-select-value {
+    line-height: 1.5 !important;
+    display: inline-block !important;
+  }
+
+  .mat-mdc-select-value-text {
+    line-height: 1.5 !important;
+    display: inline-block !important;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper {
+    color: #666666;
+    font-size: 0.75rem !important;
+    margin-top: 2px !important;
+  }
+
+  .mat-mdc-form-field-hint {
+    font-size: 0.75rem !important;
+  }
+
+  // Date picker toggle
+  .mat-datepicker-toggle {
+    .mat-icon-button {
+      width: 32px !important;
+      height: 32px !important;
+      padding: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      .mat-icon {
+        font-size: 18px !important;
+        width: 18px !important;
+        height: 18px !important;
+        line-height: 1 !important;
+      }
+    }
+  }
+
+  // Label wrapper alignment - ensure labels are not cut off
+  .mat-mdc-form-field-label-wrapper {
+    padding-top: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 20px !important;
+  }
+  
+  // Ensure the text field wrapper doesn't clip labels
+  .mat-mdc-text-field-wrapper {
+    overflow: visible !important;
+  }
+  
+  // Ensure the form field container doesn't clip
+  .mat-mdc-form-field {
+    overflow: visible !important;
+  }
+
+  // Floating label alignment
+  .mdc-floating-label {
+    line-height: 1.5 !important;
+    top: 20px !important;
+    transform-origin: left top !important;
+    
+    &.mdc-floating-label--float-above {
+      top: -6px !important;
+      transform: scale(0.75) translateY(-50%) !important;
+    }
+  }
+  
+  // Ensure label is visible when floating
+  &.mat-form-field-should-float,
+  &.mat-focused {
+    .mdc-floating-label {
+      top: -6px !important;
+      transform: scale(0.75) translateY(-50%) !important;
+    }
+    
+    // Hide placeholder when label is floating
+    .mdc-text-field__input::placeholder {
+      opacity: 0 !important;
+    }
+  }
+  
+  // Hide placeholder when label is present and field is not focused
+  &:not(.mat-focused):not(.mat-form-field-should-float) {
+    .mdc-text-field__input::placeholder {
+      opacity: 0 !important;
+    }
+  }
+
+  // Input container alignment - ensure proper vertical centering
+  .mdc-text-field__input {
+    line-height: 1.5 !important;
+    height: 20px !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    
+    &::placeholder {
+      line-height: 1.5 !important;
+      opacity: 0.6 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+  }
+
+  // Select arrow
+  .mat-mdc-select-arrow {
+    width: 16px !important;
+    height: 16px !important;
   }
 }
 
 .mat-mdc-form-field-subscript-wrapper {
   color: #666666;
+  font-size: 0.75rem !important;
 }
 
 .mat-icon {
   vertical-align: middle;
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1;
   color: #666666;
 }
 
+// Date picker calendar
+.mat-datepicker-content {
+  .mat-calendar {
+    font-size: 0.875rem !important;
+  }
+
+  .mat-calendar-body-cell-content {
+    font-size: 0.875rem !important;
+    width: 32px !important;
+    height: 32px !important;
+    line-height: 32px !important;
+  }
+
+  .mat-calendar-table-header th {
+    font-size: 0.75rem !important;
+    padding: 8px 0 !important;
+  }
+}
+
+// Select dropdown
+.mat-mdc-select-panel {
+  .mat-mdc-option {
+    font-size: 0.875rem !important;
+    min-height: 36px !important;
+    padding: 8px 16px !important;
+  }
+}
+
+// Textarea
+textarea.mat-mdc-input-element {
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+  padding: 6px 0 !important;
+  margin: 0 !important;
+  vertical-align: middle !important;
+  resize: vertical !important;
+}
+
+// Additional Material Design alignment fixes
+.mat-mdc-form-field {
+  // Ensure input text is vertically centered
+  .mdc-text-field__input {
+    line-height: 1.5 !important;
+    height: 20px !important;
+    
+    &::placeholder {
+      line-height: 1.5 !important;
+      opacity: 0.6 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+  }
+
+  // Fix select value alignment
+  .mat-mdc-select-value-text {
+    line-height: 1.5 !important;
+    display: inline-block !important;
+  }
+  
+  // Ensure text field wrapper has proper height
+  .mat-mdc-text-field-wrapper {
+    min-height: 56px !important;
+  }
+}
+
+// Global placeholder alignment
+input::placeholder,
+textarea::placeholder,
+.mdc-text-field__input::placeholder {
+  line-height: 1.5 !important;
+  opacity: 0.6 !important;
+}
+
 button mat-icon,
 button .mat-icon {
-  margin-right: 8px;
+  margin-right: 6px;
 }
 
 // Make icons white in primary buttons
@@ -342,14 +636,14 @@ button[mat-unelevated-button][color="primary"] mat-icon {
 }
 
 .page-heading {
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 600;
   margin: 0;
   color: #333333;
 }
 
 .section-subtitle {
-  font-size: 16px;
+  font-size: 0.875rem;
   color: #666666;
   margin: 4px 0 0;
 }
@@ -385,7 +679,11 @@ button[mat-unelevated-button][color="primary"] mat-icon {
   // Improve form field touch targets
   mat-form-field {
     .mat-mdc-form-field-subscript-wrapper {
-      font-size: 11px;
+      font-size: 0.75rem !important;
+    }
+
+    .mat-mdc-form-field-infix {
+      min-height: 40px !important;
     }
   }
 

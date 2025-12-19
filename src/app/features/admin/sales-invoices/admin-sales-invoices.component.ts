@@ -6,6 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales-invoices.service';
 import { InvoiceFormDialogComponent } from './invoice-form-dialog.component';
 import { InvoiceDetailDialogComponent } from './invoice-detail-dialog.component';
+import { InvoicePaymentDialogComponent } from './invoice-payment-dialog.component';
 
 @Component({
   selector: 'app-admin-sales-invoices',
@@ -80,6 +81,12 @@ export class AdminSalesInvoicesComponent implements OnInit {
   }
 
   openCreateDialog(): void {
+    // If on "Payments Received" tab, open payment dialog instead
+    if (this.currentFilter === 'payments') {
+      this.openPaymentDialog();
+      return;
+    }
+
     const dialogRef = this.dialog.open(InvoiceFormDialogComponent, {
       width: '1200px',
       maxWidth: '95vw',
@@ -90,6 +97,23 @@ export class AdminSalesInvoicesComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.snackBar.open('Invoice created successfully', 'Close', {
+          duration: 3000,
+        });
+        this.loadInvoices();
+      }
+    });
+  }
+
+  openPaymentDialog(): void {
+    const dialogRef = this.dialog.open(InvoicePaymentDialogComponent, {
+      width: '700px',
+      maxWidth: '95vw',
+      data: undefined, // No invoice pre-selected, user will select from dropdown
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.snackBar.open('Payment recorded successfully', 'Close', {
           duration: 3000,
         });
         this.loadInvoices();

@@ -1,5 +1,7 @@
 import { PlanType } from './plan.model';
 
+export type Region = 'UAE' | 'SAUDI' | 'OMAN' | 'INDIA';
+
 export interface Organization {
   id: string;
   name: string;
@@ -13,6 +15,7 @@ export interface Organization {
   contactPerson?: string;
   contactEmail?: string;
   fiscalYearStart?: string;
+  region?: Region;
 }
 
 export interface OrganizationSummary {

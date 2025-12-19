@@ -3,7 +3,8 @@ export type ReportType =
   | 'balance_sheet'
   | 'profit_and_loss'
   | 'payables'
-  | 'receivables';
+  | 'receivables'
+  | 'vat_control_account';
 
 export interface ReportHistoryItem {
   id: string;
