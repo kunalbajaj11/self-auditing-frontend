@@ -8,11 +8,11 @@
     >
       <div class="brand">
         <div class="brand-logo">
-          <img src="assets/images/backless_logo.png" alt="selfAccounting.AI Logo" class="logo-image" />
+          <img src="assets/images/backless_logo.png" alt="SelfAccounting.AI Logo" class="logo-image" />
         </div>
         <div class="brand-label">
-          <span class="brand-title">selfAccounting.AI</span>
-          <small class="brand-subtitle">Powered by Stryvon</small>
+          <span class="brand-title">SelfAccounting.AI</span>
+          <small class="brand-subtitle">Powered by <a href="https://stryvon.ai" target="_blank" rel="noopener noreferrer">stryvon.ai</a></small>
         </div>
       </div>
       <mat-nav-list #sideNavList>
@@ -95,7 +95,7 @@
         </button>
         <span class="page-title">
           <ng-container *ngIf="user$ | async as user">
-            {{ user.organization?.name || 'selfAccounting.AI' }}
+            {{ user.organization?.name || 'SelfAccounting.AI' }}
           </ng-container>
         </span>
 

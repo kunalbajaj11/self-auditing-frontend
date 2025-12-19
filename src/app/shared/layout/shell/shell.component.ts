@@ -35,7 +35,7 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly user$: Observable<AuthUser | null>;
   readonly isHandset$: Observable<boolean>;
 
-  pageTitle = 'selfAccounting.AI';
+  pageTitle = 'SelfAccounting.AI';
   navItems: ShellNavItem[] = [];
   isEnterprise = false;
   expandedGroups = new Set<string>(); // Track expanded nav groups

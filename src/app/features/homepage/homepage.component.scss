@@ -453,6 +453,23 @@
       }
     }
   }
+
+  .powered-by {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 16px;
+
+    a {
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      transition: opacity 0.2s;
+
+      &:hover {
+        opacity: 1;
+        text-decoration: underline;
+      }
+    }
+  }
 }
 
 // Responsive Design
