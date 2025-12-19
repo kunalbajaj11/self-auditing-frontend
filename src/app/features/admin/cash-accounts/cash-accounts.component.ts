@@ -2,11 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ExpensesService } from '../../../core/services/expenses.service';
 import { Expense } from '../../../core/models/expense.model';
 import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales-invoices.service';
+import { ExpensePaymentsService, ExpensePayment } from '../../../core/services/expense-payments.service';
 import { JournalEntriesService, JournalEntry, JournalEntryStatus } from '../../../core/services/journal-entries.service';
 import { ExpenseFormDialogComponent } from '../expenses/expense-form-dialog.component';
 import { InvoiceDetailDialogComponent } from '../sales-invoices/invoice-detail-dialog.component';
@@ -42,14 +44,35 @@ export class CashAccountsComponent implements OnInit {
   ] as const;
   readonly dataSource = new MatTableDataSource<CashTransaction>([]);
   loading = false;
+  dateRangeForm: FormGroup;
+  openingBalance = 0;
+  closingBalance = 0;
+  periodTotal = 0;
 
   constructor(
+    private readonly fb: FormBuilder,
     private readonly expensesService: ExpensesService,
     private readonly salesInvoicesService: SalesInvoicesService,
+    private readonly expensePaymentsService: ExpensePaymentsService,
     private readonly journalEntriesService: JournalEntriesService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
-  ) {}
+  ) {
+    // Initialize date range form - default to current month
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    
+    this.dateRangeForm = this.fb.group({
+      startDate: [firstDayOfMonth],
+      endDate: [lastDayOfMonth],
+    });
+
+    // Reload when date range changes
+    this.dateRangeForm.valueChanges.subscribe(() => {
+      this.loadCashTransactions();
+    });
+  }
 
   ngOnInit(): void {
     this.loadCashTransactions();
@@ -57,12 +80,28 @@ export class CashAccountsComponent implements OnInit {
 
   loadCashTransactions(): void {
     this.loading = true;
+    const formValue = this.dateRangeForm.value;
+    const startDate = formValue.startDate instanceof Date 
+      ? formValue.startDate.toISOString().split('T')[0] 
+      : formValue.startDate;
+    const endDate = formValue.endDate instanceof Date 
+      ? formValue.endDate.toISOString().split('T')[0] 
+      : formValue.endDate;
 
-    // Load expenses, invoices, invoice payments, and journal entries in parallel
+    // Load expenses, payments, invoices, invoice payments, and journal entries in parallel
     forkJoin({
       expenses: this.expensesService.listExpenses({}).pipe(
         catchError(() => {
           this.snackBar.open('Failed to load expenses', 'Close', {
+            duration: 4000,
+            panelClass: ['snack-error'],
+          });
+          return of([]);
+        }),
+      ),
+      payments: this.expensePaymentsService.listPayments().pipe(
+        catchError(() => {
+          this.snackBar.open('Failed to load payments', 'Close', {
             duration: 4000,
             panelClass: ['snack-error'],
           });
@@ -97,16 +136,55 @@ export class CashAccountsComponent implements OnInit {
         }),
       ),
     }).subscribe({
-      next: ({ expenses, invoices, invoicePayments, journalEntries }) => {
+      next: ({ expenses, payments, invoices, invoicePayments, journalEntries }) => {
         const transactions: CashTransaction[] = [];
+        const allTransactions: CashTransaction[] = [];
 
-        // Filter and add expenses with purchaseStatus = 'Purchase - Cash Paid'
+        // Filter payments with cash method
+        const cashPayments = payments.filter(
+          (payment) => payment.paymentMethod === 'cash',
+        );
+
+        // Create a map of expense IDs to their cash payments
+        const expenseCashPaymentsMap = new Map<string, ExpensePayment[]>();
+        cashPayments.forEach((payment) => {
+          const expenseId = payment.expenseId;
+          if (!expenseCashPaymentsMap.has(expenseId)) {
+            expenseCashPaymentsMap.set(expenseId, []);
+          }
+          expenseCashPaymentsMap.get(expenseId)!.push(payment);
+        });
+
+        // Add expenses that have cash payments
+        expenses.forEach((expense) => {
+          const cashPaymentsForExpense = expenseCashPaymentsMap.get(expense.id);
+          if (cashPaymentsForExpense && cashPaymentsForExpense.length > 0) {
+            cashPaymentsForExpense.forEach((payment) => {
+              const transaction: CashTransaction = {
+                id: `${expense.id}-${payment.id}`,
+                type: 'expense',
+                date: payment.paymentDate,
+                description: expense.description || 'Expense',
+                vendorOrCustomer: expense.vendorName || '—',
+                amount: parseFloat(payment.amount),
+                currency: expense.currency || 'AED',
+                expense: expense,
+              };
+              allTransactions.push(transaction);
+            });
+          }
+        });
+
+        // Also add expenses with purchaseStatus = 'Purchase - Cash Paid' that don't have payments yet
+        // (to avoid duplicates, exclude expenses that already have cash payments)
         const cashExpenses = expenses.filter(
-          (expense) => expense.purchaseStatus === 'Purchase - Cash Paid',
+          (expense) =>
+            expense.purchaseStatus === 'Purchase - Cash Paid' &&
+            !expenseCashPaymentsMap.has(expense.id),
         );
         
         cashExpenses.forEach((expense) => {
-          transactions.push({
+          const transaction: CashTransaction = {
             id: expense.id,
             type: 'expense',
             date: expense.expenseDate,
@@ -115,7 +193,8 @@ export class CashAccountsComponent implements OnInit {
             amount: expense.totalAmount,
             currency: expense.currency || 'AED',
             expense: expense,
-          });
+          };
+          allTransactions.push(transaction);
         });
 
         // Create a set of invoice IDs that have cash payments
@@ -132,7 +211,7 @@ export class CashAccountsComponent implements OnInit {
         );
 
         cashReceivedInvoices.forEach((invoice) => {
-          transactions.push({
+          const transaction: CashTransaction = {
             id: invoice.id,
             type: 'sales',
             date: invoice.invoiceDate,
@@ -141,13 +220,14 @@ export class CashAccountsComponent implements OnInit {
             amount: parseFloat(invoice.totalAmount),
             currency: invoice.currency || 'AED',
             invoice: invoice,
-          });
+          };
+          allTransactions.push(transaction);
         });
 
         // Add invoice payments with payment method = cash
         invoicePayments.forEach((payment) => {
           const invoice = payment.invoice;
-          transactions.push({
+          const transaction: CashTransaction = {
             id: payment.id,
             type: 'payment',
             date: payment.paymentDate,
@@ -157,7 +237,8 @@ export class CashAccountsComponent implements OnInit {
             currency: invoice?.currency || 'AED',
             invoice: invoice,
             invoicePayment: payment,
-          });
+          };
+          allTransactions.push(transaction);
         });
 
         // Filter and add journal entries with CASH_PAID or CASH_RECEIVED status
@@ -168,17 +249,49 @@ export class CashAccountsComponent implements OnInit {
         );
 
         cashJournalEntries.forEach((entry) => {
-          transactions.push({
+          const amount = parseFloat(entry.amount.toString());
+          // CASH_PAID is negative (outflow), CASH_RECEIVED is positive (inflow)
+          const transactionAmount = entry.status === JournalEntryStatus.CASH_PAID ? -amount : amount;
+          
+          const transaction: CashTransaction = {
             id: entry.id,
             type: 'journal',
             date: entry.entryDate,
             description: entry.description || `Journal Entry - ${entry.type}`,
             vendorOrCustomer: 'Journal Entry',
-            amount: parseFloat(entry.amount.toString()),
+            amount: transactionAmount,
             currency: 'AED',
             journalEntry: entry,
-          });
+          };
+          allTransactions.push(transaction);
         });
+
+        // Calculate opening balance (sum of all transactions before start date)
+        const startDateObj = new Date(startDate);
+        startDateObj.setHours(0, 0, 0, 0);
+        
+        this.openingBalance = allTransactions
+          .filter((t) => {
+            const tDate = new Date(t.date);
+            tDate.setHours(0, 0, 0, 0);
+            return tDate < startDateObj;
+          })
+          .reduce((sum, t) => sum + t.amount, 0);
+
+        // Filter transactions for the period
+        const endDateObj = new Date(endDate);
+        endDateObj.setHours(23, 59, 59, 999);
+        
+        transactions.push(...allTransactions.filter((t) => {
+          const tDate = new Date(t.date);
+          return tDate >= startDateObj && tDate <= endDateObj;
+        }));
+
+        // Calculate period total
+        this.periodTotal = transactions.reduce((sum, t) => sum + t.amount, 0);
+
+        // Calculate closing balance
+        this.closingBalance = this.openingBalance + this.periodTotal;
 
         // Sort by date descending (latest first)
         transactions.sort((a, b) => {

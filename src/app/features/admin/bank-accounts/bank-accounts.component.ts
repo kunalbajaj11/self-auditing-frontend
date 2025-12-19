@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ExpensesService } from '../../../core/services/expenses.service';
@@ -47,15 +48,35 @@ export class BankAccountsComponent implements OnInit {
   ] as const;
   readonly dataSource = new MatTableDataSource<BankTransaction>([]);
   loading = false;
+  dateRangeForm: FormGroup;
+  openingBalance = 0;
+  closingBalance = 0;
+  periodTotal = 0;
 
   constructor(
+    private readonly fb: FormBuilder,
     private readonly expensesService: ExpensesService,
     private readonly salesInvoicesService: SalesInvoicesService,
     private readonly expensePaymentsService: ExpensePaymentsService,
     private readonly journalEntriesService: JournalEntriesService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
-  ) {}
+  ) {
+    // Initialize date range form - default to current month
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    
+    this.dateRangeForm = this.fb.group({
+      startDate: [firstDayOfMonth],
+      endDate: [lastDayOfMonth],
+    });
+
+    // Reload when date range changes
+    this.dateRangeForm.valueChanges.subscribe(() => {
+      this.loadBankTransactions();
+    });
+  }
 
   ngOnInit(): void {
     this.loadBankTransactions();
@@ -63,6 +84,13 @@ export class BankAccountsComponent implements OnInit {
 
   loadBankTransactions(): void {
     this.loading = true;
+    const formValue = this.dateRangeForm.value;
+    const startDate = formValue.startDate instanceof Date 
+      ? formValue.startDate.toISOString().split('T')[0] 
+      : formValue.startDate;
+    const endDate = formValue.endDate instanceof Date 
+      ? formValue.endDate.toISOString().split('T')[0] 
+      : formValue.endDate;
 
     // Load expenses, payments, invoices, invoice payments, and journal entries in parallel
     forkJoin({
@@ -114,6 +142,7 @@ export class BankAccountsComponent implements OnInit {
     }).subscribe({
       next: ({ expenses, payments, invoices, invoicePayments, journalEntries }) => {
         const transactions: BankTransaction[] = [];
+        const allTransactions: BankTransaction[] = [];
 
         // Filter payments with bank_transfer method
         const bankPayments = payments.filter(
@@ -134,24 +163,20 @@ export class BankAccountsComponent implements OnInit {
         expenses.forEach((expense) => {
           const bankPaymentsForExpense = expenseBankPaymentsMap.get(expense.id);
           if (bankPaymentsForExpense && bankPaymentsForExpense.length > 0) {
-            // Use the most recent payment date
-            const latestPayment = bankPaymentsForExpense.reduce((latest, current) => {
-              return new Date(current.paymentDate) > new Date(latest.paymentDate)
-                ? current
-                : latest;
-            });
-
-            transactions.push({
-              id: expense.id,
-              type: 'expense',
-              date: latestPayment.paymentDate,
-              description: expense.description || 'Expense',
-              vendorOrCustomer: expense.vendorName || '—',
-              amount: expense.totalAmount,
-              currency: expense.currency || 'AED',
-              expense: expense,
-              paymentMethod: latestPayment.paymentMethod,
-              referenceNumber: latestPayment.referenceNumber,
+            bankPaymentsForExpense.forEach((payment) => {
+              const transaction: BankTransaction = {
+                id: `${expense.id}-${payment.id}`,
+                type: 'expense',
+                date: payment.paymentDate,
+                description: expense.description || 'Expense',
+                vendorOrCustomer: expense.vendorName || '—',
+                amount: parseFloat(payment.amount),
+                currency: expense.currency || 'AED',
+                expense: expense,
+                paymentMethod: payment.paymentMethod,
+                referenceNumber: payment.referenceNumber,
+              };
+              allTransactions.push(transaction);
             });
           }
         });
@@ -164,24 +189,29 @@ export class BankAccountsComponent implements OnInit {
         );
 
         bankJournalEntries.forEach((entry) => {
-          transactions.push({
+          const amount = parseFloat(entry.amount.toString());
+          // BANK_PAID is negative (outflow), BANK_RECEIVED is positive (inflow)
+          const transactionAmount = entry.status === JournalEntryStatus.BANK_PAID ? -amount : amount;
+          
+          const transaction: BankTransaction = {
             id: entry.id,
             type: 'journal',
             date: entry.entryDate,
             description: entry.description || `Journal Entry - ${entry.type}`,
             vendorOrCustomer: 'Journal Entry',
-            amount: parseFloat(entry.amount.toString()),
+            amount: transactionAmount,
             currency: 'AED',
             journalEntry: entry,
             paymentMethod: 'Bank Transfer',
             referenceNumber: entry.referenceNumber || undefined,
-          });
+          };
+          allTransactions.push(transaction);
         });
 
         // Add invoice payments with payment method = bank_transfer
         invoicePayments.forEach((payment) => {
           const invoice = payment.invoice;
-          transactions.push({
+          const transaction: BankTransaction = {
             id: payment.id,
             type: 'payment',
             date: payment.paymentDate,
@@ -193,8 +223,36 @@ export class BankAccountsComponent implements OnInit {
             invoicePayment: payment,
             paymentMethod: payment.paymentMethod || 'Bank Transfer',
             referenceNumber: payment.referenceNumber || undefined,
-          });
+          };
+          allTransactions.push(transaction);
         });
+
+        // Calculate opening balance (sum of all transactions before start date)
+        const startDateObj = new Date(startDate);
+        startDateObj.setHours(0, 0, 0, 0);
+        
+        this.openingBalance = allTransactions
+          .filter((t) => {
+            const tDate = new Date(t.date);
+            tDate.setHours(0, 0, 0, 0);
+            return tDate < startDateObj;
+          })
+          .reduce((sum, t) => sum + t.amount, 0);
+
+        // Filter transactions for the period
+        const endDateObj = new Date(endDate);
+        endDateObj.setHours(23, 59, 59, 999);
+        
+        transactions.push(...allTransactions.filter((t) => {
+          const tDate = new Date(t.date);
+          return tDate >= startDateObj && tDate <= endDateObj;
+        }));
+
+        // Calculate period total
+        this.periodTotal = transactions.reduce((sum, t) => sum + t.amount, 0);
+
+        // Calculate closing balance
+        this.closingBalance = this.openingBalance + this.periodTotal;
 
         // Sort by date descending (latest first)
         transactions.sort((a, b) => {

@@ -134,18 +134,73 @@
       <mat-card-content>
         <!-- Trial Balance Report -->
         <div *ngIf="generatedReport.type === 'trial_balance'">
+          <!-- Opening/Closing Balance Summary -->
+          <div class="balance-summary" *ngIf="generatedReport.data.summary && (generatedReport.data.summary.openingDebit !== undefined || generatedReport.data.summary.openingCredit !== undefined)">
+            <div class="balance-card">
+              <div class="balance-label">Opening Balance</div>
+              <div class="balance-amount">
+                <div class="balance-row">
+                  <span>Debit:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.openingDebit || 0) }}</span>
+                </div>
+                <div class="balance-row">
+                  <span>Credit:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.openingCredit || 0) }}</span>
+                </div>
+                <div class="balance-row total">
+                  <span>Balance:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.openingBalance || 0) }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="balance-card">
+              <div class="balance-label">Period Total</div>
+              <div class="balance-amount">
+                <div class="balance-row">
+                  <span>Debit:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.periodDebit || 0) }}</span>
+                </div>
+                <div class="balance-row">
+                  <span>Credit:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.periodCredit || 0) }}</span>
+                </div>
+                <div class="balance-row total">
+                  <span>Balance:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.periodBalance || 0) }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="balance-card">
+              <div class="balance-label">Closing Balance</div>
+              <div class="balance-amount">
+                <div class="balance-row">
+                  <span>Debit:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.closingDebit || 0) }}</span>
+                </div>
+                <div class="balance-row">
+                  <span>Credit:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.closingCredit || 0) }}</span>
+                </div>
+                <div class="balance-row total">
+                  <span>Balance:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.closingBalance || 0) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <div class="report-summary" *ngIf="generatedReport.data.summary">
             <div class="summary-card">
               <div class="summary-label">Total Debit</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.totalDebit) }}</div>
+              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.closingDebit || generatedReport.data.summary.totalDebit || 0) }}</div>
             </div>
             <div class="summary-card">
               <div class="summary-label">Total Credit</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.totalCredit) }}</div>
+              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.closingCredit || generatedReport.data.summary.totalCredit || 0) }}</div>
             </div>
             <div class="summary-card">
               <div class="summary-label">Balance</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.totalBalance) }}</div>
+              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.closingBalance || generatedReport.data.summary.totalBalance || 0) }}</div>
             </div>
           </div>
 
@@ -187,20 +242,44 @@
                 <th mat-header-cell *matHeaderCellDef>Type</th>
                 <td mat-cell *matCellDef="let row">{{ row.accountType }}</td>
               </ng-container>
+              <ng-container matColumnDef="openingDebit">
+                <th mat-header-cell *matHeaderCellDef class="text-right">Opening Debit</th>
+                <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.openingDebit || 0) }}</td>
+              </ng-container>
+              <ng-container matColumnDef="openingCredit">
+                <th mat-header-cell *matHeaderCellDef class="text-right">Opening Credit</th>
+                <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.openingCredit || 0) }}</td>
+              </ng-container>
+              <ng-container matColumnDef="openingBalance">
+                <th mat-header-cell *matHeaderCellDef class="text-right">Opening Balance</th>
+                <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.openingBalance || 0) }}</td>
+              </ng-container>
               <ng-container matColumnDef="debit">
-                <th mat-header-cell *matHeaderCellDef class="text-right">Debit</th>
+                <th mat-header-cell *matHeaderCellDef class="text-right">Period Debit</th>
                 <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.debit) }}</td>
               </ng-container>
               <ng-container matColumnDef="credit">
-                <th mat-header-cell *matHeaderCellDef class="text-right">Credit</th>
+                <th mat-header-cell *matHeaderCellDef class="text-right">Period Credit</th>
                 <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.credit) }}</td>
               </ng-container>
               <ng-container matColumnDef="balance">
-                <th mat-header-cell *matHeaderCellDef class="text-right">Balance</th>
+                <th mat-header-cell *matHeaderCellDef class="text-right">Period Balance</th>
                 <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.balance) }}</td>
               </ng-container>
-              <tr mat-header-row *matHeaderRowDef="['accountName', 'accountType', 'debit', 'credit', 'balance']"></tr>
-              <tr mat-row *matRowDef="let row; columns: ['accountName', 'accountType', 'debit', 'credit', 'balance']"></tr>
+              <ng-container matColumnDef="closingDebit">
+                <th mat-header-cell *matHeaderCellDef class="text-right">Closing Debit</th>
+                <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.closingDebit || 0) }}</td>
+              </ng-container>
+              <ng-container matColumnDef="closingCredit">
+                <th mat-header-cell *matHeaderCellDef class="text-right">Closing Credit</th>
+                <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.closingCredit || 0) }}</td>
+              </ng-container>
+              <ng-container matColumnDef="closingBalance">
+                <th mat-header-cell *matHeaderCellDef class="text-right">Closing Balance</th>
+                <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.closingBalance || 0) }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="['accountName', 'accountType', 'openingDebit', 'openingCredit', 'openingBalance', 'debit', 'credit', 'balance', 'closingDebit', 'closingCredit', 'closingBalance']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['accountName', 'accountType', 'openingDebit', 'openingCredit', 'openingBalance', 'debit', 'credit', 'balance', 'closingDebit', 'closingCredit', 'closingBalance']"></tr>
             </table>
             </div>
           </ng-container>
@@ -219,37 +298,116 @@
               <th mat-header-cell *matHeaderCellDef>Type</th>
               <td mat-cell *matCellDef="let row">{{ row.accountType }}</td>
             </ng-container>
+            <ng-container matColumnDef="openingDebit">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Opening Debit</th>
+              <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.openingDebit || 0) }}</td>
+            </ng-container>
+            <ng-container matColumnDef="openingCredit">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Opening Credit</th>
+              <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.openingCredit || 0) }}</td>
+            </ng-container>
+            <ng-container matColumnDef="openingBalance">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Opening Balance</th>
+              <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.openingBalance || 0) }}</td>
+            </ng-container>
             <ng-container matColumnDef="debit">
-              <th mat-header-cell *matHeaderCellDef class="text-right">Debit</th>
+              <th mat-header-cell *matHeaderCellDef class="text-right">Period Debit</th>
               <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.debit) }}</td>
             </ng-container>
             <ng-container matColumnDef="credit">
-              <th mat-header-cell *matHeaderCellDef class="text-right">Credit</th>
+              <th mat-header-cell *matHeaderCellDef class="text-right">Period Credit</th>
               <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.credit) }}</td>
             </ng-container>
             <ng-container matColumnDef="balance">
-              <th mat-header-cell *matHeaderCellDef class="text-right">Balance</th>
+              <th mat-header-cell *matHeaderCellDef class="text-right">Period Balance</th>
               <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.balance) }}</td>
             </ng-container>
-            <tr mat-header-row *matHeaderRowDef="['accountName', 'accountType', 'debit', 'credit', 'balance']"></tr>
-            <tr mat-row *matRowDef="let row; columns: ['accountName', 'accountType', 'debit', 'credit', 'balance']"></tr>
+            <ng-container matColumnDef="closingDebit">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Closing Debit</th>
+              <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.closingDebit || 0) }}</td>
+            </ng-container>
+            <ng-container matColumnDef="closingCredit">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Closing Credit</th>
+              <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.closingCredit || 0) }}</td>
+            </ng-container>
+            <ng-container matColumnDef="closingBalance">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Closing Balance</th>
+              <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.closingBalance || 0) }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="['accountName', 'accountType', 'openingDebit', 'openingCredit', 'openingBalance', 'debit', 'credit', 'balance', 'closingDebit', 'closingCredit', 'closingBalance']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['accountName', 'accountType', 'openingDebit', 'openingCredit', 'openingBalance', 'debit', 'credit', 'balance', 'closingDebit', 'closingCredit', 'closingBalance']"></tr>
           </table>
         </div>
 
         <!-- Balance Sheet Report -->
         <div *ngIf="generatedReport.type === 'balance_sheet'">
+          <!-- Opening/Closing Balance Summary -->
+          <div class="balance-summary" *ngIf="generatedReport.data.summary && (generatedReport.data.summary.openingAssets !== undefined || generatedReport.data.summary.openingLiabilities !== undefined)">
+            <div class="balance-card">
+              <div class="balance-label">Opening Balance</div>
+              <div class="balance-amount">
+                <div class="balance-row">
+                  <span>Assets:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.openingAssets || 0) }}</span>
+                </div>
+                <div class="balance-row">
+                  <span>Liabilities:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.openingLiabilities || 0) }}</span>
+                </div>
+                <div class="balance-row">
+                  <span>Equity:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.openingEquity || 0) }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="balance-card">
+              <div class="balance-label">Period Total</div>
+              <div class="balance-amount">
+                <div class="balance-row">
+                  <span>Assets:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.periodAssets || 0) }}</span>
+                </div>
+                <div class="balance-row">
+                  <span>Liabilities:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.periodLiabilities || 0) }}</span>
+                </div>
+                <div class="balance-row">
+                  <span>Equity:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.periodEquity || 0) }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="balance-card">
+              <div class="balance-label">Closing Balance</div>
+              <div class="balance-amount">
+                <div class="balance-row">
+                  <span>Assets:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.closingAssets || 0) }}</span>
+                </div>
+                <div class="balance-row">
+                  <span>Liabilities:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.closingLiabilities || 0) }}</span>
+                </div>
+                <div class="balance-row">
+                  <span>Equity:</span>
+                  <span>{{ formatCurrency(generatedReport.data.summary.closingEquity || 0) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <div class="report-summary" *ngIf="generatedReport.data.summary">
             <div class="summary-card">
               <div class="summary-label">Total Assets</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.totalAssets) }}</div>
+              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.closingAssets || generatedReport.data.summary.totalAssets || 0) }}</div>
             </div>
             <div class="summary-card">
               <div class="summary-label">Total Liabilities</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.totalLiabilities) }}</div>
+              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.closingLiabilities || generatedReport.data.summary.totalLiabilities || 0) }}</div>
             </div>
             <div class="summary-card">
               <div class="summary-label">Total Equity</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.totalEquity) }}</div>
+              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.closingEquity || generatedReport.data.summary.totalEquity || 0) }}</div>
             </div>
           </div>
 
@@ -288,7 +446,7 @@
                 <tr mat-header-row *matHeaderRowDef="['category', 'amount']"></tr>
                 <tr mat-row *matRowDef="let row; columns: ['category', 'amount']"></tr>
               </table>
-              <div class="section-total">Total Assets: {{ formatCurrency(generatedReport.data.assets.total) }}</div>
+              <div class="section-total">Total Assets: {{ formatCurrency(generatedReport.data.assets?.total || 0) }}</div>
             </div>
 
             <div class="section">
@@ -305,26 +463,50 @@
                 <tr mat-header-row *matHeaderRowDef="['vendor', 'amount']"></tr>
                 <tr mat-row *matRowDef="let row; columns: ['vendor', 'amount']"></tr>
               </table>
-              <div class="section-total">Total Liabilities: {{ formatCurrency(generatedReport.data.liabilities.total) }}</div>
+              <div class="section-total">Total Liabilities: {{ formatCurrency(generatedReport.data.liabilities?.total || 0) }}</div>
             </div>
           </div>
         </div>
 
         <!-- Profit and Loss Report -->
         <div *ngIf="generatedReport.type === 'profit_and_loss'">
+          <!-- Opening/Closing Balance Summary -->
+          <div class="balance-summary" *ngIf="generatedReport.data.summary && generatedReport.data.summary.openingRetainedEarnings !== undefined">
+            <div class="balance-card">
+              <div class="balance-label">Opening Retained Earnings</div>
+              <div class="balance-amount">
+                <span>{{ formatCurrency(generatedReport.data.summary.openingRetainedEarnings || 0) }}</span>
+              </div>
+            </div>
+            <div class="balance-card">
+              <div class="balance-label">Period Net Profit</div>
+              <div class="balance-amount">
+                <span [class.positive]="(generatedReport.data.summary.netProfit || 0) >= 0" [class.negative]="(generatedReport.data.summary.netProfit || 0) < 0">
+                  {{ formatCurrency(generatedReport.data.summary.netProfit || 0) }}
+                </span>
+              </div>
+            </div>
+            <div class="balance-card">
+              <div class="balance-label">Closing Retained Earnings</div>
+              <div class="balance-amount">
+                <span>{{ formatCurrency(generatedReport.data.summary.closingRetainedEarnings || 0) }}</span>
+              </div>
+            </div>
+          </div>
+          
           <div class="report-summary" *ngIf="generatedReport.data.summary">
             <div class="summary-card">
               <div class="summary-label">Gross Profit</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.grossProfit) }}</div>
+              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.grossProfit || 0) }}</div>
             </div>
             <div class="summary-card">
               <div class="summary-label">Total Expenses</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.totalExpenses) }}</div>
+              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.totalExpenses || 0) }}</div>
             </div>
             <div class="summary-card">
               <div class="summary-label">Net Profit</div>
-              <div class="summary-value" [class.positive]="generatedReport.data.summary.netProfit >= 0" [class.negative]="generatedReport.data.summary.netProfit < 0">
-                {{ formatCurrency(generatedReport.data.summary.netProfit) }}
+              <div class="summary-value" [class.positive]="(generatedReport.data.summary.netProfit || 0) >= 0" [class.negative]="(generatedReport.data.summary.netProfit || 0) < 0">
+                {{ formatCurrency(generatedReport.data.summary.netProfit || 0) }}
               </div>
             </div>
             <div class="summary-card" *ngIf="generatedReport.data.summary.netProfitMargin">
@@ -359,15 +541,15 @@
               <div class="section-details">
                 <div class="detail-row">
                   <span>Amount:</span>
-                  <span>{{ formatCurrency(generatedReport.data.revenue.amount) }}</span>
+                  <span>{{ formatCurrency(generatedReport.data.revenue?.amount || 0) }}</span>
                 </div>
                 <div class="detail-row">
                   <span>VAT:</span>
-                  <span>{{ formatCurrency(generatedReport.data.revenue.vat) }}</span>
+                  <span>{{ formatCurrency(generatedReport.data.revenue?.vat || 0) }}</span>
                 </div>
                 <div class="detail-row total">
                   <span>Total:</span>
-                  <span>{{ formatCurrency(generatedReport.data.revenue.total) }}</span>
+                  <span>{{ formatCurrency(generatedReport.data.revenue?.total || 0) }}</span>
                 </div>
               </div>
             </div>
@@ -394,13 +576,35 @@
                 <tr mat-header-row *matHeaderRowDef="['category', 'amount', 'vat', 'total']"></tr>
                 <tr mat-row *matRowDef="let row; columns: ['category', 'amount', 'vat', 'total']"></tr>
               </table>
-              <div class="section-total">Total Expenses: {{ formatCurrency(generatedReport.data.expenses.grandTotal) }}</div>
+              <div class="section-total">Total Expenses: {{ formatCurrency(generatedReport.data.expenses?.grandTotal || 0) }}</div>
             </div>
           </div>
         </div>
 
         <!-- Payables Report -->
         <div *ngIf="generatedReport.type === 'payables'">
+          <!-- Opening/Closing Balance Summary -->
+          <div class="balance-summary" *ngIf="generatedReport.data.summary && generatedReport.data.summary.openingBalance !== undefined">
+            <div class="balance-card">
+              <div class="balance-label">Opening Balance</div>
+              <div class="balance-amount">
+                <span>{{ formatCurrency(generatedReport.data.summary.openingBalance || 0) }}</span>
+              </div>
+            </div>
+            <div class="balance-card">
+              <div class="balance-label">Period Amount</div>
+              <div class="balance-amount">
+                <span>{{ formatCurrency(generatedReport.data.summary.periodAmount || 0) }}</span>
+              </div>
+            </div>
+            <div class="balance-card">
+              <div class="balance-label">Closing Balance</div>
+              <div class="balance-amount">
+                <span>{{ formatCurrency(generatedReport.data.summary.closingBalance || 0) }}</span>
+              </div>
+            </div>
+          </div>
+          
           <div class="report-summary" *ngIf="generatedReport.data.summary">
             <div class="summary-card">
               <div class="summary-label">Total Items</div>
@@ -408,15 +612,15 @@
             </div>
             <div class="summary-card">
               <div class="summary-label">Total Amount</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.totalAmount) }}</div>
+              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.totalAmount || 0) }}</div>
             </div>
             <div class="summary-card">
               <div class="summary-label">Overdue Items</div>
-              <div class="summary-value">{{ generatedReport.data.summary.overdueItems }}</div>
+              <div class="summary-value">{{ generatedReport.data.summary.overdueItems || 0 }}</div>
             </div>
             <div class="summary-card">
               <div class="summary-label">Overdue Amount</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.overdueAmount) }}</div>
+              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.overdueAmount || 0) }}</div>
             </div>
           </div>
 
@@ -456,6 +660,28 @@
 
         <!-- Receivables Report -->
         <div *ngIf="generatedReport.type === 'receivables'">
+          <!-- Opening/Closing Balance Summary -->
+          <div class="balance-summary" *ngIf="generatedReport.data.summary && generatedReport.data.summary.openingBalance !== undefined">
+            <div class="balance-card">
+              <div class="balance-label">Opening Balance</div>
+              <div class="balance-amount">
+                <span>{{ formatCurrency(generatedReport.data.summary.openingBalance || 0) }}</span>
+              </div>
+            </div>
+            <div class="balance-card">
+              <div class="balance-label">Period Amount</div>
+              <div class="balance-amount">
+                <span>{{ formatCurrency(generatedReport.data.summary.periodAmount || 0) }}</span>
+              </div>
+            </div>
+            <div class="balance-card">
+              <div class="balance-label">Closing Balance</div>
+              <div class="balance-amount">
+                <span>{{ formatCurrency(generatedReport.data.summary.closingBalance || 0) }}</span>
+              </div>
+            </div>
+          </div>
+          
           <div class="report-summary" *ngIf="generatedReport.data.summary">
             <div class="summary-card">
               <div class="summary-label">Total Invoices</div>
@@ -463,15 +689,15 @@
             </div>
             <div class="summary-card">
               <div class="summary-label">Total Outstanding</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.totalOutstanding) }}</div>
+              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.totalOutstanding || 0) }}</div>
             </div>
             <div class="summary-card">
               <div class="summary-label">Overdue Invoices</div>
-              <div class="summary-value">{{ generatedReport.data.summary.overdueInvoices }}</div>
+              <div class="summary-value">{{ generatedReport.data.summary.overdueInvoices || 0 }}</div>
             </div>
             <div class="summary-card">
               <div class="summary-label">Overdue Amount</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.overdueAmount) }}</div>
+              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.overdueAmount || 0) }}</div>
             </div>
           </div>
 

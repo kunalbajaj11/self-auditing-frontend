@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ExpensesService } from '../../../core/services/expenses.service';
@@ -38,13 +39,33 @@ export class AdjustmentsComponent implements OnInit {
   ] as const;
   readonly dataSource = new MatTableDataSource<AdjustmentTransaction>([]);
   loading = false;
+  dateRangeForm: FormGroup;
+  openingBalance = 0;
+  closingBalance = 0;
+  periodTotal = 0;
 
   constructor(
+    private readonly fb: FormBuilder,
     private readonly expensesService: ExpensesService,
     private readonly journalEntriesService: JournalEntriesService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
-  ) {}
+  ) {
+    // Initialize date range form - default to current month
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    
+    this.dateRangeForm = this.fb.group({
+      startDate: [firstDayOfMonth],
+      endDate: [lastDayOfMonth],
+    });
+
+    // Reload when date range changes
+    this.dateRangeForm.valueChanges.subscribe(() => {
+      this.loadAdjustmentTransactions();
+    });
+  }
 
   ngOnInit(): void {
     this.loadAdjustmentTransactions();
@@ -52,6 +73,13 @@ export class AdjustmentsComponent implements OnInit {
 
   loadAdjustmentTransactions(): void {
     this.loading = true;
+    const formValue = this.dateRangeForm.value;
+    const startDate = formValue.startDate instanceof Date 
+      ? formValue.startDate.toISOString().split('T')[0] 
+      : formValue.startDate;
+    const endDate = formValue.endDate instanceof Date 
+      ? formValue.endDate.toISOString().split('T')[0] 
+      : formValue.endDate;
 
     // Load expenses filtered by type='adjustment' and journal entries in parallel
     forkJoin({
@@ -73,10 +101,11 @@ export class AdjustmentsComponent implements OnInit {
     }).subscribe({
       next: ({ expenses, journalEntries }) => {
         const transactions: AdjustmentTransaction[] = [];
+        const allTransactions: AdjustmentTransaction[] = [];
 
         // Add all expenses (already filtered by backend to type='adjustment')
         expenses.forEach((expense) => {
-          transactions.push({
+          const transaction: AdjustmentTransaction = {
             id: expense.id,
             type: 'expense',
             date: expense.expenseDate,
@@ -85,12 +114,40 @@ export class AdjustmentsComponent implements OnInit {
             amount: expense.totalAmount,
             currency: expense.currency || 'AED',
             expense: expense,
-          });
+          };
+          allTransactions.push(transaction);
         });
 
         // Note: Journal entries don't have a specific "adjustment" status
         // If needed in the future, we can add filtering logic here
         // For now, we only show expenses with type='adjustment'
+
+        // Calculate opening balance (sum of all transactions before start date)
+        const startDateObj = new Date(startDate);
+        startDateObj.setHours(0, 0, 0, 0);
+        
+        this.openingBalance = allTransactions
+          .filter((t) => {
+            const tDate = new Date(t.date);
+            tDate.setHours(0, 0, 0, 0);
+            return tDate < startDateObj;
+          })
+          .reduce((sum, t) => sum + t.amount, 0);
+
+        // Filter transactions for the period
+        const endDateObj = new Date(endDate);
+        endDateObj.setHours(23, 59, 59, 999);
+        
+        transactions.push(...allTransactions.filter((t) => {
+          const tDate = new Date(t.date);
+          return tDate >= startDateObj && tDate <= endDateObj;
+        }));
+
+        // Calculate period total
+        this.periodTotal = transactions.reduce((sum, t) => sum + t.amount, 0);
+
+        // Calculate closing balance
+        this.closingBalance = this.openingBalance + this.periodTotal;
 
         // Sort by date descending (latest first)
         transactions.sort((a, b) => {
