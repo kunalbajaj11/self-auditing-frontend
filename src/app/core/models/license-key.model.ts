@@ -1,4 +1,5 @@
 import { PlanType } from './plan.model';
+import { Region } from './organization.model';
 
 export type LicenseKeyStatus = 'active' | 'consumed' | 'expired' | 'revoked';
 
@@ -17,6 +18,7 @@ export interface LicenseKey {
   consumedByUserId?: string | null;
   notes?: string | null;
   email?: string | null;
+  region?: Region | null;
   createdAt: string;
   updatedAt: string;
 }

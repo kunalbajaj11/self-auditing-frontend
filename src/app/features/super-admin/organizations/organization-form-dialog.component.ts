@@ -16,6 +16,9 @@ export class OrganizationFormDialogComponent {
     { value: 'UAE', label: 'United Arab Emirates (UAE)' },
     { value: 'SAUDI', label: 'Saudi Arabia' },
     { value: 'OMAN', label: 'Oman' },
+    { value: 'KUWAIT', label: 'Kuwait' },
+    { value: 'BAHRAIN', label: 'Bahrain' },
+    { value: 'QATAR', label: 'Qatar' },
     { value: 'INDIA', label: 'India' },
   ];
   loading = false;
@@ -33,10 +36,8 @@ export class OrganizationFormDialogComponent {
       name: ['', [Validators.required, Validators.maxLength(150)]],
       planType: ['standard' as PlanType, Validators.required],
       vatNumber: [''],
-      fiscalYearStart: [''],
       contactPerson: [''],
       contactEmail: ['', [Validators.email]],
-      storageQuotaMb: [500, [Validators.required, Validators.min(100)]],
       currency: ['AED', Validators.required],
       region: ['UAE'],
       address: [''],

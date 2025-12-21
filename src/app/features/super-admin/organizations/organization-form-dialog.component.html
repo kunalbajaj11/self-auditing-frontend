@@ -23,13 +23,6 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline">
-    <mat-label>Fiscal Year Start</mat-label>
-    <input matInput [matDatepicker]="fiscalYearStartPicker" formControlName="fiscalYearStart" placeholder="Select fiscal year start" />
-    <mat-datepicker-toggle matIconSuffix [for]="fiscalYearStartPicker"></mat-datepicker-toggle>
-    <mat-datepicker #fiscalYearStartPicker></mat-datepicker>
-  </mat-form-field>
-
-  <mat-form-field appearance="outline">
     <mat-label>Contact Person</mat-label>
     <input matInput formControlName="contactPerson" />
   </mat-form-field>
@@ -40,11 +33,6 @@
     <mat-error *ngIf="form.get('contactEmail')?.hasError('email')">
       Please enter a valid email
     </mat-error>
-  </mat-form-field>
-
-  <mat-form-field appearance="outline">
-    <mat-label>Storage Quota (MB)</mat-label>
-    <input matInput type="number" formControlName="storageQuotaMb" />
   </mat-form-field>
 
   <mat-form-field appearance="outline">

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   Validators,
@@ -17,7 +17,7 @@ import { UserRole } from '../../../core/models/user.model';
   templateUrl: './license-registration.component.html',
   styleUrls: ['./license-registration.component.scss'],
 })
-export class LicenseRegistrationComponent {
+export class LicenseRegistrationComponent implements OnInit {
   validating = false;
   loading = false;
   hidePassword = true;
@@ -28,6 +28,9 @@ export class LicenseRegistrationComponent {
     { value: 'UAE', label: 'United Arab Emirates (UAE)' },
     { value: 'SAUDI', label: 'Saudi Arabia' },
     { value: 'OMAN', label: 'Oman' },
+    { value: 'KUWAIT', label: 'Kuwait' },
+    { value: 'BAHRAIN', label: 'Bahrain' },
+    { value: 'QATAR', label: 'Qatar' },
     { value: 'INDIA', label: 'India' },
   ];
 
@@ -42,15 +45,13 @@ export class LicenseRegistrationComponent {
     this.form = this.fb.group({
       licenseKey: ['', [Validators.required, Validators.minLength(8)]],
       organizationName: ['', [Validators.required, Validators.maxLength(150)]],
-      planType: ['', []],
+      planType: [{ value: '', disabled: true }, []],
       vatNumber: [''],
       address: [''],
       currency: ['AED'],
       region: ['UAE'],
-      fiscalYearStart: [''],
       contactPerson: [''],
       contactEmail: ['', [Validators.email]],
-      storageQuotaMb: [null as number | null],
       adminName: ['', [Validators.required]],
       adminEmail: ['', [Validators.required, Validators.email]],
       adminPassword: ['', [Validators.required, Validators.minLength(8)]],
@@ -60,6 +61,19 @@ export class LicenseRegistrationComponent {
 
   get licenseKeyControl(): AbstractControl {
     return this.form.controls.licenseKey;
+  }
+
+  ngOnInit(): void {
+    // Reset plan field when license key changes
+    this.form.controls.licenseKey.valueChanges.subscribe(() => {
+      if (this.licenseInfo) {
+        this.licenseInfo = null;
+        this.form.controls.planType.setValue('');
+        this.form.controls.planType.disable({ emitEvent: false });
+        this.form.controls.planType.clearValidators();
+        this.form.controls.planType.updateValueAndValidity();
+      }
+    });
   }
 
   validateLicense(): void {
@@ -111,14 +125,15 @@ export class LicenseRegistrationComponent {
       return;
     }
     const raw = this.form.getRawValue();
+    // If planType is disabled (from license), use the license planType
+    const planType = this.form.controls.planType.disabled && this.licenseInfo?.planType
+      ? this.licenseInfo.planType
+      : raw.planType || undefined;
+    
     const payload = {
       ...raw,
       licenseKey: raw.licenseKey?.trim(),
-      planType: raw.planType || undefined,
-      storageQuotaMb:
-        raw.storageQuotaMb === null || raw.storageQuotaMb === undefined
-          ? undefined
-          : raw.storageQuotaMb,
+      planType: planType,
     };
     this.loading = true;
     this.authService
@@ -157,9 +172,10 @@ export class LicenseRegistrationComponent {
       this.enablePlanTypeControl(true);
     }
 
-    this.form.controls.storageQuotaMb.setValue(
-      info.storageQuotaMb ?? null,
-    );
+    // Pre-populate region if license has one, but allow user to change it
+    if (info.region) {
+      this.form.controls.region.setValue(info.region);
+    }
   }
 
   private enablePlanTypeControl(applyRequired = false): void {

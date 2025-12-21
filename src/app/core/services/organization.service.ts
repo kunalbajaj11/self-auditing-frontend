@@ -30,7 +30,6 @@ export class OrganizationService {
     vatNumber?: string;
     address?: string;
     currency?: string;
-    fiscalYearStart?: string;
     contactPerson?: string;
     contactEmail?: string;
     storageQuotaMb?: number;

@@ -16,6 +16,7 @@ export interface LicensePreview {
   storageQuotaMb?: number | null;
   expiresAt: string;
   status: string;
+  region?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

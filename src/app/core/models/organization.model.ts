@@ -1,6 +1,6 @@
 import { PlanType } from './plan.model';
 
-export type Region = 'UAE' | 'SAUDI' | 'OMAN' | 'INDIA';
+export type Region = 'UAE' | 'SAUDI' | 'OMAN' | 'KUWAIT' | 'BAHRAIN' | 'QATAR' | 'INDIA';
 
 export interface Organization {
   id: string;
@@ -9,12 +9,11 @@ export interface Organization {
   status: 'active' | 'inactive';
   currency: string;
   baseCurrency?: string;
-  storageQuotaMb: number;
+  storageQuotaMb?: number | null;
   vatNumber?: string;
   address?: string;
   contactPerson?: string;
   contactEmail?: string;
-  fiscalYearStart?: string;
   region?: Region;
 }
 

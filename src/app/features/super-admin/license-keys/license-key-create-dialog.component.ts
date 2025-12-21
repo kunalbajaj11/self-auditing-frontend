@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { LicenseKeysService } from '../../../core/services/license-keys.service';
 import { PlanType } from '../../../core/models/plan.model';
+import { Region } from '../../../core/models/organization.model';
 
 export interface LicenseKeyCreateResult {
   refresh: boolean;
@@ -14,9 +15,18 @@ export interface LicenseKeyCreateResult {
   templateUrl: './license-key-create-dialog.component.html',
   styleUrls: ['./license-key-create-dialog.component.scss'],
 })
-export class LicenseKeyCreateDialogComponent {
+export class LicenseKeyCreateDialogComponent implements OnInit {
   loading = false;
   readonly planTypes: PlanType[] = ['free', 'standard', 'enterprise'];
+  readonly regions: Array<{ value: Region; label: string }> = [
+    { value: 'UAE', label: 'United Arab Emirates (UAE)' },
+    { value: 'SAUDI', label: 'Saudi Arabia' },
+    { value: 'OMAN', label: 'Oman' },
+    { value: 'KUWAIT', label: 'Kuwait' },
+    { value: 'BAHRAIN', label: 'Bahrain' },
+    { value: 'QATAR', label: 'Qatar' },
+    { value: 'INDIA', label: 'India' },
+  ];
 
   readonly form;
 
@@ -28,13 +38,34 @@ export class LicenseKeyCreateDialogComponent {
   ) {
     this.form = this.fb.group({
       planType: ['standard' as PlanType, Validators.required],
-      maxUsers: [null as number | null],
+      maxUsers: [5, [Validators.min(1)]],
       storageQuotaMb: [null as number | null],
       maxUploads: [2000, [Validators.min(1)]],
       validityDays: [365, [Validators.required, Validators.min(1)]],
       notes: [''],
+      region: [null as Region | null],
       email: ['', [Validators.required, Validators.email]],
     });
+  }
+
+  ngOnInit(): void {
+    // Update maxUsers default when plan type changes
+    this.form.controls.planType.valueChanges.subscribe((planType: PlanType | null) => {
+      const defaultMaxUsers = this.getDefaultMaxUsers(planType);
+      this.form.controls.maxUsers.setValue(defaultMaxUsers, { emitEvent: false });
+    });
+  }
+
+  private getDefaultMaxUsers(planType: PlanType | null): number | null {
+    switch (planType) {
+      case 'enterprise':
+        return 25;
+      case 'standard':
+        return 5;
+      case 'free':
+      default:
+        return null;
+    }
   }
 
   submit(): void {
@@ -50,6 +81,7 @@ export class LicenseKeyCreateDialogComponent {
       maxUploads: raw.maxUploads ?? undefined,
       validityDays: raw.validityDays ?? undefined,
       notes: raw.notes ?? undefined,
+      region: raw.region ?? undefined,
       email: raw.email ?? '',
     };
     this.loading = true;

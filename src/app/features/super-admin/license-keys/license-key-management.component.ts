@@ -20,7 +20,7 @@ import {
 export class LicenseKeyManagementComponent implements OnInit {
   loading = false;
   licenseKeys: LicenseKey[] = [];
-  displayedColumns = ['key', 'plan', 'status', 'email', 'expires', 'created', 'actions'];
+  displayedColumns = ['key', 'plan', 'region', 'status', 'email', 'expires', 'created', 'actions'];
 
   constructor(
     private readonly licenseKeysService: LicenseKeysService,
@@ -108,6 +108,22 @@ export class LicenseKeyManagementComponent implements OnInit {
       default:
         return '';
     }
+  }
+
+  getRegionLabel(region: string | null | undefined): string {
+    if (!region) {
+      return '—';
+    }
+    const regionLabels: Record<string, string> = {
+      UAE: 'United Arab Emirates (UAE)',
+      SAUDI: 'Saudi Arabia',
+      OMAN: 'Oman',
+      KUWAIT: 'Kuwait',
+      BAHRAIN: 'Bahrain',
+      QATAR: 'Qatar',
+      INDIA: 'India',
+    };
+    return regionLabels[region] || region;
   }
 }
 

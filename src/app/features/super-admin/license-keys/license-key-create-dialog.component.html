@@ -16,6 +16,10 @@
     <mat-form-field appearance="outline">
       <mat-label>Max Users</mat-label>
       <input matInput type="number" formControlName="maxUsers" />
+      <mat-hint>Default: 5 (Standard), 25 (Enterprise), Unlimited (Free)</mat-hint>
+      <mat-error *ngIf="form.controls.maxUsers.hasError('min')">
+        Max users must be at least 1
+      </mat-error>
     </mat-form-field>
     <mat-form-field appearance="outline">
       <mat-label>Storage Quota (MB)</mat-label>
@@ -38,6 +42,17 @@
     <mat-error *ngIf="form.controls.validityDays.hasError('required')">
       Validity period is required
     </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Region/Country</mat-label>
+    <mat-select formControlName="region">
+      <mat-option [value]="null">None (Client selects during registration)</mat-option>
+      <mat-option *ngFor="let region of regions" [value]="region.value">
+        {{ region.label }}
+      </mat-option>
+    </mat-select>
+    <mat-hint>Optional: Pre-select region for this license</mat-hint>
   </mat-form-field>
 
   <mat-form-field appearance="outline">

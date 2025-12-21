@@ -24,11 +24,9 @@ export class AdminCompanyComponent implements OnInit {
       name: ['', [Validators.required]],
       vatNumber: [''],
       currency: ['AED', [Validators.required]],
-      fiscalYearStart: [''],
       contactPerson: [''],
       contactEmail: ['', [Validators.email]],
       address: [''],
-      storageQuotaMb: [500, [Validators.min(100)]],
     });
   }
 
@@ -69,11 +67,9 @@ export class AdminCompanyComponent implements OnInit {
         name: org.name,
         vatNumber: org.vatNumber ?? '',
         currency: org.currency ?? 'AED',
-        fiscalYearStart: org.fiscalYearStart ?? '',
         contactPerson: org.contactPerson ?? '',
         contactEmail: org.contactEmail ?? '',
         address: org.address ?? '',
-        storageQuotaMb: org.storageQuotaMb ?? 500,
       });
     });
   }
@@ -83,11 +79,9 @@ export class AdminCompanyComponent implements OnInit {
       name: value.name ?? '',
       vatNumber: value.vatNumber ?? undefined,
       currency: value.currency ?? undefined,
-      fiscalYearStart: value.fiscalYearStart ?? undefined,
       contactPerson: value.contactPerson ?? undefined,
       contactEmail: value.contactEmail ?? undefined,
       address: value.address ?? undefined,
-      storageQuotaMb: value.storageQuotaMb ?? undefined,
     };
   }
 }

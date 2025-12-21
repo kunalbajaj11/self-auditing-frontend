@@ -3,6 +3,7 @@ import { ApiService } from './api.service';
 import { LicenseKey, UploadUsage } from '../models/license-key.model';
 import { Observable } from 'rxjs';
 import { PlanType } from '../models/plan.model';
+import { Region } from '../models/organization.model';
 
 export interface CreateLicenseKeyPayload {
   planType?: PlanType;
@@ -12,6 +13,7 @@ export interface CreateLicenseKeyPayload {
   notes?: string;
   validityDays?: number;
   email: string;
+  region?: Region;
 }
 
 export interface AllocateUploadsPayload {

@@ -1,225 +1,277 @@
 <div class="auth-page">
-  <mat-card class="auth-card">
-    <mat-card-header>
-      <div mat-card-avatar class="auth-avatar">
-        <mat-icon>verified_user</mat-icon>
+  <div class="auth-container">
+    <!-- Left side - Branding Section -->
+    <div class="auth-branding">
+      <div class="brand-content">
+        <div class="logo-container">
+          <img src="assets/images/backless_logo_white.png" alt="SelfAccounting.AI Logo" class="brand-logo" />
+        </div>
+        <h1 class="brand-title">SelfAccounting.AI</h1>
+        <p class="brand-subtitle">Activate your workspace and start managing expenses with AI-powered automation</p>
+        <div class="brand-features">
+          <div class="feature-item">
+            <mat-icon>verified</mat-icon>
+            <span>Secure License Activation</span>
+          </div>
+          <div class="feature-item">
+            <mat-icon>business</mat-icon>
+            <span>Complete Organization Setup</span>
+          </div>
+          <div class="feature-item">
+            <mat-icon>admin_panel_settings</mat-icon>
+            <span>Admin Account Creation</span>
+          </div>
+        </div>
       </div>
-      <mat-card-title>Activate Your SelfAccounting.AI Workspace</mat-card-title>
-      <mat-card-subtitle>
-        Use the license key provided by SelfAccounting.AI Super Admin to set up your company account.
-      </mat-card-subtitle>
-    </mat-card-header>
+    </div>
 
-    <mat-card-content>
-      <form [formGroup]="form" class="auth-form" (ngSubmit)="submit()">
-        <section class="form-section">
-          <h3>License Key</h3>
-          <div class="two-column">
-            <mat-form-field appearance="outline">
-              <mat-label>License Key</mat-label>
-              <input
-                matInput
-                placeholder="XXXX-XXXX-XXXX-XXXX"
-                formControlName="licenseKey"
-                autocomplete="off"
-              />
-              <mat-error *ngIf="licenseKeyControl.hasError('required')">
-                License key is required
-              </mat-error>
-            </mat-form-field>
-
-            <button
-              mat-stroked-button
-              color="primary"
-              type="button"
-              class="validate-button"
-              (click)="validateLicense()"
-              [disabled]="validating"
-            >
-              <mat-progress-spinner
-                *ngIf="validating"
-                mode="indeterminate"
-                diameter="18"
-                strokeWidth="3"
-              ></mat-progress-spinner>
-              <span *ngIf="!validating">Validate Key</span>
-            </button>
+    <!-- Right side - Registration Form -->
+    <div class="auth-form-section">
+      <mat-card class="auth-card">
+        <mat-card-content>
+          <div class="form-header">
+            <h2 class="form-title">Activate Your Workspace</h2>
+            <p class="form-subtitle">Use your license key to set up your company account</p>
           </div>
 
-          <div *ngIf="licenseInfo" class="license-overview">
-            <mat-icon color="primary">check_circle</mat-icon>
-            <div>
-              <p>
-                License valid until
-                <strong>{{ licenseInfo.expiresAt | date: 'mediumDate' }}</strong>
-              </p>
-              <p class="muted" *ngIf="licenseInfo.planType">
-                Plan: <strong>{{ licenseInfo.planType | titlecase }}</strong>
-              </p>
-              <p class="muted" *ngIf="!licenseInfo.planType">
-                Select a plan that matches this license.
-              </p>
+          <form [formGroup]="form" class="auth-form" (ngSubmit)="submit()">
+            <!-- License Key Section -->
+            <div class="form-section-header">
+              <mat-icon>vpn_key</mat-icon>
+              <h3>License Key</h3>
             </div>
-          </div>
-        </section>
-
-        <section class="form-section">
-          <h3>Organization Details</h3>
-          <div class="two-column">
-            <mat-form-field appearance="outline">
-              <mat-label>Organization Name</mat-label>
-              <input matInput formControlName="organizationName" />
-              <mat-error *ngIf="form.controls.organizationName.hasError('required')">
-                Organization name is required
-              </mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Plan</mat-label>
-              <mat-select formControlName="planType" [disabled]="form.controls.planType.disabled">
-                <mat-option *ngFor="let plan of planTypes" [value]="plan">
-                  {{ plan | titlecase }}
-                </mat-option>
-              </mat-select>
-              <mat-error *ngIf="form.controls.planType.hasError('required')">
-                Plan selection is required
-              </mat-error>
-            </mat-form-field>
-          </div>
-
-          <div class="two-column">
-            <mat-form-field appearance="outline">
-              <mat-label>Region/Country *</mat-label>
-              <mat-select formControlName="region" required>
-                <mat-option *ngFor="let region of regions" [value]="region.value">
-                  {{ region.label }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>VAT Number</mat-label>
-              <input matInput formControlName="vatNumber" />
-            </mat-form-field>
-          </div>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Currency</mat-label>
-            <input matInput formControlName="currency" />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Registered Address</mat-label>
-            <textarea matInput rows="2" formControlName="address"></textarea>
-          </mat-form-field>
-
-          <div class="two-column">
-            <mat-form-field appearance="outline">
-              <mat-label>Fiscal Year Start</mat-label>
-              <input matInput [matDatepicker]="fiscalYearStartPicker" formControlName="fiscalYearStart" placeholder="Select fiscal year start" />
-              <mat-datepicker-toggle matIconSuffix [for]="fiscalYearStartPicker"></mat-datepicker-toggle>
-              <mat-datepicker #fiscalYearStartPicker></mat-datepicker>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Storage Quota (MB)</mat-label>
-              <input matInput type="number" formControlName="storageQuotaMb" />
-            </mat-form-field>
-          </div>
-
-          <div class="two-column">
-            <mat-form-field appearance="outline">
-              <mat-label>Primary Contact Person</mat-label>
-              <input matInput formControlName="contactPerson" />
-            </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>Contact Email</mat-label>
-                <input matInput type="email" formControlName="contactEmail" />
-                <mat-error *ngIf="form.controls.contactEmail.hasError('email')">
-                  Enter a valid email address
+            <div class="license-key-section">
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>License Key</mat-label>
+                <mat-icon matPrefix>vpn_key</mat-icon>
+                <input
+                  matInput
+                  placeholder="XXXX-XXXX-XXXX-XXXX"
+                  formControlName="licenseKey"
+                  autocomplete="off"
+                />
+                <mat-error *ngIf="licenseKeyControl.hasError('required')">
+                  License key is required
                 </mat-error>
               </mat-form-field>
-          </div>
-        </section>
 
-        <section class="form-section">
-          <h3>Administrator Account</h3>
-          <div class="two-column">
-            <mat-form-field appearance="outline">
-              <mat-label>Admin Name</mat-label>
-              <input matInput formControlName="adminName" />
-              <mat-error *ngIf="form.controls.adminName.hasError('required')">
-                Name is required
-              </mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Admin Email</mat-label>
-              <input matInput type="email" formControlName="adminEmail" />
-              <mat-error *ngIf="form.controls.adminEmail.hasError('required')">
-                Email is required
-              </mat-error>
-              <mat-error *ngIf="form.controls.adminEmail.hasError('email')">
-                Enter a valid email
-              </mat-error>
-            </mat-form-field>
-          </div>
-
-          <div class="two-column">
-            <mat-form-field appearance="outline">
-              <mat-label>Password</mat-label>
-              <input
-                matInput
-                [type]="hidePassword ? 'password' : 'text'"
-                formControlName="adminPassword"
-                autocomplete="new-password"
-              />
               <button
-                mat-icon-button
-                matSuffix
+                mat-stroked-button
+                color="primary"
                 type="button"
-                (click)="hidePassword = !hidePassword"
-                [attr.aria-label]="hidePassword ? 'Show password' : 'Hide password'"
+                class="validate-button"
+                (click)="validateLicense()"
+                [disabled]="validating || licenseKeyControl.invalid"
               >
-                <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                <mat-progress-spinner
+                  *ngIf="validating"
+                  mode="indeterminate"
+                  diameter="18"
+                  strokeWidth="3"
+                  class="button-spinner"
+                ></mat-progress-spinner>
+                <mat-icon *ngIf="!validating">verified</mat-icon>
+                <span *ngIf="!validating">Validate Key</span>
               </button>
-              <mat-error *ngIf="form.controls.adminPassword.hasError('required')">
-                Password is required
-              </mat-error>
-              <mat-error *ngIf="form.controls.adminPassword.hasError('minlength')">
-                Minimum 8 characters required
-              </mat-error>
-            </mat-form-field>
+            </div>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Admin Phone</mat-label>
-              <input matInput formControlName="adminPhone" />
-            </mat-form-field>
+            <div *ngIf="licenseInfo" class="license-overview">
+              <mat-icon color="primary">check_circle</mat-icon>
+              <div>
+                <p>
+                  License valid until
+                  <strong>{{ licenseInfo.expiresAt | date: 'mediumDate' }}</strong>
+                </p>
+                <p class="muted" *ngIf="licenseInfo.planType">
+                  Plan: <strong>{{ licenseInfo.planType | titlecase }}</strong>
+                </p>
+                <p class="muted" *ngIf="!licenseInfo.planType">
+                  Select a plan that matches this license.
+                </p>
+              </div>
+            </div>
+
+            <!-- Organization Details Section -->
+            <div class="form-section-header">
+              <mat-icon>business</mat-icon>
+              <h3>Organization Details</h3>
+            </div>
+            <div class="form-section-content">
+              <div class="two-column">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Organization Name</mat-label>
+                  <mat-icon matPrefix>business</mat-icon>
+                  <input matInput formControlName="organizationName" />
+                  <mat-error *ngIf="form.controls.organizationName.hasError('required')">
+                    Organization name is required
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Plan</mat-label>
+                  <mat-icon matPrefix>workspace_premium</mat-icon>
+                  <mat-select formControlName="planType" [disabled]="form.controls.planType.disabled">
+                    <mat-option *ngFor="let plan of planTypes" [value]="plan">
+                      {{ plan | titlecase }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-hint *ngIf="form.controls.planType.disabled && licenseInfo?.planType">
+                    Plan is set by your license key and cannot be changed
+                  </mat-hint>
+                  <mat-error *ngIf="form.controls.planType.hasError('required')">
+                    Plan selection is required
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="two-column">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Region/Country *</mat-label>
+                  <mat-icon matPrefix>public</mat-icon>
+                  <mat-select formControlName="region" required>
+                    <mat-option *ngFor="let region of regions" [value]="region.value">
+                      {{ region.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>VAT Number</mat-label>
+                  <mat-icon matPrefix>receipt</mat-icon>
+                  <input matInput formControlName="vatNumber" />
+                </mat-form-field>
+              </div>
+
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Currency</mat-label>
+                <mat-icon matPrefix>attach_money</mat-icon>
+                <input matInput formControlName="currency" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Registered Address</mat-label>
+                <mat-icon matPrefix>location_on</mat-icon>
+                <textarea matInput rows="2" formControlName="address"></textarea>
+              </mat-form-field>
+
+              <div class="two-column">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Primary Contact Person</mat-label>
+                  <mat-icon matPrefix>person</mat-icon>
+                  <input matInput formControlName="contactPerson" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Contact Email</mat-label>
+                  <mat-icon matPrefix>email</mat-icon>
+                  <input matInput type="email" formControlName="contactEmail" />
+                  <mat-error *ngIf="form.controls.contactEmail.hasError('email')">
+                    Enter a valid email address
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Administrator Account Section -->
+            <div class="form-section-header">
+              <mat-icon>admin_panel_settings</mat-icon>
+              <h3>Administrator Account</h3>
+            </div>
+            <div class="form-section-content">
+              <div class="two-column">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Admin Name</mat-label>
+                  <mat-icon matPrefix>person</mat-icon>
+                  <input matInput formControlName="adminName" />
+                  <mat-error *ngIf="form.controls.adminName.hasError('required')">
+                    Name is required
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Admin Email</mat-label>
+                  <mat-icon matPrefix>email</mat-icon>
+                  <input matInput type="email" formControlName="adminEmail" />
+                  <mat-error *ngIf="form.controls.adminEmail.hasError('required')">
+                    Email is required
+                  </mat-error>
+                  <mat-error *ngIf="form.controls.adminEmail.hasError('email')">
+                    Enter a valid email
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="two-column">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Password</mat-label>
+                  <mat-icon matPrefix>lock</mat-icon>
+                  <input
+                    matInput
+                    [type]="hidePassword ? 'password' : 'text'"
+                    formControlName="adminPassword"
+                    autocomplete="new-password"
+                  />
+                  <button
+                    mat-icon-button
+                    matSuffix
+                    type="button"
+                    (click)="hidePassword = !hidePassword"
+                    [attr.aria-label]="hidePassword ? 'Show password' : 'Hide password'"
+                    class="password-toggle"
+                  >
+                    <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                  </button>
+                  <mat-error *ngIf="form.controls.adminPassword.hasError('required')">
+                    Password is required
+                  </mat-error>
+                  <mat-error *ngIf="form.controls.adminPassword.hasError('minlength')">
+                    Minimum 8 characters required
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Admin Phone</mat-label>
+                  <mat-icon matPrefix>phone</mat-icon>
+                  <input matInput formControlName="adminPhone" />
+                </mat-form-field>
+              </div>
+            </div>
+
+            <button
+              mat-raised-button
+              color="primary"
+              class="submit-button"
+              type="submit"
+              [disabled]="loading || form.invalid || !licenseInfo"
+            >
+              <mat-progress-spinner
+                *ngIf="loading"
+                mode="indeterminate"
+                diameter="20"
+                strokeWidth="3"
+                class="button-spinner"
+              ></mat-progress-spinner>
+              <mat-icon *ngIf="!loading">rocket_launch</mat-icon>
+              <span *ngIf="!loading">Create Workspace</span>
+              <span *ngIf="loading">Creating...</span>
+            </button>
+          </form>
+
+          <div class="form-footer">
+            <p class="login-link">
+              Already have an account?
+              <a routerLink="/auth/login" class="login-link-text">
+                Sign in
+              </a>
+            </p>
+            <div class="powered-by">
+              <span>Powered by</span>
+              <strong><a href="https://stryvon.ai" target="_blank" rel="noopener noreferrer">stryvon.ai</a></strong>
+            </div>
           </div>
-        </section>
-
-        <button
-          mat-flat-button
-          color="primary"
-          class="submit-button"
-          type="submit"
-          [disabled]="loading"
-        >
-          <mat-progress-spinner
-            *ngIf="loading"
-            mode="indeterminate"
-            diameter="18"
-            strokeWidth="3"
-          ></mat-progress-spinner>
-          <span *ngIf="!loading">Create Workspace</span>
-        </button>
-      </form>
-    </mat-card-content>
-
-    <mat-card-actions>
-      <a routerLink="/auth/login">Already have an account? Sign in</a>
-    </mat-card-actions>
-  </mat-card>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
 </div>
 
