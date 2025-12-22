@@ -519,6 +519,57 @@
   }
 }
 
+// Trial Balance Warning
+.trial-balance-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  background-color: #fef2f2;
+  border: 2px solid #dc2626;
+  border-radius: 8px;
+  border-left: 4px solid #dc2626;
+
+  mat-icon {
+    color: #dc2626;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .warning-content {
+    flex: 1;
+
+    strong {
+      display: block;
+      color: #dc2626;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin: 0 0 8px 0;
+      color: #7f1d1d;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .warning-note {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #fecaca;
+      font-size: 0.8125rem;
+      color: #991b1b;
+
+      strong {
+        display: inline;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
 // Responsive
 @media (max-width: 768px) {
   .reports-container {

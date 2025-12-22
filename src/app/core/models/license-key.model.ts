@@ -21,6 +21,7 @@ export interface LicenseKey {
   region?: Region | null;
   createdAt: string;
   updatedAt: string;
+  organizationName?: string | null;
 }
 
 export interface UploadUsage {

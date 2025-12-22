@@ -134,6 +134,19 @@
       <mat-card-content>
         <!-- Trial Balance Report -->
         <div *ngIf="generatedReport.type === 'trial_balance'">
+          <!-- Trial Balance Validation Warning -->
+          <div *ngIf="generatedReport.data.summary && generatedReport.data.summary.warning" class="trial-balance-warning">
+            <mat-icon color="warn">warning</mat-icon>
+            <div class="warning-content">
+              <strong>Trial Balance Not Balanced!</strong>
+              <p>{{ generatedReport.data.summary.warning }}</p>
+              <p class="warning-note">
+                <strong>Note:</strong> In double-entry bookkeeping, a trial balance should always balance (Total Debits = Total Credits). 
+                A difference indicates an accounting error that needs investigation. Please review your transactions and ensure all entries are properly recorded.
+              </p>
+            </div>
+          </div>
+          
           <!-- Opening/Closing Balance Summary -->
           <div class="balance-summary" *ngIf="generatedReport.data.summary && (generatedReport.data.summary.openingDebit !== undefined || generatedReport.data.summary.openingCredit !== undefined)">
             <div class="balance-card">

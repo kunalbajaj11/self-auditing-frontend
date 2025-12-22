@@ -23,6 +23,10 @@ import {
   AllocateUploadsDialogComponent,
   AllocateUploadsDialogData,
 } from './allocate-uploads-dialog.component';
+import {
+  LicenseKeyRenewDialogComponent,
+  LicenseKeyRenewResult,
+} from '../license-keys/license-key-renew-dialog.component';
 import { PlanType } from '../../../core/models/plan.model';
 import { LicenseKeysService } from '../../../core/services/license-keys.service';
 import { forkJoin } from 'rxjs';
@@ -37,6 +41,7 @@ export class SuperAdminOrganizationsComponent implements OnInit {
     'name',
     'planType',
     'status',
+    'licenseExpires',
     'userCount',
     'expenseCount',
     'accrualCount',
@@ -183,6 +188,48 @@ export class SuperAdminOrganizationsComponent implements OnInit {
     });
   }
 
+  renewLicense(org: OrganizationUsage): void {
+    // Get the license key for this organization
+    this.licenseKeysService.getByOrganizationId(org.id).subscribe({
+      next: (license) => {
+        if (!license) {
+          this.snackBar.open(
+            'No license found for this organization',
+            'Close',
+            { duration: 3000, panelClass: ['snack-error'] },
+          );
+          return;
+        }
+
+        const dialogRef = this.dialog.open<
+          LicenseKeyRenewDialogComponent,
+          { license: any },
+          LicenseKeyRenewResult
+        >(LicenseKeyRenewDialogComponent, {
+          width: '400px',
+          disableClose: true,
+          data: { license },
+        });
+
+        dialogRef.afterClosed().subscribe((result?: LicenseKeyRenewResult) => {
+          if (result?.refresh) {
+            this.snackBar.open('License renewed successfully', 'Close', {
+              duration: 3000,
+            });
+            this.loadOrganizations(); // Refresh to get updated expiry date
+          }
+        });
+      },
+      error: () => {
+        this.snackBar.open(
+          'Failed to load license information',
+          'Close',
+          { duration: 3000, panelClass: ['snack-error'] },
+        );
+      },
+    });
+  }
+
   toggleStatus(org: OrganizationUsage): void {
     if (org.status === 'active') {
       // Deactivate: simple status change
@@ -235,6 +282,44 @@ export class SuperAdminOrganizationsComponent implements OnInit {
           });
         }
       });
+    }
+  }
+
+  getLicenseExpiryStatus(expiresAt: string | null | undefined): {
+    status: 'expired' | 'expiring-soon' | 'expiring-warning' | 'valid';
+    color: string;
+    label: string;
+  } {
+    if (!expiresAt) {
+      return { status: 'valid', color: 'primary', label: 'No license' };
+    }
+
+    const expiryDate = new Date(expiresAt);
+    const now = new Date();
+    const daysUntilExpiry = Math.ceil(
+      (expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    if (daysUntilExpiry < 0) {
+      return { status: 'expired', color: 'warn', label: 'Expired' };
+    } else if (daysUntilExpiry <= 30) {
+      return {
+        status: 'expiring-soon',
+        color: 'warn',
+        label: `Expires in ${daysUntilExpiry} days`,
+      };
+    } else if (daysUntilExpiry <= 60) {
+      return {
+        status: 'expiring-warning',
+        color: 'accent',
+        label: `Expires in ${daysUntilExpiry} days`,
+      };
+    } else {
+      return {
+        status: 'valid',
+        color: 'primary',
+        label: expiresAt ? new Date(expiresAt).toLocaleDateString() : '—',
+      };
     }
   }
 

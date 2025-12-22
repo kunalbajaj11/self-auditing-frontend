@@ -31,6 +31,7 @@ export interface OrganizationUsage {
   storageUsedMb: number;
   rankingScore: number; // Combined score for sorting
   createdAt: string;
+  licenseExpiresAt?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

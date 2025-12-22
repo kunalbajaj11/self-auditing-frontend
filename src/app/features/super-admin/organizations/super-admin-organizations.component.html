@@ -69,6 +69,23 @@
           </td>
         </ng-container>
 
+        <ng-container matColumnDef="licenseExpires">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>License Expires</th>
+          <td mat-cell *matCellDef="let org">
+            <ng-container *ngIf="org.licenseExpiresAt; else noLicense">
+              <mat-chip
+                [color]="getLicenseExpiryStatus(org.licenseExpiresAt).color"
+                selected
+              >
+                {{ getLicenseExpiryStatus(org.licenseExpiresAt).label }}
+              </mat-chip>
+            </ng-container>
+            <ng-template #noLicense>
+              <span class="muted">—</span>
+            </ng-template>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="userCount">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Users</th>
           <td mat-cell *matCellDef="let org">{{ org.userCount | number }}</td>
@@ -120,6 +137,15 @@
               >
                 <mat-icon>cloud_upload</mat-icon>
                 Allocate Uploads
+              </button>
+              <button
+                mat-stroked-button
+                color="accent"
+                (click)="renewLicense(org)"
+                matTooltip="Renew or extend the license expiry date"
+              >
+                <mat-icon>event</mat-icon>
+                Renew License
               </button>
               <button
                 mat-stroked-button

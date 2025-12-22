@@ -1,6 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { FormControl } from '@angular/forms';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatSelect } from '@angular/material/select';
+import { Router } from '@angular/router';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { LicenseKeysService } from '../../../core/services/license-keys.service';
 import { LicenseKey } from '../../../core/models/license-key.model';
 import {
@@ -20,16 +25,84 @@ import {
 export class LicenseKeyManagementComponent implements OnInit {
   loading = false;
   licenseKeys: LicenseKey[] = [];
-  displayedColumns = ['key', 'plan', 'region', 'status', 'email', 'expires', 'created', 'actions'];
+  dataSource = new MatTableDataSource<LicenseKey>([]);
+  displayedColumns = ['key', 'organization', 'plan', 'region', 'status', 'email', 'expires', 'created', 'actions'];
+  searchControl = new FormControl('');
+  statusFilterControl = new FormControl('all');
+  expiryFilterControl = new FormControl('all');
 
   constructor(
     private readonly licenseKeysService: LicenseKeysService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
+    private readonly router: Router,
   ) {}
 
   ngOnInit(): void {
     this.loadKeys();
+    this.setupFilters();
+  }
+
+  setupFilters(): void {
+    // Search filter
+    this.searchControl.valueChanges
+      .pipe(debounceTime(250), distinctUntilChanged())
+      .subscribe(() => this.applyFilters());
+
+    // Status filter
+    this.statusFilterControl.valueChanges.subscribe(() => this.applyFilters());
+
+    // Expiry filter
+    this.expiryFilterControl.valueChanges.subscribe(() => this.applyFilters());
+  }
+
+  applyFilters(): void {
+    let filtered = [...this.licenseKeys];
+
+    // Search filter
+    const searchTerm = this.searchControl.value?.toLowerCase() || '';
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (key) =>
+          key.key.toLowerCase().includes(searchTerm) ||
+          key.organizationName?.toLowerCase().includes(searchTerm) ||
+          key.email?.toLowerCase().includes(searchTerm) ||
+          key.planType?.toLowerCase().includes(searchTerm),
+      );
+    }
+
+    // Status filter
+    const statusFilter = this.statusFilterControl.value;
+    if (statusFilter && statusFilter !== 'all') {
+      filtered = filtered.filter((key) => key.status === statusFilter);
+    }
+
+    // Expiry filter
+    const expiryFilter = this.expiryFilterControl.value;
+    if (expiryFilter && expiryFilter !== 'all') {
+      const now = new Date();
+      filtered = filtered.filter((key) => {
+        const expiryDate = new Date(key.expiresAt);
+        const daysUntilExpiry = Math.ceil(
+          (expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+        );
+
+        switch (expiryFilter) {
+          case 'expired':
+            return daysUntilExpiry < 0 || key.status === 'expired';
+          case 'expiring-soon':
+            return daysUntilExpiry >= 0 && daysUntilExpiry <= 30;
+          case 'expiring-warning':
+            return daysUntilExpiry > 30 && daysUntilExpiry <= 60;
+          case 'valid':
+            return daysUntilExpiry > 60;
+          default:
+            return true;
+        }
+      });
+    }
+
+    this.dataSource.data = filtered;
   }
 
   loadKeys(): void {
@@ -38,6 +111,8 @@ export class LicenseKeyManagementComponent implements OnInit {
       next: (keys) => {
         this.loading = false;
         this.licenseKeys = keys;
+        this.dataSource.data = keys;
+        this.applyFilters();
       },
       error: () => {
         this.loading = false;
@@ -124,6 +199,82 @@ export class LicenseKeyManagementComponent implements OnInit {
       INDIA: 'India',
     };
     return regionLabels[region] || region;
+  }
+
+  getExpiryStatus(expiresAt: string, status: LicenseKey['status']): {
+    status: 'expired' | 'expiring-soon' | 'expiring-warning' | 'valid';
+    color: string;
+    label: string;
+  } {
+    if (status === 'expired' || status === 'revoked') {
+      return { status: 'expired', color: 'warn', label: 'Expired' };
+    }
+
+    const expiryDate = new Date(expiresAt);
+    const now = new Date();
+    const daysUntilExpiry = Math.ceil(
+      (expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    if (daysUntilExpiry < 0) {
+      return { status: 'expired', color: 'warn', label: 'Expired' };
+    } else if (daysUntilExpiry <= 30) {
+      return {
+        status: 'expiring-soon',
+        color: 'warn',
+        label: `${daysUntilExpiry} days`,
+      };
+    } else if (daysUntilExpiry <= 60) {
+      return {
+        status: 'expiring-warning',
+        color: 'accent',
+        label: `${daysUntilExpiry} days`,
+      };
+    } else {
+      return {
+        status: 'valid',
+        color: 'primary',
+        label: expiryDate.toLocaleDateString(),
+      };
+    }
+  }
+
+  viewOrganization(organizationId: string): void {
+    this.router.navigate(['/super-admin/organizations'], {
+      queryParams: { highlight: organizationId },
+    });
+  }
+
+  getLicenseTooltip(license: LicenseKey): string {
+    const parts: string[] = [];
+    
+    if (license.organizationName) {
+      parts.push(`Organization: ${license.organizationName}`);
+    }
+    
+    if (license.email) {
+      parts.push(`Email: ${license.email}`);
+    }
+    
+    if (license.consumedAt) {
+      parts.push(`Consumed: ${new Date(license.consumedAt).toLocaleString()}`);
+    }
+    
+    if (license.notes) {
+      parts.push(`Notes: ${license.notes}`);
+    }
+    
+    if (license.maxUsers) {
+      parts.push(`Max Users: ${license.maxUsers}`);
+    }
+    
+    if (license.storageQuotaMb) {
+      parts.push(`Storage: ${license.storageQuotaMb} MB`);
+    }
+    
+    parts.push(`Expires: ${new Date(license.expiresAt).toLocaleDateString()}`);
+    
+    return parts.join('\n') || 'No additional details';
   }
 }
 
