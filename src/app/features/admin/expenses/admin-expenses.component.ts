@@ -19,6 +19,7 @@ import { InvoiceDetailDialogComponent } from '../sales-invoices/invoice-detail-d
   styleUrls: ['./admin-expenses.component.scss'],
 })
 export class AdminExpensesComponent implements OnInit {
+  readonly Math = Math; // Expose Math to template
   readonly columns = [
     'vendor',
     'category',
@@ -392,6 +393,14 @@ export class AdminExpensesComponent implements OnInit {
 
   isSalesType(expense: Expense): boolean {
     return expense.type === 'credit';
+  }
+
+  getAmountWithSign(expense: Expense): number {
+    // Expenses are negative (outflow), Sales/Credit are positive (inflow)
+    if (expense.type === 'credit') {
+      return expense.totalAmount; // Positive for sales/credit
+    }
+    return -expense.totalAmount; // Negative for expenses
   }
 
   printInvoice(expense: Expense): void {

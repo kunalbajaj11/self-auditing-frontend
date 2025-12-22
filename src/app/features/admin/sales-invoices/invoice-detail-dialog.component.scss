@@ -150,6 +150,14 @@
     &.outstanding {
       color: #ef4444;
     }
+
+    &.positive-amount {
+      color: #059669;
+    }
+
+    &.negative-amount {
+      color: #dc2626;
+    }
   }
 
   &.total-line {

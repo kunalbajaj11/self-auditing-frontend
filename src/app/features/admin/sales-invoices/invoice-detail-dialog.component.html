@@ -93,23 +93,23 @@
     <div class="totals-section">
       <div class="totals-row">
         <span class="label">Subtotal:</span>
-        <span class="value">{{ invoice.amount | number: '1.2-2' }} {{ invoice.currency }}</span>
+        <span class="value positive-amount">+{{ invoice.currency }} {{ invoice.amount | number: '1.2-2' }}</span>
       </div>
       <div class="totals-row">
         <span class="label">Total VAT:</span>
-        <span class="value">{{ invoice.vatAmount | number: '1.2-2' }} {{ invoice.currency }}</span>
+        <span class="value positive-amount">+{{ invoice.currency }} {{ invoice.vatAmount | number: '1.2-2' }}</span>
       </div>
       <div class="totals-row total-line">
         <span class="label">Total Amount:</span>
-        <span class="value">{{ invoice.totalAmount | number: '1.2-2' }} {{ invoice.currency }}</span>
+        <span class="value positive-amount">+{{ invoice.currency }} {{ invoice.totalAmount | number: '1.2-2' }}</span>
       </div>
       <div class="totals-row" *ngIf="getPaidAmount() > 0">
         <span class="label">Paid Amount:</span>
-        <span class="value paid">{{ invoice.paidAmount | number: '1.2-2' }} {{ invoice.currency }}</span>
+        <span class="value paid positive-amount">+{{ invoice.currency }} {{ invoice.paidAmount | number: '1.2-2' }}</span>
       </div>
       <div class="totals-row" *ngIf="outstandingAmount > 0">
         <span class="label">Outstanding:</span>
-        <span class="value outstanding">{{ outstandingAmount | number: '1.2-2' }} {{ invoice.currency }}</span>
+        <span class="value outstanding positive-amount">+{{ invoice.currency }} {{ outstandingAmount | number: '1.2-2' }}</span>
       </div>
     </div>
 

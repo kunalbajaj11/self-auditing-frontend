@@ -54,6 +54,10 @@ mat-dialog-content {
       font-weight: 600;
       color: #1976d2;
       white-space: nowrap;
+
+      &.positive-amount {
+        color: #059669;
+      }
     }
   }
 
@@ -81,6 +85,10 @@ mat-dialog-content {
       color: #ef4444;
       font-weight: 500;
       white-space: nowrap;
+
+      &.positive-amount {
+        color: #059669;
+      }
     }
   }
 }
@@ -158,6 +166,14 @@ mat-dialog-content {
       &.outstanding {
         color: #ef4444;
         font-size: 1.1rem;
+      }
+
+      &.positive-amount {
+        color: #059669;
+      }
+
+      &.negative-amount {
+        color: #dc2626;
       }
     }
   }

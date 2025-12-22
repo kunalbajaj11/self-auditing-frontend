@@ -140,6 +140,23 @@
         font-size: 0.75rem;
         padding: 4px 12px;
       }
+
+      &.text-right {
+        text-align: right;
+        font-family: 'SF Mono', 'Monaco', monospace;
+      }
+
+      strong {
+        font-weight: 700;
+
+        &.positive-amount {
+          color: #059669;
+        }
+
+        &.negative-amount {
+          color: #dc2626;
+        }
+      }
     }
   }
 }

@@ -241,6 +241,14 @@
       strong {
         font-weight: 700;
         color: #0f172a;
+
+        &.positive-amount {
+          color: #059669;
+        }
+
+        &.negative-amount {
+          color: #dc2626;
+        }
       }
     }
   }

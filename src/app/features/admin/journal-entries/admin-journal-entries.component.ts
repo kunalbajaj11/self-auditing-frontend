@@ -18,6 +18,7 @@ import { JournalEntryFormDialogComponent } from './journal-entry-form-dialog.com
   styleUrls: ['./admin-journal-entries.component.scss'],
 })
 export class AdminJournalEntriesComponent implements OnInit {
+  readonly Math = Math; // Expose Math to template
   readonly columns = [
     'type',
     'category',
@@ -173,6 +174,15 @@ export class AdminJournalEntriesComponent implements OnInit {
       return 'warn';
     }
     return 'primary';
+  }
+
+  getAmountWithSign(entry: JournalEntry): number {
+    const amount = parseFloat(entry.amount.toString());
+    // CASH_PAID and BANK_PAID are negative (outflow), CASH_RECEIVED and BANK_RECEIVED are positive (inflow)
+    if (entry.status === JournalEntryStatus.CASH_PAID || entry.status === JournalEntryStatus.BANK_PAID) {
+      return -amount;
+    }
+    return amount;
   }
 }
 

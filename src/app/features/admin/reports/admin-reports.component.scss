@@ -314,6 +314,21 @@
   .text-right {
     text-align: right;
   }
+
+  .positive-amount {
+    color: #059669; // Green for debit accounts (Assets, Expenses)
+    font-weight: 600;
+  }
+
+  .credit-amount {
+    color: #2563eb; // Blue for credit accounts (Liabilities, Revenue, Equity)
+    font-weight: 600;
+  }
+
+  .negative-amount {
+    color: #dc2626; // Red for negative balances
+    font-weight: 600;
+  }
 }
 
 // Balance Sheet Sections
@@ -498,6 +513,18 @@
         span:last-child {
           color: #0f172a;
           font-weight: 700;
+
+          &.positive-amount {
+            color: #059669; // Green for debit accounts (Assets, Expenses)
+          }
+
+          &.credit-amount {
+            color: #2563eb; // Blue for credit accounts (Liabilities, Revenue, Equity)
+          }
+
+          &.negative-amount {
+            color: #dc2626; // Red for negative balances
+          }
         }
       }
 

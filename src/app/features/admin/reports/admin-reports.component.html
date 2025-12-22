@@ -162,7 +162,9 @@
                 </div>
                 <div class="balance-row total">
                   <span>Balance:</span>
-                  <span>{{ formatCurrency(generatedReport.data.summary.openingBalance || 0) }}</span>
+                  <span [class.positive-amount]="(generatedReport.data.summary.openingBalance || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.openingBalance || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.summary.openingBalance || 0, true) }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -179,7 +181,9 @@
                 </div>
                 <div class="balance-row total">
                   <span>Balance:</span>
-                  <span>{{ formatCurrency(generatedReport.data.summary.periodBalance || 0) }}</span>
+                  <span [class.positive-amount]="(generatedReport.data.summary.periodBalance || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.periodBalance || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.summary.periodBalance || 0, true) }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -196,7 +200,9 @@
                 </div>
                 <div class="balance-row total">
                   <span>Balance:</span>
-                  <span>{{ formatCurrency(generatedReport.data.summary.closingBalance || 0) }}</span>
+                  <span [class.positive-amount]="(generatedReport.data.summary.closingBalance || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.closingBalance || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.summary.closingBalance || 0, true) }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -213,7 +219,9 @@
             </div>
             <div class="summary-card">
               <div class="summary-label">Balance</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.closingBalance || generatedReport.data.summary.totalBalance || 0) }}</div>
+              <div class="summary-value" [class.positive]="(generatedReport.data.summary.closingBalance || generatedReport.data.summary.totalBalance || 0) >= 0" [class.negative]="(generatedReport.data.summary.closingBalance || generatedReport.data.summary.totalBalance || 0) < 0">
+                {{ formatCurrency(generatedReport.data.summary.closingBalance || generatedReport.data.summary.totalBalance || 0, true) }}
+              </div>
             </div>
           </div>
 
@@ -265,7 +273,12 @@
               </ng-container>
               <ng-container matColumnDef="openingBalance">
                 <th mat-header-cell *matHeaderCellDef class="text-right">Opening Balance</th>
-                <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.openingBalance || 0) }}</td>
+                <td mat-cell *matCellDef="let row" class="text-right" 
+                    [class.positive-amount]="(row.openingBalance || 0) >= 0 && (row.accountType === 'Asset' || row.accountType === 'Expense')" 
+                    [class.credit-amount]="(row.openingBalance || 0) >= 0 && (row.accountType === 'Liability' || row.accountType === 'Revenue' || row.accountType === 'Equity')"
+                    [class.negative-amount]="(row.openingBalance || 0) < 0">
+                  {{ formatCurrency(row.openingBalance || 0, true) }}
+                </td>
               </ng-container>
               <ng-container matColumnDef="debit">
                 <th mat-header-cell *matHeaderCellDef class="text-right">Period Debit</th>
@@ -277,7 +290,12 @@
               </ng-container>
               <ng-container matColumnDef="balance">
                 <th mat-header-cell *matHeaderCellDef class="text-right">Period Balance</th>
-                <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.balance) }}</td>
+                <td mat-cell *matCellDef="let row" class="text-right" 
+                    [class.positive-amount]="row.balance >= 0 && (row.accountType === 'Asset' || row.accountType === 'Expense')" 
+                    [class.credit-amount]="row.balance >= 0 && (row.accountType === 'Liability' || row.accountType === 'Revenue' || row.accountType === 'Equity')"
+                    [class.negative-amount]="row.balance < 0">
+                  {{ formatCurrency(row.balance, true) }}
+                </td>
               </ng-container>
               <ng-container matColumnDef="closingDebit">
                 <th mat-header-cell *matHeaderCellDef class="text-right">Closing Debit</th>
@@ -289,7 +307,12 @@
               </ng-container>
               <ng-container matColumnDef="closingBalance">
                 <th mat-header-cell *matHeaderCellDef class="text-right">Closing Balance</th>
-                <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.closingBalance || 0) }}</td>
+                <td mat-cell *matCellDef="let row" class="text-right" 
+                    [class.positive-amount]="(row.closingBalance || 0) >= 0 && (row.accountType === 'Asset' || row.accountType === 'Expense')" 
+                    [class.credit-amount]="(row.closingBalance || 0) >= 0 && (row.accountType === 'Liability' || row.accountType === 'Revenue' || row.accountType === 'Equity')"
+                    [class.negative-amount]="(row.closingBalance || 0) < 0">
+                  {{ formatCurrency(row.closingBalance || 0, true) }}
+                </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="['accountName', 'accountType', 'openingDebit', 'openingCredit', 'openingBalance', 'debit', 'credit', 'balance', 'closingDebit', 'closingCredit', 'closingBalance']"></tr>
               <tr mat-row *matRowDef="let row; columns: ['accountName', 'accountType', 'openingDebit', 'openingCredit', 'openingBalance', 'debit', 'credit', 'balance', 'closingDebit', 'closingCredit', 'closingBalance']"></tr>
@@ -321,7 +344,12 @@
             </ng-container>
             <ng-container matColumnDef="openingBalance">
               <th mat-header-cell *matHeaderCellDef class="text-right">Opening Balance</th>
-              <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.openingBalance || 0) }}</td>
+              <td mat-cell *matCellDef="let row" class="text-right" 
+                  [class.positive-amount]="(row.openingBalance || 0) >= 0 && (row.accountType === 'Asset' || row.accountType === 'Expense')" 
+                  [class.credit-amount]="(row.openingBalance || 0) >= 0 && (row.accountType === 'Liability' || row.accountType === 'Revenue' || row.accountType === 'Equity')"
+                  [class.negative-amount]="(row.openingBalance || 0) < 0">
+                {{ formatCurrency(row.openingBalance || 0, true) }}
+              </td>
             </ng-container>
             <ng-container matColumnDef="debit">
               <th mat-header-cell *matHeaderCellDef class="text-right">Period Debit</th>
@@ -333,7 +361,12 @@
             </ng-container>
             <ng-container matColumnDef="balance">
               <th mat-header-cell *matHeaderCellDef class="text-right">Period Balance</th>
-              <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.balance) }}</td>
+              <td mat-cell *matCellDef="let row" class="text-right" 
+                  [class.positive-amount]="row.balance >= 0 && (row.accountType === 'Asset' || row.accountType === 'Expense')" 
+                  [class.credit-amount]="row.balance >= 0 && (row.accountType === 'Liability' || row.accountType === 'Revenue' || row.accountType === 'Equity')"
+                  [class.negative-amount]="row.balance < 0">
+                {{ formatCurrency(row.balance, true) }}
+              </td>
             </ng-container>
             <ng-container matColumnDef="closingDebit">
               <th mat-header-cell *matHeaderCellDef class="text-right">Closing Debit</th>
@@ -345,7 +378,12 @@
             </ng-container>
             <ng-container matColumnDef="closingBalance">
               <th mat-header-cell *matHeaderCellDef class="text-right">Closing Balance</th>
-              <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.closingBalance || 0) }}</td>
+              <td mat-cell *matCellDef="let row" class="text-right" 
+                  [class.positive-amount]="(row.closingBalance || 0) >= 0 && (row.accountType === 'Asset' || row.accountType === 'Expense')" 
+                  [class.credit-amount]="(row.closingBalance || 0) >= 0 && (row.accountType === 'Liability' || row.accountType === 'Revenue' || row.accountType === 'Equity')"
+                  [class.negative-amount]="(row.closingBalance || 0) < 0">
+                {{ formatCurrency(row.closingBalance || 0, true) }}
+              </td>
             </ng-container>
             <tr mat-header-row *matHeaderRowDef="['accountName', 'accountType', 'openingDebit', 'openingCredit', 'openingBalance', 'debit', 'credit', 'balance', 'closingDebit', 'closingCredit', 'closingBalance']"></tr>
             <tr mat-row *matRowDef="let row; columns: ['accountName', 'accountType', 'openingDebit', 'openingCredit', 'openingBalance', 'debit', 'credit', 'balance', 'closingDebit', 'closingCredit', 'closingBalance']"></tr>
@@ -361,15 +399,21 @@
               <div class="balance-amount">
                 <div class="balance-row">
                   <span>Assets:</span>
-                  <span>{{ formatCurrency(generatedReport.data.summary.openingAssets || 0) }}</span>
+                  <span [class.positive-amount]="(generatedReport.data.summary.openingAssets || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.openingAssets || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.summary.openingAssets || 0, true) }}
+                  </span>
                 </div>
                 <div class="balance-row">
                   <span>Liabilities:</span>
-                  <span>{{ formatCurrency(generatedReport.data.summary.openingLiabilities || 0) }}</span>
+                  <span [class.credit-amount]="(generatedReport.data.summary.openingLiabilities || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.openingLiabilities || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.summary.openingLiabilities || 0, true) }}
+                  </span>
                 </div>
                 <div class="balance-row">
                   <span>Equity:</span>
-                  <span>{{ formatCurrency(generatedReport.data.summary.openingEquity || 0) }}</span>
+                  <span [class.credit-amount]="(generatedReport.data.summary.openingEquity || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.openingEquity || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.summary.openingEquity || 0, true) }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -378,15 +422,21 @@
               <div class="balance-amount">
                 <div class="balance-row">
                   <span>Assets:</span>
-                  <span>{{ formatCurrency(generatedReport.data.summary.periodAssets || 0) }}</span>
+                  <span [class.positive-amount]="(generatedReport.data.summary.periodAssets || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.periodAssets || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.summary.periodAssets || 0, true) }}
+                  </span>
                 </div>
                 <div class="balance-row">
                   <span>Liabilities:</span>
-                  <span>{{ formatCurrency(generatedReport.data.summary.periodLiabilities || 0) }}</span>
+                  <span [class.credit-amount]="(generatedReport.data.summary.periodLiabilities || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.periodLiabilities || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.summary.periodLiabilities || 0, true) }}
+                  </span>
                 </div>
                 <div class="balance-row">
                   <span>Equity:</span>
-                  <span>{{ formatCurrency(generatedReport.data.summary.periodEquity || 0) }}</span>
+                  <span [class.credit-amount]="(generatedReport.data.summary.periodEquity || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.periodEquity || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.summary.periodEquity || 0, true) }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -395,15 +445,21 @@
               <div class="balance-amount">
                 <div class="balance-row">
                   <span>Assets:</span>
-                  <span>{{ formatCurrency(generatedReport.data.summary.closingAssets || 0) }}</span>
+                  <span [class.positive-amount]="(generatedReport.data.summary.closingAssets || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.closingAssets || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.summary.closingAssets || 0, true) }}
+                  </span>
                 </div>
                 <div class="balance-row">
                   <span>Liabilities:</span>
-                  <span>{{ formatCurrency(generatedReport.data.summary.closingLiabilities || 0) }}</span>
+                  <span [class.credit-amount]="(generatedReport.data.summary.closingLiabilities || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.closingLiabilities || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.summary.closingLiabilities || 0, true) }}
+                  </span>
                 </div>
                 <div class="balance-row">
                   <span>Equity:</span>
-                  <span>{{ formatCurrency(generatedReport.data.summary.closingEquity || 0) }}</span>
+                  <span [class.credit-amount]="(generatedReport.data.summary.closingEquity || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.closingEquity || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.summary.closingEquity || 0, true) }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -412,15 +468,21 @@
           <div class="report-summary" *ngIf="generatedReport.data.summary">
             <div class="summary-card">
               <div class="summary-label">Total Assets</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.closingAssets || generatedReport.data.summary.totalAssets || 0) }}</div>
+              <div class="summary-value" [class.positive-amount]="(generatedReport.data.summary.closingAssets || generatedReport.data.summary.totalAssets || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.closingAssets || generatedReport.data.summary.totalAssets || 0) < 0">
+                {{ formatCurrency(generatedReport.data.summary.closingAssets || generatedReport.data.summary.totalAssets || 0, true) }}
+              </div>
             </div>
             <div class="summary-card">
               <div class="summary-label">Total Liabilities</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.closingLiabilities || generatedReport.data.summary.totalLiabilities || 0) }}</div>
+              <div class="summary-value" [class.credit-amount]="(generatedReport.data.summary.closingLiabilities || generatedReport.data.summary.totalLiabilities || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.closingLiabilities || generatedReport.data.summary.totalLiabilities || 0) < 0">
+                {{ formatCurrency(generatedReport.data.summary.closingLiabilities || generatedReport.data.summary.totalLiabilities || 0, true) }}
+              </div>
             </div>
             <div class="summary-card">
               <div class="summary-label">Total Equity</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.closingEquity || generatedReport.data.summary.totalEquity || 0) }}</div>
+              <div class="summary-value" [class.credit-amount]="(generatedReport.data.summary.closingEquity || generatedReport.data.summary.totalEquity || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.closingEquity || generatedReport.data.summary.totalEquity || 0) < 0">
+                {{ formatCurrency(generatedReport.data.summary.closingEquity || generatedReport.data.summary.totalEquity || 0, true) }}
+              </div>
             </div>
           </div>
 
@@ -454,12 +516,16 @@
                 </ng-container>
                 <ng-container matColumnDef="amount">
                   <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
-                  <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.amount) }}</td>
+                  <td mat-cell *matCellDef="let row" class="text-right" [class.positive-amount]="(row.amount || 0) >= 0" [class.negative-amount]="(row.amount || 0) < 0">
+                    {{ formatCurrency(row.amount, true) }}
+                  </td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="['category', 'amount']"></tr>
                 <tr mat-row *matRowDef="let row; columns: ['category', 'amount']"></tr>
               </table>
-              <div class="section-total">Total Assets: {{ formatCurrency(generatedReport.data.assets?.total || 0) }}</div>
+              <div class="section-total" [class.positive-amount]="(generatedReport.data.assets?.total || 0) >= 0" [class.negative-amount]="(generatedReport.data.assets?.total || 0) < 0">
+                Total Assets: {{ formatCurrency(generatedReport.data.assets?.total || 0, true) }}
+              </div>
             </div>
 
             <div class="section">
@@ -471,12 +537,16 @@
                 </ng-container>
                 <ng-container matColumnDef="amount">
                   <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
-                  <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.amount) }}</td>
+                  <td mat-cell *matCellDef="let row" class="text-right" [class.positive-amount]="(row.amount || 0) >= 0" [class.negative-amount]="(row.amount || 0) < 0">
+                    {{ formatCurrency(row.amount, true) }}
+                  </td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="['vendor', 'amount']"></tr>
                 <tr mat-row *matRowDef="let row; columns: ['vendor', 'amount']"></tr>
               </table>
-              <div class="section-total">Total Liabilities: {{ formatCurrency(generatedReport.data.liabilities?.total || 0) }}</div>
+              <div class="section-total" [class.credit-amount]="(generatedReport.data.liabilities?.total || 0) >= 0" [class.negative-amount]="(generatedReport.data.liabilities?.total || 0) < 0">
+                Total Liabilities: {{ formatCurrency(generatedReport.data.liabilities?.total || 0, true) }}
+              </div>
             </div>
           </div>
         </div>
@@ -488,21 +558,25 @@
             <div class="balance-card">
               <div class="balance-label">Opening Retained Earnings</div>
               <div class="balance-amount">
-                <span>{{ formatCurrency(generatedReport.data.summary.openingRetainedEarnings || 0) }}</span>
+                <span [class.credit-amount]="(generatedReport.data.summary.openingRetainedEarnings || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.openingRetainedEarnings || 0) < 0">
+                  {{ formatCurrency(generatedReport.data.summary.openingRetainedEarnings || 0, true) }}
+                </span>
               </div>
             </div>
             <div class="balance-card">
               <div class="balance-label">Period Net Profit</div>
               <div class="balance-amount">
-                <span [class.positive]="(generatedReport.data.summary.netProfit || 0) >= 0" [class.negative]="(generatedReport.data.summary.netProfit || 0) < 0">
-                  {{ formatCurrency(generatedReport.data.summary.netProfit || 0) }}
+                <span [class.credit-amount]="(generatedReport.data.summary.netProfit || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.netProfit || 0) < 0">
+                  {{ formatCurrency(generatedReport.data.summary.netProfit || 0, true) }}
                 </span>
               </div>
             </div>
             <div class="balance-card">
               <div class="balance-label">Closing Retained Earnings</div>
               <div class="balance-amount">
-                <span>{{ formatCurrency(generatedReport.data.summary.closingRetainedEarnings || 0) }}</span>
+                <span [class.credit-amount]="(generatedReport.data.summary.closingRetainedEarnings || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.closingRetainedEarnings || 0) < 0">
+                  {{ formatCurrency(generatedReport.data.summary.closingRetainedEarnings || 0, true) }}
+                </span>
               </div>
             </div>
           </div>
@@ -510,16 +584,20 @@
           <div class="report-summary" *ngIf="generatedReport.data.summary">
             <div class="summary-card">
               <div class="summary-label">Gross Profit</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.grossProfit || 0) }}</div>
+              <div class="summary-value" [class.credit-amount]="(generatedReport.data.summary.grossProfit || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.grossProfit || 0) < 0">
+                {{ formatCurrency(generatedReport.data.summary.grossProfit || 0, true) }}
+              </div>
             </div>
             <div class="summary-card">
               <div class="summary-label">Total Expenses</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.totalExpenses || 0) }}</div>
+              <div class="summary-value" [class.positive-amount]="(generatedReport.data.summary.totalExpenses || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.totalExpenses || 0) < 0">
+                {{ formatCurrency(generatedReport.data.summary.totalExpenses || 0, true) }}
+              </div>
             </div>
             <div class="summary-card">
               <div class="summary-label">Net Profit</div>
-              <div class="summary-value" [class.positive]="(generatedReport.data.summary.netProfit || 0) >= 0" [class.negative]="(generatedReport.data.summary.netProfit || 0) < 0">
-                {{ formatCurrency(generatedReport.data.summary.netProfit || 0) }}
+              <div class="summary-value" [class.credit-amount]="(generatedReport.data.summary.netProfit || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.netProfit || 0) < 0">
+                {{ formatCurrency(generatedReport.data.summary.netProfit || 0, true) }}
               </div>
             </div>
             <div class="summary-card" *ngIf="generatedReport.data.summary.netProfitMargin">
@@ -554,15 +632,21 @@
               <div class="section-details">
                 <div class="detail-row">
                   <span>Amount:</span>
-                  <span>{{ formatCurrency(generatedReport.data.revenue?.amount || 0) }}</span>
+                  <span [class.credit-amount]="(generatedReport.data.revenue?.amount || 0) >= 0" [class.negative-amount]="(generatedReport.data.revenue?.amount || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.revenue?.amount || 0, true) }}
+                  </span>
                 </div>
                 <div class="detail-row">
                   <span>VAT:</span>
-                  <span>{{ formatCurrency(generatedReport.data.revenue?.vat || 0) }}</span>
+                  <span [class.credit-amount]="(generatedReport.data.revenue?.vat || 0) >= 0" [class.negative-amount]="(generatedReport.data.revenue?.vat || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.revenue?.vat || 0, true) }}
+                  </span>
                 </div>
                 <div class="detail-row total">
                   <span>Total:</span>
-                  <span>{{ formatCurrency(generatedReport.data.revenue?.total || 0) }}</span>
+                  <span [class.credit-amount]="(generatedReport.data.revenue?.total || 0) >= 0" [class.negative-amount]="(generatedReport.data.revenue?.total || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.revenue?.total || 0, true) }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -576,20 +660,28 @@
                 </ng-container>
                 <ng-container matColumnDef="amount">
                   <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
-                  <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.amount) }}</td>
+                  <td mat-cell *matCellDef="let row" class="text-right" [class.positive-amount]="(row.amount || 0) >= 0" [class.negative-amount]="(row.amount || 0) < 0">
+                    {{ formatCurrency(row.amount, true) }}
+                  </td>
                 </ng-container>
                 <ng-container matColumnDef="vat">
                   <th mat-header-cell *matHeaderCellDef class="text-right">VAT</th>
-                  <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.vat) }}</td>
+                  <td mat-cell *matCellDef="let row" class="text-right" [class.positive-amount]="(row.vat || 0) >= 0" [class.negative-amount]="(row.vat || 0) < 0">
+                    {{ formatCurrency(row.vat, true) }}
+                  </td>
                 </ng-container>
                 <ng-container matColumnDef="total">
                   <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
-                  <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.total) }}</td>
+                  <td mat-cell *matCellDef="let row" class="text-right" [class.positive-amount]="(row.total || 0) >= 0" [class.negative-amount]="(row.total || 0) < 0">
+                    {{ formatCurrency(row.total, true) }}
+                  </td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="['category', 'amount', 'vat', 'total']"></tr>
                 <tr mat-row *matRowDef="let row; columns: ['category', 'amount', 'vat', 'total']"></tr>
               </table>
-              <div class="section-total">Total Expenses: {{ formatCurrency(generatedReport.data.expenses?.grandTotal || 0) }}</div>
+              <div class="section-total" [class.positive-amount]="(generatedReport.data.expenses?.grandTotal || 0) >= 0" [class.negative-amount]="(generatedReport.data.expenses?.grandTotal || 0) < 0">
+                Total Expenses: {{ formatCurrency(generatedReport.data.expenses?.grandTotal || 0, true) }}
+              </div>
             </div>
           </div>
         </div>
@@ -601,19 +693,25 @@
             <div class="balance-card">
               <div class="balance-label">Opening Balance</div>
               <div class="balance-amount">
-                <span>{{ formatCurrency(generatedReport.data.summary.openingBalance || 0) }}</span>
+                <span [class.credit-amount]="(generatedReport.data.summary.openingBalance || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.openingBalance || 0) < 0">
+                  {{ formatCurrency(generatedReport.data.summary.openingBalance || 0, true) }}
+                </span>
               </div>
             </div>
             <div class="balance-card">
               <div class="balance-label">Period Amount</div>
               <div class="balance-amount">
-                <span>{{ formatCurrency(generatedReport.data.summary.periodAmount || 0) }}</span>
+                <span [class.credit-amount]="(generatedReport.data.summary.periodAmount || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.periodAmount || 0) < 0">
+                  {{ formatCurrency(generatedReport.data.summary.periodAmount || 0, true) }}
+                </span>
               </div>
             </div>
             <div class="balance-card">
               <div class="balance-label">Closing Balance</div>
               <div class="balance-amount">
-                <span>{{ formatCurrency(generatedReport.data.summary.closingBalance || 0) }}</span>
+                <span [class.credit-amount]="(generatedReport.data.summary.closingBalance || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.closingBalance || 0) < 0">
+                  {{ formatCurrency(generatedReport.data.summary.closingBalance || 0, true) }}
+                </span>
               </div>
             </div>
           </div>
@@ -625,7 +723,9 @@
             </div>
             <div class="summary-card">
               <div class="summary-label">Total Amount</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.totalAmount || 0) }}</div>
+              <div class="summary-value" [class.credit-amount]="(generatedReport.data.summary.totalAmount || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.totalAmount || 0) < 0">
+                {{ formatCurrency(generatedReport.data.summary.totalAmount || 0, true) }}
+              </div>
             </div>
             <div class="summary-card">
               <div class="summary-label">Overdue Items</div>
@@ -633,7 +733,9 @@
             </div>
             <div class="summary-card">
               <div class="summary-label">Overdue Amount</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.overdueAmount || 0) }}</div>
+              <div class="summary-value" [class.credit-amount]="(generatedReport.data.summary.overdueAmount || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.overdueAmount || 0) < 0">
+                {{ formatCurrency(generatedReport.data.summary.overdueAmount || 0, true) }}
+              </div>
             </div>
           </div>
 
@@ -654,7 +756,9 @@
             </ng-container>
             <ng-container matColumnDef="amount">
               <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
-              <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.amount) }}</td>
+              <td mat-cell *matCellDef="let row" class="text-right" [class.credit-amount]="(row.amount || 0) >= 0" [class.negative-amount]="(row.amount || 0) < 0">
+                {{ formatCurrency(row.amount, true) }}
+              </td>
             </ng-container>
             <ng-container matColumnDef="expectedDate">
               <th mat-header-cell *matHeaderCellDef>Expected Date</th>
@@ -678,19 +782,25 @@
             <div class="balance-card">
               <div class="balance-label">Opening Balance</div>
               <div class="balance-amount">
-                <span>{{ formatCurrency(generatedReport.data.summary.openingBalance || 0) }}</span>
+                <span [class.positive-amount]="(generatedReport.data.summary.openingBalance || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.openingBalance || 0) < 0">
+                  {{ formatCurrency(generatedReport.data.summary.openingBalance || 0, true) }}
+                </span>
               </div>
             </div>
             <div class="balance-card">
               <div class="balance-label">Period Amount</div>
               <div class="balance-amount">
-                <span>{{ formatCurrency(generatedReport.data.summary.periodAmount || 0) }}</span>
+                <span [class.positive-amount]="(generatedReport.data.summary.periodAmount || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.periodAmount || 0) < 0">
+                  {{ formatCurrency(generatedReport.data.summary.periodAmount || 0, true) }}
+                </span>
               </div>
             </div>
             <div class="balance-card">
               <div class="balance-label">Closing Balance</div>
               <div class="balance-amount">
-                <span>{{ formatCurrency(generatedReport.data.summary.closingBalance || 0) }}</span>
+                <span [class.positive-amount]="(generatedReport.data.summary.closingBalance || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.closingBalance || 0) < 0">
+                  {{ formatCurrency(generatedReport.data.summary.closingBalance || 0, true) }}
+                </span>
               </div>
             </div>
           </div>
@@ -702,7 +812,9 @@
             </div>
             <div class="summary-card">
               <div class="summary-label">Total Outstanding</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.totalOutstanding || 0) }}</div>
+              <div class="summary-value" [class.positive-amount]="(generatedReport.data.summary.totalOutstanding || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.totalOutstanding || 0) < 0">
+                {{ formatCurrency(generatedReport.data.summary.totalOutstanding || 0, true) }}
+              </div>
             </div>
             <div class="summary-card">
               <div class="summary-label">Overdue Invoices</div>
@@ -710,7 +822,9 @@
             </div>
             <div class="summary-card">
               <div class="summary-label">Overdue Amount</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.overdueAmount || 0) }}</div>
+              <div class="summary-value" [class.positive-amount]="(generatedReport.data.summary.overdueAmount || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.overdueAmount || 0) < 0">
+                {{ formatCurrency(generatedReport.data.summary.overdueAmount || 0, true) }}
+              </div>
             </div>
           </div>
 
@@ -735,15 +849,21 @@
             </ng-container>
             <ng-container matColumnDef="total">
               <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
-              <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.total) }}</td>
+              <td mat-cell *matCellDef="let row" class="text-right" [class.positive-amount]="(row.total || 0) >= 0" [class.negative-amount]="(row.total || 0) < 0">
+                {{ formatCurrency(row.total, true) }}
+              </td>
             </ng-container>
             <ng-container matColumnDef="paid">
               <th mat-header-cell *matHeaderCellDef class="text-right">Paid</th>
-              <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.paid) }}</td>
+              <td mat-cell *matCellDef="let row" class="text-right" [class.positive-amount]="(row.paid || 0) >= 0" [class.negative-amount]="(row.paid || 0) < 0">
+                {{ formatCurrency(row.paid, true) }}
+              </td>
             </ng-container>
             <ng-container matColumnDef="outstanding">
               <th mat-header-cell *matHeaderCellDef class="text-right">Outstanding</th>
-              <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.outstanding) }}</td>
+              <td mat-cell *matCellDef="let row" class="text-right" [class.positive-amount]="(row.outstanding || 0) >= 0" [class.negative-amount]="(row.outstanding || 0) < 0">
+                {{ formatCurrency(row.outstanding, true) }}
+              </td>
             </ng-container>
             <ng-container matColumnDef="dueDate">
               <th mat-header-cell *matHeaderCellDef>Due Date</th>
@@ -765,16 +885,20 @@
           <div class="report-summary" *ngIf="generatedReport.data.summary">
             <div class="summary-card">
               <div class="summary-label">VAT Input</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.vatInput || 0) }}</div>
+              <div class="summary-value" [class.positive-amount]="(generatedReport.data.summary.vatInput || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.vatInput || 0) < 0">
+                {{ formatCurrency(generatedReport.data.summary.vatInput || 0, true) }}
+              </div>
             </div>
             <div class="summary-card">
               <div class="summary-label">VAT Output</div>
-              <div class="summary-value">{{ formatCurrency(generatedReport.data.summary.vatOutput || 0) }}</div>
+              <div class="summary-value" [class.credit-amount]="(generatedReport.data.summary.vatOutput || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.vatOutput || 0) < 0">
+                {{ formatCurrency(generatedReport.data.summary.vatOutput || 0, true) }}
+              </div>
             </div>
             <div class="summary-card">
               <div class="summary-label">Net VAT</div>
-              <div class="summary-value" [class.positive]="(generatedReport.data.summary.netVat || 0) >= 0" [class.negative]="(generatedReport.data.summary.netVat || 0) < 0">
-                {{ formatCurrency(generatedReport.data.summary.netVat || 0) }}
+              <div class="summary-value" [class.credit-amount]="(generatedReport.data.summary.netVat || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.netVat || 0) < 0">
+                {{ formatCurrency(generatedReport.data.summary.netVat || 0, true) }}
               </div>
             </div>
             <div class="summary-card" *ngIf="generatedReport.data.summary.totalTransactions">
@@ -807,7 +931,9 @@
                 </ng-container>
                 <ng-container matColumnDef="amount">
                   <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
-                  <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.amount) }}</td>
+                  <td mat-cell *matCellDef="let row" class="text-right" [class.positive-amount]="(row.amount || 0) >= 0" [class.negative-amount]="(row.amount || 0) < 0">
+                    {{ formatCurrency(row.amount, true) }}
+                  </td>
                 </ng-container>
                 <ng-container matColumnDef="vatRate">
                   <th mat-header-cell *matHeaderCellDef class="text-right">VAT Rate</th>
@@ -815,7 +941,9 @@
                 </ng-container>
                 <ng-container matColumnDef="vatAmount">
                   <th mat-header-cell *matHeaderCellDef class="text-right">VAT Amount</th>
-                  <td mat-cell *matCellDef="let row" class="text-right">{{ formatCurrency(row.vatAmount) }}</td>
+                  <td mat-cell *matCellDef="let row" class="text-right" [class.positive-amount]="(row.vatAmount || 0) >= 0" [class.negative-amount]="(row.vatAmount || 0) < 0">
+                    {{ formatCurrency(row.vatAmount, true) }}
+                  </td>
                 </ng-container>
                 <ng-container matColumnDef="trn">
                   <th mat-header-cell *matHeaderCellDef>TRN</th>
@@ -824,8 +952,8 @@
                 <tr mat-header-row *matHeaderRowDef="['date', 'description', 'amount', 'vatRate', 'vatAmount', 'trn']"></tr>
                 <tr mat-row *matRowDef="let row; columns: ['date', 'description', 'amount', 'vatRate', 'vatAmount', 'trn']"></tr>
               </table>
-              <div class="section-total" *ngIf="generatedReport.data.summary">
-                Total VAT Input: {{ formatCurrency(generatedReport.data.summary.vatInput || 0) }}
+              <div class="section-total" *ngIf="generatedReport.data.summary" [class.positive-amount]="(generatedReport.data.summary.vatInput || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.vatInput || 0) < 0">
+                Total VAT Input: {{ formatCurrency(generatedReport.data.summary.vatInput || 0, true) }}
               </div>
             </div>
 
@@ -859,8 +987,8 @@
                 <tr mat-header-row *matHeaderRowDef="['date', 'description', 'amount', 'vatRate', 'vatAmount', 'trn']"></tr>
                 <tr mat-row *matRowDef="let row; columns: ['date', 'description', 'amount', 'vatRate', 'vatAmount', 'trn']"></tr>
               </table>
-              <div class="section-total" *ngIf="generatedReport.data.summary">
-                Total VAT Output: {{ formatCurrency(generatedReport.data.summary.vatOutput || 0) }}
+              <div class="section-total" *ngIf="generatedReport.data.summary" [class.credit-amount]="(generatedReport.data.summary.vatOutput || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.vatOutput || 0) < 0">
+                Total VAT Output: {{ formatCurrency(generatedReport.data.summary.vatOutput || 0, true) }}
               </div>
             </div>
           </div>

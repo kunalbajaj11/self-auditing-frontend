@@ -734,8 +734,14 @@ export class AdminReportsComponent implements OnInit {
     };
   }
 
-  formatCurrency(value: number): string {
-    return `AED ${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  formatCurrency(value: number, showSign: boolean = false): string {
+    const numValue = Number(value);
+    const formatted = numValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (showSign) {
+      const sign = numValue >= 0 ? '+' : '';
+      return `${sign}AED ${formatted}`;
+    }
+    return `AED ${formatted}`;
   }
 
   formatDate(date: string): string {

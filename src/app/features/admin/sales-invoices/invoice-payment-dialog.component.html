@@ -21,15 +21,15 @@
             <div class="invoice-option">
               <div class="invoice-option-main">
                 <span class="invoice-number">{{ invoice.invoiceNumber }}</span>
-                <span class="invoice-amount">
-                  {{ invoice.totalAmount | number: '1.2-2' }} {{ invoice.currency || 'AED' }}
+                <span class="invoice-amount positive-amount">
+                  +{{ invoice.currency || 'AED' }} {{ invoice.totalAmount | number: '1.2-2' }}
                 </span>
               </div>
               <div class="invoice-option-details">
                 <span class="invoice-date">{{ invoice.invoiceDate | date: 'shortDate' }}</span>
                 <span class="customer-name">{{ invoice.customerName || 'N/A' }}</span>
-                <span class="outstanding-badge">
-                  Outstanding: {{ invoice.outstandingAmount | number: '1.2-2' }} {{ invoice.currency || 'AED' }}
+                <span class="outstanding-badge positive-amount">
+                  Outstanding: +{{ invoice.currency || 'AED' }} {{ invoice.outstandingAmount | number: '1.2-2' }}
                 </span>
               </div>
             </div>
@@ -71,20 +71,20 @@
           </div>
           <div class="detail-row">
             <span class="detail-label">Total Amount:</span>
-            <span class="detail-value">
-              {{ selectedInvoice.totalAmount | number: '1.2-2' }} {{ selectedInvoice.currency || 'AED' }}
+            <span class="detail-value positive-amount">
+              +{{ selectedInvoice.currency || 'AED' }} {{ selectedInvoice.totalAmount | number: '1.2-2' }}
             </span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Paid Amount:</span>
-            <span class="detail-value">
-              {{ selectedInvoice.paidAmount | number: '1.2-2' }} {{ selectedInvoice.currency || 'AED' }}
+            <span class="detail-value positive-amount">
+              +{{ selectedInvoice.currency || 'AED' }} {{ selectedInvoice.paidAmount | number: '1.2-2' }}
             </span>
           </div>
           <div class="detail-row highlight">
             <span class="detail-label">Outstanding Balance:</span>
-            <span class="detail-value outstanding">
-              {{ selectedInvoice.outstandingAmount | number: '1.2-2' }} {{ selectedInvoice.currency || 'AED' }}
+            <span class="detail-value outstanding positive-amount">
+              +{{ selectedInvoice.currency || 'AED' }} {{ selectedInvoice.outstandingAmount | number: '1.2-2' }}
             </span>
           </div>
           <div class="detail-row" *ngIf="selectedInvoice.description">
