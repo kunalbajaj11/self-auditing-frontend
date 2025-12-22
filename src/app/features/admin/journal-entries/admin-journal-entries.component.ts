@@ -38,6 +38,10 @@ export class AdminJournalEntriesComponent implements OnInit {
     { value: JournalEntryType.SHARE_CAPITAL, label: 'Share Capital' },
     { value: JournalEntryType.RETAINED_EARNINGS, label: 'Retained Earnings' },
     { value: JournalEntryType.SHAREHOLDER_ACCOUNT, label: 'Share Holder Account' },
+    { value: JournalEntryType.OUTSTANDING, label: 'Outstanding' },
+    { value: JournalEntryType.PREPAID, label: 'Prepaid' },
+    { value: JournalEntryType.ACCRUED_INCOME, label: 'Accrued Income' },
+    { value: JournalEntryType.DEPRECIATION, label: 'Depreciation' },
   ];
 
   readonly categoryOptions = [
