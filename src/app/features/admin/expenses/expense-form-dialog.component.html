@@ -99,6 +99,7 @@
       #vendorAuto="matAutocomplete"
       [displayWith]="displayVendor"
       (optionSelected)="onVendorSelected($event.option.value)"
+      [panelWidth]="'auto'"
     >
       <mat-option *ngFor="let vendor of filteredVendors$ | async" [value]="vendor">
         <div class="vendor-option">
@@ -120,10 +121,10 @@
     >
       <mat-icon>close</mat-icon>
     </button>
-    <mat-hint *ngIf="selectedVendor">
+    <mat-hint *ngIf="selectedVendor" class="vendor-selected-hint">
       Selected: {{ selectedVendor.name }}
     </mat-hint>
-    <mat-hint *ngIf="!selectedVendor">
+    <mat-hint *ngIf="!selectedVendor" class="vendor-search-hint">
       Start typing to search vendors from master, or type a new vendor name
     </mat-hint>
   </mat-form-field>

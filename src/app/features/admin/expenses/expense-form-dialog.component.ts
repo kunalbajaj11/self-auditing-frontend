@@ -226,6 +226,38 @@ export class ExpenseFormDialogComponent implements OnInit {
             this.form.patchValue({ vendorName: cleanedVendorName }, { emitEvent: false });
           }
           
+          // Re-initialize vendor autocomplete with OCR vendor name
+          // This ensures the autocomplete shows the correct initial value
+          if (cleanedVendorName) {
+            setTimeout(() => {
+              // Ensure vendor name is still set (in case it was cleared)
+              const currentVendorName = this.form.get('vendorName')?.value;
+              if (!currentVendorName || currentVendorName.trim() === '') {
+                this.form.patchValue({ vendorName: cleanedVendorName }, { emitEvent: false });
+              }
+              
+              // Re-initialize autocomplete observable
+              this.filteredVendors$ = this.form.get('vendorName')!.valueChanges.pipe(
+                startWith(cleanedVendorName),
+                debounceTime(300),
+                distinctUntilChanged(),
+                switchMap((searchTerm: string | null) => {
+                  const search = searchTerm || '';
+                  if (this.selectedVendor) {
+                    return of([this.selectedVendor]);
+                  }
+                  if (!search || search.length < 2) {
+                    return of(this.vendors.slice(0, 10));
+                  }
+                  return this.vendorsService.searchVendors(search).pipe(
+                    map((vendors) => vendors.slice(0, 10)),
+                  );
+                }),
+              );
+              console.log('[ExpenseForm] Re-initialized vendor autocomplete with OCR vendor name:', cleanedVendorName);
+            }, 200);
+          }
+          
           // Trigger validation after OCR population
           this.form.markAllAsTouched();
           
@@ -677,8 +709,17 @@ export class ExpenseFormDialogComponent implements OnInit {
     });
   }
 
-  displayVendor(vendor: Vendor | null): string {
-    return vendor ? vendor.name : '';
+  displayVendor(vendor: Vendor | string | null): string {
+    if (!vendor) {
+      // If no vendor, return the current form value (which might be a string from OCR)
+      return this.form.get('vendorName')?.value || '';
+    }
+    // If vendor is a string (from OCR or manual input), return it as-is
+    if (typeof vendor === 'string') {
+      return vendor;
+    }
+    // If vendor is a Vendor object, return its name
+    return vendor.name;
   }
 
   clearVendorSelection(): void {
