@@ -116,15 +116,11 @@
           ></app-summary-card>
 
           <app-summary-card
-            label="VAT"
-            icon="percent"
-            [value]="'AED ' + (vm.vatPayable | number: '1.0-2')"
+            label="Payables"
+            icon="account_balance_wallet"
+            [value]="'AED ' + (vm.payablesAmount | number: '1.0-2')"
             accent="accent"
-            [hint]="
-              vm.vatSummary && (vm.inputVat > 0 || vm.outputVat > 0)
-                ? 'Output: AED ' + (vm.outputVat | number: '1.0-2') + ' - Input: AED ' + (vm.inputVat | number: '1.0-2')
-                : 'No VAT transactions'
-            "
+            [hint]="vm.accrualSummary && vm.accrualSummary.length > 0 && vm.accrualSummary[0].count > 0 ? vm.accrualSummary[0].count + ' items pending' : 'No pending payables'"
           ></app-summary-card>
 
           <app-summary-card

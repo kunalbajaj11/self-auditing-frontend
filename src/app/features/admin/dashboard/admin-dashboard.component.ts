@@ -66,6 +66,7 @@ interface AdminDashboardViewModel {
   // New metrics
   receivablesAmount: number;
   vatPayable: number;
+  payablesAmount: number;
   bankBalance: number;
   cashBalance: number;
   uploadUsage?: UploadUsage;
@@ -384,6 +385,9 @@ export class AdminDashboardComponent implements OnInit {
           // VAT Payable (net VAT)
           const vatPayable = netVatPayable;
 
+          // Payables amount (total outstanding payables)
+          const payablesAmount = payables?.summary?.totalAmount ?? 0;
+
           // Calculate Bank Balance
           // Bank transactions include:
           // 1. Expense payments with paymentMethod = 'bank_transfer'
@@ -493,6 +497,7 @@ export class AdminDashboardComponent implements OnInit {
             overdueInvoices,
             receivablesAmount,
             vatPayable,
+            payablesAmount,
             bankBalance,
             cashBalance,
             uploadUsage,

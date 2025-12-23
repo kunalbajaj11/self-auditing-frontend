@@ -36,6 +36,7 @@ export interface Expense {
   purchaseStatus?: string; // 'Purchase - Cash Paid' or 'Purchase - Accruals'
   vendorName?: string;
   vendorTrn?: string;
+  invoiceNumber?: string;
   description?: string;
   ocrConfidence?: number;
   linkedAccrualExpenseId?: string;

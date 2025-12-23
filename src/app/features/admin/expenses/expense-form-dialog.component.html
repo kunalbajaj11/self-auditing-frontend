@@ -76,13 +76,13 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline">
-    <mat-label>Payment Date</mat-label>
-    <input matInput [matDatepicker]="expectedPaymentDatePicker" formControlName="expectedPaymentDate" placeholder="Select expected payment date" />
+    <mat-label>Due Date</mat-label>
+    <input matInput [matDatepicker]="expectedPaymentDatePicker" formControlName="expectedPaymentDate" placeholder="Select due date" />
     <mat-datepicker-toggle matIconSuffix [for]="expectedPaymentDatePicker"></mat-datepicker-toggle>
     <mat-datepicker #expectedPaymentDatePicker></mat-datepicker>
     <mat-hint>Required for accrual entries and Purchase - Accruals status</mat-hint>
     <mat-error *ngIf="form.get('expectedPaymentDate')?.hasError('required')">
-      Payment date is required for Purchase - Accruals
+      Due date is required for Purchase - Accruals
     </mat-error>
   </mat-form-field>
 
@@ -133,6 +133,11 @@
     <mat-label>{{ form.get('type')?.value === 'credit' ? 'Customer' : 'Vendor' }} TRN</mat-label>
     <input matInput formControlName="vendorTrn" placeholder="Tax Registration Number" maxlength="20" />
     <mat-hint>Enter the {{ form.get('type')?.value === 'credit' ? 'customer' : 'vendor' }}'s Tax Registration Number</mat-hint>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Invoice Number</mat-label>
+    <input matInput formControlName="invoiceNumber" placeholder="Enter invoice number" maxlength="100" />
   </mat-form-field>
 
   <mat-form-field appearance="outline" class="full">

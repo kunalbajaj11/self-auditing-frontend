@@ -5,6 +5,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ExpensesService } from '../../../core/services/expenses.service';
 import { ExpensePaymentsService } from '../../../core/services/expense-payments.service';
 import { SalesInvoicesService } from '../../../core/services/sales-invoices.service';
+import { VendorsService, Vendor } from '../../../core/services/vendors.service';
+import { Observable, of } from 'rxjs';
+import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-bank-transaction-form-dialog',
@@ -14,6 +17,11 @@ import { SalesInvoicesService } from '../../../core/services/sales-invoices.serv
 export class BankTransactionFormDialogComponent implements OnInit {
   form: FormGroup;
   loading = false;
+
+  // Vendor autocomplete
+  vendors: Vendor[] = [];
+  filteredVendors$!: Observable<Vendor[]>;
+  selectedVendor: Vendor | null = null;
 
   readonly transactionTypes = [
     { value: 'expense', label: 'Expense Payment' },
@@ -28,13 +36,15 @@ export class BankTransactionFormDialogComponent implements OnInit {
     private readonly expensesService: ExpensesService,
     private readonly paymentsService: ExpensePaymentsService,
     private readonly invoicesService: SalesInvoicesService,
+    private readonly vendorsService: VendorsService,
     private readonly snackBar: MatSnackBar,
   ) {
     this.form = this.fb.group({
       type: ['expense', Validators.required],
       date: [new Date().toISOString().substring(0, 10), Validators.required],
       description: ['', Validators.required],
-      vendorOrCustomer: ['', Validators.required],
+      vendorId: [''],
+      vendorName: ['', Validators.required],
       amount: [0, [Validators.required, Validators.min(0.01)]],
       currency: ['AED', Validators.required],
       referenceNumber: [''],
@@ -42,7 +52,94 @@ export class BankTransactionFormDialogComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.loadVendors();
+    this.setupVendorAutocomplete();
+  }
+
+  private loadVendors(): void {
+    this.vendorsService.listVendors({ isActive: true }).subscribe({
+      next: (vendors) => {
+        this.vendors = vendors;
+      },
+      error: (error) => {
+        console.error('Error loading vendors:', error);
+      },
+    });
+  }
+
+  private setupVendorAutocomplete(): void {
+    const initialValue = this.form.get('vendorName')?.value || '';
+    this.filteredVendors$ = this.form.get('vendorName')!.valueChanges.pipe(
+      startWith(initialValue),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((searchTerm: string | null) => {
+        const search = searchTerm || '';
+        if (this.selectedVendor) {
+          return of([this.selectedVendor]);
+        }
+        if (!search || search.length < 2) {
+          return of(this.vendors.slice(0, 10));
+        }
+        return this.vendorsService.searchVendors(search).pipe(
+          map((vendors) => vendors.slice(0, 10)),
+        );
+      }),
+    );
+
+    // Watch for vendor selection changes
+    this.form.get('vendorId')?.valueChanges.subscribe((vendorId) => {
+      if (vendorId) {
+        const vendor = this.vendors.find((v) => v.id === vendorId);
+        if (vendor) {
+          this.selectedVendor = vendor;
+          this.form.patchValue({
+            vendorName: vendor.name,
+          }, { emitEvent: false });
+        }
+      } else {
+        this.selectedVendor = null;
+      }
+    });
+
+    // Clear vendorId when vendorName is manually changed
+    this.form.get('vendorName')?.valueChanges.subscribe(() => {
+      if (!this.selectedVendor && this.form.get('vendorId')?.value) {
+        setTimeout(() => {
+          if (!this.selectedVendor && this.form.get('vendorId')?.value) {
+            this.form.patchValue({ vendorId: '' }, { emitEvent: false });
+          }
+        }, 100);
+      }
+    });
+  }
+
+  onVendorSelected(vendor: Vendor): void {
+    this.selectedVendor = vendor;
+    this.form.patchValue({
+      vendorId: vendor.id,
+      vendorName: vendor.name,
+    });
+  }
+
+  displayVendor(vendor: Vendor | string | null): string {
+    if (!vendor) {
+      return this.form.get('vendorName')?.value || '';
+    }
+    if (typeof vendor === 'string') {
+      return vendor;
+    }
+    return vendor.name;
+  }
+
+  clearVendorSelection(): void {
+    this.selectedVendor = null;
+    this.form.patchValue({
+      vendorId: '',
+      vendorName: '',
+    });
+  }
 
   save(): void {
     if (this.form.invalid) {
@@ -64,17 +161,28 @@ export class BankTransactionFormDialogComponent implements OnInit {
 
   private createExpenseWithBankPayment(data: any): void {
     // First create the expense
+    const expensePayload: any = {
+      type: 'expense',
+      amount: data.amount,
+      vatAmount: 0,
+      expenseDate: data.date,
+      description: data.description,
+      currency: data.currency,
+      purchaseStatus: 'Purchase - Accruals', // Will be settled by the payment
+    };
+
+    // Add vendorId if selected, otherwise use vendorName
+    if (data.vendorId) {
+      expensePayload.vendorId = data.vendorId;
+      if (data.vendorName) {
+        expensePayload.vendorName = data.vendorName;
+      }
+    } else if (data.vendorName) {
+      expensePayload.vendorName = data.vendorName;
+    }
+
     this.expensesService
-      .createExpense({
-        type: 'expense',
-        amount: data.amount,
-        vatAmount: 0,
-        expenseDate: data.date,
-        vendorName: data.vendorOrCustomer,
-        description: data.description,
-        currency: data.currency,
-        purchaseStatus: 'Purchase - Accruals', // Will be settled by the payment
-      })
+      .createExpense(expensePayload)
       .subscribe({
         next: (expense) => {
           // Then create the bank payment
@@ -122,7 +230,7 @@ export class BankTransactionFormDialogComponent implements OnInit {
     // and track it separately, or we can create it with a note
     this.invoicesService
       .createInvoice({
-        customerName: data.vendorOrCustomer,
+        customerName: data.vendorName,
         invoiceDate: data.date,
         currency: data.currency,
         description: data.description,

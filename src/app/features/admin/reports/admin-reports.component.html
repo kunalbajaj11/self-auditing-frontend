@@ -62,6 +62,15 @@
                 </mat-select>
               </mat-form-field>
 
+              <mat-form-field appearance="outline" *ngIf="selectedReport.value === 'payables'">
+                <mat-label>Vendor</mat-label>
+                <mat-select formControlName="vendorName" multiple>
+                  <mat-option *ngFor="let vendor of vendors" [value]="vendor">
+                    {{ vendor }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
               <mat-form-field appearance="outline" *ngIf="selectedReport.value === 'receivables'">
                 <mat-label>Payment Status</mat-label>
                 <mat-select formControlName="paymentStatus" multiple>
@@ -70,22 +79,12 @@
                   <mat-option value="paid">Paid</mat-option>
                 </mat-select>
               </mat-form-field>
-            </div>
-          </div>
 
-          <!-- Export Format -->
-          <div class="form-section">
-            <h3 class="section-title">
-              <mat-icon>download</mat-icon>
-              Export Format
-            </h3>
-            <div class="form-row">
-              <mat-form-field appearance="outline">
-                <mat-label>Format</mat-label>
-                <mat-select formControlName="format">
-                  <mat-option *ngFor="let option of formatOptions" [value]="option.value">
-                    <mat-icon>{{ option.icon }}</mat-icon>
-                    {{ option.label }}
+              <mat-form-field appearance="outline" *ngIf="selectedReport.value === 'receivables'">
+                <mat-label>Customer</mat-label>
+                <mat-select formControlName="customerName" multiple>
+                  <mat-option *ngFor="let customer of customers" [value]="customer">
+                    {{ customer }}
                   </mat-option>
                 </mat-select>
               </mat-form-field>
@@ -546,6 +545,27 @@
               </table>
               <div class="section-total" [class.credit-amount]="(generatedReport.data.liabilities?.total || 0) >= 0" [class.negative-amount]="(generatedReport.data.liabilities?.total || 0) < 0">
                 Total Liabilities: {{ formatCurrency(generatedReport.data.liabilities?.total || 0, true) }}
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Equity</h3>
+              <table mat-table [dataSource]="generatedReport.data.equity?.items || []" class="report-table">
+                <ng-container matColumnDef="account">
+                  <th mat-header-cell *matHeaderCellDef>Account</th>
+                  <td mat-cell *matCellDef="let row">{{ row.account }}</td>
+                </ng-container>
+                <ng-container matColumnDef="amount">
+                  <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
+                  <td mat-cell *matCellDef="let row" class="text-right" [class.credit-amount]="(row.closing || 0) >= 0" [class.negative-amount]="(row.closing || 0) < 0">
+                    {{ formatCurrency(row.closing || 0, true) }}
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="['account', 'amount']"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['account', 'amount']"></tr>
+              </table>
+              <div class="section-total" [class.credit-amount]="(generatedReport.data.equity?.total || 0) >= 0" [class.negative-amount]="(generatedReport.data.equity?.total || 0) < 0">
+                Total Equity: {{ formatCurrency(generatedReport.data.equity?.total || 0, true) }}
               </div>
             </div>
           </div>

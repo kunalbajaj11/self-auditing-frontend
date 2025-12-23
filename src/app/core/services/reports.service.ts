@@ -19,8 +19,8 @@ export class ReportsService {
     return this.api.post<GeneratedReport>('/reports/generate', payload);
   }
 
-  getFilterOptions(): Observable<{ vendors: string[] }> {
-    return this.api.get<{ vendors: string[] }>('/reports/filter-options');
+  getFilterOptions(): Observable<{ vendors: string[]; customers: string[] }> {
+    return this.api.get<{ vendors: string[]; customers: string[] }>('/reports/filter-options');
   }
 
   scheduleReport(payload: {

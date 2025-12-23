@@ -30,16 +30,63 @@
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>{{ form.get('type')?.value === 'expense' ? 'Vendor' : 'Customer' }} *</mat-label>
+    <mat-form-field appearance="outline" class="full-width" *ngIf="form.get('type')?.value === 'expense'">
+      <mat-label>Vendor *</mat-label>
       <input
+        type="text"
         matInput
-        formControlName="vendorOrCustomer"
-        placeholder="Enter name"
+        formControlName="vendorName"
+        [matAutocomplete]="vendorAuto"
+        placeholder="Search or type vendor name"
         required
       />
-      <mat-error *ngIf="form.get('vendorOrCustomer')?.hasError('required')">
-        {{ form.get('type')?.value === 'expense' ? 'Vendor' : 'Customer' }} name is required
+      <mat-autocomplete
+        #vendorAuto="matAutocomplete"
+        [displayWith]="displayVendor"
+        (optionSelected)="onVendorSelected($event.option.value)"
+        [panelWidth]="'auto'"
+      >
+        <mat-option *ngFor="let vendor of filteredVendors$ | async" [value]="vendor">
+          <div class="vendor-option">
+            <span class="vendor-name">{{ vendor.name }}</span>
+            <span *ngIf="vendor.vendorTrn" class="vendor-trn">TRN: {{ vendor.vendorTrn }}</span>
+          </div>
+        </mat-option>
+        <mat-option *ngIf="(filteredVendors$ | async)?.length === 0 && form.get('vendorName')?.value" [value]="null">
+          <span class="no-vendor-found">No vendor found. Will create new entry.</span>
+        </mat-option>
+      </mat-autocomplete>
+      <button
+        *ngIf="selectedVendor"
+        matSuffix
+        mat-icon-button
+        (click)="clearVendorSelection()"
+        type="button"
+        matTooltip="Clear vendor selection"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-hint *ngIf="selectedVendor" class="vendor-selected-hint">
+        Selected: {{ selectedVendor.name }}
+      </mat-hint>
+      <mat-hint *ngIf="!selectedVendor" class="vendor-search-hint">
+        Start typing to search vendors from master, or type a new vendor name
+      </mat-hint>
+      <mat-error *ngIf="form.get('vendorName')?.hasError('required')">
+        Vendor name is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width" *ngIf="form.get('type')?.value === 'sales'">
+      <mat-label>Customer *</mat-label>
+      <input
+        matInput
+        formControlName="vendorName"
+        placeholder="Enter customer name"
+        required
+      />
+      <mat-error *ngIf="form.get('vendorName')?.hasError('required')">
+        Customer name is required
       </mat-error>
     </mat-form-field>
 

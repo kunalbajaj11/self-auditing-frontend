@@ -66,12 +66,6 @@ export class AdminReportsComponent implements OnInit {
     },
   ];
 
-  readonly formatOptions: { value: 'pdf' | 'xlsx' | 'csv'; label: string; icon: string }[] = [
-    { value: 'pdf', label: 'PDF', icon: 'picture_as_pdf' },
-    { value: 'xlsx', label: 'Excel', icon: 'table_chart' },
-    { value: 'csv', label: 'CSV', icon: 'description' },
-  ];
-
   readonly dateRangePresets: { value: string; label: string }[] = [
     { value: '', label: 'Custom Range' },
     { value: 'thisMonth', label: 'This Month' },
@@ -86,6 +80,8 @@ export class AdminReportsComponent implements OnInit {
   selectedReport: ReportConfig | null = null;
   generatedReport: GeneratedReport | null = null;
   loading = false;
+  vendors: string[] = [];
+  customers: string[] = [];
 
   // Cached chart data to prevent re-rendering
   profitAndLossChartData: ChartConfiguration<'bar'>['data'] | null = null;
@@ -109,7 +105,6 @@ export class AdminReportsComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       reportType: [''],
-      format: ['pdf' as 'pdf' | 'xlsx' | 'csv'],
       dateRangePreset: [''],
       startDate: [''],
       endDate: [''],
@@ -234,6 +229,25 @@ export class AdminReportsComponent implements OnInit {
     this.form.patchValue({
       startDate: startDate.toISOString().substring(0, 10),
       endDate: endDate.toISOString().substring(0, 10),
+    });
+
+    // Load filter options (vendors and customers)
+    this.loadFilterOptions();
+  }
+
+  private loadFilterOptions(): void {
+    this.reportsService.getFilterOptions().subscribe({
+      next: (options) => {
+        this.vendors = options.vendors || [];
+        this.customers = options.customers || [];
+        console.log('Filter options loaded:', { vendors: this.vendors.length, customers: this.customers.length });
+      },
+      error: (err) => {
+        console.error('Failed to load filter options:', err);
+        // Silently fail - filters will just be empty
+        this.vendors = [];
+        this.customers = [];
+      },
     });
   }
 

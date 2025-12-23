@@ -35,9 +35,12 @@ export class ExpenseFormDialogComponent implements OnInit {
   // Tax settings
   taxSettings: TaxSettings | null = null;
   defaultTaxRate = 5;
-  taxCalculationMethod: 'inclusive' | 'exclusive' = 'inclusive';
+  taxCalculationMethod: 'inclusive' | 'exclusive' = 'exclusive';
   reverseChargeRate = 5;
   reverseChargeEnabled = false;
+  
+  // Track if VAT was manually entered by user
+  private vatManuallyEntered = false;
   
   // VAT tax type options
   readonly vatTaxTypes: { value: VatTaxType; label: string }[] = [
@@ -73,6 +76,7 @@ export class ExpenseFormDialogComponent implements OnInit {
       vendorId: [''], // Vendor ID from vendor master
       vendorName: [''],
       vendorTrn: [''],
+      invoiceNumber: [''],
       description: [''],
     });
   }
@@ -136,8 +140,41 @@ export class ExpenseFormDialogComponent implements OnInit {
                      (typeof vatValue === 'string' && vatValue === '') || 
                      vatNum === 0;
       if (isEmpty) {
-        // User cleared VAT, recalculate
+        // User cleared VAT, mark as not manually entered and recalculate
+        this.vatManuallyEntered = false;
         setTimeout(() => this.autoCalculateVat(), 100);
+      } else {
+        // User entered/changed VAT value - mark as manually entered
+        // Use a small delay to distinguish between programmatic and manual changes
+        setTimeout(() => {
+          // Check if this was a programmatic change by comparing with expected calculation
+          const amountValue = this.form.get('amount')?.value;
+          const amount = typeof amountValue === 'number' ? amountValue : parseFloat(String(amountValue || '0'));
+          if (amount > 0) {
+            const vatTaxType = this.form.get('vatTaxType')?.value as VatTaxType || 'standard';
+            let expectedVat = 0;
+            
+            if (vatTaxType === 'reverse_charge') {
+              expectedVat = (amount * this.reverseChargeRate) / 100;
+            } else if (vatTaxType === 'zero_rated' || vatTaxType === 'exempt') {
+              expectedVat = 0;
+            } else {
+              if (this.taxCalculationMethod === 'inclusive') {
+                expectedVat = (amount * this.defaultTaxRate) / (100 + this.defaultTaxRate);
+              } else {
+                expectedVat = (amount * this.defaultTaxRate) / 100;
+              }
+            }
+            expectedVat = Math.round(expectedVat * 100) / 100;
+            
+            // If VAT matches expected calculation, it was likely auto-calculated
+            const difference = Math.abs(vatNum - expectedVat);
+            if (difference > 0.01) {
+              // VAT doesn't match expected - user manually entered it
+              this.vatManuallyEntered = true;
+            }
+          }
+        }, 50);
       }
     });
 
@@ -151,6 +188,9 @@ export class ExpenseFormDialogComponent implements OnInit {
       if ('id' in this.data) {
         // Editing existing expense
         const expense = this.data as Expense;
+        // Mark VAT as manually entered when editing existing expense to prevent recalculation
+        // This ensures we show the VAT value from the database, not a recalculated value
+        this.vatManuallyEntered = true;
         this.form.patchValue({
           type: expense.type,
           categoryId: expense.categoryId ?? '',
@@ -163,8 +203,9 @@ export class ExpenseFormDialogComponent implements OnInit {
           vendorId: (expense as any).vendorId ?? '',
           vendorName: expense.vendorName ?? '',
           vendorTrn: expense.vendorTrn ?? '',
+          invoiceNumber: (expense as any).invoiceNumber ?? '',
           description: expense.description ?? '',
-        });
+        }, { emitEvent: false }); // Don't emit events to prevent auto-calculation triggers
         // Filter categories after setting the type
         setTimeout(() => this.filterCategoriesByType(), 0);
       } else {
@@ -172,6 +213,8 @@ export class ExpenseFormDialogComponent implements OnInit {
         const data = this.data as { attachment?: any; ocrResult?: any };
         this.attachment = data.attachment;
         this.ocrResult = data.ocrResult;
+        // Reset manual entry flag for new expense
+        this.vatManuallyEntered = false;
 
         if (this.ocrResult) {
           console.log('[ExpenseForm] OCR Result received:', this.ocrResult);
@@ -205,6 +248,7 @@ export class ExpenseFormDialogComponent implements OnInit {
             categoryId: this.ocrResult.suggestedCategoryId || '',
             vendorName: cleanedVendorName,
             vendorTrn: this.ocrResult.vendorTrn || '',
+            invoiceNumber: this.ocrResult.invoiceNumber || '',
             amount: amount,
             vatAmount: vatAmount,
             expenseDate: expenseDate,
@@ -364,6 +408,11 @@ export class ExpenseFormDialogComponent implements OnInit {
     if (value.vendorTrn) {
       expensePayload.vendorTrn = value.vendorTrn;
     }
+
+    // Add invoiceNumber if provided
+    if (value.invoiceNumber) {
+      expensePayload.invoiceNumber = value.invoiceNumber;
+    }
     
     console.log('[ExpenseForm] Vendor data in payload:', {
       vendorId: expensePayload.vendorId,
@@ -503,19 +552,52 @@ export class ExpenseFormDialogComponent implements OnInit {
     this.settingsService.getTaxSettings().subscribe({
       next: (settings) => {
         this.taxSettings = settings;
-        this.defaultTaxRate = settings.taxDefaultRate || 5;
-        this.taxCalculationMethod = (settings.taxCalculationMethod as 'inclusive' | 'exclusive') || 'inclusive';
-        this.reverseChargeRate = settings.taxReverseChargeRate || 5;
+        // Parse tax rate - it might come as string "5.00" or number 5
+        let taxRate = settings.taxDefaultRate || 5;
+        
+        // Convert string to number if needed
+        if (typeof taxRate === 'string') {
+          taxRate = parseFloat(taxRate);
+        }
+        
+        // Ensure it's a valid number
+        if (isNaN(taxRate) || taxRate <= 0) {
+          taxRate = 5;
+        }
+        
+        if (taxRate < 1) {
+          // If less than 1, it's stored as decimal - multiply by 100 to get percentage
+          taxRate = taxRate * 100;
+        }
+        // Force to 5 for UAE standard VAT if it's not between 4.5 and 5.5 (to catch incorrect values)
+        if (taxRate < 4.5 || taxRate > 5.5) {
+          taxRate = 5;
+        }
+        this.defaultTaxRate = taxRate;
+        
+        // Force exclusive calculation method (user wants simple: amount × 5%)
+        this.taxCalculationMethod = 'exclusive';
+        
+        // Same for reverse charge rate
+        let reverseRate = settings.taxReverseChargeRate || 5;
+        if (reverseRate < 1) {
+          reverseRate = reverseRate * 100;
+        }
+        if (reverseRate < 5) {
+          reverseRate = 5;
+        }
+        this.reverseChargeRate = reverseRate;
+        
         this.reverseChargeEnabled = settings.taxEnableReverseCharge || false;
-        // Auto-calculate VAT if amount is already set
-        if (this.form.get('amount')?.value) {
+        // Auto-calculate VAT if amount is already set (but not when editing existing expense)
+        if (this.form.get('amount')?.value && !this.isEditMode()) {
           this.autoCalculateVat();
         }
       },
       error: () => {
         // Use fallback defaults
         this.defaultTaxRate = 5;
-        this.taxCalculationMethod = 'inclusive';
+        this.taxCalculationMethod = 'exclusive';
         this.reverseChargeRate = 5;
         this.reverseChargeEnabled = false;
       },
@@ -534,33 +616,43 @@ export class ExpenseFormDialogComponent implements OnInit {
                       vatFormValue === undefined || 
                       (typeof vatFormValue === 'string' && vatFormValue === '') || 
                       currentVat === 0;
-    if (amount > 0 && isVatEmpty) {
+    
+    // Don't auto-calculate if user has manually entered VAT
+    if (this.vatManuallyEntered && !isVatEmpty) {
+      return;
+    }
+    
+    // Simple VAT calculation: amount × tax rate / 100
+    if (amount > 0) {
+      // Ensure tax rate is a number (not string)
+      const taxRate = typeof this.defaultTaxRate === 'number' ? this.defaultTaxRate : parseFloat(String(this.defaultTaxRate)) || 5;
+      
       let calculatedVat = 0;
       
       if (vatTaxType === 'reverse_charge') {
-        // Reverse charge: use reverse charge rate
-        calculatedVat = (amount * this.reverseChargeRate) / 100;
+        // Reverse charge: amount × reverse charge rate / 100
+        const reverseRate = typeof this.reverseChargeRate === 'number' ? this.reverseChargeRate : parseFloat(String(this.reverseChargeRate)) || 5;
+        calculatedVat = (amount * reverseRate) / 100;
       } else if (vatTaxType === 'zero_rated' || vatTaxType === 'exempt') {
         // Zero rated or exempt: no VAT
         calculatedVat = 0;
       } else {
-        // Standard VAT calculation
-        if (this.taxCalculationMethod === 'inclusive') {
-          // VAT is included in the amount
-          // VAT = Amount * (TaxRate / (100 + TaxRate))
-          calculatedVat = (amount * this.defaultTaxRate) / (100 + this.defaultTaxRate);
-        } else {
-          // VAT is exclusive (added on top)
-          // VAT = Amount * (TaxRate / 100)
-          calculatedVat = (amount * this.defaultTaxRate) / 100;
-        }
+        // Standard VAT calculation - always use exclusive (simple: amount × 5%)
+        // VAT is exclusive (added on top): amount × rate / 100
+        // Simple: 5% of amount = amount × 5 / 100
+        calculatedVat = (amount * taxRate) / 100;
       }
       
       // Round to 2 decimal places
       calculatedVat = Math.round(calculatedVat * 100) / 100;
       
-      // Update VAT amount without triggering change event to avoid loop
-      this.form.patchValue({ vatAmount: calculatedVat }, { emitEvent: false });
+      // Update VAT amount if it's empty or if it's not manually entered
+      if (isVatEmpty || !this.vatManuallyEntered) {
+        // VAT is empty or was auto-calculated, update it
+        this.form.patchValue({ vatAmount: calculatedVat }, { emitEvent: false });
+        // Reset manual entry flag since we're updating it programmatically
+        this.vatManuallyEntered = false;
+      }
     }
   }
 
