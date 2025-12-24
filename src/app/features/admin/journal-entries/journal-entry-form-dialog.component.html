@@ -3,53 +3,50 @@
 </h2>
 
 <form mat-dialog-content [formGroup]="form" class="form">
-  <mat-form-field appearance="outline">
-    <mat-label>Type *</mat-label>
-    <mat-select formControlName="type" required>
-      <mat-option *ngFor="let option of typeOptions" [value]="option.value">
-        {{ option.label }}
-      </mat-option>
+  <!-- Entry Style Selection (for future multi-line support) -->
+  <mat-form-field appearance="outline" *ngIf="false">
+    <mat-label>Entry Style</mat-label>
+    <mat-select formControlName="entryStyle">
+      <mat-option value="simple">Simple Journal (1 debit, 1 credit)</mat-option>
+      <mat-option value="multi" disabled>Multi-line (Coming Soon)</mat-option>
     </mat-select>
-    <mat-error *ngIf="form.get('type')?.hasError('required')">
-      Type is required
-    </mat-error>
   </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Category *</mat-label>
-    <mat-select formControlName="category" required>
-      <mat-option *ngFor="let option of categoryOptions" [value]="option.value">
-        {{ option.label }}
-      </mat-option>
-    </mat-select>
-    <mat-error *ngIf="form.get('category')?.hasError('required')">
-      Category is required
-    </mat-error>
-  </mat-form-field>
+  <!-- Templates Section -->
+  <div class="templates-section" *ngIf="!isEditMode">
+    <h3>Quick Templates</h3>
+    <div class="template-buttons">
+      <button
+        mat-stroked-button
+        type="button"
+        *ngFor="let template of templates"
+        (click)="applyTemplate(template)"
+        [class.selected]="selectedTemplate === template"
+      >
+        <mat-icon>description</mat-icon>
+        {{ template.name }}
+      </button>
+    </div>
+  </div>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Status *</mat-label>
-    <mat-select formControlName="status" required>
-      <mat-option *ngFor="let option of statusOptions" [value]="option.value">
-        {{ option.label }}
-      </mat-option>
-    </mat-select>
-    <mat-error *ngIf="form.get('status')?.hasError('required')">
-      Status is required
-    </mat-error>
-  </mat-form-field>
+  <!-- Balance Indicator -->
+  <div class="balance-indicator" *ngIf="form.get('amount')?.value > 0">
+    <div class="balance-row">
+      <span class="balance-label">Debit:</span>
+      <span class="balance-amount debit">AED {{ debitAmount | number: '1.2-2' }}</span>
+    </div>
+    <div class="balance-row">
+      <span class="balance-label">Credit:</span>
+      <span class="balance-amount credit">AED {{ creditAmount | number: '1.2-2' }}</span>
+    </div>
+    <div class="balance-status" [class.balanced]="isBalanced">
+      <mat-icon *ngIf="isBalanced">check_circle</mat-icon>
+      <mat-icon *ngIf="!isBalanced">error</mat-icon>
+      <span>{{ isBalanced ? 'Balanced' : 'Unbalanced' }}</span>
+    </div>
+  </div>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Amount (AED) *</mat-label>
-    <input matInput type="number" formControlName="amount" required step="0.01" min="0.01" />
-    <mat-error *ngIf="form.get('amount')?.hasError('required')">
-      Amount is required
-    </mat-error>
-    <mat-error *ngIf="form.get('amount')?.hasError('min')">
-      Amount must be greater than 0
-    </mat-error>
-  </mat-form-field>
-
+  <!-- Date -->
   <mat-form-field appearance="outline">
     <mat-label>Entry Date *</mat-label>
     <input
@@ -66,20 +63,123 @@
     </mat-error>
   </mat-form-field>
 
+  <!-- Description -->
   <mat-form-field appearance="outline" class="full">
-    <mat-label>Description</mat-label>
-    <textarea matInput formControlName="description" rows="3"></textarea>
+    <mat-label>Description / Narration</mat-label>
+    <textarea matInput formControlName="description" rows="3" placeholder="Enter description of the transaction"></textarea>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" class="full">
-    <mat-label>Reference Number</mat-label>
-    <input matInput formControlName="referenceNumber" placeholder="e.g., Transaction ID, Reference #" />
+  <!-- Amount -->
+  <mat-form-field appearance="outline">
+    <mat-label>Amount (AED) *</mat-label>
+    <input matInput type="number" formControlName="amount" required step="0.01" min="0.01" />
+    <mat-error *ngIf="form.get('amount')?.hasError('required')">
+      Amount is required
+    </mat-error>
+    <mat-error *ngIf="form.get('amount')?.hasError('min')">
+      Amount must be greater than 0
+    </mat-error>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" class="full">
-    <mat-label>Notes</mat-label>
-    <textarea matInput formControlName="notes" rows="3"></textarea>
+  <!-- Debit Account -->
+  <mat-form-field appearance="outline">
+    <mat-label>Debit Account *</mat-label>
+    <mat-select formControlName="debitAccount" required>
+      <mat-optgroup *ngFor="let category of ['asset', 'expense']" [label]="category | titlecase">
+        <mat-option
+          *ngFor="let account of accountsByCategory[category]"
+          [value]="account.code"
+          [disabled]="account.isReadOnly"
+        >
+          {{ account.name }}
+        </mat-option>
+      </mat-optgroup>
+      <mat-optgroup label="Equity">
+        <mat-option
+          *ngFor="let account of accountsByCategory['equity']"
+          [value]="account.code"
+          [disabled]="account.isReadOnly || account.code === 'retained_earnings'"
+        >
+          {{ account.name }}
+        </mat-option>
+      </mat-optgroup>
+    </mat-select>
+    <mat-error *ngIf="form.get('debitAccount')?.hasError('required')">
+      Debit account is required
+    </mat-error>
+    <mat-error *ngIf="form.hasError('accountMismatch')">
+      Debit and Credit accounts cannot be the same
+    </mat-error>
+    <mat-error *ngIf="form.hasError('retainedEarningsNotAllowed')">
+      Retained Earnings is system-calculated and cannot be used
+    </mat-error>
   </mat-form-field>
+
+  <!-- Credit Account -->
+  <mat-form-field appearance="outline">
+    <mat-label>Credit Account *</mat-label>
+    <mat-select formControlName="creditAccount" required>
+      <mat-optgroup *ngFor="let category of ['liability', 'revenue']" [label]="category | titlecase">
+        <mat-option
+          *ngFor="let account of accountsByCategory[category]"
+          [value]="account.code"
+          [disabled]="account.isReadOnly"
+        >
+          {{ account.name }}
+        </mat-option>
+      </mat-optgroup>
+      <mat-optgroup label="Equity">
+        <mat-option
+          *ngFor="let account of accountsByCategory['equity']"
+          [value]="account.code"
+          [disabled]="account.isReadOnly || account.code === 'retained_earnings'"
+        >
+          {{ account.name }}
+        </mat-option>
+      </mat-optgroup>
+      <mat-optgroup label="Asset">
+        <mat-option
+          *ngFor="let account of accountsByCategory['asset']"
+          [value]="account.code"
+          [disabled]="account.isReadOnly"
+        >
+          {{ account.name }}
+        </mat-option>
+      </mat-optgroup>
+    </mat-select>
+    <mat-error *ngIf="form.get('creditAccount')?.hasError('required')">
+      Credit account is required
+    </mat-error>
+  </mat-form-field>
+
+  <!-- Optional Fields Section -->
+  <div class="optional-fields-section">
+    <h3 class="section-title">Optional Fields</h3>
+    
+    <!-- Customer / Vendor -->
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Customer / Vendor</mat-label>
+      <input matInput formControlName="customerVendorName" placeholder="Enter customer or vendor name" />
+    </mat-form-field>
+
+    <!-- Reference Number -->
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Reference Number</mat-label>
+      <input matInput formControlName="referenceNumber" placeholder="e.g., Transaction ID, Invoice #" />
+    </mat-form-field>
+
+    <!-- Attachment (placeholder for future implementation) -->
+    <mat-form-field appearance="outline" class="full" *ngIf="false">
+      <mat-label>Attachment</mat-label>
+      <input matInput formControlName="attachmentId" type="file" />
+    </mat-form-field>
+
+    <!-- Notes -->
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Notes</mat-label>
+      <textarea matInput formControlName="notes" rows="3"></textarea>
+    </mat-form-field>
+  </div>
 </form>
 
 <mat-dialog-actions align="end">
@@ -88,10 +188,9 @@
     mat-raised-button
     color="primary"
     (click)="save()"
-    [disabled]="form.invalid || loading"
+    [disabled]="form.invalid || loading || !isBalanced"
   >
     <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
     <span *ngIf="!loading">{{ isEditMode ? 'Update' : 'Create' }} Entry</span>
   </button>
 </mat-dialog-actions>
-

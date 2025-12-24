@@ -9,7 +9,7 @@ import { ExpensesService } from '../../../core/services/expenses.service';
 import { Expense } from '../../../core/models/expense.model';
 import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales-invoices.service';
 import { ExpensePaymentsService, ExpensePayment } from '../../../core/services/expense-payments.service';
-import { JournalEntriesService, JournalEntry, JournalEntryStatus } from '../../../core/services/journal-entries.service';
+import { JournalEntriesService, JournalEntry, JournalEntryAccount } from '../../../core/services/journal-entries.service';
 import { ExpenseFormDialogComponent } from '../expenses/expense-form-dialog.component';
 import { InvoiceDetailDialogComponent } from '../sales-invoices/invoice-detail-dialog.component';
 import { BankTransactionFormDialogComponent } from './bank-transaction-form-dialog.component';
@@ -181,24 +181,29 @@ export class BankAccountsComponent implements OnInit {
           }
         });
 
-        // Filter and add journal entries with BANK_PAID or BANK_RECEIVED status
+        // Filter and add journal entries that affect Cash/Bank account
         const bankJournalEntries = journalEntries.filter(
           (entry) =>
-            entry.status === JournalEntryStatus.BANK_PAID ||
-            entry.status === JournalEntryStatus.BANK_RECEIVED,
+            entry.debitAccount === JournalEntryAccount.CASH_BANK ||
+            entry.creditAccount === JournalEntryAccount.CASH_BANK,
         );
 
         bankJournalEntries.forEach((entry) => {
           const amount = parseFloat(entry.amount.toString());
-          // BANK_PAID is negative (outflow), BANK_RECEIVED is positive (inflow)
-          const transactionAmount = entry.status === JournalEntryStatus.BANK_PAID ? -amount : amount;
-          
+          // Debit to Cash/Bank is positive (inflow), Credit to Cash/Bank is negative (outflow)
+          const transactionAmount =
+            entry.debitAccount === JournalEntryAccount.CASH_BANK
+              ? amount
+              : -amount;
+
           const transaction: BankTransaction = {
             id: entry.id,
             type: 'journal',
             date: entry.entryDate,
-            description: entry.description || `Journal Entry - ${entry.type}`,
-            vendorOrCustomer: 'Journal Entry',
+            description:
+              entry.description ||
+              `Journal Entry - ${entry.debitAccount} / ${entry.creditAccount}`,
+            vendorOrCustomer: entry.customerVendorName || 'Journal Entry',
             amount: transactionAmount,
             currency: 'AED',
             journalEntry: entry,

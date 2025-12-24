@@ -6,9 +6,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   JournalEntriesService,
   JournalEntry,
-  JournalEntryType,
-  JournalEntryCategory,
-  JournalEntryStatus,
+  JournalEntryAccount,
+  ACCOUNT_METADATA,
+  getAccountsByCategory,
 } from '../../../core/services/journal-entries.service';
 import { JournalEntryFormDialogComponent } from './journal-entry-form-dialog.component';
 
@@ -20,9 +20,8 @@ import { JournalEntryFormDialogComponent } from './journal-entry-form-dialog.com
 export class AdminJournalEntriesComponent implements OnInit {
   readonly Math = Math; // Expose Math to template
   readonly columns = [
-    'type',
-    'category',
-    'status',
+    'debitAccount',
+    'creditAccount',
     'amount',
     'entryDate',
     'description',
@@ -32,31 +31,10 @@ export class AdminJournalEntriesComponent implements OnInit {
   loading = false;
 
   readonly filters;
-
-  readonly typeOptions = [
-    { value: '', label: 'All' },
-    { value: JournalEntryType.SHARE_CAPITAL, label: 'Share Capital' },
-    { value: JournalEntryType.RETAINED_EARNINGS, label: 'Retained Earnings' },
-    { value: JournalEntryType.SHAREHOLDER_ACCOUNT, label: 'Share Holder Account' },
-    { value: JournalEntryType.OUTSTANDING, label: 'Outstanding' },
-    { value: JournalEntryType.PREPAID, label: 'Prepaid' },
-    { value: JournalEntryType.ACCRUED_INCOME, label: 'Accrued Income' },
-    { value: JournalEntryType.DEPRECIATION, label: 'Depreciation' },
-  ];
-
-  readonly categoryOptions = [
-    { value: '', label: 'All' },
-    { value: JournalEntryCategory.EQUITY, label: 'Equity' },
-    { value: JournalEntryCategory.OTHERS, label: 'Others' },
-  ];
-
-  readonly statusOptions = [
-    { value: '', label: 'All' },
-    { value: JournalEntryStatus.CASH_PAID, label: 'Cash Paid' },
-    { value: JournalEntryStatus.BANK_PAID, label: 'Bank Paid' },
-    { value: JournalEntryStatus.CASH_RECEIVED, label: 'Cash Received' },
-    { value: JournalEntryStatus.BANK_RECEIVED, label: 'Bank Received' },
-  ];
+  readonly accountsByCategory = getAccountsByCategory();
+  readonly allAccounts = Object.values(ACCOUNT_METADATA).filter(
+    (acc) => !acc.isReadOnly,
+  );
 
   constructor(
     private readonly fb: FormBuilder,
@@ -65,11 +43,12 @@ export class AdminJournalEntriesComponent implements OnInit {
     private readonly snackBar: MatSnackBar,
   ) {
     this.filters = this.fb.group({
-      type: [''],
-      category: [''],
-      status: [''],
+      debitAccount: [''],
+      creditAccount: [''],
       startDate: [''],
       endDate: [''],
+      description: [''],
+      referenceNumber: [''],
     });
   }
 
@@ -86,11 +65,12 @@ export class AdminJournalEntriesComponent implements OnInit {
     const filterValues = this.filters.getRawValue();
     const filters: any = {};
 
-    if (filterValues.type) filters.type = filterValues.type;
-    if (filterValues.category) filters.category = filterValues.category;
-    if (filterValues.status) filters.status = filterValues.status;
+    if (filterValues.debitAccount) filters.debitAccount = filterValues.debitAccount;
+    if (filterValues.creditAccount) filters.creditAccount = filterValues.creditAccount;
     if (filterValues.startDate) filters.startDate = filterValues.startDate;
     if (filterValues.endDate) filters.endDate = filterValues.endDate;
+    if (filterValues.description) filters.description = filterValues.description;
+    if (filterValues.referenceNumber) filters.referenceNumber = filterValues.referenceNumber;
 
     this.journalEntriesService.listEntries(filters).subscribe({
       next: (entries) => {
@@ -158,35 +138,11 @@ export class AdminJournalEntriesComponent implements OnInit {
     });
   }
 
-  getTypeLabel(type: JournalEntryType): string {
-    const option = this.typeOptions.find((opt) => opt.value === type);
-    return option?.label || type;
+  getAccountName(accountCode: JournalEntryAccount): string {
+    return ACCOUNT_METADATA[accountCode]?.name || accountCode;
   }
 
-  getCategoryLabel(category: JournalEntryCategory): string {
-    const option = this.categoryOptions.find((opt) => opt.value === category);
-    return option?.label || category;
-  }
-
-  getStatusLabel(status: JournalEntryStatus): string {
-    const option = this.statusOptions.find((opt) => opt.value === status);
-    return option?.label || status;
-  }
-
-  getStatusColor(status: JournalEntryStatus): 'primary' | 'accent' | 'warn' {
-    if (status === JournalEntryStatus.CASH_PAID || status === JournalEntryStatus.BANK_PAID) {
-      return 'warn';
-    }
-    return 'primary';
-  }
-
-  getAmountWithSign(entry: JournalEntry): number {
-    const amount = parseFloat(entry.amount.toString());
-    // CASH_PAID and BANK_PAID are negative (outflow), CASH_RECEIVED and BANK_RECEIVED are positive (inflow)
-    if (entry.status === JournalEntryStatus.CASH_PAID || entry.status === JournalEntryStatus.BANK_PAID) {
-      return -amount;
-    }
-    return amount;
+  getAccountCategory(accountCode: JournalEntryAccount): string {
+    return ACCOUNT_METADATA[accountCode]?.category || 'asset';
   }
 }
-

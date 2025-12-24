@@ -2,7 +2,7 @@
   <header class="header">
     <div class="header-content">
       <h1>Journal Entries</h1>
-      <p>Manage equity transactions including share capital, retained earnings, and shareholder accounts.</p>
+      <p>Manage journal entries with debit and credit accounts for proper accounting.</p>
     </div>
     <button mat-raised-button color="primary" (click)="openCreateDialog()">
       <mat-icon>add</mat-icon>
@@ -16,29 +16,34 @@
       <mat-card-content>
         <div class="filter-row">
           <mat-form-field appearance="outline">
-            <mat-label>Type</mat-label>
-            <mat-select formControlName="type">
-              <mat-option *ngFor="let option of typeOptions" [value]="option.value">
-                {{ option.label }}
-              </mat-option>
+            <mat-label>Debit Account</mat-label>
+            <mat-select formControlName="debitAccount">
+              <mat-option value="">All</mat-option>
+              <mat-optgroup *ngFor="let category of ['asset', 'expense', 'equity']" [label]="category | titlecase">
+                <mat-option
+                  *ngFor="let account of accountsByCategory[category]"
+                  [value]="account.code"
+                  [disabled]="account.isReadOnly"
+                >
+                  {{ account.name }}
+                </mat-option>
+              </mat-optgroup>
             </mat-select>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Category</mat-label>
-            <mat-select formControlName="category">
-              <mat-option *ngFor="let option of categoryOptions" [value]="option.value">
-                {{ option.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Status</mat-label>
-            <mat-select formControlName="status">
-              <mat-option *ngFor="let option of statusOptions" [value]="option.value">
-                {{ option.label }}
-              </mat-option>
+            <mat-label>Credit Account</mat-label>
+            <mat-select formControlName="creditAccount">
+              <mat-option value="">All</mat-option>
+              <mat-optgroup *ngFor="let category of ['liability', 'revenue', 'equity', 'asset']" [label]="category | titlecase">
+                <mat-option
+                  *ngFor="let account of accountsByCategory[category]"
+                  [value]="account.code"
+                  [disabled]="account.isReadOnly"
+                >
+                  {{ account.name }}
+                </mat-option>
+              </mat-optgroup>
             </mat-select>
           </mat-form-field>
 
@@ -54,6 +59,16 @@
             <input matInput [matDatepicker]="endDatePicker" formControlName="endDate" placeholder="Select end date" />
             <mat-datepicker-toggle matIconSuffix [for]="endDatePicker"></mat-datepicker-toggle>
             <mat-datepicker #endDatePicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Description</mat-label>
+            <input matInput formControlName="description" placeholder="Search description" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Reference Number</mat-label>
+            <input matInput formControlName="referenceNumber" placeholder="Search reference" />
           </mat-form-field>
         </div>
       </mat-card-content>
@@ -71,36 +86,29 @@
       <mat-card-content>
         <div class="table-container">
           <table mat-table [dataSource]="dataSource" class="entries-table">
-            <ng-container matColumnDef="type">
-              <th mat-header-cell *matHeaderCellDef>Type</th>
+            <ng-container matColumnDef="debitAccount">
+              <th mat-header-cell *matHeaderCellDef>Debit Account</th>
               <td mat-cell *matCellDef="let entry">
-                <mat-chip selected class="type-chip">
-                  {{ getTypeLabel(entry.type) }}
+                <mat-chip selected class="debit-chip">
+                  {{ getAccountName(entry.debitAccount) }}
                 </mat-chip>
               </td>
             </ng-container>
 
-            <ng-container matColumnDef="category">
-              <th mat-header-cell *matHeaderCellDef>Category</th>
+            <ng-container matColumnDef="creditAccount">
+              <th mat-header-cell *matHeaderCellDef>Credit Account</th>
               <td mat-cell *matCellDef="let entry">
-                {{ getCategoryLabel(entry.category) }}
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef>Status</th>
-              <td mat-cell *matCellDef="let entry">
-                <mat-chip [color]="getStatusColor(entry.status)" selected>
-                  {{ getStatusLabel(entry.status) }}
+                <mat-chip selected class="credit-chip">
+                  {{ getAccountName(entry.creditAccount) }}
                 </mat-chip>
               </td>
             </ng-container>
 
             <ng-container matColumnDef="amount">
-              <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
+              <th mat-header-cell *matHeaderCellDef class="text-right">Amount (AED)</th>
               <td mat-cell *matCellDef="let entry" class="text-right">
-                <strong [class.positive-amount]="getAmountWithSign(entry) >= 0" [class.negative-amount]="getAmountWithSign(entry) < 0">
-                  {{ getAmountWithSign(entry) >= 0 ? '+' : '-' }}AED {{ Math.abs(getAmountWithSign(entry)) | number: '1.2-2' }}
+                <strong>
+                  AED {{ entry.amount | number: '1.2-2' }}
                 </strong>
               </td>
             </ng-container>
@@ -158,4 +166,3 @@
     </mat-card>
   </section>
 </section>
-

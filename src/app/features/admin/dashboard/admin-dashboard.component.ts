@@ -12,7 +12,7 @@ import { SalesInvoicesService } from '../../../core/services/sales-invoices.serv
 import { LicenseKeysService } from '../../../core/services/license-keys.service';
 import { UploadUsage } from '../../../core/models/license-key.model';
 import { ExpensePaymentsService } from '../../../core/services/expense-payments.service';
-import { JournalEntriesService, JournalEntryStatus } from '../../../core/services/journal-entries.service';
+import { JournalEntriesService, JournalEntryAccount } from '../../../core/services/journal-entries.service';
 
 interface ExpenseSummaryRow {
   category: string;
@@ -409,13 +409,16 @@ export class AdminDashboardComponent implements OnInit {
 
           // Bank journal entries
           const bankJournalEntries = allJournalEntries.filter(
-            entry => entry.status === JournalEntryStatus.BANK_PAID || entry.status === JournalEntryStatus.BANK_RECEIVED
+            entry =>
+              entry.debitAccount === JournalEntryAccount.CASH_BANK ||
+              entry.creditAccount === JournalEntryAccount.CASH_BANK,
           );
-          bankJournalEntries.forEach(entry => {
-            if (entry.status === JournalEntryStatus.BANK_RECEIVED) {
-              bankBalance += parseFloat(entry.amount.toString());
-            } else if (entry.status === JournalEntryStatus.BANK_PAID) {
-              bankBalance -= parseFloat(entry.amount.toString());
+          bankJournalEntries.forEach((entry) => {
+            const amount = parseFloat(entry.amount.toString());
+            if (entry.debitAccount === JournalEntryAccount.CASH_BANK) {
+              bankBalance += amount;
+            } else if (entry.creditAccount === JournalEntryAccount.CASH_BANK) {
+              bankBalance -= amount;
             }
           });
 
@@ -450,13 +453,16 @@ export class AdminDashboardComponent implements OnInit {
 
           // Cash journal entries
           const cashJournalEntries = allJournalEntries.filter(
-            entry => entry.status === JournalEntryStatus.CASH_PAID || entry.status === JournalEntryStatus.CASH_RECEIVED
+            entry =>
+              entry.debitAccount === JournalEntryAccount.CASH_BANK ||
+              entry.creditAccount === JournalEntryAccount.CASH_BANK,
           );
-          cashJournalEntries.forEach(entry => {
-            if (entry.status === JournalEntryStatus.CASH_RECEIVED) {
-              cashBalance += parseFloat(entry.amount.toString());
-            } else if (entry.status === JournalEntryStatus.CASH_PAID) {
-              cashBalance -= parseFloat(entry.amount.toString());
+          cashJournalEntries.forEach((entry) => {
+            const amount = parseFloat(entry.amount.toString());
+            if (entry.debitAccount === JournalEntryAccount.CASH_BANK) {
+              cashBalance += amount;
+            } else if (entry.creditAccount === JournalEntryAccount.CASH_BANK) {
+              cashBalance -= amount;
             }
           });
 
