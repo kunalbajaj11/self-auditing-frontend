@@ -58,6 +58,12 @@ export class OrganizationService {
     });
   }
 
+  changePlanType(id: string, planType: PlanType): Observable<Organization> {
+    return this.api.patch<Organization>(`/organizations/${id}/plan-type`, {
+      planType,
+    });
+  }
+
   isEnterprise(planType: PlanType): boolean {
     return planType === 'enterprise';
   }

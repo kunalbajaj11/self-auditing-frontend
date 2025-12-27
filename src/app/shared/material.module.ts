@@ -26,6 +26,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatTabsModule } from '@angular/material/tabs';
 
 const MATERIAL_MODULES = [
   MatButtonModule,
@@ -55,6 +56,7 @@ const MATERIAL_MODULES = [
   MatButtonToggleModule,
   MatAutocompleteModule,
   MatExpansionModule,
+  MatTabsModule,
 ];
 
 @NgModule({

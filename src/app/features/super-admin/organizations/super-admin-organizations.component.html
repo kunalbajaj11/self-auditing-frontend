@@ -123,11 +123,10 @@
                 mat-stroked-button
                 color="accent"
                 (click)="upgradeLicense(org)"
-                [disabled]="org.planType === 'enterprise'"
-                matTooltip="Upgrade to a higher license tier"
+                matTooltip="Change plan type or upgrade using license key"
               >
                 <mat-icon>upgrade</mat-icon>
-                Upgrade License
+                Change Plan / Upgrade
               </button>
               <button
                 mat-stroked-button

@@ -18,6 +18,7 @@ import {
 import {
   UpgradeLicenseDialogComponent,
   UpgradeLicenseDialogData,
+  UpgradeLicenseResult,
 } from './upgrade-license-dialog.component';
 import {
   AllocateUploadsDialogComponent,
@@ -99,40 +100,68 @@ export class SuperAdminOrganizationsComponent implements OnInit {
     const dialogRef = this.dialog.open<
       UpgradeLicenseDialogComponent,
       UpgradeLicenseDialogData,
-      string | null
+      UpgradeLicenseResult | null
     >(UpgradeLicenseDialogComponent, {
-      width: '480px',
+      width: '600px',
       data: {
         organizationName: org.name,
         currentPlanType: org.planType as PlanType,
       },
     });
 
-    dialogRef.afterClosed().subscribe((licenseKey) => {
-      if (licenseKey) {
-        this.organizationService.upgradeLicense(org.id, licenseKey).subscribe({
-          next: (updated) => {
-            org.planType = updated.planType;
-            if (updated.storageQuotaMb) {
-              // Update storage quota if available in the response
-            }
-            this.snackBar.open(
-              `License upgraded successfully to ${updated.planType}`,
-              'Close',
-              { duration: 3000 },
-            );
-            this.dataSource.data = [...this.dataSource.data];
-          },
-          error: (error) => {
-            const message =
-              error?.error?.message ??
-              'Failed to upgrade license. Please check the license key and try again.';
-            this.snackBar.open(message, 'Close', {
-              duration: 4000,
-              panelClass: ['snack-error'],
-            });
-          },
-        });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        if (result.method === 'direct' && result.planType) {
+          // Direct plan type change
+          this.organizationService.changePlanType(org.id, result.planType).subscribe({
+            next: (updated) => {
+              org.planType = updated.planType;
+              if (updated.storageQuotaMb) {
+                // Update storage quota if available in the response
+              }
+              this.snackBar.open(
+                `Plan type changed successfully to ${updated.planType}`,
+                'Close',
+                { duration: 3000 },
+              );
+              this.dataSource.data = [...this.dataSource.data];
+            },
+            error: (error) => {
+              const message =
+                error?.error?.message ??
+                'Failed to change plan type. Please try again.';
+              this.snackBar.open(message, 'Close', {
+                duration: 4000,
+                panelClass: ['snack-error'],
+              });
+            },
+          });
+        } else if (result.method === 'licenseKey' && result.licenseKey) {
+          // License key upgrade
+          this.organizationService.upgradeLicense(org.id, result.licenseKey).subscribe({
+            next: (updated) => {
+              org.planType = updated.planType;
+              if (updated.storageQuotaMb) {
+                // Update storage quota if available in the response
+              }
+              this.snackBar.open(
+                `License upgraded successfully to ${updated.planType}`,
+                'Close',
+                { duration: 3000 },
+              );
+              this.dataSource.data = [...this.dataSource.data];
+            },
+            error: (error) => {
+              const message =
+                error?.error?.message ??
+                'Failed to upgrade license. Please check the license key and try again.';
+              this.snackBar.open(message, 'Close', {
+                duration: 4000,
+                panelClass: ['snack-error'],
+              });
+            },
+          });
+        }
       }
     });
   }
