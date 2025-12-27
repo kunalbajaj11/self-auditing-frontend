@@ -1,33 +1,68 @@
 .invoice-preview-container {
-  padding: 8px 10px;
-  background: #f5f5f5;
+  padding: 24px;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
   min-height: 100vh;
 
   .preview-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
-    padding: 8px 10px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 32px;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+    border: 1px solid rgba(15, 23, 42, 0.08);
 
     .back-button {
       display: flex;
       align-items: center;
       gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      color: #475569;
+      border-color: #cbd5e1;
+      transition: all 0.2s ease;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+
+      &:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+        color: #0f172a;
+        transform: translateX(-2px);
+      }
     }
 
     .actions {
       display: flex;
       gap: 12px;
+
+      button {
+        border-radius: 8px;
+        font-weight: 500;
+        padding: 8px 20px;
+        height: 40px;
+
+        mat-icon {
+          margin-right: 6px;
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
     }
   }
 
   .loading-container,
   .error-container {
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -35,10 +70,17 @@
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-height: 400px;
 
     p {
       margin-top: 16px;
       color: #666;
+      font-size: 16px;
+    }
+
+    mat-progress-spinner {
+      display: block !important;
+      visibility: visible !important;
     }
   }
 
@@ -52,74 +94,115 @@
   }
 
   .invoice-preview {
-    display: flex;
+    display: flex !important;
     justify-content: center;
     padding: 24px 0;
+    visibility: visible !important;
 
     .invoice-paper {
       background: white;
       width: 100%;
       max-width: 210mm; // A4 width
       min-height: 297mm; // A4 height
-      padding: 40px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-      border-top: 4px solid;
-      font-family: 'Helvetica', 'Arial', sans-serif;
-      color: #1a1a1a;
+      padding: 48px 56px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+      border-top: 6px solid;
+      border-radius: 4px;
+      font-family: 'Inter', 'Helvetica Neue', 'Arial', sans-serif;
+      color: #0f172a;
+      position: relative;
+      overflow: hidden;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, currentColor 0%, currentColor 100%);
+      }
 
       .invoice-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 32px;
-        padding-bottom: 24px;
-        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 40px;
+        padding-bottom: 32px;
+        border-bottom: 2px solid #e2e8f0;
+        position: relative;
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          width: 120px;
+          height: 2px;
+          background: currentColor;
+        }
 
         .logo-section {
           flex: 0 0 auto;
 
           .company-logo {
-            max-width: 120px;
-            max-height: 120px;
+            max-width: 140px;
+            max-height: 140px;
             object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
           }
         }
 
         .header-text-section {
           flex: 1;
-          text-align: center;
+          text-align: right;
 
           .invoice-title {
-            font-size: 28px;
-            font-weight: bold;
-            margin: 0 0 8px 0;
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0 0 12px 0;
             text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.2;
           }
 
           .header-text {
-            font-size: 14px;
-            color: #666;
+            font-size: 13px;
+            color: #64748b;
             margin: 0;
+            font-weight: 500;
+            letter-spacing: 0.5px;
           }
         }
       }
 
       .company-details {
-        margin-bottom: 24px;
+        margin-bottom: 32px;
+        padding: 20px 24px;
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+        border-radius: 8px;
+        border-left: 4px solid currentColor;
 
         .company-info {
           h3 {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0 0 8px 0;
-            color: #1a1a1a;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 12px 0;
+            color: #0f172a;
+            letter-spacing: -0.02em;
           }
 
           p {
-            margin: 4px 0;
-            font-size: 12px;
-            color: #666;
-            line-height: 1.6;
+            margin: 6px 0;
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.7;
+            font-weight: 500;
+
+            &:first-of-type {
+              font-weight: 600;
+              color: #0f172a;
+            }
           }
         }
       }
@@ -127,28 +210,40 @@
       .invoice-details-section {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 32px;
-        padding: 8px 10px;
-        background: #fafafa;
-        border-radius: 4px;
+        margin-bottom: 40px;
+        padding: 24px 28px;
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
         .invoice-meta {
           flex: 1;
 
           .meta-row {
             display: flex;
-            margin-bottom: 8px;
-            font-size: 13px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            align-items: baseline;
+
+            &:last-child {
+              margin-bottom: 0;
+            }
 
             .meta-label {
               font-weight: 600;
-              margin-right: 8px;
-              color: #666;
-              min-width: 120px;
+              margin-right: 12px;
+              color: #64748b;
+              min-width: 140px;
+              font-size: 13px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
             }
 
             .meta-value {
-              color: #1a1a1a;
+              color: #0f172a;
+              font-weight: 600;
+              font-size: 14px;
             }
           }
         }
@@ -156,60 +251,100 @@
         .customer-info {
           flex: 1;
           text-align: right;
+          padding-left: 32px;
+          border-left: 1px solid #e2e8f0;
 
           h3 {
-            font-size: 14px;
-            font-weight: 600;
-            margin: 0 0 8px 0;
-            color: #666;
+            font-size: 12px;
+            font-weight: 700;
+            margin: 0 0 12px 0;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
           }
 
           .customer-name {
-            font-size: 16px;
-            font-weight: 600;
-            margin: 0 0 4px 0;
-            color: #1a1a1a;
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: #0f172a;
+            letter-spacing: -0.01em;
           }
 
           p {
-            margin: 4px 0;
-            font-size: 12px;
-            color: #666;
+            margin: 6px 0;
+            font-size: 13px;
+            color: #475569;
+            font-weight: 500;
           }
         }
       }
 
       .line-items-section {
-        margin-bottom: 32px;
+        margin-bottom: 40px;
 
         .line-items-table {
           width: 100%;
-          border-collapse: collapse;
-          font-size: 12px;
+          border-collapse: separate;
+          border-spacing: 0;
+          font-size: 13px;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          overflow: hidden;
 
           thead {
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
 
             th {
-              padding: 12px 8px;
+              padding: 16px 14px;
               text-align: left;
-              font-weight: 600;
-              color: #1a1a1a;
-              border-bottom: 2px solid #e0e0e0;
+              font-weight: 700;
+              color: #ffffff;
+              border-bottom: 2px solid #334155;
+              font-size: 11px;
+              text-transform: uppercase;
+              letter-spacing: 0.8px;
+
+              &:first-child {
+                padding-left: 20px;
+              }
+
+              &:last-child {
+                padding-right: 20px;
+                text-align: right;
+              }
             }
           }
 
           tbody {
             tr {
-              border-bottom: 1px solid #f0f0f0;
+              border-bottom: 1px solid #f1f5f9;
+              transition: background-color 0.2s ease;
 
               &:hover {
-                background: #fafafa;
+                background: #f8fafc;
+              }
+
+              &:last-child {
+                border-bottom: none;
               }
 
               td {
-                padding: 10px 8px;
-                color: #1a1a1a;
+                padding: 14px;
+                color: #0f172a;
+                font-weight: 500;
+
+                &:first-child {
+                  padding-left: 20px;
+                  font-weight: 600;
+                }
+
+                &:last-child {
+                  padding-right: 20px;
+                  text-align: right;
+                  font-weight: 700;
+                  font-family: 'SF Mono', 'Monaco', monospace;
+                }
               }
             }
           }
@@ -217,32 +352,62 @@
       }
 
       .totals-section {
-        margin-bottom: 32px;
-        padding-top: 16px;
-        border-top: 2px solid #e0e0e0;
+        margin-bottom: 40px;
+        padding: 24px 28px;
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
         .totals-row {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 8px;
+          align-items: center;
+          margin-bottom: 12px;
           font-size: 14px;
+          padding: 8px 0;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
 
           .totals-label {
-            font-weight: 500;
-            color: #666;
+            font-weight: 600;
+            color: #475569;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
           }
 
           .totals-value {
-            font-weight: 600;
-            color: #1a1a1a;
+            font-weight: 700;
+            color: #0f172a;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 14px;
           }
 
           &.total-line {
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid #e0e0e0;
-            font-size: 18px;
-            font-weight: bold;
+            margin-top: 16px;
+            padding-top: 20px;
+            border-top: 2px solid #cbd5e1;
+            background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+            border-radius: 8px;
+            padding-left: 16px;
+            padding-right: 16px;
+            margin-left: -16px;
+            margin-right: -16px;
+
+            .totals-label {
+              font-size: 16px;
+              color: #0f172a;
+              font-weight: 700;
+            }
+
+            .totals-value {
+              font-size: 24px;
+              font-weight: 800;
+              letter-spacing: -0.02em;
+            }
           }
         }
       }
@@ -250,63 +415,147 @@
       .notes-section,
       .bank-details-section,
       .terms-section {
-        margin-bottom: 24px;
-        padding: 8px 10px;
-        background: #fafafa;
-        border-radius: 4px;
+        margin-bottom: 32px;
+        padding: 20px 24px;
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+        border-radius: 8px;
+        border-left: 4px solid currentColor;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
         h4 {
-          font-size: 14px;
-          font-weight: 600;
-          margin: 0 0 8px 0;
-          color: #1a1a1a;
+          font-size: 13px;
+          font-weight: 700;
+          margin: 0 0 12px 0;
+          color: #0f172a;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
         p {
-          margin: 4px 0;
-          font-size: 12px;
-          color: #666;
-          line-height: 1.6;
+          margin: 8px 0;
+          font-size: 13px;
+          color: #475569;
+          line-height: 1.8;
           white-space: pre-wrap;
+          font-weight: 500;
         }
       }
 
       .invoice-footer {
-        margin-top: 48px;
-        padding-top: 16px;
-        border-top: 1px solid #e0e0e0;
+        margin-top: 56px;
+        padding-top: 24px;
+        border-top: 2px solid #e2e8f0;
         text-align: center;
+        position: relative;
+
+        &::before {
+          content: '';
+          position: absolute;
+          top: -2px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 80px;
+          height: 2px;
+          background: currentColor;
+        }
 
         p {
-          font-size: 10px;
-          color: #999;
+          font-size: 11px;
+          color: #94a3b8;
           margin: 0;
+          font-weight: 500;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
         }
       }
     }
   }
 }
 
-// Print styles
+// Print styles - Hide all UI elements and show only invoice
 @media print {
+  // Hide all application UI elements
+  app-shell,
+  mat-sidenav,
+  mat-sidenav-container,
+  mat-sidenav-content,
+  .side-nav,
+  .top-bar,
+  mat-toolbar,
+  .content-area,
+  .spacer,
+  .user-chip,
+  button,
+  .mat-mdc-button,
+  .mat-mdc-raised-button,
+  .mat-mdc-stroked-button {
+    display: none !important;
+  }
+
+  // Hide loading and error states
+  .loading-container,
+  .error-container {
+    display: none !important;
+  }
+
+  // Invoice preview container
   .invoice-preview-container {
-    padding: 0;
-    background: white;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+    min-height: auto !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
 
     .preview-header {
-      display: none;
+      display: none !important;
     }
 
     .invoice-preview {
-      padding: 0;
+      padding: 0 !important;
+      margin: 0 !important;
+      display: block !important;
 
       .invoice-paper {
-        box-shadow: none;
-        border: none;
-        max-width: 100%;
-        min-height: auto;
+        box-shadow: none !important;
+        border: none !important;
+        max-width: 100% !important;
+        min-height: auto !important;
+        padding: 20mm 15mm !important;
+        margin: 0 !important;
+        page-break-after: auto;
+        page-break-inside: avoid;
+
+        // Ensure proper page breaks
+        .line-items-section {
+          page-break-inside: avoid;
+        }
+
+        .totals-section {
+          page-break-inside: avoid;
+        }
       }
     }
+  }
+
+  // Ensure body and html are clean for printing
+  body,
+  html {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  // Hide any dialogs or overlays
+  .cdk-overlay-container,
+  .mat-mdc-dialog-container,
+  .mat-mdc-menu-panel {
+    display: none !important;
   }
 }
 

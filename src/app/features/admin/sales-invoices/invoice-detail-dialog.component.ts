@@ -135,9 +135,6 @@ export class InvoiceDetailDialogComponent implements OnInit {
     });
   }
 
-  printInvoice(): void {
-    window.print();
-  }
 
   downloadPDF(): void {
     if (!this.invoice) return;

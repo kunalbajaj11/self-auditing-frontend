@@ -60,11 +60,207 @@
   gap: 12px;
   margin-bottom: 12px;
   align-items: center;
+  align-content: center;
   padding: 0 20px;
+  
+  > * {
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+  }
+
+  mat-checkbox {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    align-self: center !important;
+    white-space: nowrap !important;
+    
+    ::ng-deep {
+      .mdc-checkbox {
+        height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        flex-shrink: 0 !important;
+      }
+      
+      .mdc-form-field {
+        display: flex !important;
+        align-items: center !important;
+        height: 40px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        min-height: 40px !important;
+        gap: 8px !important;
+        white-space: nowrap !important;
+      }
+      
+      .mdc-form-field__label {
+        margin: 0 !important;
+        padding: 0 !important;
+        margin-left: 8px !important;
+        white-space: nowrap !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        line-height: 1.2 !important;
+      }
+      
+      // Ensure checkbox and label don't overlap
+      .mdc-checkbox__background {
+        flex-shrink: 0 !important;
+      }
+    }
+  }
 
   .search-field {
     flex: 1;
     max-width: 400px;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-self: center !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+
+    ::ng-deep {
+      // High specificity override for search field
+      &.search-field .mat-mdc-form-field,
+      .mat-mdc-form-field {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        
+        .mat-mdc-text-field-wrapper {
+          padding: 0 !important;
+          margin: 0 !important;
+          min-height: 40px !important;
+          max-height: 40px !important;
+          height: 40px !important;
+          display: flex !important;
+          align-items: center !important;
+        }
+
+        .mat-mdc-form-field-infix {
+          padding-top: 12px !important;
+          padding-bottom: 4px !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          min-height: 40px !important;
+          max-height: 40px !important;
+          height: 40px !important;
+          box-sizing: border-box !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 0 !important;
+          position: relative !important;
+          overflow: visible !important;
+        }
+        
+        // Target the prefix container directly
+        .mdc-text-field__prefix {
+          padding-right: 12px !important;
+          margin-right: 0 !important;
+        }
+
+        .mat-mdc-form-field-label {
+          font-size: 0.75rem !important;
+        }
+
+        .mat-mdc-form-field-label-wrapper {
+          top: 0 !important;
+          padding-top: 0 !important;
+        }
+
+        // Input base styles - ensure proper spacing from icon
+        input.mat-mdc-input-element,
+        .mdc-text-field__input {
+          font-size: 0.8rem !important;
+          line-height: 20px !important;
+          padding-top: 0 !important;
+          padding-right: 12px !important;
+          padding-bottom: 0 !important;
+          padding-left: 40px !important; // Always add left padding when icon exists
+          margin: 0 !important;
+          height: 20px !important;
+          margin-top: 0 !important;
+          margin-bottom: 0 !important;
+          box-sizing: border-box !important;
+          border: none !important;
+          outline: none !important;
+          background: transparent !important;
+          display: block !important;
+          width: 100% !important;
+          
+          &::placeholder {
+            line-height: 20px !important;
+            padding-left: 0 !important; // Placeholder doesn't need extra padding
+          }
+        }
+
+        .mat-mdc-form-field-subscript-wrapper {
+          display: none !important;
+        }
+
+        // Icon prefix - Position absolutely to prevent collision
+        &.search-field .mat-mdc-form-field-icon-prefix,
+        .mat-mdc-form-field-icon-prefix,
+        [matPrefix],
+        .mdc-text-field__prefix {
+          position: absolute !important;
+          left: 12px !important;
+          top: 50% !important;
+          transform: translateY(-50%) !important;
+          margin: 0 !important;
+          width: 20px !important;
+          min-width: 20px !important;
+          max-width: 20px !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          flex-shrink: 0 !important;
+          padding: 0 !important;
+          z-index: 1 !important;
+          pointer-events: none !important;
+          
+          mat-icon,
+          .mat-icon,
+          .mdc-icon {
+            font-size: 18px !important;
+            width: 18px !important;
+            height: 18px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: block !important;
+            color: #64748b !important;
+          }
+        }
+        
+        // Also target the Material Design prefix wrapper
+        .mdc-text-field__prefix {
+          position: absolute !important;
+          left: 12px !important;
+          top: 50% !important;
+          transform: translateY(-50%) !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+        
+
+        .mat-mdc-form-field-icon-suffix {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+      }
+    }
   }
 }
 

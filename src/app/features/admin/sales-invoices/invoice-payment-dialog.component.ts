@@ -74,29 +74,44 @@ export class InvoicePaymentDialogComponent implements OnInit {
         preSelectedInvoice: this.invoicesService.getInvoice(preSelectInvoiceId),
       }).subscribe({
         next: ({ invoices, preSelectedInvoice }) => {
+          console.log('Loaded invoices:', invoices.length);
+          console.log('Pre-selected invoice:', preSelectedInvoice);
           this.processInvoices(invoices, preSelectedInvoice, preSelectInvoiceId);
         },
         error: (error) => {
           console.error('Failed to load invoices:', error);
           this.loadingInvoices = false;
-          this.snackBar.open('Failed to load invoices', 'Close', {
-            duration: 4000,
-            panelClass: ['snack-error'],
-          });
+          this.snackBar.open(
+            `Failed to load invoices: ${error?.error?.message || error?.message || 'Unknown error'}`,
+            'Close',
+            {
+              duration: 5000,
+              panelClass: ['snack-error'],
+            }
+          );
         },
       });
     } else {
       invoicesLoad$.subscribe({
         next: (invoices) => {
+          console.log('Loaded invoices:', invoices.length);
+          if (invoices.length > 0) {
+            console.log('Sample invoice:', invoices[0]);
+            console.log('Credit note applications in sample:', (invoices[0] as any).creditNoteApplications);
+          }
           this.processInvoices(invoices, null, undefined);
         },
         error: (error) => {
           console.error('Failed to load invoices:', error);
           this.loadingInvoices = false;
-          this.snackBar.open('Failed to load invoices', 'Close', {
-            duration: 4000,
-            panelClass: ['snack-error'],
-          });
+          this.snackBar.open(
+            `Failed to load invoices: ${error?.error?.message || error?.message || 'Unknown error'}`,
+            'Close',
+            {
+              duration: 5000,
+              panelClass: ['snack-error'],
+            }
+          );
         },
       });
     }
@@ -108,14 +123,23 @@ export class InvoicePaymentDialogComponent implements OnInit {
     preSelectInvoiceId?: string,
   ): void {
     // Filter invoices with outstanding balance > 0
-    // Note: This calculation doesn't account for credit notes, but backend will validate
+    // Calculate outstanding: totalAmount - paidAmount - appliedCreditNoteAmount
     const invoicesWithOutstanding: InvoiceWithOutstanding[] = invoices
       .map(invoice => {
         const totalAmount = parseFloat(invoice.totalAmount || '0');
         const paidAmount = parseFloat(invoice.paidAmount || '0');
-        // Calculate outstanding: totalAmount - paidAmount
-        // Note: Credit notes are not included here, but backend validates the actual outstanding balance
-        const outstanding = Math.max(0, totalAmount - paidAmount);
+        
+        // Calculate applied credit note amount
+        let appliedCreditAmount = 0;
+        if ((invoice as any).creditNoteApplications && Array.isArray((invoice as any).creditNoteApplications)) {
+          appliedCreditAmount = (invoice as any).creditNoteApplications.reduce(
+            (sum: number, app: any) => sum + parseFloat(app.appliedAmount || '0'),
+            0
+          );
+        }
+        
+        // Calculate outstanding: totalAmount - paidAmount - appliedCreditNoteAmount
+        const outstanding = Math.max(0, totalAmount - paidAmount - appliedCreditAmount);
         
         return {
           ...invoice,
@@ -123,6 +147,8 @@ export class InvoicePaymentDialogComponent implements OnInit {
         } as InvoiceWithOutstanding;
       })
       .filter(inv => inv.outstandingAmount > 0.01); // Only include invoices with outstanding balance
+    
+    console.log(`Found ${invoicesWithOutstanding.length} invoices with outstanding balance out of ${invoices.length} total invoices`);
     
     // If we have a pre-selected invoice, calculate its outstanding balance correctly
     if (preSelectedInvoice) {

@@ -1,19 +1,25 @@
 mat-dialog-content {
   min-width: 600px;
   max-width: 700px;
-  padding: 8px 10px;
+  padding: 16px 20px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .payment-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .form-section {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  
+  &:first-child {
+    margin-bottom: 8px;
+  }
 }
 
 .section-title {
@@ -25,6 +31,19 @@ mat-dialog-content {
 
 .full-width {
   width: 100%;
+}
+
+// Invoice Selection Section - Always visible
+.form-section:first-child {
+  display: flex !important;
+  flex-direction: column;
+  gap: 16px;
+  
+  mat-form-field {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
 }
 
 // Invoice Selection Dropdown
@@ -185,9 +204,10 @@ mat-dialog-content {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 32px 20px;
+  padding: 40px 20px;
   text-align: center;
   color: #64748b;
+  margin-top: 16px;
 
   mat-icon {
     font-size: 64px;
@@ -200,12 +220,14 @@ mat-dialog-content {
 
   p {
     margin: 8px 0;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     color: #64748b;
+    font-weight: 500;
 
     &.empty-state-hint {
       font-size: 0.75rem;
       color: #94a3b8;
+      font-weight: 400;
     }
   }
 }
@@ -217,9 +239,127 @@ mat-dialog-content {
   vertical-align: middle;
 }
 
-// Form Field Spacing
+// Form Field Spacing and Alignment
 mat-form-field {
   margin-bottom: 8px;
+  
+  ::ng-deep {
+    .mat-mdc-form-field {
+      width: 100% !important;
+      
+      .mat-mdc-text-field-wrapper {
+        min-height: 40px !important;
+        max-height: 40px !important;
+        height: 40px !important;
+      }
+
+      .mat-mdc-form-field-infix {
+        padding-top: 12px !important;
+        padding-bottom: 4px !important;
+        min-height: 40px !important;
+        max-height: 40px !important;
+        height: 40px !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        align-items: center !important;
+      }
+
+      .mat-mdc-form-field-label {
+        font-size: 0.75rem !important;
+      }
+
+      input.mat-mdc-input-element,
+      .mdc-text-field__input {
+        font-size: 0.875rem !important;
+        line-height: 1.5 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        height: 20px !important;
+        box-sizing: border-box !important;
+      }
+
+      .mat-mdc-select-trigger {
+        font-size: 0.875rem !important;
+        line-height: 1.5 !important;
+        padding: 0 !important;
+        height: 20px !important;
+        display: flex !important;
+        align-items: center !important;
+      }
+
+      .mat-mdc-select {
+        height: 20px !important;
+        display: flex !important;
+        align-items: center !important;
+      }
+      
+      .mat-mdc-select-value {
+        line-height: 1.5 !important;
+        display: inline-block !important;
+      }
+      
+      .mat-mdc-select-value-text {
+        line-height: 1.5 !important;
+        display: inline-block !important;
+      }
+      
+      // Ensure select panel is visible
+      .mat-mdc-select-panel {
+        max-height: 300px !important;
+      }
+
+      textarea.mat-mdc-input-element {
+        font-size: 0.875rem !important;
+        line-height: 1.5 !important;
+        padding: 6px 0 !important;
+        margin: 0 !important;
+        min-height: 60px !important;
+        resize: vertical !important;
+      }
+
+      .mat-datepicker-toggle {
+        .mat-icon-button {
+          width: 24px !important;
+          height: 24px !important;
+          padding: 0 !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+
+          .mat-icon {
+            font-size: 16px !important;
+            width: 16px !important;
+            height: 16px !important;
+            line-height: 1 !important;
+          }
+        }
+      }
+
+      .mat-mdc-form-field-subscript-wrapper {
+        margin-top: 2px !important;
+      }
+    }
+  }
+}
+
+// Dialog Actions
+mat-dialog-actions {
+  padding: 16px 20px !important;
+  margin: 0 !important;
+  border-top: 1px solid #e2e8f0;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 12px !important;
+  
+  button {
+    min-width: 100px;
+    height: 40px !important;
+    
+    mat-spinner {
+      margin-right: 8px;
+    }
+  }
 }
 
 // Responsive adjustments
@@ -227,7 +367,17 @@ mat-form-field {
   mat-dialog-content {
     min-width: auto;
     max-width: 100%;
-    padding: 8px 10px;
+    padding: 16px 16px;
+  }
+  
+  mat-dialog-actions {
+    padding: 12px 16px !important;
+    flex-direction: column-reverse !important;
+    
+    button {
+      width: 100%;
+      margin: 0 !important;
+    }
   }
 
   .invoice-option {

@@ -792,13 +792,23 @@ export class ExpenseFormDialogComponent implements OnInit {
     });
   }
 
-  onVendorSelected(vendor: Vendor): void {
+  onVendorSelected(vendor: Vendor | null): void {
+    if (!vendor) {
+      this.selectedVendor = null;
+      this.form.patchValue({
+        vendorId: '',
+        vendorTrn: '',
+      }, { emitEvent: false });
+      return;
+    }
+    
     this.selectedVendor = vendor;
+    // Auto-populate vendor TRN when vendor is selected
     this.form.patchValue({
       vendorId: vendor.id,
       vendorName: vendor.name,
       vendorTrn: vendor.vendorTrn || '',
-    });
+    }, { emitEvent: false });
   }
 
   displayVendor(vendor: Vendor | string | null): string {

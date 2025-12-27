@@ -1,16 +1,12 @@
-<h2 mat-dialog-title>
-  {{ data ? 'Edit Credit Note' : 'Create Credit Note' }}
-</h2>
-
 <mat-dialog-content class="credit-note-form-content">
-  <form [formGroup]="form" style="margin: 24px;">
+  <form [formGroup]="form" class="credit-note-form">
     <!-- Header Section -->
     <div class="form-section">
-      <h3>Credit Note Details</h3>
+      <h2 class="form-heading">{{ data ? 'Edit Credit Note' : 'Create Credit Note' }}</h2>
       <div class="form-row">
-        <mat-form-field appearance="outline" class="flex-2">
+        <mat-form-field appearance="outline" class="flex-2 related-invoice-field">
           <mat-label>Related Invoice (Optional)</mat-label>
-          <mat-select formControlName="invoiceId" (selectionChange)="onInvoiceChange($event.value)">
+          <mat-select formControlName="invoiceId" (selectionChange)="onInvoiceChange($event.value)" [disableOptionCentering]="true">
             <mat-option [value]="null">No Invoice</mat-option>
             <mat-option *ngFor="let invoice of invoices" [value]="invoice.id">
               {{ invoice.invoiceNumber }} - {{ invoice.customerName || 'N/A' }} ({{ invoice.totalAmount | number: '1.2-2' }} {{ invoice.currency }})
@@ -76,7 +72,7 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="flex-1">
+        <mat-form-field appearance="outline" class="flex-1 vat-amount-field">
           <mat-label>VAT Amount</mat-label>
           <input matInput type="number" formControlName="vatAmount" step="0.01" min="0" />
           <span matSuffix>{{ form.get('currency')?.value }}</span>

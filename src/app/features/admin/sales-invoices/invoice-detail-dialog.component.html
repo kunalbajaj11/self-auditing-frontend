@@ -122,18 +122,6 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end" *ngIf="!loading && invoice">
-    <button mat-raised-button color="primary" (click)="previewInvoice()">
-      <mat-icon>visibility</mat-icon>
-      Preview
-    </button>
-    <button mat-button (click)="downloadPDF()" [disabled]="loading">
-      <mat-icon>download</mat-icon>
-      Download PDF
-    </button>
-    <button mat-button (click)="printInvoice()">
-      <mat-icon>print</mat-icon>
-      Print Invoice
-    </button>
     <button mat-button (click)="close()">Close</button>
     <button
       mat-button
@@ -143,12 +131,21 @@
       <mat-icon>email</mat-icon>
       Send Email
     </button>
+    <button mat-button (click)="downloadPDF()" [disabled]="loading">
+      <mat-icon>download</mat-icon>
+      Download PDF
+    </button>
+    <button mat-raised-button color="primary" (click)="previewInvoice()">
+      <mat-icon>visibility</mat-icon>
+      Preview
+    </button>
     <button
       mat-raised-button
       color="primary"
       (click)="openPaymentDialog()"
       *ngIf="outstandingAmount > 0 && invoice.paymentStatus !== 'paid'"
     >
+      <mat-icon>payment</mat-icon>
       Record Payment
     </button>
   </mat-dialog-actions>

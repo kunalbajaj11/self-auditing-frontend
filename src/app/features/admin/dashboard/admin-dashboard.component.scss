@@ -53,49 +53,87 @@
     min-width: 0;
 
     mat-card-content {
-      padding: 8px 10px;
+      padding: 4px 10px;
       margin: 0;
     }
 
     .date-range-controls {
       display: flex;
-      align-items: flex-end;
+      align-items: flex-start;
       gap: 8px;
       flex-wrap: nowrap;
+      
+      > * {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+      }
 
       .preset-field,
       .date-field {
         min-width: 130px;
         width: 130px;
-        margin-bottom: 0;
+        margin-bottom: 0 !important;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        display: flex;
+        flex-direction: column;
+        align-self: flex-start;
+        
+        ::ng-deep .mat-mdc-form-field {
+          height: auto !important;
+          margin: 0 !important;
+        }
       }
 
       ::ng-deep {
         .mat-mdc-form-field {
+            margin-bottom: 0 !important;
+            margin-top: 0 !important;
+            height: auto !important;
+            
             .mat-mdc-text-field-wrapper {
-              padding-bottom: 0;
+              padding-bottom: 0 !important;
+              padding-top: 0 !important;
+              min-height: 40px !important;
+              max-height: 40px !important;
+              height: 40px !important;
             }
 
             .mat-mdc-form-field-infix {
-              padding-top: 20px !important;
-              padding-bottom: 8px !important;
-              min-height: 56px !important;
+              padding-top: 12px !important;
+              padding-bottom: 4px !important;
+              min-height: 40px !important;
+              max-height: 40px !important;
+              height: 40px !important;
               box-sizing: border-box !important;
+              display: flex !important;
+              align-items: center !important;
             }
 
-          .mat-mdc-form-field-label {
-            font-size: 0.75rem !important;
-          }
+            .mat-mdc-form-field-label-wrapper {
+              top: 0 !important;
+              padding-top: 0 !important;
+              margin-top: 0 !important;
+            }
+
+            .mat-mdc-form-field-label {
+              font-size: 0.75rem !important;
+              top: 0 !important;
+              margin-top: 0 !important;
+            }
 
             input,
             .mdc-text-field__input {
               font-size: 0.8rem !important;
-              line-height: 1.5 !important;
+              line-height: 20px !important;
               padding: 0 !important;
               margin: 0 !important;
               height: 20px !important;
               margin-top: 0 !important;
               padding-top: 0 !important;
+              margin-bottom: 0 !important;
+              padding-bottom: 0 !important;
               box-sizing: border-box !important;
               border: none !important;
               outline: none !important;
@@ -107,6 +145,8 @@
                 white-space: nowrap !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
+                line-height: 20px !important;
+                opacity: 0.6 !important;
               }
             }
 
@@ -116,18 +156,32 @@
               padding: 0 !important;
               height: 20px !important;
               margin-top: 0 !important;
+              padding-top: 0 !important;
+              margin-bottom: 0 !important;
+              padding-bottom: 0 !important;
+              display: flex !important;
+              align-items: center !important;
+              vertical-align: middle !important;
+            }
+
+            .mat-mdc-select {
+              height: 20px !important;
               display: flex !important;
               align-items: center !important;
             }
 
             .mat-mdc-select-value {
               line-height: 1.5 !important;
-              display: inline-block !important;
+              display: flex !important;
+              align-items: center !important;
+              height: 20px !important;
             }
 
             .mat-mdc-select-value-text {
               line-height: 1.5 !important;
-              display: inline-block !important;
+              display: flex !important;
+              align-items: center !important;
+              height: 20px !important;
             }
         }
 
@@ -138,21 +192,53 @@
         .mat-mdc-select {
           font-size: 0.8rem !important;
           line-height: 1.5 !important;
+          height: 20px !important;
+          display: flex !important;
+          align-items: center !important;
+        }
+
+        .mat-mdc-select-arrow-wrapper {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          height: 20px !important;
+          width: 20px !important;
+          flex-shrink: 0 !important;
+        }
+
+        .mat-mdc-select-arrow {
+          width: 16px !important;
+          height: 16px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
         }
 
         .mat-datepicker-toggle {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          height: 100% !important;
+          margin-left: 4px !important;
+
           .mat-icon-button {
-            width: 28px !important;
-            height: 28px !important;
+            width: 24px !important;
+            height: 24px !important;
+            padding: 0 !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
+            flex-shrink: 0 !important;
+            line-height: 1 !important;
 
             .mat-icon {
               font-size: 16px !important;
               width: 16px !important;
               height: 16px !important;
               line-height: 1 !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
             }
           }
         }
@@ -388,11 +474,11 @@
 
     th {
       font-weight: 700;
-      font-size: 0.75rem;
+      font-size: 0.65rem;
       color: #475569;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      padding: 8px 10px;
+      padding: 6px 8px;
       border-bottom: 2px solid rgba(15, 23, 42, 0.08);
 
       &.text-right {
@@ -409,9 +495,11 @@
     }
 
     td {
-      padding: 8px 10px;
+      padding: 6px 8px;
       border-bottom: 1px solid rgba(15, 23, 42, 0.06);
       color: #0f172a;
+      font-size: 0.7rem;
+      line-height: 1.4;
 
       &.text-right {
         text-align: right;
@@ -421,6 +509,7 @@
       strong {
         font-weight: 700;
         color: #0f172a;
+        font-size: 0.7rem;
       }
     }
   }
@@ -428,21 +517,21 @@
   .category-cell {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
 
     strong {
       font-weight: 600;
       color: #0f172a;
-      font-size: 0.95rem;
+      font-size: 0.7rem;
     }
 
     .type-badge {
       display: inline-block;
-      padding: 4px 10px;
+      padding: 2px 6px;
       background: rgba(30, 58, 138, 0.1);
       color: #1e3a8a;
-      border-radius: 6px;
-      font-size: 0.75rem;
+      border-radius: 4px;
+      font-size: 0.6rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -452,8 +541,8 @@
 
   .status-chip-large {
     font-weight: 600;
-    padding: 6px 14px;
-    font-size: 0.75rem;
+    padding: 4px 10px;
+    font-size: 0.65rem;
   }
 }
 
@@ -518,8 +607,8 @@
 .expense-item {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 8px 10px;
+  gap: 10px;
+  padding: 6px 8px;
   background: #f8fafc;
   border-radius: 8px;
   border: 1px solid rgba(15, 23, 42, 0.06);
@@ -532,9 +621,9 @@
   }
 
   .expense-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
     background: linear-gradient(135deg, rgba(30, 58, 138, 0.15), rgba(30, 58, 138, 0.25));
     display: flex;
     align-items: center;
@@ -543,9 +632,9 @@
 
     mat-icon {
       color: #1e3a8a;
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
     }
   }
 
@@ -553,25 +642,25 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     min-width: 0;
 
     .expense-header {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
 
       .vendor-name {
         font-weight: 600;
         color: #0f172a;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
       }
 
       .status-badge {
-        padding: 4px 12px;
-        border-radius: 8px;
-        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.65rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -597,15 +686,16 @@
     .expense-meta {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
-      font-size: 0.9rem;
+      font-size: 0.7rem;
       color: #64748b;
 
       .amount {
         font-weight: 600;
         color: #0f172a;
         font-family: 'SF Mono', 'Monaco', monospace;
+        font-size: 0.7rem;
       }
 
       .separator {
@@ -615,6 +705,7 @@
       .date,
       .category {
         color: #64748b;
+        font-size: 0.7rem;
       }
     }
   }
@@ -799,33 +890,33 @@
   .analytics-table {
     .table-header th,
     .table-row td {
-      padding: 10px 6px;
-      font-size: 0.75rem;
+      padding: 5px 6px;
+      font-size: 0.65rem;
     }
   }
 
   .expense-item {
-    padding: 10px;
-    gap: 10px;
+    padding: 6px 8px;
+    gap: 8px;
 
     .expense-icon {
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
 
       mat-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
       }
     }
 
     .expense-details {
       .expense-header .vendor-name {
-        font-size: 0.75rem;
+        font-size: 0.65rem;
       }
 
       .expense-meta {
-        font-size: 0.75rem;
+        font-size: 0.65rem;
       }
     }
   }

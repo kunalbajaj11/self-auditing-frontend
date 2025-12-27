@@ -47,7 +47,6 @@ export class AdminJournalEntriesComponent implements OnInit {
       creditAccount: [''],
       startDate: [''],
       endDate: [''],
-      description: [''],
       referenceNumber: [''],
     });
   }
@@ -69,7 +68,6 @@ export class AdminJournalEntriesComponent implements OnInit {
     if (filterValues.creditAccount) filters.creditAccount = filterValues.creditAccount;
     if (filterValues.startDate) filters.startDate = filterValues.startDate;
     if (filterValues.endDate) filters.endDate = filterValues.endDate;
-    if (filterValues.description) filters.description = filterValues.description;
     if (filterValues.referenceNumber) filters.referenceNumber = filterValues.referenceNumber;
 
     this.journalEntriesService.listEntries(filters).subscribe({

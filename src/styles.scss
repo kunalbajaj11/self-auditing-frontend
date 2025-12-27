@@ -356,11 +356,15 @@ table {
   }
 
   .mat-mdc-form-field-infix {
-    padding-top: 20px !important;
-    padding-bottom: 8px !important;
-    min-height: 56px !important;
+    padding-top: 12px !important;
+    // padding-bottom: 4px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    min-height: 40px !important;
     box-sizing: border-box !important;
-    display: block !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
   }
 
   .mat-mdc-form-field-label {
@@ -436,21 +440,32 @@ table {
     font-size: 0.75rem !important;
   }
 
-  // Date picker toggle
+  // Date picker toggle - properly aligned with reduced field height
   .mat-datepicker-toggle {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-left: 4px !important;
+    height: 100% !important;
+
     .mat-icon-button {
-      width: 32px !important;
-      height: 32px !important;
+      width: 28px !important;
+      height: 28px !important;
       padding: 0 !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
+      flex-shrink: 0 !important;
+      line-height: 1 !important;
 
       .mat-icon {
-        font-size: 18px !important;
-        width: 18px !important;
-        height: 18px !important;
+        font-size: 16px !important;
+        width: 16px !important;
+        height: 16px !important;
         line-height: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
       }
     }
   }
@@ -461,6 +476,7 @@ table {
     overflow: visible !important;
     height: auto !important;
     min-height: 20px !important;
+    top: 0 !important;
   }
   
   // Ensure the text field wrapper doesn't clip labels
@@ -473,11 +489,12 @@ table {
     overflow: visible !important;
   }
 
-  // Floating label alignment
+  // Floating label alignment - center when not floating
   .mdc-floating-label {
     line-height: 1.5 !important;
-    top: 20px !important;
-    transform-origin: left top !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    transform-origin: left center !important;
     
     &.mdc-floating-label--float-above {
       top: -6px !important;
@@ -512,6 +529,7 @@ table {
     height: 20px !important;
     margin-top: 0 !important;
     padding-top: 0 !important;
+    vertical-align: middle !important;
     
     &::placeholder {
       line-height: 1.5 !important;
@@ -520,6 +538,39 @@ table {
       overflow: hidden !important;
       text-overflow: ellipsis !important;
     }
+  }
+
+  // Ensure proper spacing when prefix icon is present
+  .mat-mdc-form-field-icon-prefix ~ .mdc-text-field__input,
+  .mat-mdc-form-field-icon-prefix ~ input {
+    margin-left: 0 !important;
+  }
+
+  // Icon prefix and suffix alignment
+  .mat-mdc-form-field-icon-prefix {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-right: 0 !important;
+    width: 24px !important;
+    min-width: 24px !important;
+    flex-shrink: 0 !important;
+  }
+  
+  // Add padding to input when prefix icon exists
+  .mat-mdc-form-field-icon-prefix ~ .mdc-text-field__input,
+  .mat-mdc-form-field-icon-prefix ~ input {
+    padding-left: 16px !important;
+  }
+
+  .mat-mdc-form-field-icon-suffix {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-left: 4px !important;
+    // width: 24px !important;
+    min-width: 24px !important;
+    flex-shrink: 0 !important;
   }
 
   // Select arrow
@@ -603,7 +654,7 @@ textarea.mat-mdc-input-element {
   
   // Ensure text field wrapper has proper height
   .mat-mdc-text-field-wrapper {
-    min-height: 56px !important;
+    max-height: 40px !important;
   }
 }
 
@@ -613,6 +664,22 @@ textarea::placeholder,
 .mdc-text-field__input::placeholder {
   line-height: 1.5 !important;
   opacity: 0.6 !important;
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+}
+
+// CRITICAL: Remove strikethrough from all form field labels and placeholders
+.mat-mdc-form-field-label,
+.mdc-floating-label,
+mat-label,
+.mat-mdc-select-value-text,
+.mdc-text-field__input,
+input::placeholder,
+textarea::placeholder {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-style: none !important;
+  text-decoration-color: transparent !important;
 }
 
 button mat-icon,
@@ -712,4 +779,64 @@ button[mat-unelevated-button][color="primary"] mat-icon {
   .mat-mdc-card {
     padding: 16px !important;
   }
+}
+
+// Global print styles - Hide all UI elements when printing invoices
+// NOTE: These styles ONLY apply when printing (@media print)
+@media print {
+  // Hide all navigation and UI elements
+  mat-sidenav,
+  .side-nav,
+  .top-bar,
+  mat-toolbar,
+  .spacer,
+  .user-chip,
+  .menu-button,
+  
+  // Hide all buttons and actions
+  button:not(.print-only),
+  .mat-mdc-button,
+  .mat-mdc-raised-button,
+  .mat-mdc-stroked-button,
+  .mat-mdc-icon-button,
+  .actions,
+  .preview-header,
+  
+  // Hide dialogs and overlays
+  .cdk-overlay-container,
+  .mat-mdc-dialog-container,
+  .mat-mdc-menu-panel,
+  mat-dialog-actions,
+  
+  // Hide loading and error states (only when printing)
+  .loading-container,
+  .error-container,
+  mat-progress-spinner {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  // Ensure body is clean for printing
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  // Show only invoice preview content
+  .invoice-preview-container {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+}
+
+.mat-mdc-form-field-hint-wrapper, .mat-mdc-form-field-error-wrapper {
+  position: relative !important;
+  padding: 0px !important;
 }

@@ -1,150 +1,163 @@
-<h2 mat-dialog-title>
-  {{ isEditMode() ? 'Edit Expense' : 'Record Expense' }}
-  <span *ngIf="ocrResult" class="ocr-badge">
-    <mat-icon>auto_awesome</mat-icon>
-    OCR Detected
-  </span>
-</h2>
-<form mat-dialog-content [formGroup]="form" class="form">
-  <div *ngIf="attachment" class="attachment-info">
-    <mat-icon>attach_file</mat-icon>
-    <span>{{ attachment.fileName }}</span>
-  </div>
-  <mat-form-field appearance="outline">
-    <mat-label>Type</mat-label>
-    <mat-select formControlName="type">
-      <mat-option *ngFor="let expenseType of expenseTypes" [value]="expenseType.name">
-        {{ expenseType.displayLabel || expenseType.name }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
+<mat-dialog-content class="expense-form-content">
+  <form [formGroup]="form" class="expense-form">
+    <div class="form-section">
+      <h2 class="form-heading">
+        {{ isEditMode() ? 'Edit Expense' : 'Record Expense' }}
+        <span *ngIf="ocrResult" class="ocr-badge">
+          <mat-icon>auto_awesome</mat-icon>
+          OCR Detected
+        </span>
+      </h2>
+      <div *ngIf="attachment" class="attachment-info">
+        <mat-icon>attach_file</mat-icon>
+        <span>{{ attachment.fileName }}</span>
+      </div>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Category</mat-label>
-    <mat-select formControlName="categoryId">
-      <mat-option value="">Uncategorized</mat-option>
-      <mat-option
-        *ngFor="let category of categories"
-        [value]="category.id"
-      >
-        {{ category.name }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Type *</mat-label>
+          <mat-select formControlName="type" required>
+            <mat-option *ngFor="let expenseType of expenseTypes" [value]="expenseType.name">
+              {{ expenseType.displayLabel || expenseType.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Amount (AED)</mat-label>
-    <input matInput type="number" formControlName="amount" required />
-    <mat-error *ngIf="form.get('amount')?.hasError('required')">
-      Amount is required
-    </mat-error>
-  </mat-form-field>
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Category</mat-label>
+          <mat-select formControlName="categoryId">
+            <mat-option value="">Uncategorized</mat-option>
+            <mat-option
+              *ngFor="let category of categories"
+              [value]="category.id"
+            >
+              {{ category.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>VAT Amount (AED)</mat-label>
-    <input matInput type="number" formControlName="vatAmount" />
-    <mat-hint *ngIf="form.get('vatTaxType')?.value === 'reverse_charge'">
-      Reverse charge VAT is calculated but not added to total
-    </mat-hint>
-  </mat-form-field>
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Expense Date *</mat-label>
+          <input matInput [matDatepicker]="expenseDatePicker" formControlName="expenseDate" placeholder="Select expense date" required />
+          <mat-datepicker-toggle matIconSuffix [for]="expenseDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #expenseDatePicker></mat-datepicker>
+        </mat-form-field>
+      </div>
 
-  <mat-form-field appearance="outline" *ngIf="reverseChargeEnabled">
-    <mat-label>VAT Tax Type</mat-label>
-    <mat-select formControlName="vatTaxType">
-      <mat-option *ngFor="let type of vatTaxTypes" [value]="type.value">
-        {{ type.label }}
-      </mat-option>
-    </mat-select>
-    <mat-hint *ngIf="form.get('vatTaxType')?.value === 'reverse_charge'">
-      Customer will self-account for VAT
-    </mat-hint>
-  </mat-form-field>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Amount (AED) *</mat-label>
+          <input matInput type="number" formControlName="amount" required />
+          <mat-error *ngIf="form.get('amount')?.hasError('required')">
+            Amount is required
+          </mat-error>
+        </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Expense Date</mat-label>
-    <input matInput [matDatepicker]="expenseDatePicker" formControlName="expenseDate" placeholder="Select expense date" required />
-    <mat-datepicker-toggle matIconSuffix [for]="expenseDatePicker"></mat-datepicker-toggle>
-    <mat-datepicker #expenseDatePicker></mat-datepicker>
-  </mat-form-field>
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>VAT Amount (AED)</mat-label>
+          <input matInput type="number" formControlName="vatAmount" />
+          <mat-hint *ngIf="form.get('vatTaxType')?.value === 'reverse_charge'">
+            Reverse charge VAT is calculated but not added to total
+          </mat-hint>
+        </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Status</mat-label>
-    <mat-select formControlName="purchaseStatus">
-      <mat-option value="Purchase - Cash Paid">Purchase - Cash Paid</mat-option>
-      <mat-option value="Purchase - Accruals">Purchase - Accruals</mat-option>
-    </mat-select>
-  </mat-form-field>
+        <mat-form-field appearance="outline" class="flex-1" *ngIf="reverseChargeEnabled">
+          <mat-label>VAT Tax Type</mat-label>
+          <mat-select formControlName="vatTaxType">
+            <mat-option *ngFor="let type of vatTaxTypes" [value]="type.value">
+              {{ type.label }}
+            </mat-option>
+          </mat-select>
+          <mat-hint *ngIf="form.get('vatTaxType')?.value === 'reverse_charge'">
+            Customer will self-account for VAT
+          </mat-hint>
+        </mat-form-field>
+      </div>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Due Date</mat-label>
-    <input matInput [matDatepicker]="expectedPaymentDatePicker" formControlName="expectedPaymentDate" placeholder="Select due date" />
-    <mat-datepicker-toggle matIconSuffix [for]="expectedPaymentDatePicker"></mat-datepicker-toggle>
-    <mat-datepicker #expectedPaymentDatePicker></mat-datepicker>
-    <mat-hint>Required for accrual entries and Purchase - Accruals status</mat-hint>
-    <mat-error *ngIf="form.get('expectedPaymentDate')?.hasError('required')">
-      Due date is required for Purchase - Accruals
-    </mat-error>
-  </mat-form-field>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Status *</mat-label>
+          <mat-select formControlName="purchaseStatus" required>
+            <mat-option value="Purchase - Cash Paid">Purchase - Cash Paid</mat-option>
+            <mat-option value="Purchase - Accruals">Purchase - Accruals</mat-option>
+          </mat-select>
+        </mat-form-field>
 
-  <mat-form-field appearance="outline" class="full">
-    <mat-label>{{ form.get('type')?.value === 'credit' ? 'Customer' : 'Vendor' }}</mat-label>
-    <input
-      type="text"
-      matInput
-      formControlName="vendorName"
-      [matAutocomplete]="vendorAuto"
-      placeholder="Search or type vendor name"
-    />
-    <mat-autocomplete
-      #vendorAuto="matAutocomplete"
-      [displayWith]="displayVendor"
-      (optionSelected)="onVendorSelected($event.option.value)"
-      [panelWidth]="'auto'"
-    >
-      <mat-option *ngFor="let vendor of filteredVendors$ | async" [value]="vendor">
-        <div class="vendor-option">
-          <span class="vendor-name">{{ vendor.name }}</span>
-          <span *ngIf="vendor.vendorTrn" class="vendor-trn">TRN: {{ vendor.vendorTrn }}</span>
-        </div>
-      </mat-option>
-      <mat-option *ngIf="(filteredVendors$ | async)?.length === 0 && form.get('vendorName')?.value" [value]="null">
-        <span class="no-vendor-found">No vendor found. Will create new entry.</span>
-      </mat-option>
-    </mat-autocomplete>
-    <button
-      *ngIf="selectedVendor"
-      matSuffix
-      mat-icon-button
-      (click)="clearVendorSelection()"
-      type="button"
-      matTooltip="Clear vendor selection"
-    >
-      <mat-icon>close</mat-icon>
-    </button>
-    <mat-hint *ngIf="selectedVendor" class="vendor-selected-hint">
-      Selected: {{ selectedVendor.name }}
-    </mat-hint>
-    <mat-hint *ngIf="!selectedVendor" class="vendor-search-hint">
-      Start typing to search vendors from master, or type a new vendor name
-    </mat-hint>
-  </mat-form-field>
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Due Date</mat-label>
+          <input matInput [matDatepicker]="expectedPaymentDatePicker" formControlName="expectedPaymentDate" placeholder="Select due date" />
+          <mat-datepicker-toggle matIconSuffix [for]="expectedPaymentDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #expectedPaymentDatePicker></mat-datepicker>
+          <mat-hint align="start">Required for accrual entries and Purchase - Accruals status</mat-hint>
+          <mat-error *ngIf="form.get('expectedPaymentDate')?.hasError('required')">
+            Due date is required for Purchase - Accruals
+          </mat-error>
+        </mat-form-field>
+      </div>
 
-  <mat-form-field appearance="outline" class="full">
-    <mat-label>{{ form.get('type')?.value === 'credit' ? 'Customer' : 'Vendor' }} TRN</mat-label>
-    <input matInput formControlName="vendorTrn" placeholder="Tax Registration Number" maxlength="20" />
-    <mat-hint>Enter the {{ form.get('type')?.value === 'credit' ? 'customer' : 'vendor' }}'s Tax Registration Number</mat-hint>
-  </mat-form-field>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-2">
+          <mat-label>{{ form.get('type')?.value === 'credit' ? 'Customer' : 'Vendor' }}</mat-label>
+          <input
+            type="text"
+            matInput
+            formControlName="vendorName"
+            [matAutocomplete]="vendorAuto"
+            placeholder="Search or type vendor name"
+          />
+          <mat-autocomplete
+            #vendorAuto="matAutocomplete"
+            [displayWith]="displayVendor"
+            (optionSelected)="onVendorSelected($event.option.value)"
+            [panelWidth]="'auto'"
+          >
+            <mat-option *ngFor="let vendor of filteredVendors$ | async" [value]="vendor">
+              <div class="vendor-option">
+                <span class="vendor-name">{{ vendor.name }}</span>
+                <span *ngIf="vendor.vendorTrn" class="vendor-trn">TRN: {{ vendor.vendorTrn }}</span>
+              </div>
+            </mat-option>
+            <mat-option *ngIf="(filteredVendors$ | async)?.length === 0 && form.get('vendorName')?.value" [value]="null">
+              <span class="no-vendor-found">No vendor found. Will create new entry.</span>
+            </mat-option>
+          </mat-autocomplete>
+          <button
+            *ngIf="selectedVendor"
+            matSuffix
+            mat-icon-button
+            (click)="clearVendorSelection()"
+            type="button"
+            matTooltip="Clear vendor selection"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+          <mat-hint *ngIf="selectedVendor" align="start" class="vendor-selected-hint">
+            Selected: {{ selectedVendor.name }}
+          </mat-hint>
+          <mat-hint *ngIf="!selectedVendor" align="start" class="vendor-search-hint">
+            Start typing to search vendors from master, or type a new vendor name
+          </mat-hint>
+        </mat-form-field>
 
-  <mat-form-field appearance="outline" class="full">
-    <mat-label>Invoice Number</mat-label>
-    <input matInput formControlName="invoiceNumber" placeholder="Enter invoice number" maxlength="100" />
-  </mat-form-field>
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>{{ form.get('type')?.value === 'credit' ? 'Customer' : 'Vendor' }} TRN</mat-label>
+          <input matInput formControlName="vendorTrn" placeholder="Tax Registration Number" maxlength="20" />
+          <mat-hint align="start">Enter the {{ form.get('type')?.value === 'credit' ? 'customer' : 'vendor' }}'s Tax Registration Number</mat-hint>
+        </mat-form-field>
+      </div>
 
-  <mat-form-field appearance="outline" class="full">
-    <mat-label>Description</mat-label>
-    <textarea matInput formControlName="description" rows="3"></textarea>
-  </mat-form-field>
-</form>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Invoice Number</mat-label>
+        <input matInput formControlName="invoiceNumber" placeholder="Enter invoice number" maxlength="100" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="3"></textarea>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, AfterViewInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -15,7 +15,7 @@ import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales
   templateUrl: './debit-note-form-dialog.component.html',
   styleUrls: ['./debit-note-form-dialog.component.scss'],
 })
-export class DebitNoteFormDialogComponent implements OnInit {
+export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
   form: FormGroup;
   loading = false;
   customers: Customer[] = [];
@@ -51,7 +51,7 @@ export class DebitNoteFormDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: DebitNote | null,
   ) {
     this.form = this.fb.group({
-      invoiceId: [''],
+      invoiceId: [null],
       customerId: [''],
       customerName: [''],
       customerTrn: [''],
@@ -73,6 +73,19 @@ export class DebitNoteFormDialogComponent implements OnInit {
     if (this.data) {
       this.loadDebitNoteData();
     }
+  }
+
+  ngAfterViewInit(): void {
+    // Ensure invoiceId field is not focused/highlighted when dialog opens
+    setTimeout(() => {
+      const invoiceIdControl = this.form.get('invoiceId');
+      if (invoiceIdControl && invoiceIdControl.value === null) {
+        // Blur any focused elements to prevent highlighting
+        if (document.activeElement && document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
+      }
+    }, 100);
   }
 
   loadCustomers(): void {
