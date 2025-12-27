@@ -13,6 +13,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'pricing',
+    loadComponent: () =>
+      import('./features/pricing/pricing.component').then(
+        (m) => m.PricingComponent,
+      ),
+  },
+  {
     path: 'auth',
     loadChildren: () =>
       import('./features/auth/auth.module').then((m) => m.AuthModule),

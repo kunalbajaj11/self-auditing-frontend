@@ -1,0 +1,102 @@
+<div class="pricing-container">
+  <!-- Header -->
+  <header class="pricing-header">
+    <div class="header-content">
+      <button mat-icon-button class="back-button" (click)="navigateToHome()" aria-label="Back to homepage">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="logo-section">
+        <img src="assets/images/backless_logo_white.png" alt="SelfAccounting.AI Logo" class="logo-image" />
+      </div>
+      <h1 class="page-title">Choose Your Plan</h1>
+      <p class="page-subtitle">
+        Select the perfect plan for your business needs. All plans include our core financial management features with flexible pricing options.
+      </p>
+    </div>
+  </header>
+
+  <!-- Pricing Cards -->
+  <section class="pricing-section">
+    <div class="pricing-cards">
+      <mat-card *ngFor="let plan of plans" [class.popular]="plan.popular" class="pricing-card">
+        <mat-card-header *ngIf="plan.popular" class="popular-badge">
+          <span class="badge-text">Most Popular</span>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="plan-header">
+            <h2 class="plan-name">{{ plan.name }}</h2>
+            <p class="plan-description">{{ plan.description }}</p>
+          </div>
+          
+          <div class="plan-pricing">
+            <div class="price-container">
+              <span class="currency">$</span>
+              <span class="price">{{ plan.price }}</span>
+              <span class="period">/month</span>
+            </div>
+            <p class="price-note" *ngIf="plan.maxUsers">Up to {{ plan.maxUsers }} users</p>
+            <p class="price-note" *ngIf="!plan.maxUsers">Unlimited users</p>
+          </div>
+
+          <div class="plan-features">
+            <h3 class="features-title">Features Included</h3>
+            <ul class="features-list">
+              <li *ngFor="let feature of plan.features" [class.disabled-feature]="feature.includes('disabled') || feature.includes('Note:')">
+                <mat-icon *ngIf="!feature.includes('disabled') && !feature.includes('Note:')">check_circle</mat-icon>
+                <mat-icon *ngIf="feature.includes('disabled') || feature.includes('Note:')" class="warning-icon">info</mat-icon>
+                <span>{{ feature }}</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="plan-action">
+            <button 
+              mat-raised-button 
+              [color]="plan.buttonColor"
+              [class.popular-button]="plan.popular"
+              (click)="navigateToRegister(plan.id)"
+              class="cta-button">
+              {{ plan.buttonText }}
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </section>
+
+  <!-- Additional Info Section -->
+  <section class="info-section">
+    <div class="section-container">
+      <mat-card class="info-card">
+        <mat-card-content>
+          <div class="info-content">
+            <mat-icon class="info-icon">help_outline</mat-icon>
+            <div class="info-text">
+              <h3>Need Help Choosing?</h3>
+              <p>
+                Not sure which plan is right for you? Contact our sales team for a personalized recommendation based on your business needs.
+              </p>
+              <a mat-stroked-button [href]="whatsappLink" target="_blank" class="contact-button">
+                <svg class="whatsapp-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+                Contact Sales on WhatsApp
+              </a>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </section>
+
+  <!-- Footer Actions -->
+  <section class="footer-section">
+    <div class="section-container">
+      <p class="footer-text">Already have an account?</p>
+      <button mat-button (click)="navigateToLogin()" class="login-link">
+        Sign In
+      </button>
+    </div>
+  </section>
+</div>
+

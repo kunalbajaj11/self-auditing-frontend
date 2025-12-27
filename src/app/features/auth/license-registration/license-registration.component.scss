@@ -1,3 +1,25 @@
+// CRITICAL: Force proper spacing between prefix icons and input text
+// Must be at top level to override Material's defaults
+::ng-deep .auth-page {
+  mat-form-field {
+    // When prefix icon exists, add padding to input
+    .mdc-text-field--with-leading-icon {
+      .mdc-text-field__input {
+        padding-left: 16px !important;
+      }
+      .mat-mdc-select-trigger {
+        padding-left: 16px !important;
+      }
+    }
+    
+    // Icon prefix spacing
+    .mat-mdc-form-field-icon-prefix {
+      margin-right: 16px !important;
+      margin-left: 12px !important;
+    }
+  }
+}
+
 .auth-page {
   min-height: 100vh;
   width: 100%;
@@ -243,6 +265,90 @@
   grid-template-columns: 1fr auto;
   gap: 12px;
   align-items: start;
+
+  .form-field-with-icon {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    .field-icon {
+      margin-top: 20px;
+    }
+  }
+}
+
+// Form field with icon wrapper - icons outside inputs
+.form-field-with-icon {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+
+  .field-icon {
+    color: #64748b;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    margin-top: 16px; // Align with input text area (reduced from 20px to align better)
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  .form-field {
+    flex: 1;
+    min-width: 0; // Allow form field to shrink if needed
+  }
+
+  // Better alignment using Material's form field structure
+  ::ng-deep {
+    .mat-mdc-form-field {
+      // Ensure form field has consistent height
+      .mat-mdc-text-field-wrapper {
+        padding-bottom: 0;
+      }
+
+      // Icon should align with the input area (which is vertically centered in the form field)
+      .mat-mdc-form-field-infix {
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        padding-top: 12px;
+      }
+
+      // Align icon with the actual input text area
+      .mdc-text-field__input {
+        margin-top: 0;
+      }
+    }
+  }
+}
+
+// Adjust icon position for textarea fields (they need to align with top of textarea)
+.form-field-with-icon {
+  &:has(textarea) .field-icon {
+    margin-top: 16px; // Textarea alignment
+  }
+}
+
+// Ensure icons align properly in two-column layout
+.two-column {
+  .form-field-with-icon {
+    .field-icon {
+      margin-top: 16px;
+    }
+  }
+}
+
+// License key section specific alignment
+.license-key-section {
+  .form-field-with-icon {
+    .field-icon {
+      margin-top: 16px;
+    }
+  }
 }
 
 .validate-button {
@@ -335,18 +441,102 @@
       margin-top: 4px;
     }
 
+    // Material Design MDC structure - target prefix icon spacing aggressively
+    .mat-mdc-text-field-input-control {
+      // Ensure the input control area respects icon spacing
+      padding-left: 0 !important;
+    }
+
+    // Icon prefix styling - aggressive spacing to prevent collision
     .mat-mdc-form-field-icon-prefix {
-      color: #64748b;
-      margin-right: 12px;
+      color: #64748b !important;
+      margin-right: 20px !important;
+      margin-left: 16px !important;
+      flex-shrink: 0 !important;
+      width: 24px !important;
+      min-width: 24px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 0 !important;
+
+      mat-icon {
+        font-size: 24px !important;
+        width: 24px !important;
+        height: 24px !important;
+        line-height: 24px !important;
+      }
     }
 
+    // Icon suffix styling - prevent collision with input text
     .mat-mdc-form-field-icon-suffix {
-      color: #64748b;
+      color: #64748b !important;
+      margin-left: 20px !important;
+      margin-right: 16px !important;
+      flex-shrink: 0 !important;
+      width: 24px !important;
+      min-width: 24px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 0 !important;
+
+      mat-icon {
+        font-size: 24px !important;
+        width: 24px !important;
+        height: 24px !important;
+        line-height: 24px !important;
+      }
     }
 
+    // Icon container - ensure proper width allocation
+    .mat-mdc-form-field-icon-container {
+      width: auto !important;
+      min-width: 56px !important;
+      padding: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    // MDC text field input - critical padding to prevent collision
+    // IMPORTANT: This must override Material's default padding: 0
+    .mdc-text-field__input {
+      // Only set padding-left when prefix icon exists (handled by .mdc-text-field--with-leading-icon below)
+    }
+
+    // Input element specifically - ensure no override conflicts
+    input.mdc-text-field__input,
+    textarea.mdc-text-field__input {
+      padding-left: 12px !important;
+    }
+
+    // Select trigger - needs proper padding when prefix icon is present
+    .mat-mdc-select-trigger {
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+    }
+
+    // Textarea specific adjustments
+    textarea.mdc-text-field__input {
+      padding-top: 12px !important;
+      padding-bottom: 12px !important;
+    }
+
+    // Adjust notch outline to accommodate icon spacing
     .mdc-text-field--outlined {
-      .mdc-notched-outline__leading,
-      .mdc-notched-outline__notch,
+      .mdc-notched-outline__leading {
+        border-color: #e2e8f0;
+        border-width: 1.5px;
+      }
+
+      .mdc-notched-outline__notch {
+        border-color: #e2e8f0;
+        border-width: 1.5px;
+        // Increase notch width to accommodate icon + spacing
+        padding-left: 0;
+      }
+
       .mdc-notched-outline__trailing {
         border-color: #e2e8f0;
         border-width: 1.5px;
@@ -358,6 +548,71 @@
         .mdc-notched-outline__trailing {
           border-color: #0077c8;
           border-width: 2px;
+        }
+      }
+
+      // When prefix icon exists, ensure notch accounts for it
+      &.mdc-text-field--with-leading-icon {
+        .mdc-notched-outline__notch {
+          padding-left: 0;
+        }
+      }
+    }
+
+    // Ensure the input area wrapper respects the icon spacing
+    .mdc-text-field {
+      &.mdc-text-field--with-leading-icon {
+        .mdc-text-field__input {
+          padding-left: 12px !important;
+        }
+      }
+
+      // Force spacing between icon and input regardless of notch calculation
+      .mat-mdc-text-field-input-control {
+        .mdc-text-field__input {
+          padding-left: 12px !important;
+        }
+      }
+    }
+
+    // CRITICAL FIX: Move placeholder and text to the right when prefix icon exists
+    .mdc-text-field--with-leading-icon {
+      .mdc-text-field__input,
+      input.mdc-text-field__input,
+      textarea.mdc-text-field__input {
+        padding-left: 20px !important;
+      }
+
+      .mat-mdc-select-trigger {
+        padding-left: 20px !important;
+      }
+
+      // Fix for when label is floating or not
+      &.mdc-text-field--label-floating,
+      &.mdc-text-field--no-label {
+        .mdc-text-field__input {
+          padding-left: 20px !important;
+        }
+      }
+    }
+    
+    // Alternative selector - target any input after prefix icon
+    .mat-mdc-form-field-icon-prefix ~ .mat-mdc-text-field-input-control {
+      .mdc-text-field__input,
+      input,
+      textarea {
+        padding-left: 20px !important;
+      }
+      .mat-mdc-select-trigger {
+        padding-left: 20px !important;
+      }
+    }
+
+    // Material select dropdown specific fixes
+    .mat-mdc-select {
+      &.mat-mdc-select-with-leading-icon {
+        .mat-mdc-select-trigger {
+          padding-left: 12px !important;
         }
       }
     }

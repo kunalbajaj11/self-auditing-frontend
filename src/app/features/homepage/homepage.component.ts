@@ -188,6 +188,10 @@ export class HomepageComponent implements OnInit {
     this.router.navigate(['/auth/register']);
   }
 
+  navigateToPricing(): void {
+    this.router.navigate(['/pricing']);
+  }
+
   features = [
     {
       icon: 'receipt_long',

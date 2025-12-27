@@ -9,6 +9,7 @@ import { ExpensesService } from '../../../core/services/expenses.service';
 import { NotificationsService } from '../../../core/services/notifications.service';
 import { LicenseService } from '../../../core/services/license.service';
 import { AuthUser } from '../../../core/models/user.model';
+import { PlanType } from '../../../core/models/plan.model';
 
 type BadgeKey = 'pendingAccruals' | 'unreadNotifications';
 
@@ -38,6 +39,9 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
   pageTitle = 'SelfAccounting.AI';
   navItems: ShellNavItem[] = [];
   isEnterprise = false;
+  isPremium = false;
+  isStandard = false;
+  planType: PlanType | null = null;
   expandedGroups = new Set<string>(); // Track expanded nav groups
 
   @ViewChild('sideNavList', { static: false }) sideNavList?: ElementRef<HTMLElement>;
@@ -65,11 +69,18 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     // Load license info first
-    this.licenseService.isEnterprise().pipe(
+    combineLatest([
+      this.licenseService.getPlanType().pipe(catchError(() => of('free' as PlanType))),
+      this.licenseService.isEnterprise().pipe(catchError(() => of(false))),
+      this.licenseService.isPremium().pipe(catchError(() => of(false))),
+      this.licenseService.isStandard().pipe(catchError(() => of(false))),
+    ]).pipe(
       takeUntil(this.destroy$),
-      catchError(() => of(false)),
-    ).subscribe((isEnterprise) => {
+    ).subscribe(([planType, isEnterprise, isPremium, isStandard]) => {
+      this.planType = planType;
       this.isEnterprise = isEnterprise;
+      this.isPremium = isPremium;
+      this.isStandard = isStandard;
       this.updateShellFromRoute();
     });
 
@@ -241,11 +252,25 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private filterNavItemsByLicense(items: ShellNavItemConfig[]): ShellNavItemConfig[] {
     return items.filter((item) => {
-      // Filter out enterprise-only features for standard license
+      const label = item.label?.toLowerCase() || '';
       const route = item.route || '';
-      const isBankReconciliation = route.includes('bank-reconciliation');
-      const isReminders = route.includes('reminders') || route.includes('notifications');
-      const isUploadDocument = route.includes('/upload') && !route.includes('bank-reconciliation');
+      
+      // For Standard license: Only show Sales module
+      if (this.isStandard) {
+        if (label === 'sales') {
+          // Include Sales module and filter its children
+          if (item.children) {
+            item.children = this.filterNavItemsByLicense(item.children);
+            return item.children.length > 0;
+          }
+          return true;
+        }
+        // Hide all other modules for Standard
+        return false;
+      }
+      
+      // For Premium and Enterprise: Show all modules
+      // But Premium will have upload expense disabled (handled in employee module)
       
       // Check children too
       if (item.children) {
@@ -256,8 +281,20 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
         item.children = filteredChildren;
       }
       
-      // Hide enterprise-only features for standard license
-      if (!this.isEnterprise && (isBankReconciliation || isReminders || isUploadDocument)) {
+      // Filter out enterprise-only features if not enterprise
+      const isBankReconciliation = route.includes('bank-reconciliation');
+      const isReminders = route.includes('reminders') || route.includes('notifications');
+      const isUploadDocument = route.includes('/upload') && !route.includes('bank-reconciliation');
+      
+      // Enterprise has all features, Premium has all except upload expense (but can see it)
+      // Standard is already handled above
+      if (!this.isEnterprise && (isBankReconciliation || isReminders)) {
+        return false;
+      }
+      
+      // For Standard license in employee portal: Hide upload expense nav item
+      // (Premium users can see it but functionality is disabled in component)
+      if (this.isStandard && isUploadDocument) {
         return false;
       }
       

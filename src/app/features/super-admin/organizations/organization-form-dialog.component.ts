@@ -11,7 +11,7 @@ import { PlanType } from '../../../core/models/plan.model';
   styleUrls: ['./organization-form-dialog.component.scss'],
 })
 export class OrganizationFormDialogComponent {
-  readonly planTypes: PlanType[] = ['free', 'standard', 'enterprise'];
+  readonly planTypes: PlanType[] = ['free', 'standard', 'premium', 'enterprise'];
   readonly regions: Array<{ value: string; label: string }> = [
     { value: 'UAE', label: 'United Arab Emirates (UAE)' },
     { value: 'SAUDI', label: 'Saudi Arabia' },

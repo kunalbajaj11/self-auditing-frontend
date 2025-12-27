@@ -382,6 +382,7 @@ table {
     font-size: 0.875rem !important;
     line-height: 1.5 !important;
     padding: 0 !important;
+    padding-left: 0 !important;
     margin: 0 !important;
     margin-top: 0 !important;
     padding-top: 0 !important;
@@ -413,6 +414,7 @@ table {
   .mat-mdc-select-trigger {
     font-size: 0.875rem !important;
     padding: 0 !important;
+    padding-left: 0 !important;
     line-height: 1.5 !important;
     height: 20px !important;
     margin-top: 0 !important;
@@ -540,27 +542,105 @@ table {
     }
   }
 
-  // Ensure proper spacing when prefix icon is present
-  .mat-mdc-form-field-icon-prefix ~ .mdc-text-field__input,
-  .mat-mdc-form-field-icon-prefix ~ input {
-    margin-left: 0 !important;
-  }
-
-  // Icon prefix and suffix alignment
+  // Icon prefix - CRITICAL FIX: Proper spacing to prevent collision
   .mat-mdc-form-field-icon-prefix {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    margin-right: 0 !important;
+    margin-right: 16px !important;
+    margin-left: 12px !important;
     width: 24px !important;
     min-width: 24px !important;
     flex-shrink: 0 !important;
+    padding: 0 !important;
+
+    mat-icon {
+      font-size: 24px !important;
+      width: 24px !important;
+      height: 24px !important;
+    }
+  }
+
+  // Icon container - ensure proper width allocation
+  .mat-mdc-form-field-icon-container {
+    min-width: 56px !important;
+    padding: 0 4px !important;
+  }
+
+  // CRITICAL FIX: Move placeholder and text to the right when prefix icon exists
+  // Material adds class 'mdc-text-field--with-leading-icon' when prefix icon exists
+  .mdc-text-field--with-leading-icon {
+    .mdc-text-field__input,
+    input.mdc-text-field__input,
+    textarea.mdc-text-field__input {
+      padding-left: 20px !important;
+    }
+
+    .mat-mdc-select-trigger {
+      padding-left: 20px !important;
+    }
   }
   
-  // Add padding to input when prefix icon exists
-  .mat-mdc-form-field-icon-prefix ~ .mdc-text-field__input,
-  .mat-mdc-form-field-icon-prefix ~ input {
-    padding-left: 16px !important;
+  // ULTRA SPECIFIC: Target any input that follows a prefix icon
+  .mat-mdc-form-field-icon-prefix + .mat-mdc-text-field-input-control .mdc-text-field__input,
+  .mat-mdc-form-field-icon-prefix ~ .mat-mdc-text-field-input-control .mdc-text-field__input,
+  .mat-mdc-form-field-icon-prefix ~ .mat-mdc-text-field-input-control input,
+  .mat-mdc-form-field-icon-prefix ~ .mat-mdc-text-field-input-control textarea {
+    padding-left: 20px !important;
+  }
+  
+  .mat-mdc-form-field-icon-prefix ~ .mat-mdc-text-field-input-control .mat-mdc-select-trigger {
+    padding-left: 20px !important;
+  }
+
+  // Alternative: Target by form field structure - when icon prefix exists anywhere in form field
+  .mat-mdc-form-field {
+    // When form field contains prefix icon
+    &:has(.mat-mdc-form-field-icon-prefix) {
+      .mdc-text-field__input {
+        padding-left: 12px !important;
+        padding-right: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+      }
+
+      .mat-mdc-select-trigger {
+        padding-left: 12px !important;
+        padding-right: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+      }
+
+      input.mdc-text-field__input,
+      textarea.mdc-text-field__input {
+        padding-left: 12px !important;
+        padding-right: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+      }
+    }
+
+    // Also target the input control area directly
+    .mat-mdc-text-field-input-control {
+      // When preceded by icon prefix in same form field
+      .mdc-text-field__input {
+        // This will be overridden by more specific selectors above
+      }
+    }
+  }
+
+  // ADDITIONAL FIX: Override the global padding: 0 rule more specifically
+  // This must come after the global rule to override it
+  .mat-mdc-form-field-icon-prefix ~ .mat-mdc-text-field-input-control .mdc-text-field__input,
+  .mat-mdc-form-field-icon-prefix ~ .mat-mdc-text-field-input-control input,
+  .mdc-text-field--with-leading-icon .mat-mdc-text-field-input-control .mdc-text-field__input,
+  .mdc-text-field--with-leading-icon .mat-mdc-text-field-input-control input {
+    padding-left: 12px !important;
+  }
+
+  .mat-mdc-form-field-icon-prefix ~ .mat-mdc-text-field-input-control .mat-mdc-select-trigger,
+  .mdc-text-field--with-leading-icon .mat-mdc-text-field-input-control .mat-mdc-select-trigger {
+    padding-left: 12px !important;
   }
 
   .mat-mdc-form-field-icon-suffix {

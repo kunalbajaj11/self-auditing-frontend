@@ -8,7 +8,7 @@ import { LicenseKeysService } from '../../../core/services/license-keys.service'
 import { OrganizationService } from '../../../core/services/organization.service';
 import { UploadUsage } from '../../../core/models/license-key.model';
 import { Observable, of } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError, switchMap, take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-employee-upload',
@@ -19,6 +19,7 @@ export class EmployeeUploadComponent implements OnInit {
   categories: Category[] = [];
   loading = false;
   isEnterprise$: Observable<boolean>;
+  canUploadExpense$: Observable<boolean>;
   uploadUsage$!: Observable<UploadUsage | null>;
 
   readonly form;
@@ -33,6 +34,9 @@ export class EmployeeUploadComponent implements OnInit {
     private readonly organizationService: OrganizationService,
   ) {
     this.isEnterprise$ = this.licenseService.isEnterprise().pipe(
+      catchError(() => of(false)),
+    );
+    this.canUploadExpense$ = this.licenseService.canUploadExpense().pipe(
       catchError(() => of(false)),
     );
     this.form = this.fb.group({
@@ -66,6 +70,20 @@ export class EmployeeUploadComponent implements OnInit {
   }
 
   submit(): void {
+    // Check if upload is allowed
+    this.canUploadExpense$.pipe(take(1)).subscribe((canUpload) => {
+      if (!canUpload) {
+        this.snackBar.open('Upload expense feature is not available for your license type. Please contact your administrator.', 'Close', {
+          duration: 5000,
+          panelClass: ['snack-error'],
+        });
+        return;
+      }
+      this.doSubmit();
+    });
+  }
+
+  private doSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

@@ -17,7 +17,7 @@ export interface LicenseKeyCreateResult {
 })
 export class LicenseKeyCreateDialogComponent implements OnInit {
   loading = false;
-  readonly planTypes: PlanType[] = ['free', 'standard', 'enterprise'];
+  readonly planTypes: PlanType[] = ['free', 'standard', 'premium', 'enterprise'];
   readonly regions: Array<{ value: Region; label: string }> = [
     { value: 'UAE', label: 'United Arab Emirates (UAE)' },
     { value: 'SAUDI', label: 'Saudi Arabia' },
@@ -60,6 +60,8 @@ export class LicenseKeyCreateDialogComponent implements OnInit {
     switch (planType) {
       case 'enterprise':
         return 25;
+      case 'premium':
+        return 15;
       case 'standard':
         return 5;
       case 'free':
