@@ -1,3 +1,23 @@
+// Form field with icon on the left
+.form-field-with-icon {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  .field-icon {
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
 .page-header {
   display: flex;
   align-items: center;

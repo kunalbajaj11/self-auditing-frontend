@@ -25,6 +25,10 @@ export class AdminJournalEntriesComponent implements OnInit {
     'amount',
     'entryDate',
     'description',
+    'customerVendorName',
+    'vatAmount',
+    'vendorTrn',
+    'subAccount',
     'actions',
   ] as const;
   readonly dataSource = new MatTableDataSource<JournalEntry>([]);

@@ -80,12 +80,46 @@
     <mat-form-field appearance="outline" class="full-width" *ngIf="form.get('type')?.value === 'sales'">
       <mat-label>Customer *</mat-label>
       <input
+        type="text"
         matInput
-        formControlName="vendorName"
-        placeholder="Enter customer name"
+        formControlName="customerName"
+        [matAutocomplete]="customerAuto"
+        placeholder="Search or type customer name"
         required
       />
-      <mat-error *ngIf="form.get('vendorName')?.hasError('required')">
+      <mat-autocomplete
+        #customerAuto="matAutocomplete"
+        [displayWith]="displayCustomer"
+        (optionSelected)="onCustomerSelected($event.option.value)"
+        [panelWidth]="'auto'"
+      >
+        <mat-option *ngFor="let customer of filteredCustomers$ | async" [value]="customer">
+          <div class="customer-option">
+            <span class="customer-name">{{ customer.name }}</span>
+            <span *ngIf="customer.customerTrn" class="customer-trn">TRN: {{ customer.customerTrn }}</span>
+          </div>
+        </mat-option>
+        <mat-option *ngIf="(filteredCustomers$ | async)?.length === 0 && form.get('customerName')?.value" [value]="null">
+          <span class="no-customer-found">No customer found. Will create new entry.</span>
+        </mat-option>
+      </mat-autocomplete>
+      <button
+        *ngIf="selectedCustomer"
+        matSuffix
+        mat-icon-button
+        (click)="clearCustomerSelection()"
+        type="button"
+        matTooltip="Clear customer selection"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-hint *ngIf="selectedCustomer" class="customer-selected-hint">
+        Selected: {{ selectedCustomer.name }}
+      </mat-hint>
+      <mat-hint *ngIf="!selectedCustomer" class="customer-search-hint">
+        Start typing to search customers from master, or type a new customer name
+      </mat-hint>
+      <mat-error *ngIf="form.get('customerName')?.hasError('required')">
         Customer name is required
       </mat-error>
     </mat-form-field>

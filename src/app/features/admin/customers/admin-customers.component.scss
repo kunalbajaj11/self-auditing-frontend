@@ -55,6 +55,28 @@
   }
 }
 
+// Form field with icon on the left
+.form-field-with-icon {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  height: 40px !important;
+  margin: 0 !important;
+
+  .field-icon {
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .search-field {
+    flex: 1;
+  }
+}
+
 .filters {
   display: flex;
   gap: 12px;

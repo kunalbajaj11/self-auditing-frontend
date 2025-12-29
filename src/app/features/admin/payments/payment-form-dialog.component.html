@@ -1,44 +1,244 @@
 <h2 mat-dialog-title>Create Payment</h2>
 
 <mat-dialog-content>
-  <form [formGroup]="form" class="payment-form">
-    <!-- Expense Selection -->
+  <form [formGroup]="form" class="payment-form" style="margin-top: 16px;">
+    <!-- Payment Mode Selection -->
     <div class="form-section">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Select Expense *</mat-label>
-        <mat-select 
-          formControlName="expenseId" 
-          required
-          [disabled]="loadingExpenses"
-        >
-          <mat-option value="">
-            <em>Select an expense</em>
-          </mat-option>
-          <mat-option 
-            *ngFor="let expense of expensesWithOutstanding" 
-            [value]="expense.id"
+      <div class="form-field-with-icon">
+        <mat-icon class="field-icon">payment</mat-icon>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Payment Mode</mat-label>
+          <mat-select formControlName="paymentMode">
+            <mat-option value="multi">
+              Invoice-wise Settlement (Recommended)
+            </mat-option>
+            <mat-option value="single">
+              Single Expense Payment (Legacy)
+            </mat-option>
+          </mat-select>
+          <mat-hint>Select payment mode: invoice-wise allows allocating payment across multiple invoices</mat-hint>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Multi-Invoice Mode (Invoice-wise Settlement) -->
+    <div *ngIf="paymentMode === 'multi'" class="form-section">
+      <h3 class="section-title">
+        <mat-icon>business</mat-icon>
+        Select Supplier
+      </h3>
+
+      <div class="form-field-with-icon">
+        <mat-icon class="field-icon">business</mat-icon>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Supplier/Vendor *</mat-label>
+          <input
+            type="text"
+            matInput
+            formControlName="vendorName"
+            [matAutocomplete]="vendorAuto"
+            placeholder="Search or type vendor name"
+            required
+          />
+          <mat-autocomplete
+            #vendorAuto="matAutocomplete"
+            [displayWith]="displayVendor"
+            (optionSelected)="onVendorSelected($event.option.value)"
+            [panelWidth]="'auto'"
           >
-            <div class="expense-option">
-              <div class="expense-option-main">
-                <span class="vendor-name">{{ expense.vendorName || 'N/A' }}</span>
-                <span class="expense-amount">
-                  {{ expense.totalAmount | number: '1.2-2' }} {{ expense.currency || 'AED' }}
-                </span>
+            <mat-option *ngFor="let vendor of filteredVendors$ | async" [value]="vendor">
+              <div class="vendor-option">
+                <span class="vendor-name">{{ vendor.name }}</span>
+                <span *ngIf="vendor.vendorTrn" class="vendor-trn">TRN: {{ vendor.vendorTrn }}</span>
               </div>
-              <div class="expense-option-details">
-                <span class="expense-date">{{ expense.expenseDate | date: 'shortDate' }}</span>
+            </mat-option>
+            <mat-option *ngIf="(filteredVendors$ | async)?.length === 0 && form.get('vendorName')?.value" [value]="null">
+              <span class="no-vendor-found">No vendor found. Will use typed name.</span>
+            </mat-option>
+          </mat-autocomplete>
+          <button
+            *ngIf="selectedVendor"
+            matSuffix
+            mat-icon-button
+            (click)="clearVendorSelection()"
+            type="button"
+            matTooltip="Clear vendor selection"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+          <mat-error *ngIf="form.get('vendorName')?.hasError('required')">
+            Supplier name is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Pending Invoices List -->
+      <div *ngIf="selectedVendor && !loadingInvoices && pendingInvoices.length > 0" class="invoices-section">
+        <h3 class="section-title">
+          <mat-icon>receipt_long</mat-icon>
+          Pending Invoices ({{ pendingInvoices.length }})
+        </h3>
+
+        <div class="invoices-table-container">
+          <table mat-table [dataSource]="allocationsFormArray.controls" class="invoices-table">
+            <ng-container matColumnDef="select">
+              <th mat-header-cell *matHeaderCellDef>
+                <mat-checkbox
+                  (change)="toggleAllInvoices($event.checked)"
+                  [checked]="allInvoicesSelected()"
+                  [indeterminate]="someInvoicesSelected()"
+                ></mat-checkbox>
+              </th>
+              <td mat-cell *matCellDef="let allocation; let i = index">
+                <mat-checkbox
+                  [formControl]="allocation.get('selected')"
+                ></mat-checkbox>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="invoiceNumber">
+              <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+              <td mat-cell *matCellDef="let allocation">
+                {{ allocation.get('invoiceNumber')?.value }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="invoiceDate">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let allocation">
+                {{ allocation.get('invoiceDate')?.value | date: 'shortDate' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="totalAmount">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Total Amount</th>
+              <td mat-cell *matCellDef="let allocation" class="text-right">
+                {{ allocation.get('totalAmount')?.value | number: '1.2-2' }} AED
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="outstandingAmount">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Outstanding</th>
+              <td mat-cell *matCellDef="let allocation" class="text-right">
                 <span class="outstanding-badge">
-                  Outstanding: {{ expense.outstandingAmount | number: '1.2-2' }} {{ expense.currency || 'AED' }}
+                  {{ allocation.get('outstandingAmount')?.value | number: '1.2-2' }} AED
                 </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="allocatedAmount">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Allocate Amount</th>
+              <td mat-cell *matCellDef="let allocation" class="text-right">
+                <mat-form-field appearance="outline" class="allocation-input">
+                  <input
+                    matInput
+                    type="number"
+                    [formControl]="allocation.get('allocatedAmount')"
+                    [max]="allocation.get('outstandingAmount')?.value"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    [disabled]="!allocation.get('selected')?.value"
+                  />
+                  <span matSuffix>AED</span>
+                  <mat-error *ngIf="allocation.get('allocatedAmount')?.hasError('max')">
+                    Cannot exceed outstanding amount
+                  </mat-error>
+                </mat-form-field>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['select', 'invoiceNumber', 'invoiceDate', 'totalAmount', 'outstandingAmount', 'allocatedAmount']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['select', 'invoiceNumber', 'invoiceDate', 'totalAmount', 'outstandingAmount', 'allocatedAmount']"></tr>
+          </table>
+        </div>
+
+        <div class="allocation-summary">
+          <div class="summary-row">
+            <span class="summary-label">Total Payment Amount:</span>
+            <mat-form-field appearance="outline" class="total-amount-input">
+              <input
+                matInput
+                type="number"
+                formControlName="totalPaymentAmount"
+                step="0.01"
+                min="0.01"
+                placeholder="0.00"
+              />
+              <span matSuffix>AED</span>
+              <mat-error *ngIf="form.get('totalPaymentAmount')?.hasError('required')">
+                Total payment amount is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Total Allocated:</span>
+            <span class="summary-value" [class.mismatch]="getAllocationMismatch()">
+              {{ totalAllocated | number: '1.2-2' }} AED
+            </span>
+          </div>
+          <div class="summary-row" *ngIf="getAllocationMismatch()">
+            <span class="summary-error">
+              <mat-icon>warning</mat-icon>
+              Total allocated must equal payment amount
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loadingInvoices" class="loading-state">
+        <mat-spinner diameter="30"></mat-spinner>
+        <p>Loading pending invoices...</p>
+      </div>
+
+      <!-- No Invoices State -->
+      <div *ngIf="selectedVendor && !loadingInvoices && pendingInvoices.length === 0" class="empty-state">
+        <mat-icon>receipt_long</mat-icon>
+        <p>No pending invoices found for this supplier</p>
+      </div>
+    </div>
+
+    <!-- Single Expense Mode (Legacy) -->
+    <div *ngIf="paymentMode === 'single'" class="form-section">
+      <div class="form-field-with-icon">
+        <mat-icon class="field-icon">receipt</mat-icon>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Select Expense *</mat-label>
+          <mat-select 
+            formControlName="expenseId" 
+            required
+            [disabled]="loadingExpenses"
+          >
+            <mat-option value="">
+              <em>Select an expense</em>
+            </mat-option>
+            <mat-option 
+              *ngFor="let expense of expensesWithOutstanding" 
+              [value]="expense.id"
+            >
+              <div class="expense-option">
+                <div class="expense-option-main">
+                  <span class="vendor-name">{{ expense.vendorName || 'N/A' }}</span>
+                  <span class="expense-amount">
+                    {{ expense.totalAmount | number: '1.2-2' }} {{ expense.currency || 'AED' }}
+                  </span>
+                </div>
+                <div class="expense-option-details">
+                  <span class="expense-date">{{ expense.expenseDate | date: 'shortDate' }}</span>
+                  <span class="outstanding-badge">
+                    Outstanding: {{ expense.outstandingAmount | number: '1.2-2' }} {{ expense.currency || 'AED' }}
+                  </span>
+                </div>
               </div>
-            </div>
-          </mat-option>
-        </mat-select>
-        <mat-spinner *ngIf="loadingExpenses" diameter="20" matSuffix class="loading-spinner"></mat-spinner>
-        <mat-error *ngIf="form.get('expenseId')?.hasError('required')">
-          Please select an expense
-        </mat-error>
-      </mat-form-field>
+            </mat-option>
+          </mat-select>
+          <mat-spinner *ngIf="loadingExpenses" diameter="20" matSuffix class="loading-spinner"></mat-spinner>
+          <mat-error *ngIf="form.get('expenseId')?.hasError('required')">
+            Please select an expense
+          </mat-error>
+        </mat-form-field>
+      </div>
 
       <!-- Selected Expense Details -->
       <div class="expense-details-card" *ngIf="selectedExpense">
@@ -76,88 +276,102 @@
               {{ selectedExpense.outstandingAmount | number: '1.2-2' }} {{ selectedExpense.currency || 'AED' }}
             </span>
           </div>
-          <div class="detail-row" *ngIf="selectedExpense.description">
-            <span class="detail-label">Description:</span>
-            <span class="detail-value">{{ selectedExpense.description }}</span>
-          </div>
         </div>
+      </div>
+
+      <div class="form-field-with-icon" *ngIf="selectedExpense">
+        <mat-icon class="field-icon">attach_money</mat-icon>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Payment Amount *</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="amount"
+            step="0.01"
+            min="0.01"
+            [max]="selectedExpense.outstandingAmount"
+            placeholder="Enter payment amount"
+          />
+          <span matSuffix>{{ selectedExpense.currency || 'AED' }}</span>
+          <mat-hint>
+            Maximum: {{ selectedExpense.outstandingAmount | number: '1.2-2' }} {{ selectedExpense.currency || 'AED' }}
+          </mat-hint>
+          <mat-error *ngIf="form.get('amount')?.hasError('required')">
+            Payment amount is required
+          </mat-error>
+          <mat-error *ngIf="form.get('amount')?.hasError('max')">
+            Payment cannot exceed outstanding amount
+          </mat-error>
+        </mat-form-field>
       </div>
     </div>
 
-    <!-- Payment Details -->
-    <div class="form-section" *ngIf="selectedExpense">
-      <h3 class="section-title">Payment Details</h3>
-      
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Payment Amount *</mat-label>
-        <input
-          matInput
-          type="number"
-          formControlName="amount"
-          step="0.01"
-          min="0.01"
-          [max]="selectedExpense.outstandingAmount"
-          placeholder="Enter payment amount"
-        />
-        <span matSuffix>{{ selectedExpense.currency || 'AED' }}</span>
-        <mat-hint>
-          Maximum: {{ selectedExpense.outstandingAmount | number: '1.2-2' }} {{ selectedExpense.currency || 'AED' }}
-        </mat-hint>
-        <mat-error *ngIf="form.get('amount')?.hasError('required')">
-          Payment amount is required
-        </mat-error>
-        <mat-error *ngIf="form.get('amount')?.hasError('max')">
-          Payment cannot exceed outstanding amount of {{ selectedExpense.outstandingAmount | number: '1.2-2' }} {{ selectedExpense.currency || 'AED' }}
-        </mat-error>
-      </mat-form-field>
+    <!-- Common Payment Details -->
+    <div class="form-section" *ngIf="(paymentMode === 'multi' && selectedVendor && pendingInvoices.length > 0) || (paymentMode === 'single' && selectedExpense)">
+      <h3 class="section-title">
+        <mat-icon>payment</mat-icon>
+        Payment Details
+      </h3>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Payment Date *</mat-label>
-        <input
-          matInput
-          [matDatepicker]="paymentDatePicker"
-          formControlName="paymentDate"
-          placeholder="Select payment date"
-          required
-        />
-        <mat-datepicker-toggle matIconSuffix [for]="paymentDatePicker"></mat-datepicker-toggle>
-        <mat-datepicker #paymentDatePicker></mat-datepicker>
-        <mat-error *ngIf="form.get('paymentDate')?.hasError('required')">
-          Payment date is required
-        </mat-error>
-      </mat-form-field>
+      <div class="form-field-with-icon">
+        <mat-icon class="field-icon">calendar_today</mat-icon>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Payment Date *</mat-label>
+          <input
+            matInput
+            [matDatepicker]="paymentDatePicker"
+            formControlName="paymentDate"
+            placeholder="Select payment date"
+            required
+          />
+          <mat-datepicker-toggle matIconSuffix [for]="paymentDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #paymentDatePicker></mat-datepicker>
+          <mat-error *ngIf="form.get('paymentDate')?.hasError('required')">
+            Payment date is required
+          </mat-error>
+        </mat-form-field>
+      </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Payment Method</mat-label>
-        <mat-select formControlName="paymentMethod">
-          <mat-option *ngFor="let method of paymentMethods" [value]="method.value">
-            {{ method.label }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+      <div class="form-field-with-icon">
+        <mat-icon class="field-icon">payment</mat-icon>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Payment Method</mat-label>
+          <mat-select formControlName="paymentMethod">
+            <mat-option *ngFor="let method of paymentMethods" [value]="method.value">
+              {{ method.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Reference Number</mat-label>
-        <input
-          matInput
-          formControlName="referenceNumber"
-          placeholder="e.g., Transaction ID, Cheque #"
-        />
-      </mat-form-field>
+      <div class="form-field-with-icon">
+        <mat-icon class="field-icon">tag</mat-icon>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Reference Number</mat-label>
+          <input
+            matInput
+            formControlName="referenceNumber"
+            placeholder="e.g., Transaction ID, Cheque #"
+          />
+        </mat-form-field>
+      </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Notes</mat-label>
-        <textarea 
-          matInput 
-          formControlName="notes" 
-          rows="3"
-          placeholder="Additional notes about this payment"
-        ></textarea>
-      </mat-form-field>
+      <div class="form-field-with-icon">
+        <mat-icon class="field-icon">notes</mat-icon>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Notes</mat-label>
+          <textarea 
+            matInput 
+            formControlName="notes" 
+            rows="3"
+            placeholder="Additional notes about this payment"
+          ></textarea>
+        </mat-form-field>
+      </div>
     </div>
 
     <!-- Empty State -->
-    <div class="empty-state" *ngIf="!loadingExpenses && expensesWithOutstanding.length === 0">
+    <div class="empty-state" *ngIf="paymentMode === 'single' && !loadingExpenses && expensesWithOutstanding.length === 0">
       <mat-icon>receipt_long</mat-icon>
       <p>No expenses with outstanding balance found</p>
       <p class="empty-state-hint">Create an expense first to record payments against it.</p>
@@ -171,7 +385,7 @@
     mat-raised-button
     color="primary"
     (click)="save()"
-    [disabled]="form.invalid || loading || !selectedExpense"
+    [disabled]="form.invalid || loading || !canSave()"
   >
     <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
     <span *ngIf="!loading">Create Payment</span>

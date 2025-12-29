@@ -63,6 +63,27 @@
   letter-spacing: -0.01em;
 }
 
+// Form field with icon on the left
+.form-field-with-icon {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+
+  .field-icon {
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
 .filters-card {
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);

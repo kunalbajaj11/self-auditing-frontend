@@ -230,6 +230,27 @@
   gap: 16px;
 }
 
+// Form field with icon on the left
+.form-field-with-icon {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+
+  .field-icon {
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .form-field {
+    flex: 1;
+  }
+}
+
 .form-field {
   width: 100%;
 
@@ -244,11 +265,6 @@
 
     .mat-mdc-form-field-subscript-wrapper {
       margin-top: 4px;
-    }
-
-    .mat-mdc-form-field-icon-prefix {
-      color: #64748b;
-      margin-right: 12px;
     }
 
     .mat-mdc-form-field-icon-suffix {

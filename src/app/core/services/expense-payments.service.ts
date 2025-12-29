@@ -1,6 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
+import { Expense } from '../models/expense.model';
+
+export interface PaymentAllocationResponse {
+  id: string;
+  expenseId: string;
+  expense?: Expense;
+  allocatedAmount: string;
+}
 
 export interface ExpensePayment {
   id: string;
@@ -21,17 +29,30 @@ export interface ExpensePayment {
   paymentMethod?: string;
   referenceNumber?: string;
   notes?: string;
+  allocations?: PaymentAllocationResponse[]; // Allocations for multi-invoice payments
   createdAt: string;
   updatedAt: string;
 }
 
-export interface CreateExpensePaymentPayload {
+export interface PaymentAllocation {
   expenseId: string;
+  allocatedAmount: number;
+}
+
+export interface CreateExpensePaymentPayload {
+  expenseId?: string; // Optional for backward compatibility
   amount: number;
   paymentDate: string;
   paymentMethod?: string;
   referenceNumber?: string;
   notes?: string;
+  allocations?: PaymentAllocation[]; // New: invoice-wise allocations
+  vendorName?: string; // Optional: for filtering
+}
+
+export interface ExpenseWithOutstanding extends Expense {
+  outstandingAmount: number;
+  totalAmount: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -56,6 +77,12 @@ export class ExpensePaymentsService {
 
   deletePayment(id: string): Observable<void> {
     return this.api.delete<void>(`/expense-payments/${id}`);
+  }
+
+  getPendingInvoicesByVendor(vendorName: string): Observable<ExpenseWithOutstanding[]> {
+    return this.api.get<ExpenseWithOutstanding[]>(
+      `/expense-payments/pending-invoices/${encodeURIComponent(vendorName)}`
+    );
   }
 }
 

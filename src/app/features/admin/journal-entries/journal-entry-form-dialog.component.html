@@ -162,6 +162,36 @@
       <input matInput formControlName="customerVendorName" placeholder="Enter customer or vendor name" />
     </mat-form-field>
 
+    <!-- Vendor TRN -->
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Vendor TRN</mat-label>
+      <input matInput formControlName="vendorTrn" placeholder="Enter vendor TRN (Tax Registration Number)" />
+    </mat-form-field>
+
+    <!-- Sub-Account (for sub-heads like Prepaid Rent) -->
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Sub-Account (Optional)</mat-label>
+      <input matInput formControlName="subAccount" placeholder="e.g., Prepaid Rent, Prepaid Commission" />
+      <mat-hint>Use for sub-heads under main accounts (e.g., Prepaid Rent under Prepaid Expenses)</mat-hint>
+    </mat-form-field>
+
+    <!-- VAT Amount -->
+    <mat-form-field appearance="outline">
+      <mat-label>VAT Amount (AED)</mat-label>
+      <input matInput type="number" formControlName="vatAmount" step="0.01" min="0" placeholder="0.00" />
+    </mat-form-field>
+
+    <!-- VAT Tax Type -->
+    <mat-form-field appearance="outline">
+      <mat-label>VAT Tax Type</mat-label>
+      <mat-select formControlName="vatTaxType">
+        <mat-option value="standard">Standard Rate</mat-option>
+        <mat-option value="zero_rated">Zero Rated</mat-option>
+        <mat-option value="exempt">Exempt</mat-option>
+        <mat-option value="reverse_charge">Reverse Charge</mat-option>
+      </mat-select>
+    </mat-form-field>
+
     <!-- Reference Number -->
     <mat-form-field appearance="outline" class="full">
       <mat-label>Reference Number</mat-label>

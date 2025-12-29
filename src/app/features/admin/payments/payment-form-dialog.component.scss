@@ -27,6 +27,27 @@ mat-dialog-content {
   width: 100%;
 }
 
+// Form field with icon on the left
+.form-field-with-icon {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+
+  .field-icon {
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
 // Expense Selection Dropdown
 .expense-option {
   display: flex;

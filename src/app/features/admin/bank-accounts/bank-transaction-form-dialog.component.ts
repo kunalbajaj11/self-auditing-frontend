@@ -6,6 +6,7 @@ import { ExpensesService } from '../../../core/services/expenses.service';
 import { ExpensePaymentsService } from '../../../core/services/expense-payments.service';
 import { SalesInvoicesService } from '../../../core/services/sales-invoices.service';
 import { VendorsService, Vendor } from '../../../core/services/vendors.service';
+import { CustomersService, Customer } from '../../../core/services/customers.service';
 import { Observable, of } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
@@ -23,6 +24,11 @@ export class BankTransactionFormDialogComponent implements OnInit {
   filteredVendors$!: Observable<Vendor[]>;
   selectedVendor: Vendor | null = null;
 
+  // Customer autocomplete
+  customers: Customer[] = [];
+  filteredCustomers$!: Observable<Customer[]>;
+  selectedCustomer: Customer | null = null;
+
   readonly transactionTypes = [
     { value: 'expense', label: 'Expense Payment' },
     { value: 'sales', label: 'Sales Receipt' },
@@ -37,6 +43,7 @@ export class BankTransactionFormDialogComponent implements OnInit {
     private readonly paymentsService: ExpensePaymentsService,
     private readonly invoicesService: SalesInvoicesService,
     private readonly vendorsService: VendorsService,
+    private readonly customersService: CustomersService,
     private readonly snackBar: MatSnackBar,
   ) {
     this.form = this.fb.group({
@@ -44,7 +51,9 @@ export class BankTransactionFormDialogComponent implements OnInit {
       date: [new Date().toISOString().substring(0, 10), Validators.required],
       description: ['', Validators.required],
       vendorId: [''],
-      vendorName: ['', Validators.required],
+      vendorName: [''],
+      customerId: [''],
+      customerName: [''],
       amount: [0, [Validators.required, Validators.min(0.01)]],
       currency: ['AED', Validators.required],
       referenceNumber: [''],
@@ -54,7 +63,22 @@ export class BankTransactionFormDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadVendors();
+    this.loadCustomers();
     this.setupVendorAutocomplete();
+    this.setupCustomerAutocomplete();
+    
+    // Update validators based on transaction type
+    this.form.get('type')?.valueChanges.subscribe((type) => {
+      if (type === 'expense') {
+        this.form.get('vendorName')?.setValidators([Validators.required]);
+        this.form.get('customerName')?.clearValidators();
+      } else if (type === 'sales') {
+        this.form.get('customerName')?.setValidators([Validators.required]);
+        this.form.get('vendorName')?.clearValidators();
+      }
+      this.form.get('vendorName')?.updateValueAndValidity();
+      this.form.get('customerName')?.updateValueAndValidity();
+    });
   }
 
   private loadVendors(): void {
@@ -64,6 +88,17 @@ export class BankTransactionFormDialogComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading vendors:', error);
+      },
+    });
+  }
+
+  private loadCustomers(): void {
+    this.customersService.listCustomers(undefined, true).subscribe({
+      next: (customers) => {
+        this.customers = customers;
+      },
+      error: (error) => {
+        console.error('Error loading customers:', error);
       },
     });
   }
@@ -138,6 +173,79 @@ export class BankTransactionFormDialogComponent implements OnInit {
     this.form.patchValue({
       vendorId: '',
       vendorName: '',
+    });
+  }
+
+  private setupCustomerAutocomplete(): void {
+    const initialValue = this.form.get('customerName')?.value || '';
+    this.filteredCustomers$ = this.form.get('customerName')!.valueChanges.pipe(
+      startWith(initialValue),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((searchTerm: string | null) => {
+        const search = searchTerm || '';
+        if (this.selectedCustomer) {
+          return of([this.selectedCustomer]);
+        }
+        if (!search || search.length < 2) {
+          return of(this.customers.slice(0, 10));
+        }
+        return this.customersService.listCustomers(search, true).pipe(
+          map((customers) => customers.slice(0, 10)),
+        );
+      }),
+    );
+
+    // Watch for customer selection changes
+    this.form.get('customerId')?.valueChanges.subscribe((customerId) => {
+      if (customerId) {
+        const customer = this.customers.find((c) => c.id === customerId);
+        if (customer) {
+          this.selectedCustomer = customer;
+          this.form.patchValue({
+            customerName: customer.name,
+          }, { emitEvent: false });
+        }
+      } else {
+        this.selectedCustomer = null;
+      }
+    });
+
+    // Clear customerId when customerName is manually changed
+    this.form.get('customerName')?.valueChanges.subscribe(() => {
+      if (!this.selectedCustomer && this.form.get('customerId')?.value) {
+        setTimeout(() => {
+          if (!this.selectedCustomer && this.form.get('customerId')?.value) {
+            this.form.patchValue({ customerId: '' }, { emitEvent: false });
+          }
+        }, 100);
+      }
+    });
+  }
+
+  onCustomerSelected(customer: Customer): void {
+    this.selectedCustomer = customer;
+    this.form.patchValue({
+      customerId: customer.id,
+      customerName: customer.name,
+    });
+  }
+
+  displayCustomer(customer: Customer | string | null): string {
+    if (!customer) {
+      return this.form.get('customerName')?.value || '';
+    }
+    if (typeof customer === 'string') {
+      return customer;
+    }
+    return customer.name;
+  }
+
+  clearCustomerSelection(): void {
+    this.selectedCustomer = null;
+    this.form.patchValue({
+      customerId: '',
+      customerName: '',
     });
   }
 
@@ -228,9 +336,8 @@ export class BankTransactionFormDialogComponent implements OnInit {
     // Create a sales invoice with bank received status
     // Note: Since tax_invoice_bank_received is removed, we'll create it as a regular invoice
     // and track it separately, or we can create it with a note
-    this.invoicesService
-      .createInvoice({
-        customerName: data.vendorName,
+    const invoicePayload: any = {
+        customerName: data.customerName || data.vendorName, // Use customerName for sales
         invoiceDate: data.date,
         currency: data.currency,
         description: data.description,
@@ -248,7 +355,15 @@ export class BankTransactionFormDialogComponent implements OnInit {
             vatTaxType: 'STANDARD',
           },
         ],
-      })
+      };
+
+    // Add customerId if selected
+    if (data.customerId) {
+      invoicePayload.customerId = data.customerId;
+    }
+
+    this.invoicesService
+      .createInvoice(invoicePayload)
       .subscribe({
         next: (invoice) => {
           // Record payment for the invoice

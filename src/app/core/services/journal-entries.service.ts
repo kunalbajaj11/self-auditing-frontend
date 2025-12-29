@@ -123,6 +123,10 @@ export interface JournalEntry {
   referenceNumber?: string | null;
   customerVendorId?: string | null;
   customerVendorName?: string | null;
+  vendorTrn?: string | null;
+  vatAmount?: number | null;
+  vatTaxType?: string | null;
+  subAccount?: string | null;
   attachmentId?: string | null;
   notes?: string | null;
   createdAt: string;
@@ -143,6 +147,10 @@ export interface CreateJournalEntryPayload {
   referenceNumber?: string;
   customerVendorId?: string;
   customerVendorName?: string;
+  vendorTrn?: string;
+  vatAmount?: number;
+  vatTaxType?: string;
+  subAccount?: string;
   attachmentId?: string;
   notes?: string;
 }
@@ -156,6 +164,10 @@ export interface UpdateJournalEntryPayload {
   referenceNumber?: string;
   customerVendorId?: string;
   customerVendorName?: string;
+  vendorTrn?: string;
+  vatAmount?: number;
+  vatTaxType?: string;
+  subAccount?: string;
   attachmentId?: string;
   notes?: string;
 }
