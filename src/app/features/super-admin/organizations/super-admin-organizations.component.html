@@ -17,10 +17,10 @@
     <mat-card class="filters-card">
     <div class="form-field-with-icon">
       <mat-icon class="field-icon">search</mat-icon>
-      <mat-form-field appearance="outline">
-        <mat-label>Search organizations</mat-label>
-        <input matInput [formControl]="searchControl" placeholder="Name, status, or plan" />
-      </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Search organizations</mat-label>
+      <input matInput [formControl]="searchControl" placeholder="Name, status, or plan" />
+    </mat-form-field>
     </div>
     <button mat-button (click)="refresh()">
       <mat-icon>refresh</mat-icon>

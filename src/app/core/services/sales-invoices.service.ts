@@ -133,5 +133,26 @@ export class SalesInvoicesService {
   downloadInvoicePDF(invoiceId: string): Observable<Blob> {
     return this.api.download(`/sales-invoices/${invoiceId}/pdf`);
   }
+
+  getItemSuggestions(searchTerm?: string): Observable<Array<{
+    itemName: string;
+    description?: string;
+    unitPrice: number;
+    vatRate: number;
+    vatTaxType: string;
+    unitOfMeasure?: string;
+    usageCount: number;
+  }>> {
+    const params = searchTerm ? { search: searchTerm } : {};
+    return this.api.get<Array<{
+      itemName: string;
+      description?: string;
+      unitPrice: number;
+      vatRate: number;
+      vatTaxType: string;
+      unitOfMeasure?: string;
+      usageCount: number;
+    }>>('/sales-invoices/item-suggestions', params);
+  }
 }
 

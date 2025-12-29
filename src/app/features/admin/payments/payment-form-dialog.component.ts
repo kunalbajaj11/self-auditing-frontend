@@ -86,7 +86,7 @@ export class PaymentFormDialogComponent implements OnInit {
     this.form.get('totalPaymentAmount')?.valueChanges.subscribe(() => {
       this.updateTotalAllocated();
     });
-
+              
     // Watch allocation changes
     this.allocationsFormArray.valueChanges.subscribe(() => {
       this.updateTotalAllocated();
@@ -124,11 +124,11 @@ export class PaymentFormDialogComponent implements OnInit {
     this.vendorsService.listVendors({ isActive: true }).subscribe({
       next: (vendors) => {
         this.vendors = vendors;
-      },
-      error: (error) => {
+            },
+            error: (error) => {
         console.error('Error loading vendors:', error);
-      },
-    });
+            },
+          });
   }
 
   onVendorSelected(vendor: Vendor): void {
@@ -208,7 +208,7 @@ export class PaymentFormDialogComponent implements OnInit {
         } else {
           // Clear allocation when deselected
           allocationGroup.get('allocatedAmount')?.setValue(0, { emitEvent: false });
-        }
+    }
         this.updateTotalAllocated();
       });
 
@@ -299,7 +299,7 @@ export class PaymentFormDialogComponent implements OnInit {
 
   save(): void {
     this.form.markAllAsTouched();
-
+    
     if (this.form.invalid) {
       this.snackBar.open('Please fix the form errors before submitting', 'Close', {
         duration: 4000,
@@ -372,44 +372,44 @@ export class PaymentFormDialogComponent implements OnInit {
         });
     } else {
       // Legacy: Single expense mode
-      const amount = parseFloat(formValue.amount);
+    const amount = parseFloat(formValue.amount);
+    
+    if (isNaN(amount) || amount <= 0) {
+      this.loading = false;
+      this.snackBar.open('Please enter a valid payment amount', 'Close', {
+        duration: 4000,
+        panelClass: ['snack-error'],
+      });
+      return;
+    }
 
-      if (isNaN(amount) || amount <= 0) {
-        this.loading = false;
-        this.snackBar.open('Please enter a valid payment amount', 'Close', {
-          duration: 4000,
-          panelClass: ['snack-error'],
-        });
-        return;
-      }
-
-      this.paymentsService
-        .createPayment({
-          expenseId: formValue.expenseId,
-          amount: amount,
-          paymentDate: formValue.paymentDate,
-          paymentMethod: formValue.paymentMethod,
-          referenceNumber: formValue.referenceNumber || undefined,
-          notes: formValue.notes || undefined,
-        })
-        .subscribe({
-          next: () => {
-            this.loading = false;
-            this.snackBar.open('Payment created successfully', 'Close', {
-              duration: 3000,
-            });
-            this.dialogRef.close(true);
-          },
-          error: (error) => {
-            this.loading = false;
-            console.error('Error creating payment:', error);
-            const errorMessage = error?.error?.message || error?.message || 'Failed to create payment';
-            this.snackBar.open(errorMessage, 'Close', {
-              duration: 5000,
-              panelClass: ['snack-error'],
-            });
-          },
-        });
+    this.paymentsService
+      .createPayment({
+        expenseId: formValue.expenseId,
+        amount: amount,
+        paymentDate: formValue.paymentDate,
+        paymentMethod: formValue.paymentMethod,
+        referenceNumber: formValue.referenceNumber || undefined,
+        notes: formValue.notes || undefined,
+      })
+      .subscribe({
+        next: () => {
+          this.loading = false;
+          this.snackBar.open('Payment created successfully', 'Close', {
+            duration: 3000,
+          });
+          this.dialogRef.close(true);
+        },
+        error: (error) => {
+          this.loading = false;
+          console.error('Error creating payment:', error);
+          const errorMessage = error?.error?.message || error?.message || 'Failed to create payment';
+          this.snackBar.open(errorMessage, 'Close', {
+            duration: 5000,
+            panelClass: ['snack-error'],
+          });
+        },
+      });
     }
   }
 

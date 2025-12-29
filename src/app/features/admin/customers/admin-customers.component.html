@@ -14,15 +14,15 @@
     <div class="filters">
       <div class="form-field-with-icon">
         <mat-icon class="field-icon">search</mat-icon>
-        <mat-form-field appearance="outline" class="search-field">
-          <mat-label style="margin-left: 12px;">Search customers</mat-label>
-          <input
-            matInput
-            [(ngModel)]="searchTerm"
-            (ngModelChange)="onSearchChange()"
-            placeholder="Search by name, TRN, email..."
-          />
-        </mat-form-field>
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label style="margin-left: 12px;">Search customers</mat-label>
+        <input
+          matInput
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Search by name, TRN, email..."
+        />
+      </mat-form-field>
       </div>
 
       <mat-checkbox

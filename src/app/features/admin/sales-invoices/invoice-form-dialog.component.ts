@@ -11,6 +11,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { SalesInvoicesService, SalesInvoice, InvoiceLineItem } from '../../../core/services/sales-invoices.service';
 import { CustomersService, Customer } from '../../../core/services/customers.service';
 import { SettingsService, TaxRate } from '../../../core/services/settings.service';
+import { Observable, of } from 'rxjs';
+import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-invoice-form-dialog',
@@ -34,6 +36,27 @@ export class InvoiceFormDialogComponent implements OnInit {
     'tax_invoice_cash_received': 'Tax Invoice - Cash received',
   };
   readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
+
+  // Item suggestions autocomplete
+  itemSuggestionsMap = new Map<number, Observable<Array<{
+    itemName: string;
+    description?: string;
+    unitPrice: number;
+    vatRate: number;
+    vatTaxType: string;
+    unitOfMeasure?: string;
+    usageCount: number;
+  }>>>();
+  activeItemIndex: number | null = null;
+  filteredItems$: Observable<Array<{
+    itemName: string;
+    description?: string;
+    unitPrice: number;
+    vatRate: number;
+    vatTaxType: string;
+    unitOfMeasure?: string;
+    usageCount: number;
+  }>> = of([]);
 
   get lineItems(): FormArray {
     return this.form.get('lineItems') as FormArray;
@@ -93,6 +116,8 @@ export class InvoiceFormDialogComponent implements OnInit {
       // Add one empty line item for new invoice
       this.addLineItem();
     }
+    // Initialize filteredItems$ with empty suggestions
+    this.filteredItems$ = this.invoicesService.getItemSuggestions();
   }
 
   loadTaxSettings(): void {
@@ -248,11 +273,109 @@ export class InvoiceFormDialogComponent implements OnInit {
     // Initial calculation
     this.calculateLineItem(lineItemGroup);
 
+    const index = this.lineItems.length;
     this.lineItems.push(lineItemGroup);
+
+    // Setup autocomplete for item name
+    this.setupItemNameAutocomplete(index, lineItemGroup);
+  }
+
+  setupItemNameAutocomplete(index: number, lineItemGroup: FormGroup): void {
+    const itemNameControl = lineItemGroup.get('itemName');
+    if (!itemNameControl) return;
+
+    const filteredItems$ = itemNameControl.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((searchTerm: string | null) => {
+        const search = (searchTerm || '').trim();
+        if (search.length < 1) {
+          // Show top suggestions when empty
+          return this.invoicesService.getItemSuggestions();
+        }
+        return this.invoicesService.getItemSuggestions(search);
+      }),
+      map((suggestions) => suggestions.slice(0, 10)), // Limit to 10 suggestions
+    );
+
+    this.itemSuggestionsMap.set(index, filteredItems$);
+  }
+
+  onItemNameFocus(index: number): void {
+    this.activeItemIndex = index;
+    const lineItemGroup = this.lineItems.at(index) as FormGroup;
+    if (lineItemGroup) {
+      const itemNameControl = lineItemGroup.get('itemName');
+      if (itemNameControl) {
+        this.filteredItems$ = itemNameControl.valueChanges.pipe(
+          startWith(itemNameControl.value || ''),
+          debounceTime(300),
+          distinctUntilChanged(),
+          switchMap((searchTerm: string | null) => {
+            const search = (searchTerm || '').trim();
+            if (search.length < 1) {
+              return this.invoicesService.getItemSuggestions();
+            }
+            return this.invoicesService.getItemSuggestions(search);
+          }),
+          map((suggestions) => suggestions.slice(0, 10)),
+        );
+      }
+    }
+  }
+
+  getItemSuggestions(index: number): Observable<Array<{
+    itemName: string;
+    description?: string;
+    unitPrice: number;
+    vatRate: number;
+    vatTaxType: string;
+    unitOfMeasure?: string;
+    usageCount: number;
+  }>> {
+    return this.itemSuggestionsMap.get(index) || of([]);
+  }
+
+  onItemSelected(index: number, selectedItem: {
+    itemName: string;
+    description?: string;
+    unitPrice: number;
+    vatRate: number;
+    vatTaxType: string;
+    unitOfMeasure?: string;
+  }): void {
+    const lineItemGroup = this.lineItems.at(index) as FormGroup;
+    if (!lineItemGroup) return;
+
+    // Auto-fill fields from selected suggestion
+    lineItemGroup.patchValue({
+      itemName: selectedItem.itemName,
+      description: selectedItem.description || lineItemGroup.get('description')?.value || '',
+      unitPrice: selectedItem.unitPrice || lineItemGroup.get('unitPrice')?.value || 0,
+      vatRate: selectedItem.vatRate || this.defaultTaxRate,
+      vatTaxType: selectedItem.vatTaxType || 'STANDARD',
+      unitOfMeasure: selectedItem.unitOfMeasure || lineItemGroup.get('unitOfMeasure')?.value || 'unit',
+    }, { emitEvent: true }); // Emit events to trigger calculations
+
+    // Recalculate line item
+    this.calculateLineItem(lineItemGroup);
+  }
+
+  displayItemName(item: { itemName: string } | string | null): string {
+    if (!item) return '';
+    if (typeof item === 'string') return item;
+    return item.itemName || '';
   }
 
   removeLineItem(index: number): void {
+    this.itemSuggestionsMap.delete(index);
     this.lineItems.removeAt(index);
+    // Re-index remaining items
+    this.itemSuggestionsMap.clear();
+    this.lineItems.controls.forEach((control, idx) => {
+      this.setupItemNameAutocomplete(idx, control as FormGroup);
+    });
   }
 
   calculateLineItem(lineItemGroup: FormGroup): void {
