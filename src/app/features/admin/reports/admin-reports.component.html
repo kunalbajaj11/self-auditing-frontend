@@ -808,7 +808,7 @@
               <ng-container matColumnDef="pendingBalance">
                 <th mat-header-cell *matHeaderCellDef class="text-right">Pending Balance</th>
                 <td mat-cell *matCellDef="let row" class="text-right" [class.credit-amount]="(row.pendingBalance || 0) >= 0" [class.negative-amount]="(row.pendingBalance || 0) < 0">
-                  {{ formatCurrency(row.pendingBalance, true) }}
+                  {{ formatCurrency(row.pendingBalance || 0, true) }}
                 </td>
               </ng-container>
               <ng-container matColumnDef="itemCount">

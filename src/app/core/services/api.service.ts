@@ -52,6 +52,13 @@ export class ApiService {
     });
   }
 
+  postDownload(endpoint: string, body?: unknown) {
+    return this.http.post(`${this.baseUrl}${endpoint}`, body, {
+      responseType: 'blob',
+      headers: this.authHeaders(),
+    });
+  }
+
   uploadFile(endpoint: string, file: File, additionalData?: Record<string, any>): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);

@@ -1,0 +1,36 @@
+<h2 mat-dialog-title>
+  {{ isEdit ? 'Edit Location' : 'New Location' }}
+</h2>
+<form mat-dialog-content [formGroup]="form" class="form">
+  <mat-form-field appearance="outline">
+    <mat-label>Name</mat-label>
+    <input matInput formControlName="name" required />
+    <mat-error *ngIf="form.get('name')?.hasError('required')">
+      Name is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Address</mat-label>
+    <textarea matInput rows="3" formControlName="address"></textarea>
+  </mat-form-field>
+</form>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="save()"
+    [disabled]="loading"
+  >
+    <mat-progress-spinner
+      *ngIf="loading"
+      diameter="20"
+      mode="indeterminate"
+      style="display: inline-block; margin-right: 8px;"
+    ></mat-progress-spinner>
+    {{ isEdit ? 'Update' : 'Create' }}
+  </button>
+</mat-dialog-actions>
+

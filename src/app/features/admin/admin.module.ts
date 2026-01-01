@@ -47,6 +47,15 @@ import { BankTransactionFormDialogComponent } from './bank-accounts/bank-transac
 import { AdjustmentsComponent } from './adjustments/adjustments.component';
 import { AdminJournalEntriesComponent } from './journal-entries/admin-journal-entries.component';
 import { JournalEntryFormDialogComponent } from './journal-entries/journal-entry-form-dialog.component';
+import { AdminPayrollRunsComponent } from './payroll/admin-payroll-runs.component';
+import { PayrollRunFormDialogComponent } from './payroll/payroll-run-form-dialog.component';
+import { PayrollRunDetailDialogComponent } from './payroll/payroll-run-detail-dialog.component';
+import { AdminSalaryProfilesComponent } from './payroll/admin-salary-profiles.component';
+import { SalaryProfileFormDialogComponent } from './payroll/salary-profile-form-dialog.component';
+import { AdminInventoryLocationsComponent } from './inventory/admin-inventory-locations.component';
+import { LocationFormDialogComponent } from './inventory/location-form-dialog.component';
+import { AdminProductsComponent } from './products/admin-products.component';
+import { ProductFormDialogComponent } from './products/product-form-dialog.component';
 
 @NgModule({
   declarations: [
@@ -96,6 +105,15 @@ import { JournalEntryFormDialogComponent } from './journal-entries/journal-entry
     AdjustmentsComponent,
     AdminJournalEntriesComponent,
     JournalEntryFormDialogComponent,
+    AdminSalaryProfilesComponent,
+    SalaryProfileFormDialogComponent,
+    AdminPayrollRunsComponent,
+    PayrollRunFormDialogComponent,
+    PayrollRunDetailDialogComponent,
+    AdminInventoryLocationsComponent,
+    LocationFormDialogComponent,
+    AdminProductsComponent,
+    ProductFormDialogComponent,
   ],
   imports: [SharedModule, AdminRoutingModule],
 })

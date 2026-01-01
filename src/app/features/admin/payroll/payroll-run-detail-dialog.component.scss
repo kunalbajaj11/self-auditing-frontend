@@ -1,0 +1,131 @@
+.payroll-run-detail-dialog {
+  min-width: 900px;
+  max-width: 1200px;
+
+  h2[mat-dialog-title] {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .run-summary {
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 16px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .summary-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        &.full-width {
+          grid-column: span 3;
+        }
+
+        label {
+          font-size: 12px;
+          color: rgba(0, 0, 0, 0.6);
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        span {
+          font-size: 16px;
+          color: rgba(0, 0, 0, 0.87);
+
+          &.amount {
+            font-weight: 500;
+
+            &.primary {
+              font-size: 18px;
+              font-weight: 600;
+              color: #1976d2;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .entries-section {
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 500;
+      }
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .entries-table {
+      width: 100%;
+
+      th {
+        font-weight: 500;
+      }
+
+      .primary {
+        font-weight: 500;
+      }
+
+      .secondary {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.6);
+      }
+
+      .status-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .status-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+
+        .email-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 16px;
+
+    p {
+      margin: 0;
+      color: rgba(0, 0, 0, 0.6);
+    }
+  }
+}
+

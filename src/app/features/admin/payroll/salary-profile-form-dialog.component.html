@@ -1,0 +1,167 @@
+<h2 mat-dialog-title>
+  {{ isEdit ? 'Edit Salary Profile' : 'New Salary Profile' }}
+</h2>
+<form mat-dialog-content [formGroup]="form" class="form" style="margin: 16px;">
+  <div class="form-row">
+    <mat-form-field appearance="outline" class="flex-2" style="padding-top: 10px;">
+      <mat-label>Employee Name</mat-label>
+      <input matInput formControlName="employeeName" placeholder="Enter employee name" required />
+      <mat-hint>Enter the name of the employee (can be any employee, not just portal users)</mat-hint>
+      <mat-error *ngIf="form.get('employeeName')?.hasError('required')">
+        Employee name is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Currency</mat-label>
+      <mat-select formControlName="currency" required>
+        <mat-option *ngFor="let curr of currencies" [value]="curr">
+          {{ curr }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="form-row">
+    <mat-form-field appearance="outline">
+      <mat-label>Basic Salary</mat-label>
+      <input matInput type="number" formControlName="basicSalary" required />
+      <mat-error *ngIf="form.get('basicSalary')?.hasError('required')">
+        Basic salary is required
+      </mat-error>
+      <mat-error *ngIf="form.get('basicSalary')?.hasError('min')">
+        Basic salary must be greater than 0
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Effective Date</mat-label>
+      <input matInput [matDatepicker]="effectiveDatePicker" formControlName="effectiveDate" required />
+      <mat-datepicker-toggle matSuffix [for]="effectiveDatePicker"></mat-datepicker-toggle>
+      <mat-datepicker #effectiveDatePicker></mat-datepicker>
+      <mat-error *ngIf="form.get('effectiveDate')?.hasError('required')">
+        Effective date is required
+      </mat-error>
+    </mat-form-field>
+  </div>
+
+  <mat-form-field appearance="outline">
+    <mat-label>End Date (Optional)</mat-label>
+    <input matInput [matDatepicker]="endDatePicker" formControlName="endDate" />
+    <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+    <mat-datepicker #endDatePicker></mat-datepicker>
+    <mat-hint>Leave blank if this profile has no end date</mat-hint>
+  </mat-form-field>
+
+  <div class="components-section">
+    <div class="components-header">
+      <h3>Salary Components</h3>
+      <button mat-button type="button" color="primary" (click)="addComponent()">
+        <mat-icon>add</mat-icon>
+        Add Component
+      </button>
+    </div>
+
+    <div formArrayName="salaryComponents" class="components-list">
+      <div
+        *ngFor="let component of salaryComponents.controls; let i = index"
+        [formGroupName]="i"
+        class="component-item"
+      >
+        <div class="component-header">
+          <mat-icon>drag_indicator</mat-icon>
+          <span class="component-title">Component {{ i + 1 }}</span>
+          <button mat-icon-button type="button" color="warn" (click)="removeComponent(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+
+        <div class="component-fields">
+          <mat-form-field appearance="outline">
+            <mat-label>Type</mat-label>
+            <mat-select formControlName="componentType" required>
+              <mat-option *ngFor="let type of componentTypes" [value]="type.value">
+                {{ type.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" required />
+            <mat-error *ngIf="salaryComponents.at(i).get('name')?.hasError('required')">
+              Name is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Calculation Type</mat-label>
+            <mat-select formControlName="calculationType" required>
+              <mat-option *ngFor="let calcType of calculationTypes" [value]="calcType.value">
+                {{ calcType.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <ng-container [ngSwitch]="salaryComponents.at(i).get('calculationType')?.value">
+            <mat-form-field appearance="outline" *ngSwitchCase="'fixed'">
+              <mat-label>Amount</mat-label>
+              <input matInput type="number" formControlName="amount" required />
+              <mat-error *ngIf="salaryComponents.at(i).get('amount')?.hasError('required')">
+                Amount is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" *ngSwitchCase="'percentage'">
+              <mat-label>Percentage</mat-label>
+              <input matInput type="number" formControlName="percentage" required />
+              <mat-hint>Percentage of basic salary</mat-hint>
+              <mat-error *ngIf="salaryComponents.at(i).get('percentage')?.hasError('required')">
+                Percentage is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" *ngSwitchCase="'hourly'">
+              <mat-label>Hourly Rate</mat-label>
+              <input matInput type="number" formControlName="hourlyRate" required />
+              <mat-error *ngIf="salaryComponents.at(i).get('hourlyRate')?.hasError('required')">
+                Hourly rate is required
+              </mat-error>
+            </mat-form-field>
+          </ng-container>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Priority</mat-label>
+            <input matInput type="number" formControlName="priority" />
+            <mat-hint>Calculation order (0 = first)</mat-hint>
+          </mat-form-field>
+
+          <mat-checkbox formControlName="isTaxable">Taxable</mat-checkbox>
+        </div>
+      </div>
+
+      <div *ngIf="salaryComponents.length === 0" class="no-components">
+        <p>No components added. Click "Add Component" to add allowances, deductions, etc.</p>
+      </div>
+    </div>
+  </div>
+</form>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="save()"
+    [disabled]="loading"
+  >
+    <mat-progress-spinner
+      *ngIf="loading"
+      diameter="20"
+      mode="indeterminate"
+      style="display: inline-block; margin-right: 8px;"
+    ></mat-progress-spinner>
+    {{ isEdit ? 'Update' : 'Create' }}
+  </button>
+</mat-dialog-actions>
+

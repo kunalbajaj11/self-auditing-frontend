@@ -1,0 +1,47 @@
+<h2 mat-dialog-title>
+  {{ isEdit ? 'Edit Payroll Run' : 'New Payroll Run' }}
+</h2>
+<form mat-dialog-content [formGroup]="form" class="form" style="margin: 16px;">
+  <mat-form-field appearance="outline" style="padding-top: 10px;">
+    <mat-label>Payroll Period</mat-label>
+    <input matInput formControlName="payrollPeriod" placeholder="e.g., 2024-01" required />
+    <mat-hint>Format: YYYY-MM (e.g., 2024-01)</mat-hint>
+    <mat-error *ngIf="form.get('payrollPeriod')?.hasError('required')">
+      Payroll period is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Pay Date</mat-label>
+    <input matInput [matDatepicker]="picker" formControlName="payDate" required />
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+    <mat-error *ngIf="form.get('payDate')?.hasError('required')">
+      Pay date is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Notes</mat-label>
+    <textarea matInput rows="3" formControlName="notes"></textarea>
+  </mat-form-field>
+</form>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="save()"
+    [disabled]="loading"
+  >
+    <mat-progress-spinner
+      *ngIf="loading"
+      diameter="20"
+      mode="indeterminate"
+      style="display: inline-block; margin-right: 8px;"
+    ></mat-progress-spinner>
+    {{ isEdit ? 'Update' : 'Create' }}
+  </button>
+</mat-dialog-actions>
+

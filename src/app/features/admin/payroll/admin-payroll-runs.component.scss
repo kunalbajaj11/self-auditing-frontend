@@ -1,0 +1,74 @@
+.payroll-runs {
+  padding: 24px;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+
+    .header-content {
+      h1 {
+        margin: 0 0 8px 0;
+        font-size: 24px;
+        font-weight: 500;
+      }
+
+      p {
+        margin: 0;
+        color: rgba(0, 0, 0, 0.6);
+      }
+    }
+  }
+
+  .payroll-runs-card {
+    .card-title-with-icon {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      mat-icon {
+        color: rgba(0, 0, 0, 0.54);
+      }
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .payroll-runs-table {
+      width: 100%;
+
+      th {
+        font-weight: 500;
+      }
+
+      .status-draft {
+        background-color: #ff9800;
+        color: white;
+      }
+
+      .status-processed {
+        background-color: #2196f3;
+        color: white;
+      }
+
+      .status-paid {
+        background-color: #4caf50;
+        color: white;
+      }
+
+      .status-cancelled {
+        background-color: #f44336;
+        color: white;
+      }
+    }
+
+    .loading-container {
+      display: flex;
+      justify-content: center;
+      padding: 40px;
+    }
+  }
+}
+

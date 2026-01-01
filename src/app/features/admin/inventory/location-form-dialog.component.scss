@@ -1,0 +1,16 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  min-width: 400px;
+  padding: 16px 0;
+
+  mat-form-field {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .full {
+    width: 100%;
+  }
+}
+

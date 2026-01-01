@@ -1,0 +1,90 @@
+<section class="salary-profiles">
+  <header class="header">
+    <div class="header-content">
+      <h1>Salary Profiles</h1>
+      <p>Manage employee salary structures, allowances, and deductions.</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openDialog()">
+      <mat-icon>add</mat-icon>
+      Add Salary Profile
+    </button>
+  </header>
+
+  <mat-card class="salary-profiles-card">
+    <mat-card-header>
+      <div class="card-title-with-icon">
+        <mat-icon>account_circle</mat-icon>
+        <mat-card-title>Salary Profiles</mat-card-title>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="table-container" *ngIf="!loading; else loadingTemplate">
+        <table mat-table [dataSource]="dataSource" class="salary-profiles-table">
+          <ng-container matColumnDef="user">
+            <th mat-header-cell *matHeaderCellDef>Employee</th>
+            <td mat-cell *matCellDef="let profile">
+              <div class="primary">{{ profile.employeeName || profile.user?.name || 'N/A' }}</div>
+              <div class="secondary" *ngIf="profile.user?.email">{{ profile.user.email }}</div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="basicSalary">
+            <th mat-header-cell *matHeaderCellDef>Basic Salary</th>
+            <td mat-cell *matCellDef="let profile">
+              {{ profile.currency }} {{ profile.basicSalary }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="currency">
+            <th mat-header-cell *matHeaderCellDef>Currency</th>
+            <td mat-cell *matCellDef="let profile">{{ profile.currency }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="effectiveDate">
+            <th mat-header-cell *matHeaderCellDef>Effective Date</th>
+            <td mat-cell *matCellDef="let profile">{{ profile.effectiveDate }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="isActive">
+            <th mat-header-cell *matHeaderCellDef>Active</th>
+            <td mat-cell *matCellDef="let profile">
+              <mat-icon *ngIf="profile.isActive" color="primary">check_circle</mat-icon>
+              <mat-icon *ngIf="!profile.isActive" color="warn">cancel</mat-icon>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let profile">
+              <button mat-icon-button [matMenuTriggerFor]="menu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="openDialog(profile)">
+                  <mat-icon>edit</mat-icon>
+                  Edit
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns"></tr>
+
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="columns.length">
+              No salary profiles found
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <ng-template #loadingTemplate>
+        <div class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+        </div>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
+</section>
+

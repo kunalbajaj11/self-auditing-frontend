@@ -27,6 +27,10 @@ import { NumberingSequencesComponent } from './settings/numbering-sequences/numb
 import { CashAccountsComponent } from './cash-accounts/cash-accounts.component';
 import { BankAccountsComponent } from './bank-accounts/bank-accounts.component';
 import { AdjustmentsComponent } from './adjustments/adjustments.component';
+import { AdminPayrollRunsComponent } from './payroll/admin-payroll-runs.component';
+import { AdminSalaryProfilesComponent } from './payroll/admin-salary-profiles.component';
+import { AdminInventoryLocationsComponent } from './inventory/admin-inventory-locations.component';
+import { AdminProductsComponent } from './products/admin-products.component';
 
 const routes: Routes = [
   {
@@ -56,6 +60,22 @@ const routes: Routes = [
               { label: 'Payments', route: '/admin/payments' },
               { label: 'Journal Entries', route: '/admin/journal-entries' },
               { label: 'Vendors', route: '/admin/vendors' },
+            ],
+          },
+          {
+            label: 'Payroll',
+            icon: 'payments',
+            children: [
+              { label: 'Salary Profiles', route: '/admin/payroll/salary-profiles' },
+              { label: 'Payroll Runs', route: '/admin/payroll/runs' },
+            ],
+          },
+          {
+            label: 'Inventory',
+            icon: 'inventory_2',
+            children: [
+              { label: 'Products', route: '/admin/inventory/products' },
+              { label: 'Locations', route: '/admin/inventory/locations' },
             ],
           },
           {
@@ -282,6 +302,26 @@ const routes: Routes = [
             path: 'vendors',
             component: AdminVendorsComponent,
             data: { shell: { title: 'Vendor Management' } },
+          },
+          {
+            path: 'payroll/salary-profiles',
+            component: AdminSalaryProfilesComponent,
+            data: { shell: { title: 'Salary Profiles' } },
+          },
+          {
+            path: 'payroll/runs',
+            component: AdminPayrollRunsComponent,
+            data: { shell: { title: 'Payroll Runs' } },
+          },
+          {
+            path: 'inventory/products',
+            component: AdminProductsComponent,
+            data: { shell: { title: 'Products' } },
+          },
+          {
+            path: 'inventory/locations',
+            component: AdminInventoryLocationsComponent,
+            data: { shell: { title: 'Inventory Locations' } },
           },
           { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],

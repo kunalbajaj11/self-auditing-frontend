@@ -1,0 +1,90 @@
+<section class="products">
+  <header class="header">
+    <div class="header-content">
+      <h1>Products</h1>
+      <p>Manage products and inventory items.</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openDialog()">
+      <mat-icon>add</mat-icon>
+      Add Product
+    </button>
+  </header>
+
+  <mat-card class="products-card">
+    <mat-card-header>
+      <div class="card-title-with-icon">
+        <mat-icon>inventory_2</mat-icon>
+        <mat-card-title>Products</mat-card-title>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="table-container" *ngIf="!loading; else loadingTemplate">
+        <table mat-table [dataSource]="dataSource" class="products-table">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let product">{{ product.name }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="sku">
+            <th mat-header-cell *matHeaderCellDef>SKU</th>
+            <td mat-cell *matCellDef="let product">{{ product.sku || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="unitPrice">
+            <th mat-header-cell *matHeaderCellDef>Price</th>
+            <td mat-cell *matCellDef="let product">
+              {{ product.unitPrice || '—' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="stockQuantity">
+            <th mat-header-cell *matHeaderCellDef>Stock</th>
+            <td mat-cell *matCellDef="let product">{{ product.stockQuantity }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="isActive">
+            <th mat-header-cell *matHeaderCellDef>Active</th>
+            <td mat-cell *matCellDef="let product">
+              <mat-icon *ngIf="product.isActive" color="primary">check_circle</mat-icon>
+              <mat-icon *ngIf="!product.isActive" color="warn">cancel</mat-icon>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let product">
+              <button mat-icon-button [matMenuTriggerFor]="menu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="openDialog(product)">
+                  <mat-icon>edit</mat-icon>
+                  Edit
+                </button>
+                <button mat-menu-item (click)="delete(product)">
+                  <mat-icon>delete</mat-icon>
+                  Delete
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns"></tr>
+
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="columns.length">
+              No products found
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <ng-template #loadingTemplate>
+        <div class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+        </div>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
+</section>
