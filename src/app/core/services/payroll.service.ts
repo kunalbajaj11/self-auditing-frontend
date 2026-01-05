@@ -6,6 +6,7 @@ export interface SalaryProfile {
   id: string;
   userId?: string | null;
   employeeName?: string | null;
+  email?: string | null; // Email address for sending payslips
   basicSalary: string;
   currency: string;
   effectiveDate: string;
@@ -75,6 +76,7 @@ export interface PayrollEntry {
 export interface CreateSalaryProfilePayload {
   userId?: string; // Optional - for employees with portal access
   employeeName?: string; // For employees without portal access (required if userId not provided)
+  email?: string; // Email address for sending payslips (required for external employees)
   basicSalary: number;
   currency?: string;
   effectiveDate: string;

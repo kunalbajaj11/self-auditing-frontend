@@ -45,6 +45,7 @@ export class SalaryProfileFormDialogComponent implements OnInit, OnDestroy {
     this.isEdit = Boolean(data);
     this.form = this.fb.group({
       employeeName: [data?.employeeName || data?.user?.name || '', Validators.required],
+      email: [data?.email || data?.user?.email || '', [Validators.email]],
       basicSalary: [data?.basicSalary ? parseFloat(data.basicSalary) : null, [Validators.required, Validators.min(0)]],
       currency: [data?.currency || 'AED', Validators.required],
       effectiveDate: [data?.effectiveDate || '', Validators.required],
@@ -152,6 +153,7 @@ export class SalaryProfileFormDialogComponent implements OnInit, OnDestroy {
 
     const payload: CreateSalaryProfilePayload = {
       employeeName: formValue.employeeName || undefined,
+      email: formValue.email || undefined,
       basicSalary: formValue.basicSalary,
       currency: formValue.currency,
       effectiveDate: effectiveDate,

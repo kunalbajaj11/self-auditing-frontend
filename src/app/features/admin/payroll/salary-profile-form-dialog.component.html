@@ -12,6 +12,17 @@
       </mat-error>
     </mat-form-field>
 
+    <mat-form-field appearance="outline" class="flex-2" style="padding-top: 10px;">
+      <mat-label>Email Address</mat-label>
+      <input matInput type="email" formControlName="email" placeholder="employee@example.com" />
+      <mat-hint>Email address for sending payslips (required for external employees without portal access)</mat-hint>
+      <mat-error *ngIf="form.get('email')?.hasError('email')">
+        Please enter a valid email address
+      </mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="form-row">
     <mat-form-field appearance="outline">
       <mat-label>Currency</mat-label>
       <mat-select formControlName="currency" required>

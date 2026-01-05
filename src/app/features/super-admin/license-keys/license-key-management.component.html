@@ -111,6 +111,32 @@
           </td>
         </ng-container>
 
+        <ng-container matColumnDef="features">
+          <th mat-header-cell *matHeaderCellDef>Features</th>
+          <td mat-cell *matCellDef="let row">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <mat-slide-toggle
+                [checked]="row.enablePayroll ?? false"
+                (change)="togglePayrollFeature(row)"
+                [disabled]="row.status === 'revoked'"
+                color="primary"
+                [matTooltip]="row.enablePayroll ? 'Payroll enabled' : 'Payroll disabled'"
+              >
+                Payroll
+              </mat-slide-toggle>
+              <mat-slide-toggle
+                [checked]="row.enableInventory ?? false"
+                (change)="toggleInventoryFeature(row)"
+                [disabled]="row.status === 'revoked'"
+                color="primary"
+                [matTooltip]="row.enableInventory ? 'Inventory enabled' : 'Inventory disabled'"
+              >
+                Inventory
+              </mat-slide-toggle>
+            </div>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="email">
           <th mat-header-cell *matHeaderCellDef>Email</th>
           <td mat-cell *matCellDef="let row">

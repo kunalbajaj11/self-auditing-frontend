@@ -19,6 +19,8 @@ export interface LicenseKey {
   notes?: string | null;
   email?: string | null;
   region?: Region | null;
+  enablePayroll?: boolean;
+  enableInventory?: boolean;
   createdAt: string;
   updatedAt: string;
   organizationName?: string | null;

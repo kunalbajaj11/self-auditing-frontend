@@ -54,6 +54,8 @@ import { AdminSalaryProfilesComponent } from './payroll/admin-salary-profiles.co
 import { SalaryProfileFormDialogComponent } from './payroll/salary-profile-form-dialog.component';
 import { AdminInventoryLocationsComponent } from './inventory/admin-inventory-locations.component';
 import { LocationFormDialogComponent } from './inventory/location-form-dialog.component';
+import { AdminStockMovementsComponent } from './inventory/admin-stock-movements.component';
+import { StockMovementFormDialogComponent } from './inventory/stock-movement-form-dialog.component';
 import { AdminProductsComponent } from './products/admin-products.component';
 import { ProductFormDialogComponent } from './products/product-form-dialog.component';
 
@@ -112,6 +114,8 @@ import { ProductFormDialogComponent } from './products/product-form-dialog.compo
     PayrollRunDetailDialogComponent,
     AdminInventoryLocationsComponent,
     LocationFormDialogComponent,
+    AdminStockMovementsComponent,
+    StockMovementFormDialogComponent,
     AdminProductsComponent,
     ProductFormDialogComponent,
   ],

@@ -42,6 +42,8 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
   isPremium = false;
   isStandard = false;
   planType: PlanType | null = null;
+  isPayrollEnabled = false;
+  isInventoryEnabled = false;
   expandedGroups = new Set<string>(); // Track expanded nav groups
 
   @ViewChild('sideNavList', { static: false }) sideNavList?: ElementRef<HTMLElement>;
@@ -69,20 +71,7 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     // Load license info first
-    combineLatest([
-      this.licenseService.getPlanType().pipe(catchError(() => of('free' as PlanType))),
-      this.licenseService.isEnterprise().pipe(catchError(() => of(false))),
-      this.licenseService.isPremium().pipe(catchError(() => of(false))),
-      this.licenseService.isStandard().pipe(catchError(() => of(false))),
-    ]).pipe(
-      takeUntil(this.destroy$),
-    ).subscribe(([planType, isEnterprise, isPremium, isStandard]) => {
-      this.planType = planType;
-      this.isEnterprise = isEnterprise;
-      this.isPremium = isPremium;
-      this.isStandard = isStandard;
-      this.updateShellFromRoute();
-    });
+    this.loadLicenseInfo();
 
     this.router.events
       .pipe(
@@ -91,10 +80,33 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
         takeUntil(this.destroy$),
       )
       .subscribe(() => {
+        // Refresh license info on navigation to pick up any changes
+        this.loadLicenseInfo();
         this.updateShellFromRoute();
         // Restore sidebar scroll position after navigation
         this.restoreSidebarScroll();
       });
+  }
+
+  private loadLicenseInfo(): void {
+    combineLatest([
+      this.licenseService.getPlanType().pipe(catchError(() => of('free' as PlanType))),
+      this.licenseService.isEnterprise().pipe(catchError(() => of(false))),
+      this.licenseService.isPremium().pipe(catchError(() => of(false))),
+      this.licenseService.isStandard().pipe(catchError(() => of(false))),
+      this.licenseService.isPayrollEnabled().pipe(catchError(() => of(false))),
+      this.licenseService.isInventoryEnabled().pipe(catchError(() => of(false))),
+    ]).pipe(
+      takeUntil(this.destroy$),
+    ).subscribe(([planType, isEnterprise, isPremium, isStandard, isPayrollEnabled, isInventoryEnabled]) => {
+      this.planType = planType;
+      this.isEnterprise = isEnterprise;
+      this.isPremium = isPremium;
+      this.isStandard = isStandard;
+      this.isPayrollEnabled = isPayrollEnabled;
+      this.isInventoryEnabled = isInventoryEnabled;
+      this.updateShellFromRoute();
+    });
   }
 
   ngAfterViewInit(): void {
@@ -296,6 +308,15 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
       // (Premium users can see it but functionality is disabled in component)
       if (this.isStandard && isUploadDocument) {
         return false;
+      }
+      
+      // Filter payroll and inventory based on license feature flags
+      if (label === 'payroll' || route.includes('/payroll')) {
+        return this.isPayrollEnabled;
+      }
+      
+      if (label === 'inventory' || route.includes('/inventory')) {
+        return this.isInventoryEnabled;
       }
       
       return true;

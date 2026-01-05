@@ -25,6 +25,11 @@ export interface RenewLicenseKeyPayload {
   newExpiry?: string;
 }
 
+export interface UpdateLicenseFeaturesPayload {
+  enablePayroll?: boolean;
+  enableInventory?: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class LicenseKeysService {
   constructor(private readonly api: ApiService) {}
@@ -64,6 +69,16 @@ export class LicenseKeysService {
   getByOrganizationId(organizationId: string): Observable<LicenseKey | null> {
     return this.api.get<LicenseKey | null>(
       `/license-keys/organization/${organizationId}`,
+    );
+  }
+
+  updateFeatures(
+    id: string,
+    payload: UpdateLicenseFeaturesPayload,
+  ): Observable<LicenseKey> {
+    return this.api.patch<LicenseKey>(
+      `/license-keys/${id}/features`,
+      payload,
     );
   }
 }

@@ -1,0 +1,19 @@
+.form {
+  min-width: 500px;
+  padding: 16px 0;
+
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    .flex-1 {
+      flex: 1;
+    }
+
+    .flex-2 {
+      flex: 2;
+    }
+  }
+}
+

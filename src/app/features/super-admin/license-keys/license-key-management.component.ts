@@ -26,7 +26,7 @@ export class LicenseKeyManagementComponent implements OnInit {
   loading = false;
   licenseKeys: LicenseKey[] = [];
   dataSource = new MatTableDataSource<LicenseKey>([]);
-  displayedColumns = ['key', 'organization', 'plan', 'region', 'status', 'email', 'expires', 'created', 'actions'];
+  displayedColumns = ['key', 'organization', 'plan', 'region', 'status', 'features', 'email', 'expires', 'created', 'actions'];
   searchControl = new FormControl('');
   statusFilterControl = new FormControl('all');
   expiryFilterControl = new FormControl('all');
@@ -275,6 +275,56 @@ export class LicenseKeyManagementComponent implements OnInit {
     parts.push(`Expires: ${new Date(license.expiresAt).toLocaleDateString()}`);
     
     return parts.join('\n') || 'No additional details';
+  }
+
+  togglePayrollFeature(key: LicenseKey): void {
+    // Default to false if undefined
+    const currentValue = key.enablePayroll ?? false;
+    const newValue = !currentValue;
+    this.licenseKeysService
+      .updateFeatures(key.id, { enablePayroll: newValue })
+      .subscribe({
+        next: (updated) => {
+          key.enablePayroll = updated.enablePayroll ?? false;
+          this.snackBar.open(
+            `Payroll feature ${newValue ? 'enabled' : 'disabled'}`,
+            'Close',
+            { duration: 3000 },
+          );
+        },
+        error: () => {
+          this.snackBar.open(
+            'Failed to update payroll feature',
+            'Close',
+            { duration: 4000, panelClass: ['snack-error'] },
+          );
+        },
+      });
+  }
+
+  toggleInventoryFeature(key: LicenseKey): void {
+    // Default to false if undefined
+    const currentValue = key.enableInventory ?? false;
+    const newValue = !currentValue;
+    this.licenseKeysService
+      .updateFeatures(key.id, { enableInventory: newValue })
+      .subscribe({
+        next: (updated) => {
+          key.enableInventory = updated.enableInventory ?? false;
+          this.snackBar.open(
+            `Inventory feature ${newValue ? 'enabled' : 'disabled'}`,
+            'Close',
+            { duration: 3000 },
+          );
+        },
+        error: () => {
+          this.snackBar.open(
+            'Failed to update inventory feature',
+            'Close',
+            { duration: 4000, panelClass: ['snack-error'] },
+          );
+        },
+      });
   }
 }
 

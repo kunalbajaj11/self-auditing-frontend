@@ -30,6 +30,7 @@ import { AdjustmentsComponent } from './adjustments/adjustments.component';
 import { AdminPayrollRunsComponent } from './payroll/admin-payroll-runs.component';
 import { AdminSalaryProfilesComponent } from './payroll/admin-salary-profiles.component';
 import { AdminInventoryLocationsComponent } from './inventory/admin-inventory-locations.component';
+import { AdminStockMovementsComponent } from './inventory/admin-stock-movements.component';
 import { AdminProductsComponent } from './products/admin-products.component';
 
 const routes: Routes = [
@@ -76,6 +77,7 @@ const routes: Routes = [
             children: [
               { label: 'Products', route: '/admin/inventory/products' },
               { label: 'Locations', route: '/admin/inventory/locations' },
+              { label: 'Stock Movements', route: '/admin/inventory/movements' },
             ],
           },
           {
@@ -322,6 +324,11 @@ const routes: Routes = [
             path: 'inventory/locations',
             component: AdminInventoryLocationsComponent,
             data: { shell: { title: 'Inventory Locations' } },
+          },
+          {
+            path: 'inventory/movements',
+            component: AdminStockMovementsComponent,
+            data: { shell: { title: 'Stock Movements' } },
           },
           { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],

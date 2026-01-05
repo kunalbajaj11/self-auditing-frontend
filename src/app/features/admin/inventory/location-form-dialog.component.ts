@@ -39,7 +39,7 @@ export class LocationFormDialogComponent {
     };
 
     const operation = this.isEdit
-      ? this.inventoryService.createLocation(payload) // TODO: Add update method
+      ? this.inventoryService.updateLocation(this.data!.id, payload)
       : this.inventoryService.createLocation(payload);
 
     operation.subscribe({

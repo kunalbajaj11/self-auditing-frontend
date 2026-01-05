@@ -1,13 +1,18 @@
 import { Injectable } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
 import { OrganizationService } from './organization.service';
+import { LicenseKeysService } from './license-keys.service';
 import { PlanType } from '../models/plan.model';
+import { catchError, switchMap } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class LicenseService {
   private cachedOrganization: { planType: PlanType } | null = null;
 
-  constructor(private readonly organizationService: OrganizationService) {}
+  constructor(
+    private readonly organizationService: OrganizationService,
+    private readonly licenseKeysService: LicenseKeysService,
+  ) {}
 
   /**
    * Get the current organization's plan type
@@ -133,6 +138,70 @@ export class LicenseService {
    */
   canUploadExpenseCached(): boolean {
     return this.cachedOrganization?.planType === 'enterprise';
+  }
+
+  /**
+   * Check if payroll feature is enabled for the current organization's license
+   */
+  isPayrollEnabled(): Observable<boolean> {
+    return this.organizationService.getMyOrganization().pipe(
+      map((org) => org.id),
+      catchError(() => of(null)),
+      switchMap((orgId) => {
+        if (!orgId) {
+          return of(false);
+        }
+        return this.licenseKeysService.getByOrganizationId(orgId).pipe(
+          map((license) => {
+            // Debug logging (remove in production if needed)
+            console.log('[LicenseService] Payroll check:', {
+              orgId,
+              license: license ? {
+                id: license.id,
+                enablePayroll: license.enablePayroll,
+              } : null,
+            });
+            return license?.enablePayroll ?? false;
+          }),
+          catchError((error) => {
+            console.error('[LicenseService] Error checking payroll:', error);
+            return of(false);
+          }),
+        );
+      }),
+    );
+  }
+
+  /**
+   * Check if inventory feature is enabled for the current organization's license
+   */
+  isInventoryEnabled(): Observable<boolean> {
+    return this.organizationService.getMyOrganization().pipe(
+      map((org) => org.id),
+      catchError(() => of(null)),
+      switchMap((orgId) => {
+        if (!orgId) {
+          return of(false);
+        }
+        return this.licenseKeysService.getByOrganizationId(orgId).pipe(
+          map((license) => {
+            // Debug logging (remove in production if needed)
+            console.log('[LicenseService] Inventory check:', {
+              orgId,
+              license: license ? {
+                id: license.id,
+                enableInventory: license.enableInventory,
+              } : null,
+            });
+            return license?.enableInventory ?? false;
+          }),
+          catchError((error) => {
+            console.error('[LicenseService] Error checking inventory:', error);
+            return of(false);
+          }),
+        );
+      }),
+    );
   }
 }
 

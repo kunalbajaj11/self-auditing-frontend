@@ -1,0 +1,153 @@
+<section class="stock-movements">
+  <header class="header">
+    <div class="header-content">
+      <h1>Stock Movements</h1>
+      <p>Track all inventory movements including purchases, sales, adjustments, transfers, and returns.</p>
+    </div>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="openDialog()">
+        <mat-icon>add</mat-icon>
+        <span class="button-label">Record Movement</span>
+      </button>
+    </div>
+  </header>
+
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filter-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Movement Type</mat-label>
+          <mat-select [(ngModel)]="selectedType" (selectionChange)="onTypeFilterChange()">
+            <mat-option value="">All Types</mat-option>
+            <mat-option *ngFor="let type of movementTypes" [value]="type.value">
+              {{ type.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="movements-card">
+    <mat-card-header>
+      <div class="card-title-with-icon">
+        <mat-icon>inventory_2</mat-icon>
+        <mat-card-title>Stock Movement History</mat-card-title>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" class="movements-table">
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let movement">
+              {{ movement.createdAt | date: 'short' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="product">
+            <th mat-header-cell *matHeaderCellDef>Product</th>
+            <td mat-cell *matCellDef="let movement">
+              <div *ngIf="movement.product">
+                <strong>{{ movement.product.name }}</strong>
+                <div class="muted" *ngIf="movement.product.sku">
+                  SKU: {{ movement.product.sku }}
+                </div>
+              </div>
+              <span class="muted" *ngIf="!movement.product">N/A</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="location">
+            <th mat-header-cell *matHeaderCellDef>Location</th>
+            <td mat-cell *matCellDef="let movement">
+              {{ movement.location?.name || 'N/A' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let movement">
+              <mat-chip [color]="getTypeColor(movement.movementType)" selected>
+                {{ getMovementTypeLabel(movement.movementType) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="quantity">
+            <th mat-header-cell *matHeaderCellDef>Quantity</th>
+            <td mat-cell *matCellDef="let movement">
+              <span [class.positive]="getQuantity(movement) > 0" [class.negative]="getQuantity(movement) < 0">
+                {{ getQuantity(movement) > 0 ? '+' : '' }}{{ movement.quantity }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="unitCost">
+            <th mat-header-cell *matHeaderCellDef>Unit Cost</th>
+            <td mat-cell *matCellDef="let movement">
+              {{ movement.unitCost | number: '1.2-2' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="totalCost">
+            <th mat-header-cell *matHeaderCellDef>Total Cost</th>
+            <td mat-cell *matCellDef="let movement">
+              <strong>{{ getTotalCost(movement) | number: '1.2-2' }}</strong>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="createdBy">
+            <th mat-header-cell *matHeaderCellDef>Recorded By</th>
+            <td mat-cell *matCellDef="let movement">
+              {{ movement.createdBy?.name || 'System' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="notes">
+            <th mat-header-cell *matHeaderCellDef>Notes</th>
+            <td mat-cell *matCellDef="let movement">
+              <span class="muted" *ngIf="!movement.notes">—</span>
+              <span *ngIf="movement.notes">{{ movement.notes }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let movement">
+              <button mat-icon-button [matMenuTriggerFor]="menu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="openDialog(movement)">
+                  <mat-icon>edit</mat-icon>
+                  <span>View Details</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns"></tr>
+
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="columns.length">
+              <div class="no-data">
+                <mat-icon>inventory_2</mat-icon>
+                <p>No stock movements found</p>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <mat-progress-spinner
+        *ngIf="loading"
+        mode="indeterminate"
+        diameter="40"
+        class="loading-spinner"
+      ></mat-progress-spinner>
+    </mat-card-content>
+  </mat-card>
+</section>
+

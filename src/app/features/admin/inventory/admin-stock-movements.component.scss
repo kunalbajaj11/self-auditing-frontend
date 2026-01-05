@@ -1,0 +1,91 @@
+.stock-movements {
+  padding: 24px;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+
+    .header-content {
+      h1 {
+        margin: 0 0 8px 0;
+        font-size: 28px;
+        font-weight: 500;
+      }
+
+      p {
+        margin: 0;
+        color: rgba(0, 0, 0, 0.6);
+      }
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+
+      .button-label {
+        margin-left: 8px;
+      }
+    }
+  }
+
+  .filters-card {
+    margin-bottom: 24px;
+
+    .filter-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+  }
+
+  .movements-card {
+    .card-title-with-icon {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .movements-table {
+      width: 100%;
+
+      .positive {
+        color: #4caf50;
+        font-weight: 500;
+      }
+
+      .negative {
+        color: #f44336;
+        font-weight: 500;
+      }
+
+      .muted {
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 0.875rem;
+      }
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 48px;
+      color: rgba(0, 0, 0, 0.5);
+
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+      }
+    }
+
+    .loading-spinner {
+      margin: 24px auto;
+    }
+  }
+}
+
