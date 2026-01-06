@@ -67,9 +67,9 @@ export class HomepageComponent implements OnInit {
   }
 
   private setSEOMetaTags(): void {
-    const title = 'SelfAccounting.AI - Complete Financial Management Platform for UAE | Expense Tracking & Invoice Management';
-    const description = 'Complete financial management platform for UAE businesses. Expense tracking, sales invoice management, payment tracking, credit notes, AI-powered OCR receipt scanning, VAT compliance, bank reconciliation, and automated financial reporting. Trusted by audit firms across UAE.';
-    const keywords = 'expense tracker UAE, invoice management UAE, payment tracking UAE, credit notes UAE, auditing software UAE, expense management UAE, VAT compliance UAE, receipt scanning UAE, bank reconciliation UAE, accounting software UAE, financial reporting UAE, audit software UAE, expense tracking app UAE, FTA compliance UAE, OCR receipt UAE, automated accounting UAE, multi-currency expense tracker UAE, sales invoice software UAE';
+    const title = 'Self Accounting Software UAE - SelfAccounting.AI | AI-Powered Expense Tracker & Accounting Platform';
+    const description = 'Self accounting software for UAE businesses. SelfAccounting.AI provides comprehensive self accounting solutions including expense tracking, sales invoice management, payment tracking, credit notes, AI-powered OCR receipt scanning, VAT compliance, bank reconciliation, and automated financial reporting. Trusted by audit firms across UAE.';
+    const keywords = 'self accounting, self accounting software, self accounting UAE, self accounting software UAE, expense tracker UAE, invoice management UAE, payment tracking UAE, credit notes UAE, auditing software UAE, expense management UAE, VAT compliance UAE, receipt scanning UAE, bank reconciliation UAE, accounting software UAE, financial reporting UAE, audit software UAE, expense tracking app UAE, FTA compliance UAE, OCR receipt UAE, automated accounting UAE, multi-currency expense tracker UAE, sales invoice software UAE, self accounting platform, self accounting app';
     const imageUrl = 'https://selfaccounting.ai/assets/images/app-logo.jpg';
     const siteUrl = 'https://selfaccounting.ai/';
 
@@ -112,7 +112,7 @@ export class HomepageComponent implements OnInit {
         ratingValue: '4.8',
         ratingCount: '150',
       },
-      description: 'AI-powered expense tracker and financial management software for UAE businesses. Features OCR receipt scanning, sales invoice management, payment tracking, credit notes, VAT compliance, bank reconciliation, and automated financial reporting.',
+      description: 'Self accounting software for UAE businesses. AI-powered self accounting platform with OCR receipt scanning, sales invoice management, payment tracking, credit notes, VAT compliance, bank reconciliation, and automated financial reporting.',
       featureList: [
         'AI-Powered OCR Receipt Scanning',
         'Sales Invoice Management',
@@ -145,7 +145,7 @@ export class HomepageComponent implements OnInit {
         '@type': 'Country',
         name: 'United Arab Emirates',
       },
-      keywords: 'expense tracker, auditing software, VAT compliance, receipt scanning, UAE',
+      keywords: 'self accounting, self accounting software, self accounting UAE, expense tracker, auditing software, VAT compliance, receipt scanning, UAE',
     };
 
     const organizationData = {
@@ -154,7 +154,7 @@ export class HomepageComponent implements OnInit {
       name: 'SelfAccounting.AI',
       url: 'https://selfaccounting.ai',
       logo: 'https://selfaccounting.ai/assets/images/app-logo.jpg',
-      description: 'Leading provider of AI-powered expense tracking and auditing software for UAE businesses',
+      description: 'Leading provider of self accounting software and AI-powered expense tracking solutions for UAE businesses',
       address: {
         '@type': 'PostalAddress',
         addressCountry: 'AE',
