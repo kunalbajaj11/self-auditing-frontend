@@ -1,0 +1,94 @@
+<div class="tax-forms-container">
+  <div class="header">
+    <h1>Tax Forms</h1>
+    <button mat-raised-button color="primary" (click)="openGenerateDialog()">
+      <mat-icon>add</mat-icon>
+      Generate VAT Return
+    </button>
+  </div>
+
+  <mat-card class="filters-card">
+    <form [formGroup]="form" (ngSubmit)="loadTaxForms()">
+      <div class="filters">
+        <mat-form-field appearance="outline">
+          <mat-label>Form Type</mat-label>
+          <mat-select formControlName="formType">
+            <mat-option value="">All Types</mat-option>
+            <mat-option *ngFor="let type of formTypes" [value]="type">
+              {{ getFormTypeLabel(type) }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Period</mat-label>
+          <input matInput formControlName="period" placeholder="e.g., 2024-01" />
+        </mat-form-field>
+
+        <button mat-raised-button type="submit" color="primary">Filter</button>
+        <button mat-button type="button" (click)="form.reset(); loadTaxForms()">Clear</button>
+      </div>
+    </form>
+  </mat-card>
+
+  <mat-card>
+    <table mat-table [dataSource]="dataSource" class="tax-forms-table">
+      <ng-container matColumnDef="formType">
+        <th mat-header-cell *matHeaderCellDef>Form Type</th>
+        <td mat-cell *matCellDef="let form">{{ getFormTypeLabel(form.formType) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="period">
+        <th mat-header-cell *matHeaderCellDef>Period</th>
+        <td mat-cell *matCellDef="let form">{{ form.period }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let form">
+          <mat-chip [style.background-color]="getStatusColor(form.status)">
+            {{ form.status }}
+          </mat-chip>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="generatedAt">
+        <th mat-header-cell *matHeaderCellDef>Generated</th>
+        <td mat-cell *matCellDef="let form">
+          {{ form.generatedAt ? (form.generatedAt | date: 'short') : '-' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="filedAt">
+        <th mat-header-cell *matHeaderCellDef>Filed</th>
+        <td mat-cell *matCellDef="let form">
+          {{ form.filedAt ? (form.filedAt | date: 'short') : '-' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let form">
+          <button mat-icon-button (click)="viewForm(form)" matTooltip="View Details">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          <button mat-icon-button (click)="downloadForm(form)" matTooltip="Download">
+            <mat-icon>download</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="columns.length">
+          <div class="no-data">No tax forms found</div>
+        </td>
+      </tr>
+    </table>
+
+    <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+  </mat-card>
+</div>
+

@@ -1,0 +1,74 @@
+<h2 mat-dialog-title>Tax Form Details</h2>
+
+<mat-dialog-content>
+  <div class="form-details">
+    <div class="detail-row">
+      <strong>Form Type:</strong>
+      <span>{{ form.formType }}</span>
+    </div>
+    <div class="detail-row">
+      <strong>Period:</strong>
+      <span>{{ form.period }}</span>
+    </div>
+    <div class="detail-row">
+      <strong>Status:</strong>
+      <span>{{ form.status }}</span>
+    </div>
+    <div class="detail-row" *ngIf="form.generatedAt">
+      <strong>Generated:</strong>
+      <span>{{ form.generatedAt | date: 'short' }}</span>
+    </div>
+    <div class="detail-row" *ngIf="form.filedAt">
+      <strong>Filed:</strong>
+      <span>{{ form.filedAt | date: 'short' }}</span>
+    </div>
+    <div class="detail-row" *ngIf="form.filingReference">
+      <strong>Filing Reference:</strong>
+      <span>{{ form.filingReference }}</span>
+    </div>
+    <div class="detail-row" *ngIf="form.notes">
+      <strong>Notes:</strong>
+      <span>{{ form.notes }}</span>
+    </div>
+
+    <div *ngIf="form.validationErrors && form.validationErrors.length > 0" class="validation-section">
+      <h3>Validation Errors</h3>
+      <ul>
+        <li *ngFor="let error of form.validationErrors">{{ error }}</li>
+      </ul>
+    </div>
+
+    <div *ngIf="form.validationWarnings && form.validationWarnings.length > 0" class="validation-section">
+      <h3>Validation Warnings</h3>
+      <ul>
+        <li *ngFor="let warning of form.validationWarnings">{{ warning }}</li>
+      </ul>
+    </div>
+
+    <div *ngIf="form.formData" class="form-data-section">
+      <h3>Form Data</h3>
+      <pre>{{ form.formData | json }}</pre>
+    </div>
+
+    <div *ngIf="form.status !== 'filed'" class="filing-section">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Filing Reference</mat-label>
+        <input matInput [value]="filingReference" (input)="filingReference = $any($event.target).value" placeholder="Enter filing reference" />
+      </mat-form-field>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="close()">Close</button>
+  <button
+    *ngIf="form.status !== 'filed'"
+    mat-raised-button
+    color="primary"
+    (click)="markAsFiled()"
+    [disabled]="!filingReference.trim()"
+  >
+    Mark as Filed
+  </button>
+</mat-dialog-actions>
+

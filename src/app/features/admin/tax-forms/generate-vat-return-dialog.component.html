@@ -1,0 +1,59 @@
+<h2 mat-dialog-title>Generate VAT Return</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Form Type</mat-label>
+      <mat-select formControlName="formType" required>
+        <mat-option *ngFor="let type of formTypes" [value]="type.value">
+          {{ type.label }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('formType')?.hasError('required')">
+        Form type is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Period</mat-label>
+      <input
+        matInput
+        formControlName="period"
+        placeholder="e.g., 2024-01 for monthly, 2024-Q1 for quarterly"
+        required
+      />
+      <mat-hint>Format: YYYY-MM (monthly) or YYYY-QN (quarterly)</mat-hint>
+      <mat-error *ngIf="form.get('period')?.hasError('required')">
+        Period is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Format</mat-label>
+      <mat-select formControlName="format">
+        <mat-option *ngFor="let format of formats" [value]="format.value">
+          {{ format.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notes (Optional)</mat-label>
+      <textarea matInput formControlName="notes" rows="3"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="generate()"
+    [disabled]="form.invalid || loading"
+  >
+    <mat-spinner *ngIf="loading" diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+    Generate
+  </button>
+</mat-dialog-actions>
+

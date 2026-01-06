@@ -32,6 +32,8 @@ import { AdminSalaryProfilesComponent } from './payroll/admin-salary-profiles.co
 import { AdminInventoryLocationsComponent } from './inventory/admin-inventory-locations.component';
 import { AdminStockMovementsComponent } from './inventory/admin-stock-movements.component';
 import { AdminProductsComponent } from './products/admin-products.component';
+import { AdminTaxFormsComponent } from './tax-forms/admin-tax-forms.component';
+import { AdminComplianceComponent } from './compliance/admin-compliance.component';
 
 const routes: Routes = [
   {
@@ -101,6 +103,14 @@ const routes: Routes = [
               { label: 'Payables', route: '/admin/reports/payables', icon: 'account_balance_wallet' },
               { label: 'Receivables', route: '/admin/reports/receivables', icon: 'receipt_long' },
               { label: 'VAT Control Account', route: '/admin/reports/vat-control-account', icon: 'account_balance' },
+            ],
+          },
+          {
+            label: 'Tax & Compliance',
+            icon: 'gavel',
+            children: [
+              { label: 'Tax Forms', route: '/admin/tax-forms' },
+              { label: 'Compliance Calendar', route: '/admin/compliance' },
             ],
           },
           {
@@ -329,6 +339,16 @@ const routes: Routes = [
             path: 'inventory/movements',
             component: AdminStockMovementsComponent,
             data: { shell: { title: 'Stock Movements' } },
+          },
+          {
+            path: 'tax-forms',
+            component: AdminTaxFormsComponent,
+            data: { shell: { title: 'Tax Forms' } },
+          },
+          {
+            path: 'compliance',
+            component: AdminComplianceComponent,
+            data: { shell: { title: 'Compliance Calendar' } },
           },
           { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],

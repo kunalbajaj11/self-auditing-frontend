@@ -1,0 +1,43 @@
+.tax-forms-container {
+  padding: 24px;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    h1 {
+      margin: 0;
+    }
+  }
+
+  .filters-card {
+    margin-bottom: 24px;
+
+    .filters {
+      display: flex;
+      gap: 16px;
+      align-items: flex-end;
+
+      mat-form-field {
+        flex: 1;
+      }
+    }
+  }
+
+  .tax-forms-table {
+    width: 100%;
+
+    .mat-column-actions {
+      width: 120px;
+    }
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 24px;
+    color: rgba(0, 0, 0, 0.54);
+  }
+}
+

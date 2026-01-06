@@ -58,6 +58,11 @@ import { AdminStockMovementsComponent } from './inventory/admin-stock-movements.
 import { StockMovementFormDialogComponent } from './inventory/stock-movement-form-dialog.component';
 import { AdminProductsComponent } from './products/admin-products.component';
 import { ProductFormDialogComponent } from './products/product-form-dialog.component';
+import { AdminTaxFormsComponent } from './tax-forms/admin-tax-forms.component';
+import { GenerateVATReturnDialogComponent } from './tax-forms/generate-vat-return-dialog.component';
+import { TaxFormDetailDialogComponent } from './tax-forms/tax-form-detail-dialog.component';
+import { AdminComplianceComponent } from './compliance/admin-compliance.component';
+import { CreateDeadlineDialogComponent } from './compliance/create-deadline-dialog.component';
 
 @NgModule({
   declarations: [
@@ -118,6 +123,11 @@ import { ProductFormDialogComponent } from './products/product-form-dialog.compo
     StockMovementFormDialogComponent,
     AdminProductsComponent,
     ProductFormDialogComponent,
+    AdminTaxFormsComponent,
+    GenerateVATReturnDialogComponent,
+    TaxFormDetailDialogComponent,
+    AdminComplianceComponent,
+    CreateDeadlineDialogComponent,
   ],
   imports: [SharedModule, AdminRoutingModule],
 })

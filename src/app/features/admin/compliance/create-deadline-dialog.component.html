@@ -1,0 +1,67 @@
+<h2 mat-dialog-title>Create Compliance Deadline</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Compliance Type</mat-label>
+      <mat-select formControlName="complianceType" required>
+        <mat-option *ngFor="let type of complianceTypes" [value]="type.value">
+          {{ type.label }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('complianceType')?.hasError('required')">
+        Compliance type is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Period</mat-label>
+      <input
+        matInput
+        formControlName="period"
+        placeholder="e.g., 2024-01 for monthly, 2024-Q1 for quarterly"
+        required
+      />
+      <mat-hint>Format: YYYY-MM (monthly) or YYYY-QN (quarterly) or YYYY (annual)</mat-hint>
+      <mat-error *ngIf="form.get('period')?.hasError('required')">
+        Period is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Due Date</mat-label>
+      <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" required />
+      <mat-datepicker-toggle matSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
+      <mat-datepicker #dueDatePicker></mat-datepicker>
+      <mat-error *ngIf="form.get('dueDate')?.hasError('required')">
+        Due date is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Filing Frequency</mat-label>
+      <mat-select formControlName="filingFrequency" required>
+        <mat-option *ngFor="let freq of filingFrequencies" [value]="freq.value">
+          {{ freq.label }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('filingFrequency')?.hasError('required')">
+        Filing frequency is required
+      </mat-error>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="create()"
+    [disabled]="form.invalid || loading"
+  >
+    <mat-spinner *ngIf="loading" diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+    Create
+  </button>
+</mat-dialog-actions>
+
