@@ -67,6 +67,24 @@ export class ExpensesService {
       ? Number(raw.totalAmount)
       : amount; // Fallback to amount only (for reverse charge, total = amount)
 
+    // Normalize line items if present
+    const lineItems = raw.lineItems?.map((item: any) => ({
+      id: item.id,
+      productId: item.productId,
+      itemName: item.itemName,
+      sku: item.sku,
+      quantity: Number(item.quantity ?? 0),
+      unitOfMeasure: item.unitOfMeasure,
+      unitPrice: Number(item.unitPrice ?? 0),
+      amount: Number(item.amount ?? 0),
+      vatRate: item.vatRate ? Number(item.vatRate) : undefined,
+      vatAmount: Number(item.vatAmount ?? 0),
+      vatTaxType: item.vatTaxType,
+      totalAmount: Number(item.totalAmount ?? 0),
+      description: item.description,
+      lineNumber: item.lineNumber,
+    })) || undefined;
+
     return {
       ...raw,
       amount,
@@ -74,6 +92,7 @@ export class ExpensesService {
       totalAmount,
       categoryName: raw.category?.name ?? raw.categoryName ?? null,
       attachments,
+      lineItems,
     };
   }
 }

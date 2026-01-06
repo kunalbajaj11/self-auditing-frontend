@@ -1,17 +1,30 @@
 <div class="homepage-container">
   <!-- Hero Section -->
   <section class="hero-section" aria-label="Hero section">
+    <div class="hero-background">
+      <div class="hero-gradient"></div>
+      <div class="hero-pattern"></div>
+      <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+      </div>
+    </div>
     <div class="hero-content">
       <div class="hero-logo">
         <img src="assets/images/backless_logo_white.png" alt="SelfAccounting.AI Logo" class="logo-image" />
       </div>
-      <h1 class="hero-title">SelfAccounting.AI - Complete Financial Management Platform for UAE</h1>
+      <h1 class="hero-title">
+        <span class="title-highlight">Complete Financial Management</span>
+        <span class="title-main">Platform for UAE</span>
+      </h1>
       <p class="hero-subtitle">
         Comprehensive expense tracking and invoice management software for UAE businesses. Manage expenses, track sales invoices, record payments, handle credit notes, and ensure VAT compliance with AI-powered automation. Trusted by audit firms and accounting departments across the United Arab Emirates.
       </p>
       <div class="hero-actions">
         <button mat-raised-button class="cta-button cta-button-primary" (click)="navigateToRegister()" aria-label="Get started with SelfAccounting.AI">
-          Get Started
+          <span>Get Started</span>
+          <mat-icon>arrow_forward</mat-icon>
         </button>
         <button mat-stroked-button class="cta-button cta-button-outline" (click)="navigateToPricing()" aria-label="View pricing plans">
           View Pricing
@@ -23,13 +36,13 @@
       <div class="hero-secondary-actions">
         <a mat-stroked-button class="secondary-action-button download-manual-btn" href="assets/USER-MANUAL.pdf" download="SelfAccounting-User-Manual.pdf" aria-label="Download user manual PDF">
           <mat-icon>download</mat-icon>
-          Download User Manual
+          <span>Download User Manual</span>
         </a>
         <a mat-stroked-button class="secondary-action-button whatsapp-btn" [href]="whatsappLink" target="_blank" aria-label="Contact us on WhatsApp">
           <svg class="whatsapp-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
           </svg>
-          Chat on WhatsApp
+          <span>Chat on WhatsApp</span>
         </a>
       </div>
     </div>
@@ -38,11 +51,17 @@
   <!-- Benefits Section -->
   <section class="benefits-section" aria-label="Benefits of using SelfAccounting.AI">
     <div class="section-container">
-      <h2 class="section-title">Why Choose SelfAccounting.AI for Financial Management in UAE?</h2>
-      <p class="section-subtitle">The most comprehensive expense tracking and invoice management solution designed specifically for UAE businesses, audit firms, and accounting departments. Handle both money going out (expenses) and money coming in (invoices) in one unified platform.</p>
+      <div class="section-header">
+        <span class="section-badge">Why Choose Us</span>
+        <h2 class="section-title">Why Choose SelfAccounting.AI for Financial Management in UAE?</h2>
+        <p class="section-subtitle">The most comprehensive expense tracking and invoice management solution designed specifically for UAE businesses, audit firms, and accounting departments. Handle both money going out (expenses) and money coming in (invoices) in one unified platform.</p>
+      </div>
       <div class="benefits-grid">
-        <mat-card *ngFor="let benefit of benefits" class="benefit-card">
+        <mat-card *ngFor="let benefit of benefits; let i = index" class="benefit-card" [style.animation-delay]="(i * 0.1) + 's'">
           <mat-card-content>
+            <div class="benefit-icon-wrapper">
+              <div class="benefit-icon"></div>
+            </div>
             <h3>{{ benefit.title }}</h3>
             <p>{{ benefit.description }}</p>
           </mat-card-content>
@@ -54,55 +73,68 @@
   <!-- Features Section -->
   <section class="features-section" aria-label="Features of SelfAccounting.AI expense tracker">
     <div class="section-container">
-      <h2 class="section-title">Complete Financial Management Features for UAE Businesses</h2>
-      <p class="section-subtitle">
-        Everything you need to manage expenses, track invoices, record payments, ensure VAT compliance, and streamline financial processes in the UAE
-      </p>
-      <mat-grid-list cols="3" rowHeight="280px" gutterSize="24px">
-        <mat-grid-tile *ngFor="let feature of features">
-          <mat-card class="feature-card">
-            <mat-card-content>
-              <div class="feature-icon" aria-hidden="true">
-                <mat-icon>{{ feature.icon }}</mat-icon>
-              </div>
-              <h3>{{ feature.title }}</h3>
-              <p>{{ feature.description }}</p>
-            </mat-card-content>
-          </mat-card>
-        </mat-grid-tile>
-      </mat-grid-list>
+      <div class="section-header">
+        <span class="section-badge">Features</span>
+        <h2 class="section-title">Complete Financial Management Features for UAE Businesses</h2>
+        <p class="section-subtitle">
+          Everything you need to manage expenses, track invoices, record payments, ensure VAT compliance, and streamline financial processes in the UAE
+        </p>
+      </div>
+      <div class="features-grid">
+        <mat-card *ngFor="let feature of features; let i = index" class="feature-card" [style.animation-delay]="(i * 0.05) + 's'">
+          <mat-card-content>
+            <div class="feature-icon-wrapper" aria-hidden="true">
+              <div class="feature-icon-bg"></div>
+              <mat-icon class="feature-icon">{{ feature.icon }}</mat-icon>
+            </div>
+            <h3>{{ feature.title }}</h3>
+            <p>{{ feature.description }}</p>
+          </mat-card-content>
+        </mat-card>
+      </div>
     </div>
   </section>
 
   <!-- Use Cases Section -->
   <section class="use-cases-section" aria-label="Who can use SelfAccounting.AI">
     <div class="section-container">
-      <h2 class="section-title">Perfect Expense Tracker Solution For</h2>
+      <div class="section-header">
+        <span class="section-badge">Perfect For</span>
+        <h2 class="section-title">Perfect Expense Tracker Solution For</h2>
+      </div>
       <div class="use-cases-grid">
         <mat-card class="use-case-card">
           <mat-card-content>
-            <mat-icon aria-hidden="true">business</mat-icon>
+            <div class="use-case-icon-wrapper">
+              <mat-icon aria-hidden="true">business</mat-icon>
+            </div>
             <h3>Audit Firms in UAE</h3>
             <p>Manage multiple client organizations with complete tenant isolation and comprehensive audit trails. Perfect for auditing companies handling expense management for multiple clients.</p>
           </mat-card-content>
         </mat-card>
         <mat-card class="use-case-card">
           <mat-card-content>
-            <mat-icon aria-hidden="true">account_balance</mat-icon>
+            <div class="use-case-icon-wrapper">
+              <mat-icon aria-hidden="true">account_balance</mat-icon>
+            </div>
             <h3>Accounting Departments</h3>
             <p>Streamline expense approvals, accrual tracking, and financial reporting for your organization. Ideal for UAE-based accounting teams.</p>
           </mat-card-content>
         </mat-card>
         <mat-card class="use-case-card">
           <mat-card-content>
-            <mat-icon aria-hidden="true">groups</mat-icon>
+            <div class="use-case-icon-wrapper">
+              <mat-icon aria-hidden="true">groups</mat-icon>
+            </div>
             <h3>Multi-Location Businesses</h3>
             <p>Centralized expense management with role-based access for employees across different locations in the UAE and beyond.</p>
           </mat-card-content>
         </mat-card>
         <mat-card class="use-case-card">
           <mat-card-content>
-            <mat-icon aria-hidden="true">verified</mat-icon>
+            <div class="use-case-icon-wrapper">
+              <mat-icon aria-hidden="true">verified</mat-icon>
+            </div>
             <h3>VAT-Registered Companies in UAE</h3>
             <p>Ensure VAT compliance with automated calculations, TRN tracking, and FTA-ready reports. Essential for UAE businesses requiring VAT compliance.</p>
           </mat-card-content>
@@ -113,24 +145,33 @@
 
   <!-- CTA Section -->
   <section class="cta-section" aria-label="Call to action">
+    <div class="cta-background">
+      <div class="cta-gradient"></div>
+    </div>
     <div class="section-container">
-      <h2 class="cta-title">Ready to Transform Your Financial Management in UAE?</h2>
-      <p class="cta-subtitle">
-        Join leading audit firms and businesses in the UAE who trust SelfAccounting.AI for complete financial management - expense tracking, invoice management, payment tracking, VAT compliance, and comprehensive auditing solutions
-      </p>
-      <button mat-raised-button class="cta-button-large cta-button-primary" (click)="navigateToRegister()" aria-label="Request a demo of SelfAccounting.AI">
-        Request Demo
-      </button>
+      <div class="cta-content">
+        <h2 class="cta-title">Ready to Transform Your Financial Management in UAE?</h2>
+        <p class="cta-subtitle">
+          Join leading audit firms and businesses in the UAE who trust SelfAccounting.AI for complete financial management - expense tracking, invoice management, payment tracking, VAT compliance, and comprehensive auditing solutions
+        </p>
+        <button mat-raised-button class="cta-button-large cta-button-primary" (click)="navigateToRegister()" aria-label="Request a demo of SelfAccounting.AI">
+          <span>Request Demo</span>
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
     </div>
   </section>
 
   <!-- Contact Form Section -->
   <section class="contact-section" aria-label="Contact us">
     <div class="section-container">
-      <h2 class="section-title">Get in Touch</h2>
-      <p class="section-subtitle">
-        Have questions about our expense tracker, invoice management, or financial software? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
-      </p>
+      <div class="section-header">
+        <span class="section-badge">Contact Us</span>
+        <h2 class="section-title">Get in Touch</h2>
+        <p class="section-subtitle">
+          Have questions about our expense tracker, invoice management, or financial software? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+        </p>
+      </div>
       <mat-card class="contact-form-card">
         <mat-card-content>
           <form [formGroup]="contactForm" (ngSubmit)="submitContactForm()" class="contact-form">

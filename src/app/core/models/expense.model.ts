@@ -21,6 +21,23 @@ export interface Attachment {
 
 export type VatTaxType = 'standard' | 'zero_rated' | 'exempt' | 'reverse_charge';
 
+export interface PurchaseLineItem {
+  id?: string;
+  productId?: string;
+  itemName: string;
+  sku?: string;
+  quantity: number;
+  unitOfMeasure?: string;
+  unitPrice: number;
+  amount: number;
+  vatRate?: number;
+  vatAmount: number;
+  vatTaxType?: VatTaxType;
+  totalAmount: number;
+  description?: string;
+  lineNumber?: number;
+}
+
 export interface Expense {
   id: string;
   type: ExpenseType;
@@ -41,6 +58,7 @@ export interface Expense {
   ocrConfidence?: number;
   linkedAccrualExpenseId?: string;
   attachments?: Attachment[];
+  lineItems?: PurchaseLineItem[]; // For item-wise purchase entry
 }
 
 export interface AccrualSummary {

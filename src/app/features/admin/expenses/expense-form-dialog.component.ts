@@ -1,13 +1,15 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { Component, Inject, OnInit, ViewChildren, QueryList } from '@angular/core';
+import { FormBuilder, Validators, FormArray, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatAutocomplete } from '@angular/material/autocomplete';
 import { ExpensesService } from '../../../core/services/expenses.service';
 import { CategoriesService, Category } from '../../../core/services/categories.service';
 import { VendorsService, Vendor } from '../../../core/services/vendors.service';
 import { SettingsService, TaxSettings } from '../../../core/services/settings.service';
 import { ExpenseTypesService, ExpenseType as ExpenseTypeEntity } from '../../../core/services/expense-types.service';
-import { Expense, ExpenseType, VatTaxType } from '../../../core/models/expense.model';
+import { ProductsService, Product } from '../../../core/services/products.service';
+import { Expense, ExpenseType, VatTaxType, PurchaseLineItem } from '../../../core/models/expense.model';
 import { Observable, of } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
@@ -27,10 +29,19 @@ export class ExpenseFormDialogComponent implements OnInit {
   attachment?: any;
   ocrResult?: any;
 
+  // Entry mode: 'single' or 'itemwise'
+  entryMode: 'single' | 'itemwise' = 'single';
+
   // Vendor autocomplete
   vendors: Vendor[] = [];
   filteredVendors$!: Observable<Vendor[]>; // Will be initialized in setupVendorAutocomplete()
   selectedVendor: Vendor | null = null;
+
+  // Products for line items
+  products: Product[] = [];
+  filteredProducts$: Observable<Product[]>[] = []; // Array of observables for each line item
+  
+  @ViewChildren(MatAutocomplete) productAutocompletes!: QueryList<MatAutocomplete>;
 
   // Tax settings
   taxSettings: TaxSettings | null = null;
@@ -58,13 +69,14 @@ export class ExpenseFormDialogComponent implements OnInit {
     private readonly vendorsService: VendorsService,
     private readonly settingsService: SettingsService,
     private readonly expenseTypesService: ExpenseTypesService,
+    private readonly productsService: ProductsService,
     private readonly snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) readonly data: Expense | { attachment?: any; ocrResult?: any } | null,
   ) {
     this.form = this.fb.group({
       type: ['expense' as ExpenseType, Validators.required],
       categoryId: [''],
-      amount: [0, [Validators.required, Validators.min(0.01)]],
+      amount: [0, [Validators.min(0.01)]], // Not required when using line items
       vatAmount: [0, [Validators.min(0)]],
       vatTaxType: ['standard' as VatTaxType],
       expenseDate: [
@@ -78,6 +90,7 @@ export class ExpenseFormDialogComponent implements OnInit {
       vendorTrn: [''],
       invoiceNumber: [''],
       description: [''],
+      lineItems: this.fb.array([]), // Form array for line items
     });
   }
 
@@ -101,6 +114,9 @@ export class ExpenseFormDialogComponent implements OnInit {
 
     // Setup vendor autocomplete
     this.setupVendorAutocomplete();
+
+    // Load products for line items
+    this.loadProducts();
 
     // Watch for expense type changes to filter categories
     this.form.get('type')?.valueChanges.subscribe(() => {
@@ -191,6 +207,37 @@ export class ExpenseFormDialogComponent implements OnInit {
         // Mark VAT as manually entered when editing existing expense to prevent recalculation
         // This ensures we show the VAT value from the database, not a recalculated value
         this.vatManuallyEntered = true;
+        // Check if expense has line items
+        if (expense.lineItems && expense.lineItems.length > 0) {
+          this.entryMode = 'itemwise';
+          // Clear existing line items
+          while (this.lineItemsFormArray.length > 0) {
+            this.lineItemsFormArray.removeAt(0);
+          }
+          // Add line items
+          expense.lineItems.forEach((lineItem) => {
+            const lineItemGroup = this.fb.group({
+              productId: [lineItem.productId || ''],
+              itemName: [lineItem.itemName, Validators.required],
+              sku: [lineItem.sku || ''],
+              quantity: [lineItem.quantity, [Validators.required, Validators.min(0.001)]],
+              unitOfMeasure: [lineItem.unitOfMeasure || 'unit'],
+              unitPrice: [lineItem.unitPrice, [Validators.required, Validators.min(0)]],
+              vatRate: [lineItem.vatRate || this.defaultTaxRate],
+              vatTaxType: [lineItem.vatTaxType || 'standard'],
+              description: [lineItem.description || ''],
+            });
+            this.lineItemsFormArray.push(lineItemGroup);
+            const index = this.lineItemsFormArray.length - 1;
+            this.setupProductAutocomplete(index);
+            // Setup value change watchers
+            lineItemGroup.get('quantity')?.valueChanges.subscribe(() => this.calculateLineItemTotal(index));
+            lineItemGroup.get('unitPrice')?.valueChanges.subscribe(() => this.calculateLineItemTotal(index));
+            lineItemGroup.get('vatRate')?.valueChanges.subscribe(() => this.calculateLineItemTotal(index));
+            lineItemGroup.get('vatTaxType')?.valueChanges.subscribe(() => this.calculateLineItemTotal(index));
+          });
+        }
+
         this.form.patchValue({
           type: expense.type,
           categoryId: expense.categoryId ?? '',
@@ -313,24 +360,45 @@ export class ExpenseFormDialogComponent implements OnInit {
   }
 
   submit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      // Show specific validation errors
-      const amountControl = this.form.get('amount');
-      if (amountControl?.hasError('required') || (amountControl?.value !== null && amountControl?.value !== undefined && amountControl.value <= 0)) {
-        this.snackBar.open('Please enter a valid amount greater than 0', 'Close', {
+    // Validate based on entry mode
+    if (this.entryMode === 'itemwise') {
+      if (this.lineItemsFormArray.length === 0) {
+        this.snackBar.open('Please add at least one line item', 'Close', {
           duration: 4000,
           panelClass: ['snack-error'],
         });
+        return;
       }
-      if (this.form.get('expenseDate')?.hasError('required')) {
-        this.snackBar.open('Please select an expense date', 'Close', {
+      if (this.lineItemsFormArray.invalid) {
+        this.lineItemsFormArray.markAllAsTouched();
+        this.snackBar.open('Please fill all required fields in line items', 'Close', {
           duration: 4000,
           panelClass: ['snack-error'],
         });
+        return;
       }
+    } else {
+      if (this.form.get('amount')?.invalid) {
+        this.form.markAllAsTouched();
+        const amountControl = this.form.get('amount');
+        if (amountControl?.hasError('required') || (amountControl?.value !== null && amountControl?.value !== undefined && amountControl.value <= 0)) {
+          this.snackBar.open('Please enter a valid amount greater than 0', 'Close', {
+            duration: 4000,
+            panelClass: ['snack-error'],
+          });
+        }
+        return;
+      }
+    }
+
+    if (this.form.get('expenseDate')?.hasError('required')) {
+      this.snackBar.open('Please select an expense date', 'Close', {
+        duration: 4000,
+        panelClass: ['snack-error'],
+      });
       return;
     }
+
     const value = this.form.getRawValue();
     const type = (value.type as ExpenseType) ?? 'expense';
     
@@ -354,14 +422,16 @@ export class ExpenseFormDialogComponent implements OnInit {
       return;
     }
     
-    // Validate amount
-    const amount = Number(value.amount ?? 0);
-    if (amount <= 0) {
-      this.snackBar.open('Amount must be greater than 0', 'Close', {
-        duration: 4000,
-        panelClass: ['snack-error'],
-      });
-      return;
+    // Validate amount (for single entry mode)
+    if (this.entryMode === 'single') {
+      const amount = Number(value.amount ?? 0);
+      if (amount <= 0) {
+        this.snackBar.open('Amount must be greater than 0', 'Close', {
+          duration: 4000,
+          panelClass: ['snack-error'],
+        });
+        return;
+      }
     }
     
     this.loading = true;
@@ -376,18 +446,92 @@ export class ExpenseFormDialogComponent implements OnInit {
       ...(this.attachment.fileKey && { fileKey: this.attachment.fileKey }), // Include fileKey if available
     }] : undefined;
 
+    // Prepare line items if in item-wise mode
+    let lineItems: any[] | undefined = undefined;
+    if (this.entryMode === 'itemwise' && this.lineItemsFormArray.length > 0) {
+      lineItems = this.lineItemsFormArray.controls.map((control, index) => {
+        const lineItemGroup = control as FormGroup;
+        const quantity = parseFloat(lineItemGroup.get('quantity')?.value || '0');
+        const unitPrice = parseFloat(lineItemGroup.get('unitPrice')?.value || '0');
+        const vatRate = parseFloat(lineItemGroup.get('vatRate')?.value || '0');
+        const vatTaxType = lineItemGroup.get('vatTaxType')?.value || 'standard';
+
+        const lineAmount = quantity * unitPrice;
+        let lineVatAmount = 0;
+
+        if (vatTaxType === 'zero_rated' || vatTaxType === 'exempt') {
+          lineVatAmount = 0;
+        } else if (vatTaxType === 'reverse_charge') {
+          lineVatAmount = (lineAmount * vatRate) / 100;
+        } else {
+          if (this.taxCalculationMethod === 'inclusive') {
+            lineVatAmount = (lineAmount * vatRate) / (100 + vatRate);
+          } else {
+            lineVatAmount = (lineAmount * vatRate) / 100;
+          }
+        }
+
+        lineVatAmount = Math.round(lineVatAmount * 100) / 100;
+
+        return {
+          productId: lineItemGroup.get('productId')?.value || undefined,
+          itemName: lineItemGroup.get('itemName')?.value,
+          sku: lineItemGroup.get('sku')?.value || undefined,
+          quantity: quantity,
+          unitOfMeasure: lineItemGroup.get('unitOfMeasure')?.value || 'unit',
+          unitPrice: unitPrice,
+          vatRate: vatRate,
+          vatTaxType: vatTaxType,
+          description: lineItemGroup.get('description')?.value || undefined,
+        };
+      });
+    }
+
+    // Calculate totals from line items if provided
+    let finalAmount = Number(value.amount ?? 0);
+    let finalVatAmount = Number(value.vatAmount ?? 0);
+    
+    if (lineItems && lineItems.length > 0) {
+      finalAmount = 0;
+      finalVatAmount = 0;
+      lineItems.forEach(item => {
+        const lineAmount = item.quantity * item.unitPrice;
+        let lineVatAmount = 0;
+        
+        if (item.vatTaxType === 'zero_rated' || item.vatTaxType === 'exempt') {
+          lineVatAmount = 0;
+        } else if (item.vatTaxType === 'reverse_charge') {
+          lineVatAmount = (lineAmount * item.vatRate) / 100;
+        } else {
+          if (this.taxCalculationMethod === 'inclusive') {
+            lineVatAmount = (lineAmount * item.vatRate) / (100 + item.vatRate);
+          } else {
+            lineVatAmount = (lineAmount * item.vatRate) / 100;
+          }
+        }
+        
+        lineVatAmount = Math.round(lineVatAmount * 100) / 100;
+        finalAmount += lineAmount;
+        finalVatAmount += lineVatAmount;
+      });
+      
+      finalAmount = Math.round(finalAmount * 100) / 100;
+      finalVatAmount = Math.round(finalVatAmount * 100) / 100;
+    }
+
     // Prepare expense payload
     const expensePayload: any = {
       type,
       categoryId: value.categoryId || undefined,
-      amount: amount,
-      vatAmount: Number(value.vatAmount ?? 0),
+      amount: finalAmount,
+      vatAmount: finalVatAmount,
       vatTaxType: value.vatTaxType || 'standard',
       expenseDate: value.expenseDate ?? new Date().toISOString().substring(0, 10),
       expectedPaymentDate: value.expectedPaymentDate || undefined,
       purchaseStatus: value.purchaseStatus || undefined,
       description: value.description || undefined,
       attachments,
+      lineItems, // Include line items if in item-wise mode
     };
 
     // Add vendorId if selected, otherwise use vendorName
@@ -506,6 +650,211 @@ export class ExpenseFormDialogComponent implements OnInit {
 
   isEditMode(): boolean {
     return this.data !== null && this.data !== undefined && 'id' in this.data;
+  }
+
+  // Line Items Management
+  get lineItemsFormArray(): FormArray {
+    return this.form.get('lineItems') as FormArray;
+  }
+
+  toggleEntryMode(): void {
+    this.entryMode = this.entryMode === 'single' ? 'itemwise' : 'single';
+    if (this.entryMode === 'itemwise' && this.lineItemsFormArray.length === 0) {
+      this.addLineItem();
+    }
+    // Update form validators based on mode
+    const amountControl = this.form.get('amount');
+    if (this.entryMode === 'single') {
+      amountControl?.setValidators([Validators.required, Validators.min(0.01)]);
+    } else {
+      amountControl?.clearValidators();
+    }
+    amountControl?.updateValueAndValidity();
+  }
+
+  addLineItem(): void {
+    const lineItemGroup = this.fb.group({
+      productId: [''],
+      itemName: ['', Validators.required],
+      sku: [''],
+      quantity: [1, [Validators.required, Validators.min(0.001)]],
+      unitOfMeasure: ['unit'],
+      unitPrice: [0, [Validators.required, Validators.min(0)]],
+      vatRate: [this.defaultTaxRate],
+      vatTaxType: ['standard' as VatTaxType],
+      description: [''],
+    });
+
+    this.lineItemsFormArray.push(lineItemGroup);
+    const index = this.lineItemsFormArray.length - 1;
+
+    // Setup product autocomplete for this line item
+    this.setupProductAutocomplete(index);
+
+    // Watch for changes to calculate line totals
+    lineItemGroup.get('quantity')?.valueChanges.subscribe(() => this.calculateLineItemTotal(index));
+    lineItemGroup.get('unitPrice')?.valueChanges.subscribe(() => this.calculateLineItemTotal(index));
+    lineItemGroup.get('vatRate')?.valueChanges.subscribe(() => this.calculateLineItemTotal(index));
+    lineItemGroup.get('vatTaxType')?.valueChanges.subscribe(() => this.calculateLineItemTotal(index));
+
+    // Calculate initial total
+    this.calculateLineItemTotal(index);
+  }
+
+  removeLineItem(index: number): void {
+    this.lineItemsFormArray.removeAt(index);
+    this.filteredProducts$.splice(index, 1);
+    this.calculateTotalsFromLineItems();
+  }
+
+  setupProductAutocomplete(index: number): void {
+    const lineItemGroup = this.lineItemsFormArray.at(index) as FormGroup;
+    const itemNameControl = lineItemGroup.get('itemName');
+
+    if (!itemNameControl) return;
+
+    // Initialize filtered products observable for this line item
+    this.filteredProducts$[index] = itemNameControl.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((searchTerm: string | null) => {
+        const search = searchTerm || '';
+        if (!search || search.length < 2) {
+          return of(this.products.slice(0, 10));
+        }
+        const filtered = this.products.filter(p =>
+          p.name.toLowerCase().includes(search.toLowerCase()) ||
+          (p.sku && p.sku.toLowerCase().includes(search.toLowerCase()))
+        );
+        return of(filtered.slice(0, 10));
+      }),
+    );
+
+    // Watch for product selection
+    itemNameControl.valueChanges.subscribe((value) => {
+      // Check if value matches a product
+      const product = this.products.find(p =>
+        p.name === value || (p.sku && p.sku === value)
+      );
+      if (product) {
+        this.onProductSelected(index, product);
+      }
+    });
+  }
+
+  onProductSelected(index: number, product: Product): void {
+    const lineItemGroup = this.lineItemsFormArray.at(index) as FormGroup;
+    const vatRate = product.vatRate ? parseFloat(product.vatRate) : this.defaultTaxRate;
+    
+    lineItemGroup.patchValue({
+      productId: product.id,
+      itemName: product.name,
+      sku: product.sku || '',
+      unitOfMeasure: product.unitOfMeasure || 'unit',
+      unitPrice: product.unitPrice ? parseFloat(product.unitPrice) : 0,
+      vatRate: vatRate,
+    }, { emitEvent: false });
+
+    this.calculateLineItemTotal(index);
+  }
+
+  displayProduct(product: Product | string | null): string {
+    if (!product) return '';
+    if (typeof product === 'string') return product;
+    return product.name;
+  }
+
+  getProductAutocomplete(index: number): MatAutocomplete | undefined {
+    if (this.productAutocompletes && this.productAutocompletes.length > index) {
+      return this.productAutocompletes.toArray()[index];
+    }
+    return undefined;
+  }
+
+  calculateLineItemTotal(index: number): void {
+    const lineItemGroup = this.lineItemsFormArray.at(index) as FormGroup;
+    const quantity = parseFloat(lineItemGroup.get('quantity')?.value || '0');
+    const unitPrice = parseFloat(lineItemGroup.get('unitPrice')?.value || '0');
+    const vatRate = parseFloat(lineItemGroup.get('vatRate')?.value || '0');
+    const vatTaxType = lineItemGroup.get('vatTaxType')?.value || 'standard';
+
+    const amount = quantity * unitPrice;
+    let vatAmount = 0;
+
+    if (vatTaxType === 'zero_rated' || vatTaxType === 'exempt') {
+      vatAmount = 0;
+    } else if (vatTaxType === 'reverse_charge') {
+      vatAmount = (amount * vatRate) / 100;
+    } else {
+      if (this.taxCalculationMethod === 'inclusive') {
+        vatAmount = (amount * vatRate) / (100 + vatRate);
+      } else {
+        vatAmount = (amount * vatRate) / 100;
+      }
+    }
+
+    vatAmount = Math.round(vatAmount * 100) / 100;
+    const totalAmount = amount + vatAmount;
+
+    // Store calculated values (not in form, but we'll use them in submit)
+    lineItemGroup.patchValue({
+      // We'll calculate these in submit, but store for display
+    }, { emitEvent: false });
+
+    this.calculateTotalsFromLineItems();
+  }
+
+  calculateTotalsFromLineItems(): void {
+    if (this.entryMode !== 'itemwise') return;
+
+    let totalAmount = 0;
+    let totalVatAmount = 0;
+
+    this.lineItemsFormArray.controls.forEach((control) => {
+      const lineItemGroup = control as FormGroup;
+      const quantity = parseFloat(lineItemGroup.get('quantity')?.value || '0');
+      const unitPrice = parseFloat(lineItemGroup.get('unitPrice')?.value || '0');
+      const vatRate = parseFloat(lineItemGroup.get('vatRate')?.value || '0');
+      const vatTaxType = lineItemGroup.get('vatTaxType')?.value || 'standard';
+
+      const lineAmount = quantity * unitPrice;
+      let lineVatAmount = 0;
+
+      if (vatTaxType === 'zero_rated' || vatTaxType === 'exempt') {
+        lineVatAmount = 0;
+      } else if (vatTaxType === 'reverse_charge') {
+        lineVatAmount = (lineAmount * vatRate) / 100;
+      } else {
+        if (this.taxCalculationMethod === 'inclusive') {
+          lineVatAmount = (lineAmount * vatRate) / (100 + vatRate);
+        } else {
+          lineVatAmount = (lineAmount * vatRate) / 100;
+        }
+      }
+
+      lineVatAmount = Math.round(lineVatAmount * 100) / 100;
+      totalAmount += lineAmount;
+      totalVatAmount += lineVatAmount;
+    });
+
+    // Update form totals (for display, but we'll recalculate in submit)
+    this.form.patchValue({
+      amount: Math.round(totalAmount * 100) / 100,
+      vatAmount: Math.round(totalVatAmount * 100) / 100,
+    }, { emitEvent: false });
+  }
+
+  loadProducts(): void {
+    this.productsService.listProducts().subscribe({
+      next: (products) => {
+        this.products = products.filter(p => p.isActive);
+      },
+      error: (error) => {
+        console.error('Error loading products:', error);
+        this.products = [];
+      },
+    });
   }
 
   filterCategoriesByType(): void {
