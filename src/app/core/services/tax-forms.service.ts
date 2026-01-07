@@ -13,7 +13,9 @@ import {
   providedIn: 'root',
 })
 export class TaxFormsService {
-  private readonly baseUrl = `${this.apiService.baseUrl}/tax-forms`;
+  private get baseUrl(): string {
+    return `${this.apiService['baseUrl']}/tax-forms`;
+  }
 
   constructor(
     private readonly http: HttpClient,

@@ -29,6 +29,7 @@ interface BankTransaction {
   invoicePayment?: any; // InvoicePayment
   paymentMethod?: string;
   referenceNumber?: string;
+  invoiceNumber?: string; // Invoice number for payments/receipts
 }
 
 @Component({
@@ -41,6 +42,7 @@ export class BankAccountsComponent implements OnInit {
     'date',
     'type',
     'vendorOrCustomer',
+    'invoiceNumber',
     'description',
     'amount',
     'paymentMethod',
@@ -175,6 +177,7 @@ export class BankAccountsComponent implements OnInit {
                 expense: expense,
                 paymentMethod: payment.paymentMethod,
                 referenceNumber: payment.referenceNumber,
+                invoiceNumber: expense.invoiceNumber || '—', // Add invoice number
               };
               allTransactions.push(transaction);
             });
@@ -228,6 +231,7 @@ export class BankAccountsComponent implements OnInit {
             invoicePayment: payment,
             paymentMethod: payment.paymentMethod || 'Bank Transfer',
             referenceNumber: payment.referenceNumber || undefined,
+            invoiceNumber: invoice?.invoiceNumber || '—', // Add invoice number
           };
           allTransactions.push(transaction);
         });

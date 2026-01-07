@@ -805,6 +805,43 @@ export class ExpenseFormDialogComponent implements OnInit {
     this.calculateTotalsFromLineItems();
   }
 
+  /**
+   * Get the calculated total for a line item (for display purposes)
+   */
+  getLineItemTotal(index: number): number {
+    // Safety check: ensure index is valid and form array exists
+    if (!this.lineItemsFormArray || index < 0 || index >= this.lineItemsFormArray.length) {
+      return 0;
+    }
+    
+    const lineItemGroup = this.lineItemsFormArray.at(index) as FormGroup;
+    if (!lineItemGroup) return 0;
+
+    const quantity = parseFloat(lineItemGroup.get('quantity')?.value || '0');
+    const unitPrice = parseFloat(lineItemGroup.get('unitPrice')?.value || '0');
+    const vatRate = parseFloat(lineItemGroup.get('vatRate')?.value || '0');
+    const vatTaxType = lineItemGroup.get('vatTaxType')?.value || 'standard';
+
+    const amount = quantity * unitPrice;
+    let vatAmount = 0;
+
+    if (vatTaxType === 'zero_rated' || vatTaxType === 'exempt') {
+      vatAmount = 0;
+    } else if (vatTaxType === 'reverse_charge') {
+      vatAmount = (amount * vatRate) / 100;
+    } else {
+      if (this.taxCalculationMethod === 'inclusive') {
+        vatAmount = (amount * vatRate) / (100 + vatRate);
+      } else {
+        vatAmount = (amount * vatRate) / 100;
+      }
+    }
+
+    vatAmount = Math.round(vatAmount * 100) / 100;
+    const totalAmount = amount + vatAmount;
+    return Math.round(totalAmount * 100) / 100;
+  }
+
   calculateTotalsFromLineItems(): void {
     if (this.entryMode !== 'itemwise') return;
 

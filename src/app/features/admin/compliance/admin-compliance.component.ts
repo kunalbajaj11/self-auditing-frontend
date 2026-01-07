@@ -30,6 +30,7 @@ export class AdminComplianceComponent implements OnInit {
   loading = false;
   summary: ComplianceSummary | null = null;
   viewMode: 'calendar' | 'deadlines' | 'summary' = 'deadlines';
+  DeadlineStatus = DeadlineStatus; // Expose enum to template
 
   form: FormGroup;
   complianceTypes = Object.values(ComplianceType);
@@ -176,6 +177,18 @@ export class AdminComplianceComponent implements OnInit {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return dueDate < today;
+  }
+
+  getSelectedTabIndex(): number {
+    if (this.viewMode === 'deadlines') return 0;
+    if (this.viewMode === 'summary') return 1;
+    return 2;
+  }
+
+  onTabChange(index: number): void {
+    if (index === 0) this.viewMode = 'deadlines';
+    else if (index === 1) this.viewMode = 'summary';
+    else this.viewMode = 'calendar';
   }
 }
 

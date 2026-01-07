@@ -77,6 +77,29 @@
       </mat-error>
     </mat-form-field>
 
+    <!-- Pending Expense Invoices for Selected Vendor -->
+    <div *ngIf="selectedVendor && (pendingExpenseInvoices.length > 0 || loadingPendingExpenseInvoices)" class="pending-invoices-section">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Select Invoice (Optional)</mat-label>
+        <mat-select formControlName="expenseId">
+          <mat-option value="">Create New Expense</mat-option>
+          <mat-option *ngFor="let invoice of pendingExpenseInvoices" [value]="invoice.id">
+            <div class="invoice-option">
+              <span class="invoice-number">{{ invoice.invoiceNumber || 'No Invoice #' }}</span>
+              <span class="invoice-date">{{ invoice.expenseDate | date: 'shortDate' }}</span>
+              <span class="invoice-amount">Amount: {{ invoice.totalAmount | number: '1.2-2' }} {{ invoice.currency }}</span>
+              <span class="invoice-outstanding">Outstanding: {{ invoice.outstandingAmount | number: '1.2-2' }} {{ invoice.currency }}</span>
+            </div>
+          </mat-option>
+        </mat-select>
+        <mat-hint>Select an existing pending invoice to link this payment, or leave blank to create new expense</mat-hint>
+      </mat-form-field>
+      <div *ngIf="loadingPendingExpenseInvoices" class="loading-invoices">
+        <mat-spinner diameter="20"></mat-spinner>
+        <span>Loading pending invoices...</span>
+      </div>
+    </div>
+
     <mat-form-field appearance="outline" class="full-width" *ngIf="form.get('type')?.value === 'sales'">
       <mat-label>Customer *</mat-label>
       <input
@@ -123,6 +146,29 @@
         Customer name is required
       </mat-error>
     </mat-form-field>
+
+    <!-- Pending Sales Invoices for Selected Customer -->
+    <div *ngIf="selectedCustomer && (pendingSalesInvoices.length > 0 || loadingPendingSalesInvoices)" class="pending-invoices-section">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Select Invoice (Optional)</mat-label>
+        <mat-select formControlName="invoiceId">
+          <mat-option value="">Create New Invoice</mat-option>
+          <mat-option *ngFor="let invoice of pendingSalesInvoices" [value]="invoice.id">
+            <div class="invoice-option">
+              <span class="invoice-number">{{ invoice.invoiceNumber }}</span>
+              <span class="invoice-date">{{ invoice.invoiceDate | date: 'shortDate' }}</span>
+              <span class="invoice-amount">Total: {{ invoice.totalAmount | number: '1.2-2' }} {{ invoice.currency }}</span>
+              <span class="invoice-outstanding">Outstanding: {{ getInvoiceOutstanding(invoice) | number: '1.2-2' }} {{ invoice.currency }}</span>
+            </div>
+          </mat-option>
+        </mat-select>
+        <mat-hint>Select an existing pending invoice to link this receipt, or leave blank to create new invoice</mat-hint>
+      </mat-form-field>
+      <div *ngIf="loadingPendingSalesInvoices" class="loading-invoices">
+        <mat-spinner diameter="20"></mat-spinner>
+        <span>Loading pending invoices...</span>
+      </div>
+    </div>
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Description *</mat-label>

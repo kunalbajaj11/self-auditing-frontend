@@ -3,10 +3,11 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ExpensesService } from '../../../core/services/expenses.service';
-import { ExpensePaymentsService } from '../../../core/services/expense-payments.service';
-import { SalesInvoicesService } from '../../../core/services/sales-invoices.service';
+import { ExpensePaymentsService, ExpenseWithOutstanding } from '../../../core/services/expense-payments.service';
+import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales-invoices.service';
 import { VendorsService, Vendor } from '../../../core/services/vendors.service';
 import { CustomersService, Customer } from '../../../core/services/customers.service';
+import { Expense } from '../../../core/models/expense.model';
 import { Observable, of } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
@@ -28,6 +29,14 @@ export class BankTransactionFormDialogComponent implements OnInit {
   customers: Customer[] = [];
   filteredCustomers$!: Observable<Customer[]>;
   selectedCustomer: Customer | null = null;
+
+  // Pending invoices for vendor
+  pendingExpenseInvoices: Array<Expense & { outstandingAmount: number }> = [];
+  loadingPendingExpenseInvoices = false;
+
+  // Pending invoices for customer
+  pendingSalesInvoices: SalesInvoice[] = [];
+  loadingPendingSalesInvoices = false;
 
   readonly transactionTypes = [
     { value: 'expense', label: 'Expense Payment' },
@@ -54,6 +63,8 @@ export class BankTransactionFormDialogComponent implements OnInit {
       vendorName: [''],
       customerId: [''],
       customerName: [''],
+      expenseId: [''], // Selected expense invoice for payment
+      invoiceId: [''], // Selected sales invoice for receipt
       amount: [0, [Validators.required, Validators.min(0.01)]],
       currency: ['AED', Validators.required],
       referenceNumber: [''],
@@ -72,9 +83,25 @@ export class BankTransactionFormDialogComponent implements OnInit {
       if (type === 'expense') {
         this.form.get('vendorName')?.setValidators([Validators.required]);
         this.form.get('customerName')?.clearValidators();
+        // Clear sales-related fields
+        this.form.patchValue({
+          customerId: '',
+          customerName: '',
+          invoiceId: '',
+        }, { emitEvent: false });
+        this.selectedCustomer = null;
+        this.pendingSalesInvoices = [];
       } else if (type === 'sales') {
         this.form.get('customerName')?.setValidators([Validators.required]);
         this.form.get('vendorName')?.clearValidators();
+        // Clear expense-related fields
+        this.form.patchValue({
+          vendorId: '',
+          vendorName: '',
+          expenseId: '',
+        }, { emitEvent: false });
+        this.selectedVendor = null;
+        this.pendingExpenseInvoices = [];
       }
       this.form.get('vendorName')?.updateValueAndValidity();
       this.form.get('customerName')?.updateValueAndValidity();
@@ -155,7 +182,9 @@ export class BankTransactionFormDialogComponent implements OnInit {
     this.form.patchValue({
       vendorId: vendor.id,
       vendorName: vendor.name,
+      expenseId: '', // Clear previous selection
     });
+    this.loadPendingExpenseInvoices(vendor.name);
   }
 
   displayVendor(vendor: Vendor | string | null): string {
@@ -170,9 +199,31 @@ export class BankTransactionFormDialogComponent implements OnInit {
 
   clearVendorSelection(): void {
     this.selectedVendor = null;
+    this.pendingExpenseInvoices = [];
     this.form.patchValue({
       vendorId: '',
       vendorName: '',
+      expenseId: '',
+    });
+  }
+
+  loadPendingExpenseInvoices(vendorName: string): void {
+    if (!vendorName) {
+      this.pendingExpenseInvoices = [];
+      return;
+    }
+
+    this.loadingPendingExpenseInvoices = true;
+    this.paymentsService.getPendingInvoicesByVendor(vendorName).subscribe({
+      next: (invoices) => {
+        this.pendingExpenseInvoices = invoices;
+        this.loadingPendingExpenseInvoices = false;
+      },
+      error: (error) => {
+        console.error('Error loading pending expense invoices:', error);
+        this.pendingExpenseInvoices = [];
+        this.loadingPendingExpenseInvoices = false;
+      },
     });
   }
 
@@ -228,7 +279,11 @@ export class BankTransactionFormDialogComponent implements OnInit {
     this.form.patchValue({
       customerId: customer.id,
       customerName: customer.name,
+      invoiceId: '', // Clear previous selection
     });
+    // Use customer.id if available, otherwise fall back to customer.name
+    const customerIdentifier = customer.id && customer.id.trim() ? customer.id : customer.name;
+    this.loadPendingSalesInvoices(customerIdentifier);
   }
 
   displayCustomer(customer: Customer | string | null): string {
@@ -243,9 +298,50 @@ export class BankTransactionFormDialogComponent implements OnInit {
 
   clearCustomerSelection(): void {
     this.selectedCustomer = null;
+    this.pendingSalesInvoices = [];
     this.form.patchValue({
       customerId: '',
       customerName: '',
+      invoiceId: '',
+    });
+  }
+
+  loadPendingSalesInvoices(customerIdOrName: string): void {
+    if (!customerIdOrName) {
+      this.pendingSalesInvoices = [];
+      return;
+    }
+
+    this.loadingPendingSalesInvoices = true;
+    // Get unpaid or partial invoices for this customer
+    const filters: any = {};
+    
+    // If customerIdOrName looks like an ID (UUID), use customerId filter
+    if (customerIdOrName.length === 36 && customerIdOrName.includes('-')) {
+      filters.customerId = customerIdOrName;
+    }
+    // Note: The API filters by paymentStatus, but we'll filter client-side for now
+    // as the API might not support multiple paymentStatus values
+
+    this.invoicesService.listInvoices(filters).subscribe({
+      next: (invoices) => {
+        // Filter by customer, payment status, and outstanding amount
+        this.pendingSalesInvoices = invoices.filter((inv) => {
+          const matchesCustomer = 
+            (filters.customerId && inv.customerId === filters.customerId) ||
+            (!filters.customerId && this.selectedCustomer && inv.customerName === this.selectedCustomer.name);
+          const isPending = inv.paymentStatus === 'unpaid' || inv.paymentStatus === 'partial';
+          // Also check that there's an outstanding amount > 0.01
+          const outstanding = this.getInvoiceOutstanding(inv);
+          return matchesCustomer && isPending && outstanding > 0.01;
+        });
+        this.loadingPendingSalesInvoices = false;
+      },
+      error: (error) => {
+        console.error('Error loading pending sales invoices:', error);
+        this.pendingSalesInvoices = [];
+        this.loadingPendingSalesInvoices = false;
+      },
     });
   }
 
@@ -268,7 +364,39 @@ export class BankTransactionFormDialogComponent implements OnInit {
   }
 
   private createExpenseWithBankPayment(data: any): void {
-    // First create the expense
+    // If an expense invoice is selected, link payment to that expense
+    if (data.expenseId) {
+      // Create payment for existing expense
+      this.paymentsService
+        .createPayment({
+          expenseId: data.expenseId,
+          amount: data.amount,
+          paymentDate: data.date,
+          paymentMethod: 'bank_transfer',
+          referenceNumber: data.referenceNumber || undefined,
+          notes: data.notes || undefined,
+        })
+        .subscribe({
+          next: () => {
+            this.loading = false;
+            this.snackBar.open('Bank payment recorded successfully', 'Close', {
+              duration: 3000,
+            });
+            this.dialogRef.close(true);
+          },
+          error: (error) => {
+            this.loading = false;
+            this.snackBar.open(
+              error?.error?.message || 'Failed to record bank payment',
+              'Close',
+              { duration: 4000, panelClass: ['snack-error'] },
+            );
+          },
+        });
+      return;
+    }
+
+    // Otherwise, create new expense and payment
     const expensePayload: any = {
       type: 'expense',
       amount: data.amount,
@@ -333,9 +461,37 @@ export class BankTransactionFormDialogComponent implements OnInit {
   }
 
   private createSalesInvoiceWithBankReceived(data: any): void {
-    // Create a sales invoice with bank received status
-    // Note: Since tax_invoice_bank_received is removed, we'll create it as a regular invoice
-    // and track it separately, or we can create it with a note
+    // If an invoice is selected, record payment for that invoice
+    if (data.invoiceId) {
+      this.invoicesService
+        .recordPayment(data.invoiceId, {
+          amount: data.amount,
+          paymentDate: data.date,
+          paymentMethod: 'bank_transfer',
+          referenceNumber: data.referenceNumber || undefined,
+          notes: data.notes || undefined,
+        })
+        .subscribe({
+          next: () => {
+            this.loading = false;
+            this.snackBar.open('Bank receipt recorded successfully', 'Close', {
+              duration: 3000,
+            });
+            this.dialogRef.close(true);
+          },
+          error: (error) => {
+            this.loading = false;
+            this.snackBar.open(
+              error?.error?.message || 'Failed to record payment',
+              'Close',
+              { duration: 4000, panelClass: ['snack-error'] },
+            );
+          },
+        });
+      return;
+    }
+
+    // Otherwise, create new invoice and payment
     const invoicePayload: any = {
         customerName: data.customerName || data.vendorName, // Use customerName for sales
         invoiceDate: data.date,
@@ -402,6 +558,12 @@ export class BankTransactionFormDialogComponent implements OnInit {
           );
         },
       });
+  }
+
+  getInvoiceOutstanding(invoice: SalesInvoice): number {
+    const total = parseFloat(invoice.totalAmount || '0');
+    const paid = parseFloat(invoice.paidAmount || '0');
+    return total - paid;
   }
 
   cancel(): void {

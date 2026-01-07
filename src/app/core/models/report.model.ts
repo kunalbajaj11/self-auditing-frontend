@@ -4,7 +4,8 @@ export type ReportType =
   | 'profit_and_loss'
   | 'payables'
   | 'receivables'
-  | 'vat_control_account';
+  | 'vat_control_account'
+  | 'stock_balance';
 
 export interface ReportHistoryItem {
   id: string;

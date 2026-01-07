@@ -15,7 +15,9 @@ import {
   providedIn: 'root',
 })
 export class ComplianceService {
-  private readonly baseUrl = `${this.apiService.baseUrl}/compliance`;
+  private get baseUrl(): string {
+    return `${this.apiService['baseUrl']}/compliance`;
+  }
 
   constructor(
     private readonly http: HttpClient,

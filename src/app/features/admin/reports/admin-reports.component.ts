@@ -64,6 +64,13 @@ export class AdminReportsComponent implements OnInit {
       description: 'VAT input, output, and net VAT position for a period',
       color: '#d32f2f',
     },
+    {
+      value: 'stock_balance',
+      label: 'Stock Balance Report',
+      icon: 'inventory_2',
+      description: 'Stock inwards, outwards, adjustments, and balance for each product',
+      color: '#7b1fa2',
+    },
   ];
 
   readonly dateRangePresets: { value: string; label: string }[] = [

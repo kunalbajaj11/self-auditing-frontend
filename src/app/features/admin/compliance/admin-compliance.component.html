@@ -7,7 +7,7 @@
     </button>
   </div>
 
-  <mat-tab-group [(selectedIndex)]="viewMode === 'deadlines' ? 0 : viewMode === 'summary' ? 1 : 2">
+  <mat-tab-group [selectedIndex]="getSelectedTabIndex()" (selectedIndexChange)="onTabChange($event)">
     <mat-tab label="Deadlines">
       <div class="tab-content">
         <mat-card class="filters-card">
@@ -89,7 +89,7 @@
                   *ngIf="deadline.status !== 'filed'"
                   mat-button
                   color="primary"
-                  (click)="updateStatus(deadline, 'filed')"
+                  (click)="updateStatus(deadline, DeadlineStatus.FILED)"
                 >
                   Mark as Filed
                 </button>
