@@ -19,3 +19,112 @@ mat-dialog-content {
   vertical-align: middle;
 }
 
+.optional-fields-section {
+  margin-top: 16px;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 16px 0 8px 0;
+  color: #333;
+}
+
+.section-subtitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 16px 0 8px 0;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.autocomplete-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  .option-name {
+    font-weight: 500;
+  }
+  
+  .option-trn {
+    font-size: 0.85rem;
+    color: #666;
+    margin-left: 12px;
+  }
+}
+
+.pending-invoices-section {
+  margin-top: 16px;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  color: #666;
+  
+  mat-spinner {
+    display: inline-block;
+  }
+}
+
+.invoices-table-container {
+  margin-top: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.pending-invoices-table {
+  width: 100%;
+  background: white;
+  
+  th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+  
+  td {
+    font-size: 0.875rem;
+  }
+  
+  .outstanding-amount {
+    color: #d32f2f;
+    font-weight: 600;
+  }
+  
+  .text-right {
+    text-align: right;
+  }
+}
+
+.no-invoices {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  color: #666;
+  font-style: italic;
+  
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: #999;
+  }
+}
+

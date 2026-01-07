@@ -156,17 +156,173 @@
   <div class="optional-fields-section">
     <h3 class="section-title">Optional Fields</h3>
     
-    <!-- Customer / Vendor -->
+    <!-- Customer / Vendor with Autocomplete -->
     <mat-form-field appearance="outline" class="full">
       <mat-label>Customer / Vendor</mat-label>
-      <input matInput formControlName="customerVendorName" placeholder="Enter customer or vendor name" />
+      <input
+        matInput
+        formControlName="customerVendorName"
+        placeholder="Search vendor or customer name"
+        [matAutocomplete]="vendorCustomerAuto"
+        (focus)="onVendorCustomerFocus()"
+      />
+      <mat-autocomplete
+        #vendorCustomerAuto="matAutocomplete"
+        [displayWith]="displayVendorOrCustomer"
+        (optionSelected)="onVendorOrCustomerSelected($event)"
+      >
+        <!-- Vendor Options -->
+        <mat-optgroup label="Vendors" *ngIf="filteredVendors$ | async as vendors">
+          <mat-option *ngFor="let vendor of vendors" [value]="vendor">
+            <div class="autocomplete-option">
+              <span class="option-name">{{ vendor.name }}</span>
+              <span *ngIf="vendor.vendorTrn" class="option-trn">TRN: {{ vendor.vendorTrn }}</span>
+            </div>
+          </mat-option>
+        </mat-optgroup>
+        <!-- Customer Options -->
+        <mat-optgroup label="Customers" *ngIf="filteredCustomers$ | async as customers">
+          <mat-option *ngFor="let customer of customers" [value]="customer">
+            <div class="autocomplete-option">
+              <span class="option-name">{{ customer.name }}</span>
+              <span *ngIf="customer.customerTrn" class="option-trn">TRN: {{ customer.customerTrn }}</span>
+            </div>
+          </mat-option>
+        </mat-optgroup>
+      </mat-autocomplete>
+      <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
 
-    <!-- Vendor TRN -->
+    <!-- Vendor TRN (Auto-filled if vendor selected) -->
     <mat-form-field appearance="outline" class="full">
       <mat-label>Vendor TRN</mat-label>
-      <input matInput formControlName="vendorTrn" placeholder="Enter vendor TRN (Tax Registration Number)" />
+      <input matInput formControlName="vendorTrn" placeholder="Enter vendor TRN (Tax Registration Number)" [readonly]="selectedVendor?.vendorTrn ? true : false" />
+      <mat-hint *ngIf="selectedVendor?.vendorTrn">Auto-filled from vendor</mat-hint>
     </mat-form-field>
+
+    <!-- Pending Invoices Section for Vendor -->
+    <div class="pending-invoices-section" *ngIf="isVendorSelected">
+      <h4 class="section-subtitle">
+        <mat-icon>receipt</mat-icon>
+        Pending Expense Invoices
+      </h4>
+      <div *ngIf="loadingPendingExpenseInvoices" class="loading-state">
+        <mat-spinner diameter="24"></mat-spinner>
+        <span>Loading pending invoices...</span>
+      </div>
+      <div *ngIf="!loadingPendingExpenseInvoices && pendingExpenseInvoices.length > 0" class="invoices-table-container">
+        <table mat-table [dataSource]="pendingExpenseInvoices" class="pending-invoices-table">
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>Select</th>
+            <td mat-cell *matCellDef="let invoice">
+              <button
+                mat-icon-button
+                color="primary"
+                (click)="selectExpenseInvoice(invoice)"
+                matTooltip="Select this invoice"
+              >
+                <mat-icon>check_circle</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="invoiceNumber">
+            <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+            <td mat-cell *matCellDef="let invoice">
+              <strong>{{ invoice.invoiceNumber || 'N/A' }}</strong>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let invoice">{{ invoice.expenseDate | date: 'shortDate' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Total Amount</th>
+            <td mat-cell *matCellDef="let invoice" class="text-right">
+              {{ invoice.totalAmount | number: '1.2-2' }} AED
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="outstanding">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Outstanding</th>
+            <td mat-cell *matCellDef="let invoice" class="text-right">
+              <strong class="outstanding-amount">{{ invoice.outstandingAmount | number: '1.2-2' }} AED</strong>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['select', 'invoiceNumber', 'date', 'amount', 'outstanding']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['select', 'invoiceNumber', 'date', 'amount', 'outstanding']"></tr>
+        </table>
+      </div>
+      <div *ngIf="!loadingPendingExpenseInvoices && pendingExpenseInvoices.length === 0" class="no-invoices">
+        <mat-icon>info</mat-icon>
+        <span>No pending invoices found for this vendor</span>
+      </div>
+    </div>
+
+    <!-- Pending Invoices Section for Customer -->
+    <div class="pending-invoices-section" *ngIf="isCustomerSelected">
+      <h4 class="section-subtitle">
+        <mat-icon>receipt</mat-icon>
+        Pending Sales Invoices
+      </h4>
+      <div *ngIf="loadingPendingSalesInvoices" class="loading-state">
+        <mat-spinner diameter="24"></mat-spinner>
+        <span>Loading pending invoices...</span>
+      </div>
+      <div *ngIf="!loadingPendingSalesInvoices && pendingSalesInvoices.length > 0" class="invoices-table-container">
+        <table mat-table [dataSource]="pendingSalesInvoices" class="pending-invoices-table">
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>Select</th>
+            <td mat-cell *matCellDef="let invoice">
+              <button
+                mat-icon-button
+                color="primary"
+                (click)="selectSalesInvoice(invoice)"
+                matTooltip="Select this invoice"
+              >
+                <mat-icon>check_circle</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="invoiceNumber">
+            <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+            <td mat-cell *matCellDef="let invoice">
+              <strong>{{ invoice.invoiceNumber || 'N/A' }}</strong>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let invoice">{{ invoice.invoiceDate | date: 'shortDate' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Total Amount</th>
+            <td mat-cell *matCellDef="let invoice" class="text-right">
+              {{ invoice.totalAmount | number: '1.2-2' }} AED
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="outstanding">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Outstanding</th>
+            <td mat-cell *matCellDef="let invoice" class="text-right">
+              <strong class="outstanding-amount">{{ getInvoiceOutstanding(invoice) | number: '1.2-2' }} AED</strong>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['select', 'invoiceNumber', 'date', 'amount', 'outstanding']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['select', 'invoiceNumber', 'date', 'amount', 'outstanding']"></tr>
+        </table>
+      </div>
+      <div *ngIf="!loadingPendingSalesInvoices && pendingSalesInvoices.length === 0" class="no-invoices">
+        <mat-icon>info</mat-icon>
+        <span>No pending invoices found for this customer</span>
+      </div>
+    </div>
 
     <!-- Sub-Account (for sub-heads like Prepaid Rent) -->
     <mat-form-field appearance="outline" class="full">

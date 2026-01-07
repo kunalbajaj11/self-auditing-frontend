@@ -9,6 +9,12 @@ import {
   ACCOUNT_METADATA,
   getAccountsByCategory,
 } from '../../../core/services/journal-entries.service';
+import { VendorsService, Vendor } from '../../../core/services/vendors.service';
+import { CustomersService, Customer } from '../../../core/services/customers.service';
+import { ExpensePaymentsService, ExpenseWithOutstanding } from '../../../core/services/expense-payments.service';
+import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales-invoices.service';
+import { Observable, of } from 'rxjs';
+import { map, startWith, debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
 
 interface JournalEntryTemplate {
   name: string;
@@ -30,6 +36,25 @@ export class JournalEntryFormDialogComponent implements OnInit {
 
   readonly accountsByCategory = getAccountsByCategory();
   readonly allAccounts = Object.values(ACCOUNT_METADATA);
+
+  // Vendor/Customer autocomplete
+  vendors: Vendor[] = [];
+  filteredVendors$!: Observable<Vendor[]>;
+  selectedVendor: Vendor | null = null;
+
+  customers: Customer[] = [];
+  filteredCustomers$!: Observable<Customer[]>;
+  selectedCustomer: Customer | null = null;
+
+  // Pending invoices
+  pendingExpenseInvoices: Array<ExpenseWithOutstanding> = [];
+  loadingPendingExpenseInvoices = false;
+  pendingSalesInvoices: SalesInvoice[] = [];
+  loadingPendingSalesInvoices = false;
+
+  // Track if vendor or customer is selected
+  isVendorSelected = false;
+  isCustomerSelected = false;
 
   readonly templates: JournalEntryTemplate[] = [
     {
@@ -57,6 +82,10 @@ export class JournalEntryFormDialogComponent implements OnInit {
     private readonly dialogRef: MatDialogRef<JournalEntryFormDialogComponent>,
     private readonly journalEntriesService: JournalEntriesService,
     private readonly snackBar: MatSnackBar,
+    private readonly vendorsService: VendorsService,
+    private readonly customersService: CustomersService,
+    private readonly expensePaymentsService: ExpensePaymentsService,
+    private readonly salesInvoicesService: SalesInvoicesService,
     @Inject(MAT_DIALOG_DATA) readonly data: JournalEntry | null,
   ) {
     this.isEditMode = Boolean(data);
@@ -73,6 +102,10 @@ export class JournalEntryFormDialogComponent implements OnInit {
         description: [''],
         customerVendorName: [''],
         vendorTrn: [''],
+        vendorId: [''],
+        customerId: [''],
+        expenseId: [''], // Selected expense invoice
+        invoiceId: [''], // Selected sales invoice
         vatAmount: [0, [Validators.min(0)]],
         vatTaxType: ['standard'],
         subAccount: [''],
@@ -85,23 +118,330 @@ export class JournalEntryFormDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.data) {
-      // Editing existing entry
-      this.form.patchValue({
-        debitAccount: this.data.debitAccount,
-        creditAccount: this.data.creditAccount,
-        amount: parseFloat(this.data.amount.toString()),
-        entryDate: this.data.entryDate,
-        description: this.data.description || '',
-        customerVendorName: this.data.customerVendorName || '',
-        vendorTrn: (this.data as any).vendorTrn || '',
-        vatAmount: (this.data as any).vatAmount ? parseFloat((this.data as any).vatAmount.toString()) : 0,
-        vatTaxType: (this.data as any).vatTaxType || 'standard',
-        subAccount: (this.data as any).subAccount || '',
-        referenceNumber: this.data.referenceNumber || '',
-        attachmentId: this.data.attachmentId || '',
-        notes: this.data.notes || '',
-      });
+    this.setupVendorAutocomplete();
+    this.setupCustomerAutocomplete();
+
+    // Load vendors and customers, then handle edit mode
+    this.loadVendors();
+    this.loadCustomers().subscribe({
+      next: () => {
+        // After both are loaded, handle edit mode
+        if (this.data) {
+          this.handleEditMode();
+        }
+      },
+      error: () => {
+        // Even if error, try to handle edit mode
+        if (this.data) {
+          this.handleEditMode();
+        }
+      },
+    });
+
+    // Watch for vendor/customer name changes to clear selection
+    this.form.get('customerVendorName')?.valueChanges.subscribe((name) => {
+      if (!name) {
+        this.isVendorSelected = false;
+        this.isCustomerSelected = false;
+        this.selectedVendor = null;
+        this.selectedCustomer = null;
+        this.pendingExpenseInvoices = [];
+        this.pendingSalesInvoices = [];
+        this.form.patchValue({
+          vendorId: '',
+          customerId: '',
+          expenseId: '',
+          invoiceId: '',
+        });
+      }
+    });
+  }
+
+  private handleEditMode(): void {
+    if (!this.data) return;
+
+    // Editing existing entry
+    this.form.patchValue({
+      debitAccount: this.data.debitAccount,
+      creditAccount: this.data.creditAccount,
+      amount: parseFloat(this.data.amount.toString()),
+      entryDate: this.data.entryDate,
+      description: this.data.description || '',
+      customerVendorName: this.data.customerVendorName || '',
+      vendorTrn: (this.data as any).vendorTrn || '',
+      vatAmount: (this.data as any).vatAmount ? parseFloat((this.data as any).vatAmount.toString()) : 0,
+      vatTaxType: (this.data as any).vatTaxType || 'standard',
+      subAccount: (this.data as any).subAccount || '',
+      referenceNumber: this.data.referenceNumber || '',
+      attachmentId: this.data.attachmentId || '',
+      notes: this.data.notes || '',
+    });
+
+    // If editing and has customerVendorName, try to load pending invoices
+    if (this.data.customerVendorName) {
+      // Try to find if it's a vendor or customer
+      const vendor = this.vendors.find(v => v.name === this.data!.customerVendorName);
+      if (vendor) {
+        this.selectedVendor = vendor;
+        this.isVendorSelected = true;
+        this.form.patchValue({ vendorId: vendor.id });
+        this.loadPendingExpenseInvoices(vendor.name);
+      } else {
+        const customer = this.customers.find(c => c.name === this.data!.customerVendorName);
+        if (customer) {
+          this.selectedCustomer = customer;
+          this.isCustomerSelected = true;
+          this.form.patchValue({ customerId: customer.id });
+          this.loadPendingSalesInvoices(customer.id || customer.name);
+        }
+      }
+    }
+  }
+
+  loadVendors(): void {
+    this.vendorsService.listVendors().subscribe({
+      next: (vendors) => {
+        this.vendors = vendors;
+        // If editing and vendors just loaded, try to find vendor
+        if (this.data && this.data.customerVendorName && !this.selectedVendor && !this.selectedCustomer) {
+          const vendor = this.vendors.find(v => v.name === this.data!.customerVendorName);
+          if (vendor) {
+            this.selectedVendor = vendor;
+            this.isVendorSelected = true;
+            this.form.patchValue({ vendorId: vendor.id });
+            this.loadPendingExpenseInvoices(vendor.name);
+          }
+        }
+      },
+      error: (error) => {
+        console.error('Error loading vendors:', error);
+      },
+    });
+  }
+
+  loadCustomers(): Observable<Customer[]> {
+    return this.customersService.listCustomers().pipe(
+      map((customers) => {
+        this.customers = customers;
+        // If editing and customers just loaded, try to find customer
+        if (this.data && this.data.customerVendorName && !this.selectedVendor && !this.selectedCustomer) {
+          const customer = this.customers.find(c => c.name === this.data!.customerVendorName);
+          if (customer) {
+            this.selectedCustomer = customer;
+            this.isCustomerSelected = true;
+            this.form.patchValue({ customerId: customer.id });
+            this.loadPendingSalesInvoices(customer.id || customer.name);
+          }
+        }
+        return customers;
+      }),
+    );
+  }
+
+  private setupVendorAutocomplete(): void {
+    const initialValue = this.form.get('customerVendorName')?.value || '';
+    this.filteredVendors$ = this.form.get('customerVendorName')!.valueChanges.pipe(
+      startWith(initialValue),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((searchTerm: string | null) => {
+        const search = searchTerm || '';
+        if (this.selectedVendor && this.selectedVendor.name === search) {
+          return of([this.selectedVendor]);
+        }
+        if (!search || search.length < 2) {
+          return of(this.vendors.slice(0, 10));
+        }
+        const filtered = this.vendors.filter((v) =>
+          v.name.toLowerCase().includes(search.toLowerCase())
+        );
+        return of(filtered.slice(0, 10));
+      }),
+    );
+  }
+
+  private setupCustomerAutocomplete(): void {
+    const initialValue = this.form.get('customerVendorName')?.value || '';
+    this.filteredCustomers$ = this.form.get('customerVendorName')!.valueChanges.pipe(
+      startWith(initialValue),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((searchTerm: string | null) => {
+        const search = searchTerm || '';
+        if (this.selectedCustomer && this.selectedCustomer.name === search) {
+          return of([this.selectedCustomer]);
+        }
+        if (!search || search.length < 2) {
+          return of(this.customers.slice(0, 10));
+        }
+        return this.customersService.listCustomers(search, true).pipe(
+          map((customers) => customers.slice(0, 10)),
+        );
+      }),
+    );
+  }
+
+  onVendorSelected(vendor: Vendor): void {
+    this.selectedVendor = vendor;
+    this.selectedCustomer = null;
+    this.isVendorSelected = true;
+    this.isCustomerSelected = false;
+    this.form.patchValue({
+      vendorId: vendor.id,
+      customerVendorName: vendor.name,
+      vendorTrn: vendor.vendorTrn || '',
+      customerId: '',
+      expenseId: '',
+      invoiceId: '',
+    });
+    this.loadPendingExpenseInvoices(vendor.name);
+  }
+
+  onCustomerSelected(customer: Customer): void {
+    this.selectedCustomer = customer;
+    this.selectedVendor = null;
+    this.isCustomerSelected = true;
+    this.isVendorSelected = false;
+    this.form.patchValue({
+      customerId: customer.id,
+      customerVendorName: customer.name,
+      vendorId: '',
+      expenseId: '',
+      invoiceId: '',
+    });
+    const customerIdentifier = customer.id && customer.id.trim() ? customer.id : customer.name;
+    this.loadPendingSalesInvoices(customerIdentifier);
+  }
+
+  displayVendorOrCustomer(value: Vendor | Customer | string | null): string {
+    if (!value) {
+      return this.form.get('customerVendorName')?.value || '';
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    return value.name;
+  }
+
+  loadPendingExpenseInvoices(vendorName: string): void {
+    if (!vendorName) {
+      this.pendingExpenseInvoices = [];
+      return;
+    }
+
+    this.loadingPendingExpenseInvoices = true;
+    this.expensePaymentsService.getPendingInvoicesByVendor(vendorName).subscribe({
+      next: (invoices) => {
+        this.pendingExpenseInvoices = invoices;
+        this.loadingPendingExpenseInvoices = false;
+      },
+      error: (error) => {
+        console.error('Error loading pending expense invoices:', error);
+        this.pendingExpenseInvoices = [];
+        this.loadingPendingExpenseInvoices = false;
+      },
+    });
+  }
+
+  loadPendingSalesInvoices(customerIdOrName: string): void {
+    if (!customerIdOrName) {
+      this.pendingSalesInvoices = [];
+      return;
+    }
+
+    this.loadingPendingSalesInvoices = true;
+    const filters: any = {};
+    
+    if (customerIdOrName.length === 36 && customerIdOrName.includes('-')) {
+      filters.customerId = customerIdOrName;
+    }
+
+    this.salesInvoicesService.listInvoices(filters).subscribe({
+      next: (invoices) => {
+        this.pendingSalesInvoices = invoices.filter((inv) => {
+          const matchesCustomer = 
+            (filters.customerId && inv.customerId === filters.customerId) ||
+            (!filters.customerId && this.selectedCustomer && inv.customerName === this.selectedCustomer.name);
+          const isPending = inv.paymentStatus === 'unpaid' || inv.paymentStatus === 'partial';
+          const outstanding = this.getInvoiceOutstanding(inv);
+          return matchesCustomer && isPending && outstanding > 0.01;
+        });
+        this.loadingPendingSalesInvoices = false;
+      },
+      error: (error) => {
+        console.error('Error loading pending sales invoices:', error);
+        this.pendingSalesInvoices = [];
+        this.loadingPendingSalesInvoices = false;
+      },
+    });
+  }
+
+  getInvoiceOutstanding(invoice: SalesInvoice): number {
+    const total = parseFloat(invoice.totalAmount || '0');
+    const paid = parseFloat(invoice.paidAmount || '0');
+    return total - paid;
+  }
+
+  selectExpenseInvoice(expense: ExpenseWithOutstanding): void {
+    const outstandingAmount = expense.outstandingAmount || parseFloat(String(expense.totalAmount || '0'));
+    this.form.patchValue({
+      expenseId: expense.id,
+      amount: outstandingAmount,
+      description: expense.description || `Settlement for ${expense.vendorName || 'vendor'}`,
+      referenceNumber: expense.invoiceNumber || '',
+      vendorTrn: expense.vendorTrn || this.form.get('vendorTrn')?.value || '',
+    });
+    this.snackBar.open(
+      `Invoice ${expense.invoiceNumber || 'N/A'} selected. Amount set to ${outstandingAmount.toFixed(2)} AED`,
+      'Close',
+      { duration: 3000 }
+    );
+  }
+
+  selectSalesInvoice(invoice: SalesInvoice): void {
+    const outstanding = this.getInvoiceOutstanding(invoice);
+    this.form.patchValue({
+      invoiceId: invoice.id,
+      amount: outstanding,
+      description: invoice.description || `Settlement for ${invoice.customerName || 'customer'}`,
+      referenceNumber: invoice.invoiceNumber || '',
+    });
+    this.snackBar.open(
+      `Invoice ${invoice.invoiceNumber || 'N/A'} selected. Amount set to ${outstanding.toFixed(2)} AED`,
+      'Close',
+      { duration: 3000 }
+    );
+  }
+
+  onVendorCustomerFocus(): void {
+    // Trigger autocomplete when field is focused
+    const currentValue = this.form.get('customerVendorName')?.value || '';
+    if (!currentValue) {
+      this.form.get('customerVendorName')?.setValue('');
+    }
+  }
+
+  onVendorOrCustomerSelected(event: any): void {
+    const selected = event.option.value;
+    if (!selected || !selected.id) {
+      return;
+    }
+    // Check if it's a vendor
+    const vendor = this.vendors.find(v => v.id === selected.id);
+    if (vendor) {
+      this.onVendorSelected(selected);
+      return;
+    }
+    // Check if it's a customer
+    const customer = this.customers.find(c => c.id === selected.id);
+    if (customer) {
+      this.onCustomerSelected(selected);
+      return;
+    }
+    // If not found in either, it might be a string (manual entry)
+    // In that case, just set the name
+    if (typeof selected === 'string') {
+      this.form.patchValue({ customerVendorName: selected });
     }
   }
 
@@ -177,18 +517,53 @@ export class JournalEntryFormDialogComponent implements OnInit {
       entryDate = entryDate.substring(0, 10);
     }
 
+    // Build reference number - include invoice number if selected
+    let referenceNumber = formValue.referenceNumber || '';
+    if (formValue.expenseId) {
+      const selectedExpense = this.pendingExpenseInvoices.find(e => e.id === formValue.expenseId);
+      if (selectedExpense?.invoiceNumber) {
+        referenceNumber = selectedExpense.invoiceNumber;
+      } else if (selectedExpense && !referenceNumber) {
+        // Fallback: use expense ID if no invoice number
+        referenceNumber = `EXP-${selectedExpense.id.substring(0, 8)}`;
+      }
+    } else if (formValue.invoiceId) {
+      const selectedInvoice = this.pendingSalesInvoices.find(i => i.id === formValue.invoiceId);
+      if (selectedInvoice?.invoiceNumber) {
+        referenceNumber = selectedInvoice.invoiceNumber;
+      } else if (selectedInvoice && !referenceNumber) {
+        // Fallback: use invoice ID if no invoice number
+        referenceNumber = `INV-${selectedInvoice.id.substring(0, 8)}`;
+      }
+    }
+
+    // Build description - include invoice reference if selected
+    let description = formValue.description || '';
+    if (formValue.expenseId && !description) {
+      const selectedExpense = this.pendingExpenseInvoices.find(e => e.id === formValue.expenseId);
+      if (selectedExpense) {
+        description = `Settlement for ${selectedExpense.vendorName || 'vendor'}${selectedExpense.invoiceNumber ? ` - Invoice ${selectedExpense.invoiceNumber}` : ''}`;
+      }
+    } else if (formValue.invoiceId && !description) {
+      const selectedInvoice = this.pendingSalesInvoices.find(i => i.id === formValue.invoiceId);
+      if (selectedInvoice) {
+        description = `Settlement for ${selectedInvoice.customerName || 'customer'}${selectedInvoice.invoiceNumber ? ` - Invoice ${selectedInvoice.invoiceNumber}` : ''}`;
+      }
+    }
+
     const payload = {
       debitAccount: formValue.debitAccount,
       creditAccount: formValue.creditAccount,
       amount: parseFloat(formValue.amount),
       entryDate: entryDate,
-      description: formValue.description || undefined,
+      description: description || undefined,
       customerVendorName: formValue.customerVendorName || undefined,
       vendorTrn: formValue.vendorTrn || undefined,
+      customerVendorId: formValue.vendorId || formValue.customerId || undefined,
       vatAmount: formValue.vatAmount > 0 ? parseFloat(formValue.vatAmount) : undefined,
       vatTaxType: formValue.vatTaxType || undefined,
       subAccount: formValue.subAccount || undefined,
-      referenceNumber: formValue.referenceNumber || undefined,
+      referenceNumber: referenceNumber || undefined,
       attachmentId: formValue.attachmentId || undefined,
       notes: formValue.notes || undefined,
     };
