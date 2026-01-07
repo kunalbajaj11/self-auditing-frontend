@@ -66,8 +66,13 @@ export class PaymentFormDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.setupVendorAutocomplete();
+    // Load vendors first, then set up autocomplete
     this.loadVendors();
+    this.setupVendorAutocomplete();
+    
+    // Initialize payment mode (default is 'multi')
+    // This ensures amount field is disabled/cleared for multi mode
+    this.onPaymentModeChange(this.paymentMode);
     
     // Watch payment mode changes
     this.form.get('paymentMode')?.valueChanges.subscribe((mode) => {
@@ -124,11 +129,13 @@ export class PaymentFormDialogComponent implements OnInit {
     this.vendorsService.listVendors({ isActive: true }).subscribe({
       next: (vendors) => {
         this.vendors = vendors;
-            },
-            error: (error) => {
+        // Re-setup autocomplete after vendors are loaded to ensure it has the vendor list
+        this.setupVendorAutocomplete();
+      },
+      error: (error) => {
         console.error('Error loading vendors:', error);
-            },
-          });
+      },
+    });
   }
 
   onVendorSelected(vendor: Vendor): void {
@@ -208,13 +215,21 @@ export class PaymentFormDialogComponent implements OnInit {
         } else {
           // Clear allocation when deselected
           allocationGroup.get('allocatedAmount')?.setValue(0, { emitEvent: false });
-    }
+        }
         this.updateTotalAllocated();
+        // Trigger form validation after a short delay to ensure values are updated
+        setTimeout(() => {
+          this.form.updateValueAndValidity({ emitEvent: false });
+        }, 0);
       });
 
       // Watch for allocation amount changes
       allocationGroup.get('allocatedAmount')?.valueChanges.subscribe(() => {
         this.updateTotalAllocated();
+        // Trigger form validation after a short delay to ensure values are updated
+        setTimeout(() => {
+          this.form.updateValueAndValidity({ emitEvent: false });
+        }, 0);
       });
 
       this.allocationsFormArray.push(allocationGroup);
@@ -223,10 +238,14 @@ export class PaymentFormDialogComponent implements OnInit {
 
   updateTotalAllocated(): void {
     const allocations = this.allocationsFormArray.value;
-    this.totalAllocated = allocations.reduce(
-      (sum: number, alloc: any) => sum + (parseFloat(alloc.allocatedAmount) || 0),
-      0,
-    );
+    this.totalAllocated = allocations
+      .filter((alloc: any) => alloc.selected) // Only count selected invoices
+      .reduce(
+        (sum: number, alloc: any) => sum + (parseFloat(alloc.allocatedAmount) || 0),
+        0,
+      );
+    // Trigger form validation update
+    this.form.updateValueAndValidity();
   }
 
   onPaymentModeChange(mode: 'single' | 'multi'): void {
@@ -235,17 +254,27 @@ export class PaymentFormDialogComponent implements OnInit {
       this.clearVendorSelection();
       this.form.get('vendorName')?.clearValidators();
       this.form.get('totalPaymentAmount')?.clearValidators();
+      this.form.get('totalPaymentAmount')?.setValue(0, { emitEvent: false });
       this.form.get('expenseId')?.setValidators(Validators.required);
+      // Enable amount field for single mode
+      this.form.get('amount')?.setValidators([Validators.required, Validators.min(0.01)]);
+      this.form.get('amount')?.enable();
     } else {
       // Clear single expense fields
       this.selectedExpense = null;
       this.form.get('expenseId')?.clearValidators();
+      this.form.get('expenseId')?.setValue('', { emitEvent: false });
       this.form.get('vendorName')?.setValidators(Validators.required);
       this.form.get('totalPaymentAmount')?.setValidators([Validators.required, Validators.min(0.01)]);
+      // Disable/clear amount field for multi mode (not used)
+      this.form.get('amount')?.clearValidators();
+      this.form.get('amount')?.setValue(0, { emitEvent: false });
+      this.form.get('amount')?.disable();
     }
     this.form.get('expenseId')?.updateValueAndValidity();
     this.form.get('vendorName')?.updateValueAndValidity();
     this.form.get('totalPaymentAmount')?.updateValueAndValidity();
+    this.form.get('amount')?.updateValueAndValidity();
   }
 
   // Legacy: Single expense mode
@@ -307,6 +336,48 @@ export class PaymentFormDialogComponent implements OnInit {
       });
       return;
     }
+    
+    if (!this.canSave()) {
+      if (this.paymentMode === 'multi') {
+        if (!this.selectedVendor) {
+          this.snackBar.open('Please select a supplier/vendor', 'Close', {
+            duration: 4000,
+            panelClass: ['snack-error'],
+          });
+          return;
+        }
+        if (this.pendingInvoices.length === 0) {
+          this.snackBar.open('No pending invoices found for this supplier', 'Close', {
+            duration: 4000,
+            panelClass: ['snack-error'],
+          });
+          return;
+        }
+        if (this.totalAllocated === 0) {
+          this.snackBar.open('Please select invoices and allocate amounts', 'Close', {
+            duration: 4000,
+            panelClass: ['snack-error'],
+          });
+          return;
+        }
+        if (this.getAllocationMismatch()) {
+          this.snackBar.open('Total allocated amount must equal payment amount', 'Close', {
+            duration: 4000,
+            panelClass: ['snack-error'],
+          });
+          return;
+        }
+      } else {
+        if (!this.selectedExpense) {
+          this.snackBar.open('Please select an expense', 'Close', {
+            duration: 4000,
+            panelClass: ['snack-error'],
+          });
+          return;
+        }
+      }
+      return;
+    }
 
     this.loading = true;
     const formValue = this.form.getRawValue();
@@ -342,10 +413,27 @@ export class PaymentFormDialogComponent implements OnInit {
         return;
       }
 
+      // Ensure payment date is in correct format (YYYY-MM-DD)
+      let paymentDate = formValue.paymentDate;
+      if (paymentDate instanceof Date) {
+        paymentDate = paymentDate.toISOString().substring(0, 10);
+      } else if (typeof paymentDate === 'string' && paymentDate.includes('/')) {
+        // Convert from MM/DD/YYYY or DD/MM/YYYY to YYYY-MM-DD
+        const dateParts = paymentDate.split('/');
+        if (dateParts.length === 3) {
+          // Assume format is MM/DD/YYYY (US format) or DD/MM/YYYY
+          // Try to parse intelligently
+          const year = dateParts[2];
+          const month = dateParts[0].padStart(2, '0');
+          const day = dateParts[1].padStart(2, '0');
+          paymentDate = `${year}-${month}-${day}`;
+        }
+      }
+
       this.paymentsService
         .createPayment({
           amount: totalPaymentAmount,
-          paymentDate: formValue.paymentDate,
+          paymentDate: paymentDate,
           paymentMethod: formValue.paymentMethod,
           referenceNumber: formValue.referenceNumber || undefined,
           notes: formValue.notes || undefined,
@@ -383,11 +471,26 @@ export class PaymentFormDialogComponent implements OnInit {
       return;
     }
 
+      // Ensure payment date is in correct format (YYYY-MM-DD)
+      let paymentDate = formValue.paymentDate;
+      if (paymentDate instanceof Date) {
+        paymentDate = paymentDate.toISOString().substring(0, 10);
+      } else if (typeof paymentDate === 'string' && paymentDate.includes('/')) {
+        // Convert from MM/DD/YYYY or DD/MM/YYYY to YYYY-MM-DD
+        const dateParts = paymentDate.split('/');
+        if (dateParts.length === 3) {
+          const year = dateParts[2];
+          const month = dateParts[0].padStart(2, '0');
+          const day = dateParts[1].padStart(2, '0');
+          paymentDate = `${year}-${month}-${day}`;
+        }
+      }
+
     this.paymentsService
       .createPayment({
         expenseId: formValue.expenseId,
         amount: amount,
-        paymentDate: formValue.paymentDate,
+        paymentDate: paymentDate,
         paymentMethod: formValue.paymentMethod,
         referenceNumber: formValue.referenceNumber || undefined,
         notes: formValue.notes || undefined,
@@ -444,13 +547,142 @@ export class PaymentFormDialogComponent implements OnInit {
 
   canSave(): boolean {
     if (this.paymentMode === 'multi') {
-      return !!this.selectedVendor && 
+      // Check if vendor is selected OR vendor name is filled (for manual entry)
+      const hasVendor = !!this.selectedVendor || !!(this.form.get('vendorName')?.value?.trim());
+      return hasVendor && 
              this.pendingInvoices.length > 0 && 
              !this.getAllocationMismatch() &&
              this.totalAllocated > 0;
     } else {
       return !!this.selectedExpense;
     }
+  }
+
+  getDisabledReason(): string {
+    if (this.loading) {
+      return 'Processing...';
+    }
+    
+    // First check canSave conditions (these are the most common reasons)
+    if (!this.canSave()) {
+      return this.getCanSaveReason();
+    }
+    
+    // Check form-level errors (like allocation mismatch)
+    if (this.form.errors) {
+      if (this.form.errors['allocationMismatch']) {
+        const totalPaymentAmount = parseFloat(this.form.get('totalPaymentAmount')?.value || '0');
+        const calculatedTotal = this.totalAllocated;
+        return `Total allocated (${calculatedTotal.toFixed(2)}) must equal payment amount (${totalPaymentAmount.toFixed(2)})`;
+      }
+      // Return first form-level error
+      const errorKeys = Object.keys(this.form.errors);
+      if (errorKeys.length > 0) {
+        return `Form validation error: ${errorKeys[0]}`;
+      }
+    }
+    
+    // Check individual field errors (check even if not touched to show what's missing)
+    if (this.form.invalid) {
+      const errors: string[] = [];
+      
+      // Check payment date (always required)
+      const paymentDateControl = this.form.get('paymentDate');
+      if (paymentDateControl && (paymentDateControl.invalid || !paymentDateControl.value)) {
+        if (paymentDateControl.errors?.['required'] || !paymentDateControl.value) {
+          errors.push('Payment date is required');
+        }
+      }
+      
+      // Check payment mode specific fields
+      if (this.paymentMode === 'multi') {
+        const vendorNameControl = this.form.get('vendorName');
+        if (vendorNameControl && (vendorNameControl.invalid || !vendorNameControl.value)) {
+          if (vendorNameControl.errors?.['required'] || !vendorNameControl.value) {
+            errors.push('Supplier/vendor is required');
+          }
+        }
+        
+        const totalPaymentAmountControl = this.form.get('totalPaymentAmount');
+        if (totalPaymentAmountControl && (totalPaymentAmountControl.invalid || !totalPaymentAmountControl.value || totalPaymentAmountControl.value === 0)) {
+          if (totalPaymentAmountControl.errors?.['required'] || !totalPaymentAmountControl.value || totalPaymentAmountControl.value === 0) {
+            errors.push('Total payment amount is required');
+          } else if (totalPaymentAmountControl.errors?.['min']) {
+            errors.push('Total payment amount must be greater than 0');
+          }
+        }
+        
+        // Check allocations
+        const allocationsArray = this.allocationsFormArray;
+        if (allocationsArray && allocationsArray.length > 0) {
+          allocationsArray.controls.forEach((control, index) => {
+            const allocatedAmountControl = control.get('allocatedAmount');
+            if (allocatedAmountControl && allocatedAmountControl.invalid) {
+              if (allocatedAmountControl.errors?.['max']) {
+                errors.push(`Allocation ${index + 1} exceeds outstanding amount`);
+              }
+            }
+          });
+        }
+      } else {
+        // Single expense mode
+        const expenseIdControl = this.form.get('expenseId');
+        if (expenseIdControl && (expenseIdControl.invalid || !expenseIdControl.value)) {
+          if (expenseIdControl.errors?.['required'] || !expenseIdControl.value) {
+            errors.push('Expense selection is required');
+          }
+        }
+        
+        const amountControl = this.form.get('amount');
+        if (amountControl && (amountControl.invalid || !amountControl.value || amountControl.value === 0)) {
+          if (amountControl.errors?.['required'] || !amountControl.value || amountControl.value === 0) {
+            errors.push('Payment amount is required');
+          } else if (amountControl.errors?.['min']) {
+            errors.push('Payment amount must be greater than 0');
+          } else if (amountControl.errors?.['max']) {
+            errors.push('Payment amount exceeds outstanding balance');
+          }
+        }
+      }
+      
+      if (errors.length > 0) {
+        return errors.join('. ');
+      }
+    }
+    
+    return 'Please check all fields are filled correctly';
+  }
+
+  private getCanSaveReason(): string {
+    if (this.paymentMode === 'multi') {
+      // Check if vendor is selected OR vendor name is filled
+      const hasVendor = !!this.selectedVendor || !!(this.form.get('vendorName')?.value?.trim());
+      if (!hasVendor) {
+        return 'Please select or enter a supplier/vendor name';
+      }
+      if (this.pendingInvoices.length === 0) {
+        return 'No pending invoices found for this supplier';
+      }
+      if (this.totalAllocated === 0) {
+        // Check if any invoices are selected
+        const hasSelectedInvoices = this.allocationsFormArray.controls.some(
+          control => control.get('selected')?.value === true
+        );
+        if (!hasSelectedInvoices) {
+          return 'Please select at least one invoice';
+        }
+        return 'Please allocate amounts to selected invoices';
+      }
+      if (this.getAllocationMismatch()) {
+        const totalPaymentAmount = parseFloat(this.form.get('totalPaymentAmount')?.value || '0');
+        return `Total allocated (${this.totalAllocated.toFixed(2)}) must equal payment amount (${totalPaymentAmount.toFixed(2)})`;
+      }
+    } else {
+      if (!this.selectedExpense) {
+        return 'Please select an expense';
+      }
+    }
+    return 'Please complete all required fields';
   }
 
   // Custom validators
@@ -475,13 +707,21 @@ export class PaymentFormDialogComponent implements OnInit {
     if (mode === 'multi') {
       const totalPaymentAmount = parseFloat(control.get('totalPaymentAmount')?.value || '0');
       const allocations = control.get('allocations') as FormArray;
-      const totalAllocated = allocations.value.reduce(
-        (sum: number, alloc: any) => sum + (parseFloat(alloc.allocatedAmount) || 0),
-        0,
-      );
+      
+      // Only count selected allocations (same logic as updateTotalAllocated)
+      const totalAllocated = allocations.value
+        .filter((alloc: any) => alloc.selected) // Only count selected invoices
+        .reduce(
+          (sum: number, alloc: any) => sum + (parseFloat(alloc.allocatedAmount) || 0),
+          0,
+        );
 
-      if (totalPaymentAmount > 0 && Math.abs(totalPaymentAmount - totalAllocated) > 0.01) {
-        return { allocationMismatch: true };
+      // Only validate if total payment amount is set and there are selected allocations
+      if (totalPaymentAmount > 0) {
+        const hasSelectedAllocations = allocations.value.some((alloc: any) => alloc.selected);
+        if (hasSelectedAllocations && Math.abs(totalPaymentAmount - totalAllocated) > 0.01) {
+          return { allocationMismatch: true };
+        }
       }
     }
     return null;

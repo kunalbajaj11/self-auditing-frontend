@@ -85,7 +85,7 @@
   <mat-form-field appearance="outline">
     <mat-label>Debit Account *</mat-label>
     <mat-select formControlName="debitAccount" required>
-      <mat-optgroup *ngFor="let category of ['asset', 'expense']" [label]="category | titlecase">
+      <mat-optgroup *ngFor="let category of ['asset', 'expense', 'liability']" [label]="category | titlecase">
         <mat-option
           *ngFor="let account of accountsByCategory[category]"
           [value]="account.code"

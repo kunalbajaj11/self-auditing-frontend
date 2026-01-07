@@ -386,8 +386,19 @@
     color="primary"
     (click)="save()"
     [disabled]="form.invalid || loading || !canSave()"
+    [matTooltip]="(form.invalid || loading || !canSave()) ? getDisabledReason() : ''"
+    [matTooltipPosition]="'above'"
+    [matTooltipShowDelay]="500"
   >
     <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
     <span *ngIf="!loading">Create Payment</span>
   </button>
 </mat-dialog-actions>
+
+<!-- Helper message when button is disabled -->
+<div *ngIf="(form.invalid || !canSave() || loading) && getDisabledReason()" class="helper-message" style="padding: 12px 16px; background-color: #fff3cd; border-left: 4px solid #ffc107; margin-top: 16px; border-radius: 4px;">
+  <div style="display: flex; align-items: center;">
+    <mat-icon style="vertical-align: middle; margin-right: 8px; color: #856404; font-size: 20px; width: 20px; height: 20px;">info</mat-icon>
+    <span style="color: #856404; font-size: 14px; font-weight: 500;">{{ getDisabledReason() }}</span>
+  </div>
+</div>
