@@ -410,14 +410,16 @@ export class AdminDashboardComponent implements OnInit {
           // Bank journal entries
           const bankJournalEntries = allJournalEntries.filter(
             entry =>
-              entry.debitAccount === JournalEntryAccount.CASH_BANK ||
-              entry.creditAccount === JournalEntryAccount.CASH_BANK,
+              entry.debitAccount === JournalEntryAccount.CASH ||
+              entry.creditAccount === JournalEntryAccount.CASH ||
+              entry.debitAccount === JournalEntryAccount.BANK ||
+              entry.creditAccount === JournalEntryAccount.BANK,
           );
           bankJournalEntries.forEach((entry) => {
             const amount = parseFloat(entry.amount.toString());
-            if (entry.debitAccount === JournalEntryAccount.CASH_BANK) {
+            if (entry.debitAccount === JournalEntryAccount.BANK) {
               bankBalance += amount;
-            } else if (entry.creditAccount === JournalEntryAccount.CASH_BANK) {
+            } else if (entry.creditAccount === JournalEntryAccount.BANK) {
               bankBalance -= amount;
             }
           });
@@ -454,14 +456,16 @@ export class AdminDashboardComponent implements OnInit {
           // Cash journal entries
           const cashJournalEntries = allJournalEntries.filter(
             entry =>
-              entry.debitAccount === JournalEntryAccount.CASH_BANK ||
-              entry.creditAccount === JournalEntryAccount.CASH_BANK,
+              entry.debitAccount === JournalEntryAccount.CASH ||
+              entry.creditAccount === JournalEntryAccount.CASH ||
+              entry.debitAccount === JournalEntryAccount.BANK ||
+              entry.creditAccount === JournalEntryAccount.BANK,
           );
           cashJournalEntries.forEach((entry) => {
             const amount = parseFloat(entry.amount.toString());
-            if (entry.debitAccount === JournalEntryAccount.CASH_BANK) {
+            if (entry.debitAccount === JournalEntryAccount.CASH) {
               cashBalance += amount;
-            } else if (entry.creditAccount === JournalEntryAccount.CASH_BANK) {
+            } else if (entry.creditAccount === JournalEntryAccount.CASH) {
               cashBalance -= amount;
             }
           });

@@ -187,15 +187,15 @@ export class BankAccountsComponent implements OnInit {
         // Filter and add journal entries that affect Cash/Bank account
         const bankJournalEntries = journalEntries.filter(
           (entry) =>
-            entry.debitAccount === JournalEntryAccount.CASH_BANK ||
-            entry.creditAccount === JournalEntryAccount.CASH_BANK,
+            entry.debitAccount === JournalEntryAccount.BANK ||
+            entry.creditAccount === JournalEntryAccount.BANK,
         );
 
         bankJournalEntries.forEach((entry) => {
           const amount = parseFloat(entry.amount.toString());
           // Debit to Cash/Bank is positive (inflow), Credit to Cash/Bank is negative (outflow)
           const transactionAmount =
-            entry.debitAccount === JournalEntryAccount.CASH_BANK
+            entry.debitAccount === JournalEntryAccount.BANK
               ? amount
               : -amount;
 

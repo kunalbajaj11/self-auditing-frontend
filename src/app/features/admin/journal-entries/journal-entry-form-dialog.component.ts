@@ -60,14 +60,14 @@ export class JournalEntryFormDialogComponent implements OnInit {
     {
       name: 'Owner Introduced Capital',
       description: 'Owner invested capital into the business',
-      debitAccount: JournalEntryAccount.CASH_BANK,
+      debitAccount: JournalEntryAccount.CASH,
       creditAccount: JournalEntryAccount.SHARE_CAPITAL,
     },
     {
       name: 'Owner Withdrew',
       description: 'Owner withdrew funds from the business',
       debitAccount: JournalEntryAccount.OWNER_SHAREHOLDER_ACCOUNT,
-      creditAccount: JournalEntryAccount.CASH_BANK,
+      creditAccount: JournalEntryAccount.CASH,
     },
     {
       name: 'Accrued Income',

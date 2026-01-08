@@ -131,11 +131,11 @@ export class PaymentFormDialogComponent implements OnInit {
         this.vendors = vendors;
         // Re-setup autocomplete after vendors are loaded to ensure it has the vendor list
         this.setupVendorAutocomplete();
-      },
-      error: (error) => {
+            },
+            error: (error) => {
         console.error('Error loading vendors:', error);
-      },
-    });
+            },
+          });
   }
 
   onVendorSelected(vendor: Vendor): void {
@@ -215,7 +215,7 @@ export class PaymentFormDialogComponent implements OnInit {
         } else {
           // Clear allocation when deselected
           allocationGroup.get('allocatedAmount')?.setValue(0, { emitEvent: false });
-        }
+    }
         this.updateTotalAllocated();
         // Trigger form validation after a short delay to ensure values are updated
         setTimeout(() => {
@@ -241,9 +241,9 @@ export class PaymentFormDialogComponent implements OnInit {
     this.totalAllocated = allocations
       .filter((alloc: any) => alloc.selected) // Only count selected invoices
       .reduce(
-        (sum: number, alloc: any) => sum + (parseFloat(alloc.allocatedAmount) || 0),
-        0,
-      );
+      (sum: number, alloc: any) => sum + (parseFloat(alloc.allocatedAmount) || 0),
+      0,
+    );
     // Trigger form validation update
     this.form.updateValueAndValidity();
   }
@@ -484,7 +484,7 @@ export class PaymentFormDialogComponent implements OnInit {
           const day = dateParts[1].padStart(2, '0');
           paymentDate = `${year}-${month}-${day}`;
         }
-      }
+    }
 
     this.paymentsService
       .createPayment({
@@ -712,15 +712,15 @@ export class PaymentFormDialogComponent implements OnInit {
       const totalAllocated = allocations.value
         .filter((alloc: any) => alloc.selected) // Only count selected invoices
         .reduce(
-          (sum: number, alloc: any) => sum + (parseFloat(alloc.allocatedAmount) || 0),
-          0,
-        );
+        (sum: number, alloc: any) => sum + (parseFloat(alloc.allocatedAmount) || 0),
+        0,
+      );
 
       // Only validate if total payment amount is set and there are selected allocations
       if (totalPaymentAmount > 0) {
         const hasSelectedAllocations = allocations.value.some((alloc: any) => alloc.selected);
         if (hasSelectedAllocations && Math.abs(totalPaymentAmount - totalAllocated) > 0.01) {
-          return { allocationMismatch: true };
+        return { allocationMismatch: true };
         }
       }
     }
