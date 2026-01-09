@@ -152,6 +152,158 @@
     </mat-error>
   </mat-form-field>
 
+  <!-- Accounts Payable Section - Show all vendors with pending invoices -->
+  <div class="payment-allocation-section" *ngIf="showAccountsPayableSection">
+    <h3 class="section-title">
+      <mat-icon>account_circle</mat-icon>
+      Select Vendor & Invoice for Payment Allocation
+    </h3>
+    <div *ngIf="loadingVendorsWithInvoices" class="loading-state">
+      <mat-spinner diameter="24"></mat-spinner>
+      <span>Loading vendors with pending invoices...</span>
+    </div>
+    <div *ngIf="!loadingVendorsWithInvoices && vendorsWithInvoices.length > 0" class="vendors-customers-list">
+      <mat-expansion-panel *ngFor="let vendorData of vendorsWithInvoices" class="vendor-customer-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <div class="vendor-customer-header">
+              <strong>{{ vendorData.vendor.name }}</strong>
+              <span *ngIf="vendorData.vendor.vendorTrn" class="trn-badge">TRN: {{ vendorData.vendor.vendorTrn }}</span>
+              <span class="invoice-count-badge">{{ vendorData.invoices.length }} pending invoice(s)</span>
+            </div>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="invoices-table-container">
+          <table mat-table [dataSource]="vendorData.invoices" class="pending-invoices-table">
+            <ng-container matColumnDef="select">
+              <th mat-header-cell *matHeaderCellDef>Select</th>
+              <td mat-cell *matCellDef="let invoice">
+                <button
+                  mat-icon-button
+                  color="primary"
+                  (click)="selectVendorAndInvoice(vendorData.vendor, invoice)"
+                  matTooltip="Select vendor and invoice"
+                >
+                  <mat-icon>check_circle</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="invoiceNumber">
+              <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+              <td mat-cell *matCellDef="let invoice">
+                <strong>{{ invoice.invoiceNumber || 'N/A' }}</strong>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let invoice">{{ invoice.expenseDate | date: 'shortDate' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Total Amount</th>
+              <td mat-cell *matCellDef="let invoice" class="text-right">
+                {{ invoice.totalAmount | number: '1.2-2' }} AED
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="outstanding">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Outstanding</th>
+              <td mat-cell *matCellDef="let invoice" class="text-right">
+                <strong class="outstanding-amount">{{ invoice.outstandingAmount | number: '1.2-2' }} AED</strong>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['select', 'invoiceNumber', 'date', 'amount', 'outstanding']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['select', 'invoiceNumber', 'date', 'amount', 'outstanding']"></tr>
+          </table>
+        </div>
+      </mat-expansion-panel>
+    </div>
+    <div *ngIf="!loadingVendorsWithInvoices && vendorsWithInvoices.length === 0" class="no-invoices">
+      <mat-icon>info</mat-icon>
+      <span>No vendors with pending invoices found</span>
+    </div>
+  </div>
+
+  <!-- Accounts Receivable Section - Show all customers with pending invoices -->
+  <div class="payment-allocation-section" *ngIf="showAccountsReceivableSection">
+    <h3 class="section-title">
+      <mat-icon>account_circle</mat-icon>
+      Select Customer & Invoice for Payment Allocation
+    </h3>
+    <div *ngIf="loadingCustomersWithInvoices" class="loading-state">
+      <mat-spinner diameter="24"></mat-spinner>
+      <span>Loading customers with pending invoices...</span>
+    </div>
+    <div *ngIf="!loadingCustomersWithInvoices && customersWithInvoices.length > 0" class="vendors-customers-list">
+      <mat-expansion-panel *ngFor="let customerData of customersWithInvoices" class="vendor-customer-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <div class="vendor-customer-header">
+              <strong>{{ customerData.customer.name }}</strong>
+              <span *ngIf="customerData.customer.customerTrn" class="trn-badge">TRN: {{ customerData.customer.customerTrn }}</span>
+              <span class="invoice-count-badge">{{ customerData.invoices.length }} pending invoice(s)</span>
+            </div>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="invoices-table-container">
+          <table mat-table [dataSource]="customerData.invoices" class="pending-invoices-table">
+            <ng-container matColumnDef="select">
+              <th mat-header-cell *matHeaderCellDef>Select</th>
+              <td mat-cell *matCellDef="let invoice">
+                <button
+                  mat-icon-button
+                  color="primary"
+                  (click)="selectCustomerAndInvoice(customerData.customer, invoice)"
+                  matTooltip="Select customer and invoice"
+                >
+                  <mat-icon>check_circle</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="invoiceNumber">
+              <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+              <td mat-cell *matCellDef="let invoice">
+                <strong>{{ invoice.invoiceNumber || 'N/A' }}</strong>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let invoice">{{ invoice.invoiceDate | date: 'shortDate' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Total Amount</th>
+              <td mat-cell *matCellDef="let invoice" class="text-right">
+                {{ invoice.totalAmount | number: '1.2-2' }} AED
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="outstanding">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Outstanding</th>
+              <td mat-cell *matCellDef="let invoice" class="text-right">
+                <strong class="outstanding-amount">{{ getInvoiceOutstanding(invoice) | number: '1.2-2' }} AED</strong>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['select', 'invoiceNumber', 'date', 'amount', 'outstanding']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['select', 'invoiceNumber', 'date', 'amount', 'outstanding']"></tr>
+          </table>
+        </div>
+      </mat-expansion-panel>
+    </div>
+    <div *ngIf="!loadingCustomersWithInvoices && customersWithInvoices.length === 0" class="no-invoices">
+      <mat-icon>info</mat-icon>
+      <span>No customers with pending invoices found</span>
+    </div>
+  </div>
+
   <!-- Optional Fields Section -->
   <div class="optional-fields-section">
     <h3 class="section-title">Optional Fields</h3>

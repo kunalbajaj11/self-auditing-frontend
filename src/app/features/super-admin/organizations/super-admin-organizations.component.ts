@@ -28,6 +28,9 @@ import {
   LicenseKeyRenewDialogComponent,
   LicenseKeyRenewResult,
 } from '../license-keys/license-key-renew-dialog.component';
+import {
+  ClearDataConfirmationDialogComponent,
+} from './clear-data-confirmation-dialog.component';
 import { PlanType } from '../../../core/models/plan.model';
 import { LicenseKeysService } from '../../../core/services/license-keys.service';
 import { forkJoin } from 'rxjs';
@@ -256,6 +259,42 @@ export class SuperAdminOrganizationsComponent implements OnInit {
           { duration: 3000, panelClass: ['snack-error'] },
         );
       },
+    });
+  }
+
+  clearOrganizationData(org: OrganizationUsage): void {
+    const dialogRef = this.dialog.open<
+      any,
+      { organizationName: string },
+      boolean
+    >(ClearDataConfirmationDialogComponent, {
+      width: '500px',
+      disableClose: true,
+      data: { organizationName: org.name },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.superAdminService.clearOrganizationData(org.id).subscribe({
+          next: () => {
+            this.snackBar.open(
+              `All data cleared for ${org.name}. Users can still login.`,
+              'Close',
+              { duration: 5000 },
+            );
+            this.loadOrganizations(); // Refresh to show updated counts
+          },
+          error: (error) => {
+            const message =
+              error?.error?.message ??
+              'Failed to clear organization data. Please try again.';
+            this.snackBar.open(message, 'Close', {
+              duration: 4000,
+              panelClass: ['snack-error'],
+            });
+          },
+        });
+      }
     });
   }
 

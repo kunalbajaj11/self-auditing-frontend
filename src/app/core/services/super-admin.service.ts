@@ -45,5 +45,12 @@ export class SuperAdminService {
   usage(): Observable<OrganizationUsage[]> {
     return this.api.get<OrganizationUsage[]>('/super-admin/usage');
   }
+
+  clearOrganizationData(organizationId: string): Observable<{ message: string }> {
+    return this.api.post<{ message: string }>(
+      `/super-admin/organizations/${organizationId}/clear-data`,
+      {},
+    );
+  }
 }
 

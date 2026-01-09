@@ -128,3 +128,77 @@ mat-dialog-content {
   }
 }
 
+.payment-allocation-section {
+  margin-top: 24px;
+  padding: 20px;
+  background-color: #f0f7ff;
+  border-radius: 8px;
+  border: 2px solid #2196f3;
+  
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px 0;
+    color: #1976d2;
+    font-size: 1.1rem;
+    font-weight: 600;
+    
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      color: #1976d2;
+    }
+  }
+}
+
+.vendors-customers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vendor-customer-panel {
+  margin-bottom: 8px;
+  
+  ::ng-deep .mat-expansion-panel-header {
+    padding: 12px 16px;
+    
+    &:hover {
+      background-color: #f5f5f5;
+    }
+  }
+  
+  .vendor-customer-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    flex-wrap: wrap;
+    
+    strong {
+      font-size: 0.95rem;
+      color: #333;
+    }
+    
+    .trn-badge {
+      font-size: 0.8rem;
+      color: #666;
+      background-color: #e0e0e0;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    
+    .invoice-count-badge {
+      font-size: 0.85rem;
+      color: #1976d2;
+      background-color: #e3f2fd;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+      margin-left: auto;
+    }
+  }
+}
+

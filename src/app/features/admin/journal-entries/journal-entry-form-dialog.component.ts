@@ -13,8 +13,8 @@ import { VendorsService, Vendor } from '../../../core/services/vendors.service';
 import { CustomersService, Customer } from '../../../core/services/customers.service';
 import { ExpensePaymentsService, ExpenseWithOutstanding } from '../../../core/services/expense-payments.service';
 import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales-invoices.service';
-import { Observable, of } from 'rxjs';
-import { map, startWith, debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
+import { Observable, of, forkJoin } from 'rxjs';
+import { map, startWith, debounceTime, distinctUntilChanged, switchMap, tap, catchError, finalize } from 'rxjs/operators';
 
 interface JournalEntryTemplate {
   name: string;
@@ -55,6 +55,16 @@ export class JournalEntryFormDialogComponent implements OnInit {
   // Track if vendor or customer is selected
   isVendorSelected = false;
   isCustomerSelected = false;
+
+  // Track when Accounts Payable/Receivable are selected
+  showAccountsPayableSection = false;
+  showAccountsReceivableSection = false;
+  
+  // Grouped data for display
+  vendorsWithInvoices: Array<{ vendor: Vendor; invoices: ExpenseWithOutstanding[] }> = [];
+  customersWithInvoices: Array<{ customer: Customer; invoices: SalesInvoice[] }> = [];
+  loadingVendorsWithInvoices = false;
+  loadingCustomersWithInvoices = false;
 
   readonly templates: JournalEntryTemplate[] = [
     {
@@ -129,12 +139,21 @@ export class JournalEntryFormDialogComponent implements OnInit {
         if (this.data) {
           this.handleEditMode();
         }
+        // Check account selection on initial load (for both edit and create mode)
+        // Use setTimeout to ensure form values are set
+        setTimeout(() => {
+          this.checkAccountSelection();
+        }, 0);
       },
       error: () => {
         // Even if error, try to handle edit mode
         if (this.data) {
           this.handleEditMode();
         }
+        // Still check account selection even if there was an error
+        setTimeout(() => {
+          this.checkAccountSelection();
+        }, 0);
       },
     });
 
@@ -155,6 +174,59 @@ export class JournalEntryFormDialogComponent implements OnInit {
         });
       }
     });
+
+    // Watch for debit/credit account changes to show vendors/customers
+    this.form.get('debitAccount')?.valueChanges.subscribe((account) => {
+      this.checkAccountSelection();
+    });
+
+    this.form.get('creditAccount')?.valueChanges.subscribe((account) => {
+      this.checkAccountSelection();
+    });
+  }
+
+  checkAccountSelection(): void {
+    const debitAccount = this.form.get('debitAccount')?.value;
+    const creditAccount = this.form.get('creditAccount')?.value;
+    
+    const hasAccountsPayable = 
+      debitAccount === JournalEntryAccount.ACCOUNTS_PAYABLE ||
+      creditAccount === JournalEntryAccount.ACCOUNTS_PAYABLE;
+    
+    const hasAccountsReceivable = 
+      debitAccount === JournalEntryAccount.ACCOUNTS_RECEIVABLE ||
+      creditAccount === JournalEntryAccount.ACCOUNTS_RECEIVABLE;
+
+    // Track if section is being shown for the first time or becoming visible again
+    const wasPayableSectionHidden = !this.showAccountsPayableSection;
+    const wasReceivableSectionHidden = !this.showAccountsReceivableSection;
+
+    this.showAccountsPayableSection = hasAccountsPayable;
+    this.showAccountsReceivableSection = hasAccountsReceivable;
+
+    // Load vendors if Accounts Payable is selected and:
+    // - Section was previously hidden (just became visible), OR
+    // - Data hasn't been loaded yet
+    if (hasAccountsPayable && !this.loadingVendorsWithInvoices && 
+        (wasPayableSectionHidden || this.vendorsWithInvoices.length === 0)) {
+      this.loadAllVendorsWithInvoices();
+    }
+
+    // Load customers if Accounts Receivable is selected and:
+    // - Section was previously hidden (just became visible), OR
+    // - Data hasn't been loaded yet
+    if (hasAccountsReceivable && !this.loadingCustomersWithInvoices && 
+        (wasReceivableSectionHidden || this.customersWithInvoices.length === 0)) {
+      this.loadAllCustomersWithInvoices();
+    }
+
+    // Hide sections if accounts are deselected
+    if (!hasAccountsPayable) {
+      this.vendorsWithInvoices = [];
+    }
+    if (!hasAccountsReceivable) {
+      this.customersWithInvoices = [];
+    }
   }
 
   private handleEditMode(): void {
@@ -175,7 +247,15 @@ export class JournalEntryFormDialogComponent implements OnInit {
       referenceNumber: this.data.referenceNumber || '',
       attachmentId: this.data.attachmentId || '',
       notes: this.data.notes || '',
+      expenseId: (this.data as any).expenseId || '',
+      invoiceId: (this.data as any).invoiceId || '',
     });
+
+    // Check if Accounts Payable/Receivable is selected and load vendors/customers accordingly
+    // This will be called after form values are set, so use setTimeout
+    setTimeout(() => {
+      this.checkAccountSelection();
+    }, 0);
 
     // If editing and has customerVendorName, try to load pending invoices
     if (this.data.customerVendorName) {
@@ -443,6 +523,191 @@ export class JournalEntryFormDialogComponent implements OnInit {
     if (typeof selected === 'string') {
       this.form.patchValue({ customerVendorName: selected });
     }
+  }
+
+  loadAllVendorsWithInvoices(): void {
+    this.loadingVendorsWithInvoices = true;
+    this.vendorsWithInvoices = [];
+
+    // Use already loaded vendors if available, otherwise load them
+    const vendorsToProcess = this.vendors.length > 0 
+      ? of(this.vendors.filter(v => v.isActive))
+      : this.vendorsService.listVendors({ isActive: true });
+
+    vendorsToProcess.subscribe({
+      next: (allVendors) => {
+        // Update vendors array if it was empty
+        if (this.vendors.length === 0) {
+          this.vendors = allVendors;
+        }
+
+        if (allVendors.length === 0) {
+          this.loadingVendorsWithInvoices = false;
+          return;
+        }
+
+        // For each vendor, get their pending invoices
+        const vendorInvoiceRequests = allVendors.map(vendor =>
+          this.expensePaymentsService.getPendingInvoicesByVendor(vendor.name).pipe(
+            catchError(() => of([])),
+            map((invoices: ExpenseWithOutstanding[]) => ({
+              vendor,
+              invoices: invoices.filter(inv => (inv.outstandingAmount || 0) > 0.01)
+            }))
+          )
+        );
+
+        forkJoin(vendorInvoiceRequests).subscribe({
+          next: (results) => {
+            // Only include vendors that have pending invoices
+            this.vendorsWithInvoices = results.filter(result => result.invoices.length > 0);
+            this.loadingVendorsWithInvoices = false;
+          },
+          error: (error) => {
+            console.error('Error loading vendors with invoices:', error);
+            this.loadingVendorsWithInvoices = false;
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error loading vendors:', error);
+        this.loadingVendorsWithInvoices = false;
+      }
+    });
+  }
+
+  loadAllCustomersWithInvoices(): void {
+    this.loadingCustomersWithInvoices = true;
+    this.customersWithInvoices = [];
+
+    // Ensure customers are loaded first
+    const customersToProcess = this.customers.length > 0
+      ? of(this.customers.filter(c => c.isActive))
+      : this.customersService.listCustomers(undefined, true);
+
+    customersToProcess.subscribe({
+      next: (loadedCustomers) => {
+        // Update customers array if it was empty
+        if (this.customers.length === 0) {
+          this.customers = loadedCustomers;
+        }
+
+        // Get all pending sales invoices (unpaid and partial)
+        forkJoin([
+          this.salesInvoicesService.listInvoices({ paymentStatus: 'unpaid' }),
+          this.salesInvoicesService.listInvoices({ paymentStatus: 'partial' })
+        ]).subscribe({
+          next: ([unpaidInvoices, partialInvoices]) => {
+            const allPendingInvoices = [...unpaidInvoices, ...partialInvoices].filter(inv => {
+              const outstanding = this.getInvoiceOutstanding(inv);
+              return outstanding > 0.01;
+            });
+
+            // Group invoices by customer
+            const customerMap = new Map<string, { customer: Customer; invoices: SalesInvoice[] }>();
+
+            allPendingInvoices.forEach(invoice => {
+              const customerIdentifier = invoice.customerId || invoice.customerName;
+              if (!customerIdentifier) return;
+
+              // Try to find the customer in our loaded customers
+              let customer = this.customers.find(c => 
+                (c.id && c.id === invoice.customerId) || 
+                c.name === invoice.customerName
+              );
+
+              // If customer not found in loaded list but we have the invoice data, create a placeholder
+              if (!customer && invoice.customerName) {
+                customer = {
+                  id: invoice.customerId || '',
+                  name: invoice.customerName,
+                  customerTrn: invoice.customerTrn || undefined,
+                  preferredCurrency: invoice.currency || 'AED',
+                  isActive: true,
+                  createdAt: invoice.createdAt,
+                  updatedAt: invoice.updatedAt,
+                } as Customer;
+              }
+
+              if (customer) {
+                const key = customer.id || customer.name;
+                if (!customerMap.has(key)) {
+                  customerMap.set(key, { customer, invoices: [] });
+                }
+                customerMap.get(key)!.invoices.push(invoice);
+              }
+            });
+
+            this.customersWithInvoices = Array.from(customerMap.values());
+            this.loadingCustomersWithInvoices = false;
+          },
+          error: (error) => {
+            console.error('Error loading pending invoices:', error);
+            this.loadingCustomersWithInvoices = false;
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error loading customers:', error);
+        this.loadingCustomersWithInvoices = false;
+      }
+    });
+  }
+
+  selectVendorFromAccountsPayable(vendor: Vendor): void {
+    // Set vendor without reloading invoices (they're already loaded)
+    this.selectedVendor = vendor;
+    this.selectedCustomer = null;
+    this.isVendorSelected = true;
+    this.isCustomerSelected = false;
+    this.form.patchValue({
+      vendorId: vendor.id,
+      customerVendorName: vendor.name,
+      vendorTrn: vendor.vendorTrn || '',
+      customerId: '',
+      invoiceId: '',
+    });
+    // Use the invoices already loaded in vendorsWithInvoices
+    const vendorData = this.vendorsWithInvoices.find(v => v.vendor.id === vendor.id);
+    if (vendorData) {
+      this.pendingExpenseInvoices = vendorData.invoices;
+    }
+  }
+
+  selectCustomerFromAccountsReceivable(customer: Customer): void {
+    // Set customer without reloading invoices (they're already loaded)
+    this.selectedCustomer = customer;
+    this.selectedVendor = null;
+    this.isCustomerSelected = true;
+    this.isVendorSelected = false;
+    this.form.patchValue({
+      customerId: customer.id,
+      customerVendorName: customer.name,
+      vendorId: '',
+      expenseId: '',
+    });
+    // Use the invoices already loaded in customersWithInvoices
+    const customerData = this.customersWithInvoices.find(c => 
+      (c.customer.id && customer.id && c.customer.id === customer.id) || 
+      c.customer.name === customer.name
+    );
+    if (customerData) {
+      this.pendingSalesInvoices = customerData.invoices;
+    }
+  }
+
+  selectVendorAndInvoice(vendor: Vendor, invoice: ExpenseWithOutstanding): void {
+    // Select vendor first
+    this.selectVendorFromAccountsPayable(vendor);
+    // Then select the invoice
+    this.selectExpenseInvoice(invoice);
+  }
+
+  selectCustomerAndInvoice(customer: Customer, invoice: SalesInvoice): void {
+    // Select customer first
+    this.selectCustomerFromAccountsReceivable(customer);
+    // Then select the invoice
+    this.selectSalesInvoice(invoice);
   }
 
   // Custom validator: Debit and Credit accounts must be different

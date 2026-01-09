@@ -155,6 +155,15 @@
               >
                 {{ org.status === 'active' ? 'Deactivate' : 'Activate' }}
               </button>
+              <button
+                mat-stroked-button
+                color="warn"
+                (click)="clearOrganizationData(org)"
+                matTooltip="Clear all data but keep user logins. This cannot be undone!"
+              >
+                <mat-icon>delete_sweep</mat-icon>
+                Clear All Data
+              </button>
             </div>
           </td>
         </ng-container>
