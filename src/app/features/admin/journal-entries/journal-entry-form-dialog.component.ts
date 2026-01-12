@@ -169,6 +169,7 @@ export class JournalEntryFormDialogComponent implements OnInit {
         this.form.patchValue({
           vendorId: '',
           customerId: '',
+          vendorTrn: '', // Clear TRN when vendor/customer is cleared
           expenseId: '',
           invoiceId: '',
         });
@@ -352,10 +353,31 @@ export class JournalEntryFormDialogComponent implements OnInit {
           return of([this.selectedCustomer]);
         }
         if (!search || search.length < 2) {
-          return of(this.customers.slice(0, 10));
+          // If customers are already loaded, show them; otherwise load them
+          if (this.customers.length > 0) {
+            return of(this.customers.slice(0, 10));
+          }
+          // Load customers if not already loaded
+          return this.customersService.listCustomers(undefined, true).pipe(
+            map((customers) => {
+              this.customers = customers;
+              return customers.slice(0, 10);
+            }),
+            catchError(() => of([])),
+          );
         }
         return this.customersService.listCustomers(search, true).pipe(
-          map((customers) => customers.slice(0, 10)),
+          map((customers) => {
+            // Update the customers array with search results
+            if (customers.length > 0) {
+              // Merge with existing customers to avoid duplicates
+              const existingIds = new Set(this.customers.map(c => c.id));
+              const newCustomers = customers.filter(c => !existingIds.has(c.id));
+              this.customers = [...this.customers, ...newCustomers];
+            }
+            return customers.slice(0, 10);
+          }),
+          catchError(() => of([])),
         );
       }),
     );
@@ -385,6 +407,7 @@ export class JournalEntryFormDialogComponent implements OnInit {
     this.form.patchValue({
       customerId: customer.id,
       customerVendorName: customer.name,
+      vendorTrn: customer.customerTrn || '', // Populate TRN from customer
       vendorId: '',
       expenseId: '',
       invoiceId: '',
@@ -430,18 +453,34 @@ export class JournalEntryFormDialogComponent implements OnInit {
     }
 
     this.loadingPendingSalesInvoices = true;
+    // Load all invoices first, then filter by customer client-side
+    // This ensures we get all pending invoices even if customer matching fails
     const filters: any = {};
     
-    if (customerIdOrName.length === 36 && customerIdOrName.includes('-')) {
-      filters.customerId = customerIdOrName;
-    }
+    // Don't filter by customerId in the API call - load all invoices
+    // We'll filter by customer client-side to ensure we get all matches
 
     this.salesInvoicesService.listInvoices(filters).subscribe({
       next: (invoices) => {
+        // Filter by customer, payment status, and outstanding amount
         this.pendingSalesInvoices = invoices.filter((inv) => {
-          const matchesCustomer = 
-            (filters.customerId && inv.customerId === filters.customerId) ||
-            (!filters.customerId && this.selectedCustomer && inv.customerName === this.selectedCustomer.name);
+          // Check if invoice matches the selected customer
+          let matchesCustomer = false;
+          if (customerIdOrName.length === 36 && customerIdOrName.includes('-')) {
+            // Customer ID match
+            matchesCustomer = !!(inv.customerId && inv.customerId === customerIdOrName);
+          } else if (this.selectedCustomer) {
+            // Match by customer ID if available, otherwise by name
+            matchesCustomer = !!(
+              (inv.customerId && this.selectedCustomer.id && inv.customerId === this.selectedCustomer.id) ||
+              (inv.customerName && inv.customerName === this.selectedCustomer.name) ||
+              (inv.customerName && inv.customerName === customerIdOrName)
+            );
+          } else {
+            // Fallback: match by name if no selected customer
+            matchesCustomer = !!(inv.customerName && inv.customerName === customerIdOrName);
+          }
+          
           const isPending = inv.paymentStatus === 'unpaid' || inv.paymentStatus === 'partial';
           const outstanding = this.getInvoiceOutstanding(inv);
           return matchesCustomer && isPending && outstanding > 0.01;
@@ -485,6 +524,7 @@ export class JournalEntryFormDialogComponent implements OnInit {
       amount: outstanding,
       description: invoice.description || `Settlement for ${invoice.customerName || 'customer'}`,
       referenceNumber: invoice.invoiceNumber || '',
+      vendorTrn: invoice.customerTrn || this.form.get('vendorTrn')?.value || '', // Populate TRN from invoice or keep existing
     });
     this.snackBar.open(
       `Invoice ${invoice.invoiceNumber || 'N/A'} selected. Amount set to ${outstanding.toFixed(2)} AED`,
@@ -683,6 +723,7 @@ export class JournalEntryFormDialogComponent implements OnInit {
     this.form.patchValue({
       customerId: customer.id,
       customerVendorName: customer.name,
+      vendorTrn: customer.customerTrn || '', // Populate TRN from customer
       vendorId: '',
       expenseId: '',
     });

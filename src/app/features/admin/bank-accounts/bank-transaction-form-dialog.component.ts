@@ -111,10 +111,17 @@ export class BankTransactionFormDialogComponent implements OnInit {
   private loadVendors(): void {
     this.vendorsService.listVendors({ isActive: true }).subscribe({
       next: (vendors) => {
-        this.vendors = vendors;
+        // Ensure we're only storing vendors, not customers
+        if (Array.isArray(vendors)) {
+          this.vendors = vendors;
+        } else {
+          console.error('Invalid vendors data received:', vendors);
+          this.vendors = [];
+        }
       },
       error: (error) => {
         console.error('Error loading vendors:', error);
+        this.vendors = [];
       },
     });
   }
@@ -142,10 +149,19 @@ export class BankTransactionFormDialogComponent implements OnInit {
           return of([this.selectedVendor]);
         }
         if (!search || search.length < 2) {
-          return of(this.vendors.slice(0, 10));
+          // Only show vendors from the loaded list, ensure we're not showing customers
+          const vendorsList = Array.isArray(this.vendors) ? this.vendors : [];
+          return of(vendorsList.slice(0, 10));
         }
+        // Search vendors - ensure we're getting vendors, not customers
         return this.vendorsService.searchVendors(search).pipe(
-          map((vendors) => vendors.slice(0, 10)),
+          map((vendors) => {
+            // Safety check: ensure we only return vendors
+            if (!Array.isArray(vendors)) {
+              return [];
+            }
+            return vendors.slice(0, 10);
+          }),
         );
       }),
     );
@@ -313,23 +329,34 @@ export class BankTransactionFormDialogComponent implements OnInit {
     }
 
     this.loadingPendingSalesInvoices = true;
-    // Get unpaid or partial invoices for this customer
+    // Load all unpaid and partial invoices first, then filter by customer
+    // This ensures we get all pending invoices even if customer matching fails
     const filters: any = {};
     
-    // If customerIdOrName looks like an ID (UUID), use customerId filter
-    if (customerIdOrName.length === 36 && customerIdOrName.includes('-')) {
-      filters.customerId = customerIdOrName;
-    }
-    // Note: The API filters by paymentStatus, but we'll filter client-side for now
-    // as the API might not support multiple paymentStatus values
+    // Don't filter by customerId in the API call - load all unpaid/partial invoices
+    // We'll filter by customer client-side to ensure we get all matches
 
     this.invoicesService.listInvoices(filters).subscribe({
       next: (invoices) => {
         // Filter by customer, payment status, and outstanding amount
         this.pendingSalesInvoices = invoices.filter((inv) => {
-          const matchesCustomer = 
-            (filters.customerId && inv.customerId === filters.customerId) ||
-            (!filters.customerId && this.selectedCustomer && inv.customerName === this.selectedCustomer.name);
+          // Check if invoice matches the selected customer
+          let matchesCustomer = false;
+          if (customerIdOrName.length === 36 && customerIdOrName.includes('-')) {
+            // Customer ID match
+            matchesCustomer = !!(inv.customerId && inv.customerId === customerIdOrName);
+          } else if (this.selectedCustomer) {
+            // Match by customer ID if available, otherwise by name
+            matchesCustomer = !!(
+              (inv.customerId && this.selectedCustomer.id && inv.customerId === this.selectedCustomer.id) ||
+              (inv.customerName && inv.customerName === this.selectedCustomer.name) ||
+              (inv.customerName && inv.customerName === customerIdOrName)
+            );
+          } else {
+            // Fallback: match by name if no selected customer
+            matchesCustomer = !!(inv.customerName && inv.customerName === customerIdOrName);
+          }
+          
           const isPending = inv.paymentStatus === 'unpaid' || inv.paymentStatus === 'partial';
           // Also check that there's an outstanding amount > 0.01
           const outstanding = this.getInvoiceOutstanding(inv);

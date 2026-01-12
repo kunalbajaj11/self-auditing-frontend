@@ -345,11 +345,12 @@
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
 
-    <!-- Vendor TRN (Auto-filled if vendor selected) -->
+    <!-- TRN (Auto-filled if vendor or customer selected) -->
     <mat-form-field appearance="outline" class="full">
-      <mat-label>Vendor TRN</mat-label>
-      <input matInput formControlName="vendorTrn" placeholder="Enter vendor TRN (Tax Registration Number)" [readonly]="selectedVendor?.vendorTrn ? true : false" />
+      <mat-label>TRN</mat-label>
+      <input matInput formControlName="vendorTrn" placeholder="Enter TRN (Tax Registration Number)" [readonly]="(selectedVendor?.vendorTrn || selectedCustomer?.customerTrn) ? true : false" />
       <mat-hint *ngIf="selectedVendor?.vendorTrn">Auto-filled from vendor</mat-hint>
+      <mat-hint *ngIf="selectedCustomer?.customerTrn && !selectedVendor?.vendorTrn">Auto-filled from customer</mat-hint>
     </mat-form-field>
 
     <!-- Pending Invoices Section for Vendor -->
