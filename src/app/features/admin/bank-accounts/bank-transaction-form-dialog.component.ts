@@ -329,39 +329,56 @@ export class BankTransactionFormDialogComponent implements OnInit {
     }
 
     this.loadingPendingSalesInvoices = true;
-    // Load all unpaid and partial invoices first, then filter by customer
-    // This ensures we get all pending invoices even if customer matching fails
-    const filters: any = {};
     
-    // Don't filter by customerId in the API call - load all unpaid/partial invoices
-    // We'll filter by customer client-side to ensure we get all matches
-
-    this.invoicesService.listInvoices(filters).subscribe({
-      next: (invoices) => {
+    // Load all invoices first, then filter client-side
+    // This is more reliable than filtering by paymentStatus in API
+    this.invoicesService.listInvoices({}).subscribe({
+      next: (allInvoices) => {
+        // Normalize names for comparison (trim and lowercase)
+        const normalizeName = (name: string | null | undefined) => 
+          name ? name.trim().toLowerCase() : '';
+        
         // Filter by customer, payment status, and outstanding amount
-        this.pendingSalesInvoices = invoices.filter((inv) => {
-          // Check if invoice matches the selected customer
+        this.pendingSalesInvoices = allInvoices.filter((inv) => {
+          // Normalize names for comparison
+          const invoiceCustomerName = normalizeName(inv.customerName);
+          const selectedCustomerName = this.selectedCustomer ? normalizeName(this.selectedCustomer.name) : '';
+          const searchName = normalizeName(customerIdOrName);
+          
+          // Check if invoice matches the selected customer (case-insensitive)
+          // Try multiple matching strategies
           let matchesCustomer = false;
-          if (customerIdOrName.length === 36 && customerIdOrName.includes('-')) {
-            // Customer ID match
-            matchesCustomer = !!(inv.customerId && inv.customerId === customerIdOrName);
-          } else if (this.selectedCustomer) {
-            // Match by customer ID if available, otherwise by name
-            matchesCustomer = !!(
-              (inv.customerId && this.selectedCustomer.id && inv.customerId === this.selectedCustomer.id) ||
-              (inv.customerName && inv.customerName === this.selectedCustomer.name) ||
-              (inv.customerName && inv.customerName === customerIdOrName)
-            );
-          } else {
-            // Fallback: match by name if no selected customer
-            matchesCustomer = !!(inv.customerName && inv.customerName === customerIdOrName);
+          
+          // Strategy 1: Match by customer ID if both invoice and selected customer have IDs
+          if (inv.customerId && this.selectedCustomer?.id) {
+            matchesCustomer = inv.customerId === this.selectedCustomer.id;
           }
           
-          const isPending = inv.paymentStatus === 'unpaid' || inv.paymentStatus === 'partial';
+          // Strategy 2: Match by customer name (case-insensitive) - this is the fallback when customerId is missing
+          if (!matchesCustomer && this.selectedCustomer && selectedCustomerName) {
+            matchesCustomer = invoiceCustomerName === selectedCustomerName;
+          }
+          
+          // Strategy 3: Match by customerIdOrName as UUID if it's a UUID
+          if (!matchesCustomer && customerIdOrName.length === 36 && customerIdOrName.includes('-')) {
+            matchesCustomer = !!(inv.customerId && inv.customerId === customerIdOrName);
+          }
+          
+          // Strategy 4: Fallback to name matching if customerIdOrName is not a UUID
+          if (!matchesCustomer && searchName && !(customerIdOrName.length === 36 && customerIdOrName.includes('-'))) {
+            matchesCustomer = invoiceCustomerName === searchName;
+          }
+          
+          // Check payment status (case-insensitive)
+          const paymentStatus = (inv.paymentStatus || '').toLowerCase();
+          const isPending = paymentStatus === 'unpaid' || paymentStatus === 'partial';
+          
           // Also check that there's an outstanding amount > 0.01
           const outstanding = this.getInvoiceOutstanding(inv);
+          
           return matchesCustomer && isPending && outstanding > 0.01;
         });
+        
         this.loadingPendingSalesInvoices = false;
       },
       error: (error) => {
@@ -588,9 +605,16 @@ export class BankTransactionFormDialogComponent implements OnInit {
   }
 
   getInvoiceOutstanding(invoice: SalesInvoice): number {
-    const total = parseFloat(invoice.totalAmount || '0');
-    const paid = parseFloat(invoice.paidAmount || '0');
-    return total - paid;
+    // Handle both string and number types, with proper fallback
+    const total = invoice.totalAmount 
+      ? (typeof invoice.totalAmount === 'string' ? parseFloat(invoice.totalAmount) : Number(invoice.totalAmount))
+      : 0;
+    const paid = invoice.paidAmount 
+      ? (typeof invoice.paidAmount === 'string' ? parseFloat(invoice.paidAmount) : Number(invoice.paidAmount))
+      : 0;
+    const outstanding = total - paid;
+    // Return 0 if outstanding is negative or NaN
+    return isNaN(outstanding) || outstanding < 0 ? 0 : outstanding;
   }
 
   cancel(): void {
