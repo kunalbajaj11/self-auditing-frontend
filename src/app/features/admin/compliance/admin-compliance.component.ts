@@ -190,5 +190,53 @@ export class AdminComplianceComponent implements OnInit {
     else if (index === 1) this.viewMode = 'summary';
     else this.viewMode = 'calendar';
   }
+
+  getComplianceTypeIcon(type: ComplianceType): string {
+    const icons: Record<ComplianceType, string> = {
+      [ComplianceType.VAT_RETURN]: 'receipt_long',
+      [ComplianceType.TDS_RETURN]: 'description',
+      [ComplianceType.EPF_CHALLAN]: 'account_balance_wallet',
+      [ComplianceType.ESI_CHALLAN]: 'account_balance_wallet',
+      [ComplianceType.PROFESSIONAL_TAX]: 'payments',
+      [ComplianceType.GSTR_1]: 'assignment',
+      [ComplianceType.GSTR_3B]: 'assignment',
+      [ComplianceType.ANNUAL_RETURN]: 'folder',
+    };
+    return icons[type] || 'description';
+  }
+
+  getDaysUntilDue(dueDate: string | Date): string | null {
+    const due = new Date(dueDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    due.setHours(0, 0, 0, 0);
+
+    const diffTime = due.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return `${Math.abs(diffDays)} day${Math.abs(diffDays) !== 1 ? 's' : ''} overdue`;
+    } else if (diffDays === 0) {
+      return 'Due today';
+    } else if (diffDays === 1) {
+      return 'Due tomorrow';
+    } else if (diffDays <= 7) {
+      return `Due in ${diffDays} days`;
+    }
+    return null;
+  }
+
+  getUrgentCount(): number {
+    if (!this.summary?.deadlines) return 0;
+    return (this.summary.deadlines.overdue || 0) + (this.summary.deadlines.dueToday || 0);
+  }
+
+  getDeadlineCount(key: keyof ComplianceSummary['deadlines']): number {
+    return this.summary?.deadlines?.[key] || 0;
+  }
+
+  getFormCount(key: keyof ComplianceSummary['forms']): number {
+    return this.summary?.forms?.[key] || 0;
+  }
 }
 

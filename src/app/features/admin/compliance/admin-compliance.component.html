@@ -1,142 +1,373 @@
-<div class="compliance-container">
-  <div class="header">
-    <h1>Compliance Management</h1>
-    <button mat-raised-button color="primary" (click)="openCreateDialog()">
-      <mat-icon>add</mat-icon>
-      Create Deadline
-    </button>
+<section class="compliance">
+  <header class="header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1>Compliance Calendar</h1>
+        <p>Track and manage all your tax compliance deadlines and filings</p>
+      </div>
+      <button mat-flat-button color="primary" (click)="openCreateDialog()" class="create-btn">
+        <mat-icon>add_circle_outline</mat-icon>
+        Create Deadline
+      </button>
+    </div>
+  </header>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards" *ngIf="summary">
+    <mat-card class="summary-card">
+        <div class="card-content urgent">
+        <div class="card-icon">
+          <mat-icon>warning</mat-icon>
+        </div>
+        <div class="card-info">
+          <div class="card-value">{{ getUrgentCount() }}</div>
+          <div class="card-label">Urgent</div>
+          <div class="card-subtext">Overdue & Due Today</div>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <div class="card-content upcoming">
+        <div class="card-icon">
+          <mat-icon>schedule</mat-icon>
+        </div>
+        <div class="card-info">
+          <div class="card-value">{{ getDeadlineCount('upcoming') }}</div>
+          <div class="card-label">Upcoming</div>
+          <div class="card-subtext">Next 30 days</div>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <div class="card-content pending">
+        <div class="card-icon">
+          <mat-icon>pending_actions</mat-icon>
+        </div>
+        <div class="card-info">
+          <div class="card-value">{{ getDeadlineCount('pending') }}</div>
+          <div class="card-label">Pending</div>
+          <div class="card-subtext">Awaiting action</div>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <div class="card-content completed">
+        <div class="card-icon">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <div class="card-info">
+          <div class="card-value">{{ getDeadlineCount('filed') }}</div>
+          <div class="card-label">Completed</div>
+          <div class="card-subtext">Filed successfully</div>
+        </div>
+      </div>
+    </mat-card>
   </div>
 
-  <mat-tab-group [selectedIndex]="getSelectedTabIndex()" (selectedIndexChange)="onTabChange($event)">
-    <mat-tab label="Deadlines">
+  <mat-tab-group [selectedIndex]="getSelectedTabIndex()" (selectedIndexChange)="onTabChange($event)" class="compliance-tabs">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>list</mat-icon>
+        <span>Deadlines</span>
+      </ng-template>
       <div class="tab-content">
-        <mat-card class="filters-card">
-          <form [formGroup]="form" (ngSubmit)="loadDeadlines()">
-            <div class="filters">
-              <mat-form-field appearance="outline">
-                <mat-label>Compliance Type</mat-label>
-                <mat-select formControlName="complianceType">
-                  <mat-option value="">All Types</mat-option>
-                  <mat-option *ngFor="let type of complianceTypes" [value]="type">
-                    {{ getComplianceTypeLabel(type) }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>Start Date</mat-label>
-                <input matInput [matDatepicker]="startPicker" formControlName="startDate" />
-                <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-                <mat-datepicker #startPicker></mat-datepicker>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>End Date</mat-label>
-                <input matInput [matDatepicker]="endPicker" formControlName="endDate" />
-                <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-                <mat-datepicker #endPicker></mat-datepicker>
-              </mat-form-field>
-
-              <button mat-raised-button type="submit" color="primary">Filter</button>
-              <button mat-button type="button" (click)="form.reset(); loadDeadlines()">Clear</button>
-            </div>
-          </form>
-        </mat-card>
-
+        <!-- Quick Filters -->
         <div class="quick-filters">
-          <button mat-button (click)="loadUpcoming()">Upcoming (30 days)</button>
-          <button mat-button (click)="loadOverdue()">Overdue</button>
-          <button mat-button (click)="loadDeadlines()">All</button>
+          <button mat-stroked-button (click)="loadOverdue()" class="filter-chip urgent-chip">
+            <mat-icon>error</mat-icon>
+            Overdue ({{ getDeadlineCount('overdue') }})
+          </button>
+          <button mat-stroked-button (click)="loadUpcoming()" class="filter-chip upcoming-chip">
+            <mat-icon>schedule</mat-icon>
+            Upcoming ({{ getDeadlineCount('upcoming') }})
+          </button>
+          <button mat-stroked-button (click)="loadDeadlines()" class="filter-chip all-chip">
+            <mat-icon>view_list</mat-icon>
+            All Deadlines
+          </button>
         </div>
 
-        <mat-card>
-          <table mat-table [dataSource]="dataSource" class="deadlines-table">
-            <ng-container matColumnDef="complianceType">
-              <th mat-header-cell *matHeaderCellDef>Type</th>
-              <td mat-cell *matCellDef="let deadline">{{ getComplianceTypeLabel(deadline.complianceType) }}</td>
-            </ng-container>
+        <!-- Advanced Filters -->
+        <mat-card class="filters-card">
+          <mat-card-header>
+            <div class="card-title-with-icon">
+              <mat-icon>tune</mat-icon>
+              <mat-card-title>Advanced Filters</mat-card-title>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <form [formGroup]="form" (ngSubmit)="loadDeadlines()">
+              <div class="filters-grid">
+                <div class="form-field-with-icon">
+                  <mat-icon class="field-icon">category</mat-icon>
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Compliance Type</mat-label>
+                    <mat-select formControlName="complianceType">
+                      <mat-option value="">All Types</mat-option>
+                      <mat-option *ngFor="let type of complianceTypes" [value]="type">
+                        {{ getComplianceTypeLabel(type) }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
 
-            <ng-container matColumnDef="period">
-              <th mat-header-cell *matHeaderCellDef>Period</th>
-              <td mat-cell *matCellDef="let deadline">{{ deadline.period }}</td>
-            </ng-container>
+                <div class="form-field-with-icon">
+                  <mat-icon class="field-icon">event</mat-icon>
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Start Date</mat-label>
+                    <input matInput [matDatepicker]="startPicker" formControlName="startDate" />
+                    <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #startPicker></mat-datepicker>
+                  </mat-form-field>
+                </div>
 
-            <ng-container matColumnDef="dueDate">
-              <th mat-header-cell *matHeaderCellDef>Due Date</th>
-              <td mat-cell *matCellDef="let deadline" [class.overdue]="isOverdue(deadline)">
-                {{ deadline.dueDate | date: 'shortDate' }}
-              </td>
-            </ng-container>
+                <div class="form-field-with-icon">
+                  <mat-icon class="field-icon">event</mat-icon>
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>End Date</mat-label>
+                    <input matInput [matDatepicker]="endPicker" formControlName="endDate" />
+                    <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #endPicker></mat-datepicker>
+                  </mat-form-field>
+                </div>
 
-            <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef>Status</th>
-              <td mat-cell *matCellDef="let deadline">
-                <mat-chip [style.background-color]="getStatusColor(deadline.status)">
-                  {{ deadline.status }}
-                </mat-chip>
-              </td>
-            </ng-container>
+                <div class="filter-actions">
+                  <button mat-flat-button type="submit" color="primary" class="filter-btn">
+                    <mat-icon>search</mat-icon>
+                    Apply
+                  </button>
+                  <button mat-stroked-button type="button" (click)="form.reset(); loadDeadlines()" class="clear-btn">
+                    <mat-icon>clear</mat-icon>
+                    Clear
+                  </button>
+                </div>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
 
-            <ng-container matColumnDef="filingFrequency">
-              <th mat-header-cell *matHeaderCellDef>Frequency</th>
-              <td mat-cell *matCellDef="let deadline">{{ deadline.filingFrequency }}</td>
-            </ng-container>
+        <!-- Deadlines List -->
+        <mat-card class="deadlines-card">
+          <mat-card-header>
+            <div class="card-title-with-icon">
+              <mat-icon>calendar_today</mat-icon>
+              <mat-card-title>Compliance Deadlines</mat-card-title>
+            </div>
+            <div class="header-actions">
+              <button mat-icon-button (click)="loadDeadlines()" matTooltip="Refresh">
+                <mat-icon>refresh</mat-icon>
+              </button>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <div *ngIf="loading" class="loading-container">
+              <mat-spinner diameter="40"></mat-spinner>
+              <p>Loading deadlines...</p>
+            </div>
 
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>Actions</th>
-              <td mat-cell *matCellDef="let deadline">
-                <button
-                  *ngIf="deadline.status !== 'filed'"
-                  mat-button
-                  color="primary"
-                  (click)="updateStatus(deadline, DeadlineStatus.FILED)"
-                >
-                  Mark as Filed
-                </button>
-              </td>
-            </ng-container>
+            <div *ngIf="!loading && dataSource.data.length === 0" class="empty-state">
+              <mat-icon class="empty-icon">event_busy</mat-icon>
+              <h3>No Deadlines Found</h3>
+              <p>Create your first compliance deadline to get started.</p>
+              <button mat-flat-button color="primary" (click)="openCreateDialog()">
+                <mat-icon>add</mat-icon>
+                Create Deadline
+              </button>
+            </div>
 
-            <tr mat-header-row *matHeaderRowDef="columns"></tr>
-            <tr mat-row *matRowDef="let row; columns: columns"></tr>
-
-            <tr class="mat-row" *matNoDataRow>
-              <td class="mat-cell" [attr.colspan]="columns.length">
-                <div class="no-data">No deadlines found</div>
-              </td>
-            </tr>
-          </table>
-
-          <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+            <div *ngIf="!loading && dataSource.data.length > 0" class="deadlines-grid">
+              <mat-card *ngFor="let deadline of dataSource.data" class="deadline-card" [class]="'status-' + deadline.status.toLowerCase()" [class.overdue]="isOverdue(deadline)">
+                <mat-card-header>
+                  <div class="deadline-header">
+                    <div class="deadline-type-info">
+                      <mat-icon class="deadline-type-icon">{{ getComplianceTypeIcon(deadline.complianceType) }}</mat-icon>
+                      <div>
+                        <mat-card-title>{{ getComplianceTypeLabel(deadline.complianceType) }}</mat-card-title>
+                        <mat-card-subtitle>Period: {{ deadline.period }}</mat-card-subtitle>
+                      </div>
+                    </div>
+                    <mat-chip [class]="'status-chip status-' + deadline.status.toLowerCase()">
+                      {{ deadline.status | titlecase }}
+                    </mat-chip>
+                  </div>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="deadline-details">
+                    <div class="detail-item due-date" [class.urgent]="isOverdue(deadline)">
+                      <mat-icon>event</mat-icon>
+                      <div>
+                        <span class="detail-label">Due Date</span>
+                        <span class="detail-value">{{ deadline.dueDate | date: 'mediumDate' }}</span>
+                        <span class="detail-hint" *ngIf="getDaysUntilDue(deadline.dueDate) !== null">
+                          {{ getDaysUntilDue(deadline.dueDate) }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="detail-item">
+                      <mat-icon>repeat</mat-icon>
+                      <div>
+                        <span class="detail-label">Frequency</span>
+                        <span class="detail-value">{{ deadline.filingFrequency | titlecase }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </mat-card-content>
+                <mat-card-actions align="end">
+                  <button
+                    *ngIf="deadline.status !== DeadlineStatus.FILED"
+                    mat-flat-button
+                    color="primary"
+                    (click)="updateStatus(deadline, DeadlineStatus.FILED)"
+                    class="mark-filed-btn"
+                  >
+                    <mat-icon>check_circle</mat-icon>
+                    Mark as Filed
+                  </button>
+                  <button
+                    *ngIf="deadline.status === DeadlineStatus.FILED"
+                    mat-button
+                    disabled
+                    class="filed-badge"
+                  >
+                    <mat-icon>verified</mat-icon>
+                    Filed
+                  </button>
+                </mat-card-actions>
+              </mat-card>
+            </div>
+          </mat-card-content>
         </mat-card>
       </div>
     </mat-tab>
 
-    <mat-tab label="Summary">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>analytics</mat-icon>
+        <span>Summary</span>
+      </ng-template>
       <div class="tab-content" *ngIf="summary">
-        <mat-card>
-          <h2>Compliance Summary</h2>
-          <div class="summary-grid">
-            <div class="summary-card">
-              <h3>Deadlines</h3>
-              <div class="stat">Total: {{ summary.deadlines.total }}</div>
-              <div class="stat">Pending: {{ summary.deadlines.pending }}</div>
-              <div class="stat">Upcoming: {{ summary.deadlines.upcoming }}</div>
-              <div class="stat">Due Today: {{ summary.deadlines.dueToday }}</div>
-              <div class="stat">Overdue: {{ summary.deadlines.overdue }}</div>
-              <div class="stat">Filed: {{ summary.deadlines.filed }}</div>
-            </div>
+        <div class="summary-section">
+          <mat-card class="summary-section-card">
+            <mat-card-header>
+              <div class="card-title-with-icon">
+                <mat-icon>assignment</mat-icon>
+                <mat-card-title>Deadlines Overview</mat-card-title>
+              </div>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="stats-grid">
+                <div class="stat-item">
+                  <div class="stat-icon total">
+                    <mat-icon>folder</mat-icon>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-value">{{ getDeadlineCount('total') }}</div>
+                    <div class="stat-label">Total Deadlines</div>
+                  </div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-icon pending">
+                    <mat-icon>pending_actions</mat-icon>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-value">{{ getDeadlineCount('pending') }}</div>
+                    <div class="stat-label">Pending</div>
+                  </div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-icon upcoming">
+                    <mat-icon>schedule</mat-icon>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-value">{{ getDeadlineCount('upcoming') }}</div>
+                    <div class="stat-label">Upcoming</div>
+                  </div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-icon due-today">
+                    <mat-icon>today</mat-icon>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-value">{{ getDeadlineCount('dueToday') }}</div>
+                    <div class="stat-label">Due Today</div>
+                  </div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-icon overdue">
+                    <mat-icon>error</mat-icon>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-value">{{ getDeadlineCount('overdue') }}</div>
+                    <div class="stat-label">Overdue</div>
+                  </div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-icon filed">
+                    <mat-icon>check_circle</mat-icon>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-value">{{ getDeadlineCount('filed') }}</div>
+                    <div class="stat-label">Filed</div>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
 
-            <div class="summary-card">
-              <h3>Forms</h3>
-              <div class="stat">Total: {{ summary.forms.total }}</div>
-              <div class="stat">Draft: {{ summary.forms.draft }}</div>
-              <div class="stat">Generated: {{ summary.forms.generated }}</div>
-              <div class="stat">Filed: {{ summary.forms.filed }}</div>
-            </div>
-          </div>
-        </mat-card>
+          <mat-card class="summary-section-card">
+            <mat-card-header>
+              <div class="card-title-with-icon">
+                <mat-icon>description</mat-icon>
+                <mat-card-title>Forms Overview</mat-card-title>
+              </div>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="stats-grid">
+                <div class="stat-item">
+                  <div class="stat-icon total">
+                    <mat-icon>folder</mat-icon>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-value">{{ getFormCount('total') }}</div>
+                    <div class="stat-label">Total Forms</div>
+                  </div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-icon draft">
+                    <mat-icon>edit_note</mat-icon>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-value">{{ getFormCount('draft') }}</div>
+                    <div class="stat-label">Draft</div>
+                  </div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-icon generated">
+                    <mat-icon>description</mat-icon>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-value">{{ getFormCount('generated') }}</div>
+                    <div class="stat-label">Generated</div>
+                  </div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-icon filed">
+                    <mat-icon>check_circle</mat-icon>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-value">{{ getFormCount('filed') }}</div>
+                    <div class="stat-label">Filed</div>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
       </div>
     </mat-tab>
   </mat-tab-group>
-</div>
+</section>
 

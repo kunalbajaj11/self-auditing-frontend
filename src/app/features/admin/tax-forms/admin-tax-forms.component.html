@@ -1,94 +1,199 @@
-<div class="tax-forms-container">
-  <div class="header">
-    <h1>Tax Forms</h1>
-    <button mat-raised-button color="primary" (click)="openGenerateDialog()">
-      <mat-icon>add</mat-icon>
-      Generate VAT Return
-    </button>
+<section class="tax-forms">
+  <header class="header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1>Tax Forms</h1>
+        <p>Generate, manage, and file your tax returns and compliance forms</p>
+      </div>
+      <button mat-flat-button color="primary" (click)="openGenerateDialog()" class="generate-btn">
+        <mat-icon>add_circle_outline</mat-icon>
+        Generate VAT Return
+      </button>
+    </div>
+  </header>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards" *ngIf="dataSource.data.length > 0">
+    <mat-card class="summary-card">
+      <div class="card-content">
+        <div class="card-icon draft">
+          <mat-icon>edit_note</mat-icon>
+        </div>
+        <div class="card-info">
+          <div class="card-value">{{ getCountByStatus('DRAFT') }}</div>
+          <div class="card-label">Draft Forms</div>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <div class="card-content">
+        <div class="card-icon generated">
+          <mat-icon>description</mat-icon>
+        </div>
+        <div class="card-info">
+          <div class="card-value">{{ getCountByStatus('GENERATED') }}</div>
+          <div class="card-label">Generated</div>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <div class="card-content">
+        <div class="card-icon filed">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <div class="card-info">
+          <div class="card-value">{{ getCountByStatus('FILED') }}</div>
+          <div class="card-label">Filed</div>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <div class="card-content">
+        <div class="card-icon total">
+          <mat-icon>folder</mat-icon>
+        </div>
+        <div class="card-info">
+          <div class="card-value">{{ dataSource.data.length }}</div>
+          <div class="card-label">Total Forms</div>
+        </div>
+      </div>
+    </mat-card>
   </div>
 
+  <!-- Filters Section -->
   <mat-card class="filters-card">
-    <form [formGroup]="form" (ngSubmit)="loadTaxForms()">
-      <div class="filters">
-        <mat-form-field appearance="outline">
-          <mat-label>Form Type</mat-label>
-          <mat-select formControlName="formType">
-            <mat-option value="">All Types</mat-option>
-            <mat-option *ngFor="let type of formTypes" [value]="type">
-              {{ getFormTypeLabel(type) }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Period</mat-label>
-          <input matInput formControlName="period" placeholder="e.g., 2024-01" />
-        </mat-form-field>
-
-        <button mat-raised-button type="submit" color="primary">Filter</button>
-        <button mat-button type="button" (click)="form.reset(); loadTaxForms()">Clear</button>
+    <mat-card-header>
+      <div class="card-title-with-icon">
+        <mat-icon>filter_list</mat-icon>
+        <mat-card-title>Filters</mat-card-title>
       </div>
-    </form>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="loadTaxForms()">
+        <div class="filters-grid">
+          <div class="form-field-with-icon">
+            <mat-icon class="field-icon">category</mat-icon>
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Form Type</mat-label>
+              <mat-select formControlName="formType">
+                <mat-option value="">All Types</mat-option>
+                <mat-option *ngFor="let type of formTypes" [value]="type">
+                  {{ getFormTypeLabel(type) }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-field-with-icon">
+            <mat-icon class="field-icon">calendar_today</mat-icon>
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Period</mat-label>
+              <input matInput formControlName="period" placeholder="e.g., 2024-01" />
+              <mat-hint>Format: YYYY-MM or YYYY-QN</mat-hint>
+            </mat-form-field>
+          </div>
+
+          <div class="filter-actions">
+            <button mat-flat-button type="submit" color="primary" class="filter-btn">
+              <mat-icon>search</mat-icon>
+              Apply Filters
+            </button>
+            <button mat-stroked-button type="button" (click)="form.reset(); loadTaxForms()" class="clear-btn">
+              <mat-icon>clear</mat-icon>
+              Clear
+            </button>
+          </div>
+        </div>
+      </form>
+    </mat-card-content>
   </mat-card>
 
-  <mat-card>
-    <table mat-table [dataSource]="dataSource" class="tax-forms-table">
-      <ng-container matColumnDef="formType">
-        <th mat-header-cell *matHeaderCellDef>Form Type</th>
-        <td mat-cell *matCellDef="let form">{{ getFormTypeLabel(form.formType) }}</td>
-      </ng-container>
+  <!-- Tax Forms List -->
+  <mat-card class="forms-card">
+    <mat-card-header>
+      <div class="card-title-with-icon">
+        <mat-icon>receipt_long</mat-icon>
+        <mat-card-title>Tax Forms</mat-card-title>
+      </div>
+      <div class="header-actions">
+        <button mat-icon-button (click)="loadTaxForms()" matTooltip="Refresh">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      <div *ngIf="loading" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading tax forms...</p>
+      </div>
 
-      <ng-container matColumnDef="period">
-        <th mat-header-cell *matHeaderCellDef>Period</th>
-        <td mat-cell *matCellDef="let form">{{ form.period }}</td>
-      </ng-container>
+      <div *ngIf="!loading && dataSource.data.length === 0" class="empty-state">
+        <mat-icon class="empty-icon">description</mat-icon>
+        <h3>No Tax Forms Found</h3>
+        <p>Get started by generating your first VAT return or tax form.</p>
+        <button mat-flat-button color="primary" (click)="openGenerateDialog()">
+          <mat-icon>add</mat-icon>
+          Generate Form
+        </button>
+      </div>
 
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
-        <td mat-cell *matCellDef="let form">
-          <mat-chip [style.background-color]="getStatusColor(form.status)">
-            {{ form.status }}
-          </mat-chip>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="generatedAt">
-        <th mat-header-cell *matHeaderCellDef>Generated</th>
-        <td mat-cell *matCellDef="let form">
-          {{ form.generatedAt ? (form.generatedAt | date: 'short') : '-' }}
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="filedAt">
-        <th mat-header-cell *matHeaderCellDef>Filed</th>
-        <td mat-cell *matCellDef="let form">
-          {{ form.filedAt ? (form.filedAt | date: 'short') : '-' }}
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let form">
-          <button mat-icon-button (click)="viewForm(form)" matTooltip="View Details">
-            <mat-icon>visibility</mat-icon>
-          </button>
-          <button mat-icon-button (click)="downloadForm(form)" matTooltip="Download">
-            <mat-icon>download</mat-icon>
-          </button>
-        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="columns"></tr>
-      <tr mat-row *matRowDef="let row; columns: columns"></tr>
-
-      <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell" [attr.colspan]="columns.length">
-          <div class="no-data">No tax forms found</div>
-        </td>
-      </tr>
-    </table>
-
-    <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+      <div *ngIf="!loading && dataSource.data.length > 0" class="forms-grid">
+        <mat-card *ngFor="let form of dataSource.data" class="form-card" [class]="'status-' + form.status.toLowerCase()">
+          <mat-card-header>
+            <div class="form-header">
+              <div class="form-type-info">
+                <mat-icon class="form-type-icon">{{ getFormTypeIcon(form.formType) }}</mat-icon>
+                <div>
+                  <mat-card-title>{{ getFormTypeLabel(form.formType) }}</mat-card-title>
+                  <mat-card-subtitle>Period: {{ form.period }}</mat-card-subtitle>
+                </div>
+              </div>
+              <mat-chip [class]="'status-chip status-' + form.status.toLowerCase()">
+                {{ form.status | titlecase }}
+              </mat-chip>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="form-details">
+              <div class="detail-item" *ngIf="form.generatedAt">
+                <mat-icon>schedule</mat-icon>
+                <div>
+                  <span class="detail-label">Generated</span>
+                  <span class="detail-value">{{ form.generatedAt | date: 'medium' }}</span>
+                </div>
+              </div>
+              <div class="detail-item" *ngIf="form.filedAt">
+                <mat-icon>check_circle</mat-icon>
+                <div>
+                  <span class="detail-label">Filed</span>
+                  <span class="detail-value">{{ form.filedAt | date: 'medium' }}</span>
+                </div>
+              </div>
+              <div class="detail-item" *ngIf="!form.generatedAt && !form.filedAt">
+                <mat-icon>info</mat-icon>
+                <div>
+                  <span class="detail-label">Status</span>
+                  <span class="detail-value">{{ form.status | titlecase }}</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <button mat-button color="primary" (click)="viewForm(form)">
+              <mat-icon>visibility</mat-icon>
+              View Details
+            </button>
+            <button mat-button color="primary" (click)="downloadForm(form)" [disabled]="!form.formData">
+              <mat-icon>download</mat-icon>
+              Download
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </mat-card-content>
   </mat-card>
-</div>
+</section>
 

@@ -142,5 +142,28 @@ export class AdminTaxFormsComponent implements OnInit {
     };
     return colors[status] || 'gray';
   }
+
+  getCountByStatus(status: string): number {
+    return this.dataSource.data.filter((form) => form.status === status).length;
+  }
+
+  getFormTypeIcon(formType: TaxFormType): string {
+    const icons: Record<TaxFormType, string> = {
+      [TaxFormType.VAT_RETURN_UAE]: 'receipt_long',
+      [TaxFormType.VAT_RETURN_SAUDI]: 'receipt_long',
+      [TaxFormType.VAT_RETURN_OMAN]: 'receipt_long',
+      [TaxFormType.VAT_RETURN_KUWAIT]: 'receipt_long',
+      [TaxFormType.VAT_RETURN_BAHRAIN]: 'receipt_long',
+      [TaxFormType.VAT_RETURN_QATAR]: 'receipt_long',
+      [TaxFormType.TDS_RETURN_26Q]: 'description',
+      [TaxFormType.TDS_RETURN_27Q]: 'description',
+      [TaxFormType.TDS_RETURN_24Q]: 'description',
+      [TaxFormType.EPF_CHALLAN]: 'account_balance_wallet',
+      [TaxFormType.ESI_CHALLAN]: 'account_balance_wallet',
+      [TaxFormType.GSTR_1]: 'assignment',
+      [TaxFormType.GSTR_3B]: 'assignment',
+    };
+    return icons[formType] || 'description';
+  }
 }
 

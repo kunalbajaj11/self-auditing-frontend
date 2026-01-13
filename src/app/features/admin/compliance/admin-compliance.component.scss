@@ -1,74 +1,782 @@
-.compliance-container {
-  padding: 24px;
+.compliance {
+  padding: 32px;
+  background: #f5f7fa;
+  min-height: 100vh;
 
   .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
 
-    h1 {
-      margin: 0;
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+
+      .title-section {
+        flex: 1;
+
+        h1 {
+          margin: 0 0 8px 0;
+          font-size: 32px;
+          font-weight: 600;
+          color: #1a1a1a;
+          letter-spacing: -0.5px;
+        }
+
+        p {
+          margin: 0;
+          font-size: 16px;
+          color: #6b7280;
+          line-height: 1.5;
+        }
+      }
+
+      .create-btn {
+        height: 48px;
+        padding: 0 24px;
+        font-size: 15px;
+        font-weight: 500;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
+        transition: all 0.2s ease;
+
+        mat-icon {
+          margin-right: 8px;
+        }
+
+        &:hover {
+          box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+          transform: translateY(-1px);
+        }
+      }
+    }
+  }
+
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+
+    .summary-card {
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      border: none;
+      overflow: hidden;
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      }
+
+      .card-content {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px;
+
+        .card-icon {
+          width: 56px;
+          height: 56px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+
+          mat-icon {
+            font-size: 28px;
+            width: 28px;
+            height: 28px;
+            color: white;
+          }
+        }
+
+        &.urgent .card-icon {
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        &.upcoming .card-icon {
+          background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        &.pending .card-icon {
+          background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        }
+
+        &.completed .card-icon {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .card-info {
+          flex: 1;
+
+          .card-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1.2;
+            margin-bottom: 4px;
+          }
+
+          .card-label {
+            font-size: 16px;
+            color: #1a1a1a;
+            font-weight: 600;
+            margin-bottom: 2px;
+          }
+
+          .card-subtext {
+            font-size: 12px;
+            color: #6b7280;
+          }
+        }
+      }
+    }
+  }
+
+  .compliance-tabs {
+    ::ng-deep {
+      .mat-mdc-tab-header {
+        background: white;
+        border-radius: 12px 12px 0 0;
+        padding: 0 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+
+      .mat-mdc-tab-label {
+        min-width: 120px;
+        padding: 0 24px;
+        height: 56px;
+
+        .mdc-tab__content {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: 500;
+
+          mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+        }
+      }
+    }
+  }
+
+  .tab-content {
+    padding: 24px 0;
+  }
+
+  .quick-filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+
+    .filter-chip {
+      border-radius: 24px;
+      padding: 8px 20px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        margin-right: 6px;
+      }
+
+      &.urgent-chip {
+        border-color: #ef4444;
+        color: #ef4444;
+
+        &:hover {
+          background: #fee2e2;
+        }
+      }
+
+      &.upcoming-chip {
+        border-color: #f59e0b;
+        color: #f59e0b;
+
+        &:hover {
+          background: #fef3c7;
+        }
+      }
+
+      &.all-chip {
+        border-color: #6b7280;
+        color: #6b7280;
+
+        &:hover {
+          background: #f3f4f6;
+        }
+      }
     }
   }
 
   .filters-card {
     margin-bottom: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: none;
 
-    .filters {
-      display: flex;
-      gap: 16px;
-      align-items: flex-end;
+    mat-card-header {
+      padding: 20px 20px 0 20px;
 
-      mat-form-field {
-        flex: 1;
+      .card-title-with-icon {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        mat-icon {
+          color: #3b82f6;
+        }
+
+        mat-card-title {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 600;
+          color: #1a1a1a;
+        }
+      }
+    }
+
+    mat-card-content {
+      padding: 20px;
+
+      .filters-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto;
+        gap: 16px;
+        align-items: start;
+
+        .form-field-with-icon {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          width: 100%;
+
+          .field-icon {
+            margin-top: 8px;
+            color: #64748b;
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+          }
+
+          .filter-field {
+            flex: 1;
+            width: 100%;
+
+            ::ng-deep {
+              .mat-mdc-form-field-subscript-wrapper {
+                margin-top: 4px;
+              }
+
+              .mat-mdc-text-field-wrapper {
+                padding-bottom: 0;
+              }
+            }
+          }
+        }
+
+        .filter-actions {
+          display: flex;
+          gap: 12px;
+          align-items: flex-start;
+
+          .filter-btn,
+          .clear-btn {
+            height: 48px;
+            padding: 0 20px;
+            border-radius: 8px;
+            font-weight: 500;
+
+            mat-icon {
+              margin-right: 8px;
+            }
+          }
+        }
       }
     }
   }
 
-  .quick-filters {
-    margin-bottom: 16px;
-    display: flex;
-    gap: 8px;
-  }
+  .deadlines-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: none;
 
-  .deadlines-table {
-    width: 100%;
+    mat-card-header {
+      padding: 24px 24px 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
 
-    .mat-column-actions {
-      width: 150px;
+      .card-title-with-icon {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        mat-icon {
+          color: #3b82f6;
+        }
+
+        mat-card-title {
+          margin: 0;
+          font-size: 20px;
+          font-weight: 600;
+          color: #1a1a1a;
+        }
+      }
+
+      .header-actions {
+        button {
+          color: #6b7280;
+
+          &:hover {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+          }
+        }
+      }
     }
 
-    .overdue {
-      color: red;
-      font-weight: bold;
+    mat-card-content {
+      padding: 24px;
     }
-  }
 
-  .no-data {
-    text-align: center;
-    padding: 24px;
-    color: rgba(0, 0, 0, 0.54);
-  }
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      gap: 16px;
 
-  .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 24px;
-    margin-top: 24px;
+      p {
+        color: #6b7280;
+        font-size: 14px;
+        margin: 0;
+      }
+    }
 
-    .summary-card {
-      padding: 16px;
-      border: 1px solid rgba(0, 0, 0, 0.12);
-      border-radius: 4px;
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+
+      .empty-icon {
+        font-size: 80px;
+        width: 80px;
+        height: 80px;
+        color: #d1d5db;
+        margin-bottom: 24px;
+      }
 
       h3 {
-        margin-top: 0;
+        margin: 0 0 8px 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: #1a1a1a;
       }
 
-      .stat {
-        padding: 8px 0;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      p {
+        margin: 0 0 24px 0;
+        font-size: 14px;
+        color: #6b7280;
+        max-width: 400px;
+      }
+
+      button {
+        mat-icon {
+          margin-right: 8px;
+        }
+      }
+    }
+
+    .deadlines-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 20px;
+
+      .deadline-card {
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border: none;
+        border-left: 4px solid #e5e7eb;
+        overflow: hidden;
+
+        &.status-pending {
+          border-left-color: #6b7280;
+        }
+
+        &.status-upcoming {
+          border-left-color: #f59e0b;
+        }
+
+        &.status-due_today {
+          border-left-color: #ef4444;
+        }
+
+        &.status-overdue {
+          border-left-color: #ef4444;
+        }
+
+        &.status-filed {
+          border-left-color: #10b981;
+        }
+
+        &.status-extended {
+          border-left-color: #3b82f6;
+        }
+
+        &.overdue {
+          .due-date {
+            color: #ef4444;
+            font-weight: 600;
+          }
+        }
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        mat-card-header {
+          padding: 20px 20px 16px 20px;
+
+          .deadline-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+
+            .deadline-type-info {
+              display: flex;
+              align-items: flex-start;
+              gap: 12px;
+              flex: 1;
+
+              .deadline-type-icon {
+                color: #3b82f6;
+                margin-top: 4px;
+              }
+
+              mat-card-title {
+                margin: 0 0 4px 0;
+                font-size: 16px;
+                font-weight: 600;
+                color: #1a1a1a;
+                line-height: 1.3;
+              }
+
+              mat-card-subtitle {
+                margin: 0;
+                font-size: 13px;
+                color: #6b7280;
+              }
+            }
+
+            .status-chip {
+              font-size: 11px;
+              font-weight: 600;
+              padding: 4px 12px;
+              border-radius: 12px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+
+              &.status-pending {
+                background: #f3f4f6;
+                color: #6b7280;
+              }
+
+              &.status-upcoming {
+                background: #fef3c7;
+                color: #92400e;
+              }
+
+              &.status-due_today {
+                background: #fee2e2;
+                color: #991b1b;
+              }
+
+              &.status-overdue {
+                background: #fee2e2;
+                color: #991b1b;
+              }
+
+              &.status-filed {
+                background: #d1fae5;
+                color: #065f46;
+              }
+
+              &.status-extended {
+                background: #dbeafe;
+                color: #1e40af;
+              }
+            }
+          }
+        }
+
+        mat-card-content {
+          padding: 0 20px 20px 20px;
+
+          .deadline-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+
+            .detail-item {
+              display: flex;
+              align-items: flex-start;
+              gap: 12px;
+
+              mat-icon {
+                color: #9ca3af;
+                font-size: 18px;
+                width: 18px;
+                height: 18px;
+                margin-top: 2px;
+              }
+
+              .detail-label {
+                display: block;
+                font-size: 12px;
+                color: #6b7280;
+                font-weight: 500;
+                margin-bottom: 2px;
+              }
+
+              .detail-value {
+                display: block;
+                font-size: 14px;
+                color: #1a1a1a;
+                font-weight: 500;
+              }
+
+              .detail-hint {
+                display: block;
+                font-size: 12px;
+                color: #ef4444;
+                font-weight: 600;
+                margin-top: 2px;
+              }
+
+              &.due-date.urgent {
+                .detail-value {
+                  color: #ef4444;
+                }
+              }
+            }
+          }
+        }
+
+        mat-card-actions {
+          padding: 0 20px 20px 20px;
+          margin: 0;
+          display: flex;
+          gap: 8px;
+          justify-content: flex-end;
+
+          .mark-filed-btn {
+            font-size: 13px;
+            font-weight: 500;
+
+            mat-icon {
+              font-size: 18px;
+              width: 18px;
+              height: 18px;
+              margin-right: 6px;
+            }
+          }
+
+          .filed-badge {
+            color: #10b981;
+            font-weight: 500;
+
+            mat-icon {
+              font-size: 18px;
+              width: 18px;
+              height: 18px;
+              margin-right: 6px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .summary-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+
+    .summary-section-card {
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border: none;
+
+      mat-card-header {
+        padding: 24px 24px 0 24px;
+
+        .card-title-with-icon {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+
+          mat-icon {
+            color: #3b82f6;
+          }
+
+          mat-card-title {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
+          }
+        }
+      }
+
+      mat-card-content {
+        padding: 24px;
+
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
+
+          .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+
+            &:hover {
+              background: #f3f4f6;
+              transform: translateY(-2px);
+            }
+
+            .stat-icon {
+              width: 48px;
+              height: 48px;
+              border-radius: 10px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              flex-shrink: 0;
+
+              mat-icon {
+                font-size: 24px;
+                width: 24px;
+                height: 24px;
+                color: white;
+              }
+
+              &.total {
+                background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+              }
+
+              &.pending {
+                background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+              }
+
+              &.upcoming {
+                background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+              }
+
+              &.due-today {
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+              }
+
+              &.overdue {
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+              }
+
+              &.filed {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+              }
+
+              &.draft {
+                background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+              }
+
+              &.generated {
+                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+              }
+            }
+
+            .stat-info {
+              flex: 1;
+
+              .stat-value {
+                font-size: 24px;
+                font-weight: 700;
+                color: #1a1a1a;
+                line-height: 1.2;
+                margin-bottom: 4px;
+              }
+
+              .stat-label {
+                font-size: 13px;
+                color: #6b7280;
+                font-weight: 500;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .compliance {
+    padding: 20px;
+
+    .header .header-content {
+      flex-direction: column;
+
+      .create-btn {
+        width: 100%;
+      }
+    }
+
+    .summary-cards {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .filters-card mat-card-content .filters-grid {
+      grid-template-columns: 1fr;
+      align-items: start;
+    }
+
+    .deadlines-card .deadlines-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .summary-section {
+      grid-template-columns: 1fr;
+
+      .summary-section-card mat-card-content .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
   }
