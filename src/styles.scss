@@ -697,12 +697,57 @@ table {
   .mat-mdc-select-panel {
     z-index: 10000 !important;
   }
+  
+  // Allow overflow for dropdowns
+  overflow: visible !important;
 }
 
 // Ensure CDK overlay for select panels in dialogs has proper z-index
 .cdk-overlay-container {
+  z-index: 1000 !important;
+  
   .cdk-overlay-pane.mat-mdc-select-panel {
     z-index: 10000 !important;
+    position: fixed !important;
+  }
+}
+
+// Mobile-specific fixes for select panels in dialogs
+@media (max-width: 768px) {
+  .cdk-overlay-container {
+    z-index: 1000 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .cdk-overlay-pane {
+    &.mat-mdc-select-panel {
+      z-index: 10001 !important;
+      position: fixed !important;
+      max-width: 90vw !important;
+      max-height: 70vh !important;
+      touch-action: manipulation !important;
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
+  }
+
+  .mat-mdc-dialog-container {
+    overflow: visible !important;
+    max-height: 90vh !important;
+    
+    .mat-mdc-select-panel {
+      z-index: 10001 !important;
+    }
+  }
+
+  // Ensure select trigger is touch-friendly
+  .mat-mdc-select-trigger {
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
   }
 }
 

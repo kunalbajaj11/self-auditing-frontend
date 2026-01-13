@@ -360,10 +360,15 @@ export class BankAccountsComponent implements OnInit {
   }
 
   openAddTransactionDialog(): void {
+    const isMobile = window.innerWidth <= 768;
     const dialogRef = this.dialog.open(BankTransactionFormDialogComponent, {
-      width: '600px',
-      maxWidth: '95vw',
+      width: isMobile ? '100vw' : '600px',
+      maxWidth: isMobile ? '100vw' : '95vw',
+      maxHeight: isMobile ? '100vh' : '90vh',
       data: null,
+      disableClose: false,
+      autoFocus: false,
+      panelClass: 'bank-transaction-dialog',
     });
 
     dialogRef.afterClosed().subscribe((result) => {

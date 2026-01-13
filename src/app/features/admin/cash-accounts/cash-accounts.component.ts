@@ -156,6 +156,7 @@ export class CashAccountsComponent implements OnInit {
         });
 
         // Add expenses that have cash payments
+        // Cash payments are outflows, so they should be negative
         expenses.forEach((expense) => {
           const cashPaymentsForExpense = expenseCashPaymentsMap.get(expense.id);
           if (cashPaymentsForExpense && cashPaymentsForExpense.length > 0) {
@@ -164,9 +165,9 @@ export class CashAccountsComponent implements OnInit {
                 id: `${expense.id}-${payment.id}`,
                 type: 'expense',
                 date: payment.paymentDate,
-                description: expense.description || 'Expense',
+                description: payment.notes || expense.description || 'Payment',
                 vendorOrCustomer: expense.vendorName || '—',
-                amount: parseFloat(payment.amount),
+                amount: -parseFloat(payment.amount), // Negative because it's a cash outflow
                 currency: expense.currency || 'AED',
                 expense: expense,
               };
@@ -177,6 +178,7 @@ export class CashAccountsComponent implements OnInit {
 
         // Also add expenses with purchaseStatus = 'Purchase - Cash Paid' that don't have payments yet
         // (to avoid duplicates, exclude expenses that already have cash payments)
+        // These are cash outflows, so they should be negative
         const cashExpenses = expenses.filter(
           (expense) =>
             expense.purchaseStatus === 'Purchase - Cash Paid' &&
@@ -190,7 +192,7 @@ export class CashAccountsComponent implements OnInit {
             date: expense.expenseDate,
             description: expense.description || 'Expense',
             vendorOrCustomer: expense.vendorName || '—',
-            amount: expense.totalAmount,
+            amount: -parseFloat(expense.totalAmount.toString()), // Negative because it's a cash outflow
             currency: expense.currency || 'AED',
             expense: expense,
           };

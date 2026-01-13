@@ -85,7 +85,11 @@
       </div>
       <mat-form-field appearance="outline" class="full-width" *ngIf="!loadingPendingExpenseInvoices">
         <mat-label>Select Invoice (Optional)</mat-label>
-        <mat-select formControlName="expenseId" panelClass="bank-transaction-select-panel">
+        <mat-select 
+          formControlName="expenseId" 
+          panelClass="bank-transaction-select-panel"
+          [disableOptionCentering]="true"
+        >
           <mat-option value="">Create New Expense</mat-option>
           <mat-option *ngFor="let invoice of pendingExpenseInvoices" [value]="invoice.id">
             <div class="invoice-option">
@@ -160,7 +164,11 @@
       </div>
       <mat-form-field appearance="outline" class="full-width" *ngIf="!loadingPendingSalesInvoices">
         <mat-label>Select Invoice (Optional)</mat-label>
-        <mat-select formControlName="invoiceId" panelClass="bank-transaction-select-panel">
+        <mat-select 
+          formControlName="invoiceId" 
+          panelClass="bank-transaction-select-panel"
+          [disableOptionCentering]="true"
+        >
           <mat-option value="">Create New Invoice</mat-option>
           <mat-option *ngFor="let invoice of pendingSalesInvoices" [value]="invoice.id">
             <div class="invoice-option">
