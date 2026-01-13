@@ -692,6 +692,20 @@ table {
 }
 
 // Select dropdown
+// Fix z-index for mat-select panels inside dialogs
+.mat-mdc-dialog-container {
+  .mat-mdc-select-panel {
+    z-index: 10000 !important;
+  }
+}
+
+// Ensure CDK overlay for select panels in dialogs has proper z-index
+.cdk-overlay-container {
+  .cdk-overlay-pane.mat-mdc-select-panel {
+    z-index: 10000 !important;
+  }
+}
+
 .mat-mdc-select-panel {
   .mat-mdc-option {
     font-size: 0.875rem !important;

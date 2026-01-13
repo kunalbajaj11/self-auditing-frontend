@@ -74,6 +74,49 @@
   }
 }
 
+// Fix z-index for mat-select dropdowns inside dialog
+::ng-deep {
+  // Ensure CDK overlay container has proper z-index
+  .cdk-overlay-container {
+    z-index: 1000;
+  }
+
+  // Fix for mat-select panel overlay inside dialogs
+  .cdk-overlay-pane {
+    &.bank-transaction-select-panel,
+    &.mat-mdc-select-panel {
+      z-index: 10000 !important;
+      pointer-events: auto !important;
+    }
+  }
+
+  // Ensure select panel is visible and above dialog
+  .bank-transaction-select-panel {
+    z-index: 10000 !important;
+    pointer-events: auto !important;
+    
+    .mat-mdc-select-panel {
+      z-index: 10000 !important;
+      pointer-events: auto !important;
+      position: relative !important;
+    }
+  }
+
+  // Fix for mat-select inside mat-dialog - ensure overlay is above dialog
+  .mat-mdc-dialog-container {
+    .mat-mdc-select-panel {
+      z-index: 10000 !important;
+    }
+  }
+
+  // Ensure the overlay backdrop doesn't interfere
+  .cdk-overlay-backdrop {
+    &.cdk-overlay-backdrop-showing {
+      z-index: 999 !important;
+    }
+  }
+}
+
 @media (max-width: 768px) {
   .bank-transaction-form {
     min-width: 100%;
