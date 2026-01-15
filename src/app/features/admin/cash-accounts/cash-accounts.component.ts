@@ -153,10 +153,10 @@ export class CashAccountsComponent implements OnInit {
           
           // Process direct expense payment
           if (expenseId) {
-            if (!expenseCashPaymentsMap.has(expenseId)) {
-              expenseCashPaymentsMap.set(expenseId, []);
-            }
-            expenseCashPaymentsMap.get(expenseId)!.push(payment);
+          if (!expenseCashPaymentsMap.has(expenseId)) {
+            expenseCashPaymentsMap.set(expenseId, []);
+          }
+          expenseCashPaymentsMap.get(expenseId)!.push(payment);
           }
           
           // Process allocations for multi-invoice payments
