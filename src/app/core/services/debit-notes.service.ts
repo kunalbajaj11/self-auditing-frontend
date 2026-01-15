@@ -6,9 +6,13 @@ export interface DebitNote {
   id: string;
   debitNoteNumber: string;
   invoiceId?: string | null;
+  expenseId?: string | null;
   customerId?: string | null;
   customerName?: string | null;
   customerTrn?: string | null;
+  vendorId?: string | null;
+  vendorName?: string | null;
+  vendorTrn?: string | null;
   debitNoteDate: string;
   reason: string;
   amount: string;
@@ -26,9 +30,13 @@ export interface DebitNote {
 
 export interface CreateDebitNotePayload {
   invoiceId?: string;
+  expenseId?: string;
   customerId?: string;
   customerName?: string;
   customerTrn?: string;
+  vendorId?: string;
+  vendorName?: string;
+  vendorTrn?: string;
   debitNoteDate: string;
   reason: string;
   amount: number;
@@ -62,7 +70,7 @@ export class DebitNotesService {
   }
 
   updateDebitNote(id: string, payload: Partial<CreateDebitNotePayload>): Observable<DebitNote> {
-    return this.api.patch<DebitNote>(`/debit-notes/${id}`, payload);
+    return this.api.put<DebitNote>(`/debit-notes/${id}`, payload);
   }
 
   deleteDebitNote(id: string): Observable<void> {
@@ -76,6 +84,13 @@ export class DebitNotesService {
   applyDebitNote(debitNoteId: string, invoiceId: string, applyAmount: number): Observable<any> {
     return this.api.post(`/debit-notes/${debitNoteId}/apply`, {
       invoiceId,
+      appliedAmount: applyAmount,
+    });
+  }
+
+  applyDebitNoteToExpense(debitNoteId: string, expenseId: string, applyAmount: number): Observable<any> {
+    return this.api.post(`/debit-notes/${debitNoteId}/apply-to-expense`, {
+      expenseId,
       appliedAmount: applyAmount,
     });
   }

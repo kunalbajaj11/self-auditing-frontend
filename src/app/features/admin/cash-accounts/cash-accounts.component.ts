@@ -148,11 +148,35 @@ export class CashAccountsComponent implements OnInit {
         // Create a map of expense IDs to their cash payments
         const expenseCashPaymentsMap = new Map<string, ExpensePayment[]>();
         cashPayments.forEach((payment) => {
-          const expenseId = payment.expenseId;
-          if (!expenseCashPaymentsMap.has(expenseId)) {
-            expenseCashPaymentsMap.set(expenseId, []);
+          // Handle both direct expenseId and expense relation
+          const expenseId = payment.expenseId || payment.expense?.id;
+          
+          // Process direct expense payment
+          if (expenseId) {
+            if (!expenseCashPaymentsMap.has(expenseId)) {
+              expenseCashPaymentsMap.set(expenseId, []);
+            }
+            expenseCashPaymentsMap.get(expenseId)!.push(payment);
           }
-          expenseCashPaymentsMap.get(expenseId)!.push(payment);
+          
+          // Process allocations for multi-invoice payments
+          if (payment.allocations && payment.allocations.length > 0) {
+            payment.allocations.forEach((allocation) => {
+              const allocExpenseId = allocation.expenseId || allocation.expense?.id;
+              if (allocExpenseId) {
+                if (!expenseCashPaymentsMap.has(allocExpenseId)) {
+                  expenseCashPaymentsMap.set(allocExpenseId, []);
+                }
+                // Create a virtual payment object for the allocation
+                const allocationPayment = {
+                  ...payment,
+                  amount: allocation.allocatedAmount.toString(),
+                  id: `${payment.id}-alloc-${allocation.id}`,
+                };
+                expenseCashPaymentsMap.get(allocExpenseId)!.push(allocationPayment as ExpensePayment);
+              }
+            });
+          }
         });
 
         // Add expenses that have cash payments
@@ -163,7 +187,7 @@ export class CashAccountsComponent implements OnInit {
             cashPaymentsForExpense.forEach((payment) => {
               const transaction: CashTransaction = {
                 id: `${expense.id}-${payment.id}`,
-                type: 'expense',
+                type: 'payment',
                 date: payment.paymentDate,
                 description: payment.notes || expense.description || 'Payment',
                 vendorOrCustomer: expense.vendorName || '—',
@@ -172,6 +196,54 @@ export class CashAccountsComponent implements OnInit {
                 expense: expense,
               };
               allTransactions.push(transaction);
+            });
+          }
+        });
+
+        // Process cash payments that weren't matched to expenses in the list
+        // This handles cases where expenses might not be loaded or payments exist without expenses
+        const processedExpenseIds = new Set(expenses.map(e => e.id));
+        cashPayments.forEach((payment) => {
+          const expenseId = payment.expenseId || payment.expense?.id;
+          
+          // If payment has a direct expense that's not in the expenses list, process it
+          if (expenseId && !processedExpenseIds.has(expenseId)) {
+            const expense = payment.expense;
+            if (expense) {
+              const transaction: CashTransaction = {
+                id: `${expenseId}-${payment.id}`,
+                type: 'payment',
+                date: payment.paymentDate,
+                description: payment.notes || expense.description || 'Payment',
+                vendorOrCustomer: expense.vendorName || '—',
+                amount: -parseFloat(payment.amount), // Negative because it's a cash outflow
+                currency: expense.currency || 'AED',
+                expense: expense as any,
+              };
+              allTransactions.push(transaction);
+            }
+          }
+          
+          // Process allocations that weren't matched
+          if (payment.allocations && payment.allocations.length > 0) {
+            payment.allocations.forEach((allocation) => {
+              const allocExpenseId = allocation.expenseId || allocation.expense?.id;
+              if (allocExpenseId && !processedExpenseIds.has(allocExpenseId)) {
+                const expense = allocation.expense;
+                if (expense) {
+                  const transaction: CashTransaction = {
+                    id: `${allocExpenseId}-${payment.id}-alloc-${allocation.id}`,
+                    type: 'payment',
+                    date: payment.paymentDate,
+                    description: payment.notes || expense.description || 'Payment',
+                    vendorOrCustomer: expense.vendorName || '—',
+                    amount: -parseFloat(allocation.allocatedAmount), // Negative because it's a cash outflow
+                    currency: expense.currency || 'AED',
+                    expense: expense as any,
+                  };
+                  allTransactions.push(transaction);
+                }
+              }
             });
           }
         });

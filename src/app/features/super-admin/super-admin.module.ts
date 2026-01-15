@@ -13,6 +13,7 @@ import { PlanFormDialogComponent } from './plans/plan-form-dialog.component';
 import { LicenseKeyManagementComponent } from './license-keys/license-key-management.component';
 import { LicenseKeyCreateDialogComponent } from './license-keys/license-key-create-dialog.component';
 import { LicenseKeyRenewDialogComponent } from './license-keys/license-key-renew-dialog.component';
+import { ClearDataConfirmationDialogComponent } from './organizations/clear-data-confirmation-dialog.component';
 
 @NgModule({
   declarations: [
@@ -28,6 +29,7 @@ import { LicenseKeyRenewDialogComponent } from './license-keys/license-key-renew
     LicenseKeyManagementComponent,
     LicenseKeyCreateDialogComponent,
     LicenseKeyRenewDialogComponent,
+    ClearDataConfirmationDialogComponent,
   ],
   imports: [SharedModule, SuperAdminRoutingModule],
 })

@@ -4,12 +4,12 @@
     <div class="form-section">
       <h2 class="form-heading">{{ data ? 'Edit Debit Note' : 'Create Debit Note' }}</h2>
       <div class="form-row">
-        <mat-form-field appearance="outline" class="flex-2 related-invoice-field">
-          <mat-label>Related Invoice (Optional)</mat-label>
-          <mat-select formControlName="invoiceId" (selectionChange)="onInvoiceChange($event.value)" [disableOptionCentering]="true">
-            <mat-option [value]="null">No Invoice</mat-option>
-            <mat-option *ngFor="let invoice of invoices" [value]="invoice.id">
-              {{ invoice.invoiceNumber }} - {{ invoice.customerName || 'N/A' }} ({{ invoice.totalAmount | number: '1.2-2' }} {{ invoice.currency }})
+        <mat-form-field appearance="outline" class="flex-2 related-expense-field">
+          <mat-label>Related Expense (Optional)</mat-label>
+          <mat-select formControlName="expenseId" (selectionChange)="onExpenseChange($event.value)" [disableOptionCentering]="true">
+            <mat-option [value]="null">No Expense</mat-option>
+            <mat-option *ngFor="let expense of expenses" [value]="expense.id">
+              {{ expense.invoiceNumber || expense.id }} - {{ expense.vendorName || 'N/A' }} ({{ expense.totalAmount | number: '1.2-2' }} {{ expense.currency }})
             </mat-option>
           </mat-select>
         </mat-form-field>
@@ -39,23 +39,23 @@
 
       <div class="form-row">
         <mat-form-field appearance="outline" class="flex-2">
-          <mat-label>Customer</mat-label>
-          <mat-select formControlName="customerId" (selectionChange)="onCustomerChange($event.value)">
-            <mat-option [value]="null">Select Customer</mat-option>
-            <mat-option *ngFor="let customer of customers" [value]="customer.id">
-              {{ customer.name }} {{ customer.customerTrn ? '(' + customer.customerTrn + ')' : '' }}
+          <mat-label>Supplier/Vendor</mat-label>
+          <mat-select formControlName="vendorId" (selectionChange)="onVendorChange($event.value)">
+            <mat-option [value]="null">Select Supplier</mat-option>
+            <mat-option *ngFor="let vendor of vendors" [value]="vendor.id">
+              {{ vendor.name }} {{ vendor.vendorTrn ? '(' + vendor.vendorTrn + ')' : '' }}
             </mat-option>
           </mat-select>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Customer Name</mat-label>
-          <input matInput formControlName="customerName" placeholder="Or enter manually" />
+          <mat-label>Supplier Name</mat-label>
+          <input matInput formControlName="vendorName" placeholder="Or enter manually" />
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Customer TRN</mat-label>
-          <input matInput formControlName="customerTrn" />
+          <mat-label>Supplier TRN</mat-label>
+          <input matInput formControlName="vendorTrn" />
         </mat-form-field>
       </div>
 

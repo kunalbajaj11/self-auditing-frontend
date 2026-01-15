@@ -7,8 +7,9 @@ import {
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DebitNotesService, DebitNote } from '../../../core/services/debit-notes.service';
-import { CustomersService, Customer } from '../../../core/services/customers.service';
-import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales-invoices.service';
+import { VendorsService, Vendor } from '../../../core/services/vendors.service';
+import { ExpensesService } from '../../../core/services/expenses.service';
+import { Expense } from '../../../core/models/expense.model';
 
 @Component({
   selector: 'app-debit-note-form-dialog',
@@ -18,11 +19,11 @@ import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales
 export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
   form: FormGroup;
   loading = false;
-  customers: Customer[] = [];
-  invoices: SalesInvoice[] = [];
-  loadingCustomers = false;
-  loadingInvoices = false;
-  selectedInvoice: SalesInvoice | null = null;
+  vendors: Vendor[] = [];
+  expenses: Expense[] = [];
+  loadingVendors = false;
+  loadingExpenses = false;
+  selectedExpense: Expense | null = null;
 
   readonly debitNoteReasons = [
     { value: 'return', label: 'Return' },
@@ -45,16 +46,16 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
     private readonly fb: FormBuilder,
     private readonly dialogRef: MatDialogRef<DebitNoteFormDialogComponent>,
     private readonly debitNotesService: DebitNotesService,
-    private readonly customersService: CustomersService,
-    private readonly invoicesService: SalesInvoicesService,
+    private readonly vendorsService: VendorsService,
+    private readonly expensesService: ExpensesService,
     private readonly snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) public data: DebitNote | null,
   ) {
     this.form = this.fb.group({
-      invoiceId: [null],
-      customerId: [''],
-      customerName: [''],
-      customerTrn: [''],
+      expenseId: [null],
+      vendorId: [''],
+      vendorName: [''],
+      vendorTrn: [''],
       debitNoteDate: [new Date().toISOString().substring(0, 10), Validators.required],
       reason: ['return', Validators.required],
       amount: [0, [Validators.required, Validators.min(0.01)]],
@@ -67,8 +68,8 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.loadCustomers();
-    this.loadInvoices();
+    this.loadVendors();
+    this.loadExpenses();
     
     if (this.data) {
       this.loadDebitNoteData();
@@ -76,10 +77,10 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Ensure invoiceId field is not focused/highlighted when dialog opens
+    // Ensure expenseId field is not focused/highlighted when dialog opens
     setTimeout(() => {
-      const invoiceIdControl = this.form.get('invoiceId');
-      if (invoiceIdControl && invoiceIdControl.value === null) {
+      const expenseIdControl = this.form.get('expenseId');
+      if (expenseIdControl && expenseIdControl.value === null) {
         // Blur any focused elements to prevent highlighting
         if (document.activeElement && document.activeElement instanceof HTMLElement) {
           document.activeElement.blur();
@@ -88,28 +89,28 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
     }, 100);
   }
 
-  loadCustomers(): void {
-    this.loadingCustomers = true;
-    this.customersService.listCustomers(undefined, true).subscribe({
-      next: (customers) => {
-        this.loadingCustomers = false;
-        this.customers = customers;
+  loadVendors(): void {
+    this.loadingVendors = true;
+    this.vendorsService.listVendors().subscribe({
+      next: (vendors) => {
+        this.loadingVendors = false;
+        this.vendors = vendors;
       },
       error: () => {
-        this.loadingCustomers = false;
+        this.loadingVendors = false;
       },
     });
   }
 
-  loadInvoices(): void {
-    this.loadingInvoices = true;
-    this.invoicesService.listInvoices().subscribe({
-      next: (invoices) => {
-        this.loadingInvoices = false;
-        this.invoices = invoices;
+  loadExpenses(): void {
+    this.loadingExpenses = true;
+    this.expensesService.listExpenses().subscribe({
+      next: (expenses) => {
+        this.loadingExpenses = false;
+        this.expenses = expenses;
       },
       error: () => {
-        this.loadingInvoices = false;
+        this.loadingExpenses = false;
       },
     });
   }
@@ -117,37 +118,37 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
   loadDebitNoteData(): void {
     if (!this.data) return;
 
-    const debitNote = this.data;
+    const debitNote = this.data as any;
 
-    // Load customer data if customerId exists
-    if (debitNote.customerId) {
-      this.customersService.getCustomer(debitNote.customerId).subscribe({
-        next: (customer) => {
+    // Load vendor data if vendorId exists
+    if (debitNote.vendorId) {
+      this.vendorsService.getVendor(debitNote.vendorId).subscribe({
+        next: (vendor) => {
           this.form.patchValue({
-            customerId: customer.id,
-            customerName: customer.name,
-            customerTrn: customer.customerTrn || '',
+            vendorId: vendor.id,
+            vendorName: vendor.name,
+            vendorTrn: vendor.vendorTrn || '',
           });
         },
         error: () => {
           this.form.patchValue({
-            customerName: debitNote.customerName || '',
-            customerTrn: debitNote.customerTrn || '',
+            vendorName: debitNote.vendorName || '',
+            vendorTrn: debitNote.vendorTrn || '',
           });
         },
       });
     }
 
-    if (debitNote.invoiceId) {
-      this.invoicesService.getInvoice(debitNote.invoiceId).subscribe({
-        next: (invoice) => {
-          this.selectedInvoice = invoice;
+    if (debitNote.expenseId) {
+      this.expensesService.getExpense(debitNote.expenseId).subscribe({
+        next: (expense) => {
+          this.selectedExpense = expense;
           this.form.patchValue({
-            invoiceId: invoice.id,
-            customerId: invoice.customerId || '',
-            customerName: invoice.customerName || '',
-            customerTrn: invoice.customerTrn || '',
-            currency: invoice.currency || 'AED',
+            expenseId: expense.id,
+            vendorId: expense.vendorId || '',
+            vendorName: expense.vendorName || '',
+            vendorTrn: expense.vendorTrn || '',
+            currency: expense.currency || 'AED',
           });
         },
       });
@@ -165,40 +166,40 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
     });
   }
 
-  onInvoiceChange(invoiceId: string): void {
-    const invoice = this.invoices.find((inv) => inv.id === invoiceId);
-    if (invoice) {
-      this.selectedInvoice = invoice;
+  onExpenseChange(expenseId: string): void {
+    const expense = this.expenses.find((exp) => exp.id === expenseId);
+    if (expense) {
+      this.selectedExpense = expense;
       
-      // Parse invoice amounts (they come as strings)
-      const invoiceAmount = parseFloat(invoice.amount || '0');
-      const invoiceVatAmount = parseFloat(invoice.vatAmount || '0');
+      // Expense amounts are already numbers
+      const expenseAmount = expense.amount || 0;
+      const expenseVatAmount = expense.vatAmount || 0;
       
       // Only populate if creating a new debit note (not editing)
       const isNewDebitNote = !this.data;
       
       this.form.patchValue({
-        customerId: invoice.customerId || '',
-        customerName: invoice.customerName || '',
-        customerTrn: invoice.customerTrn || '',
-        currency: invoice.currency || 'AED',
+        vendorId: expense.vendorId || '',
+        vendorName: expense.vendorName || '',
+        vendorTrn: expense.vendorTrn || '',
+        currency: expense.currency || 'AED',
         // Populate amount and VAT if creating new debit note
         ...(isNewDebitNote && {
-          amount: invoiceAmount > 0 ? invoiceAmount : 0,
-          vatAmount: invoiceVatAmount > 0 ? invoiceVatAmount : 0,
-          description: invoice.description || '',
+          amount: expenseAmount > 0 ? expenseAmount : 0,
+          vatAmount: expenseVatAmount > 0 ? expenseVatAmount : 0,
+          description: expense.description || '',
         }),
       });
     }
   }
 
-  onCustomerChange(customerId: string): void {
-    const customer = this.customers.find((c) => c.id === customerId);
-    if (customer) {
+  onVendorChange(vendorId: string): void {
+    const vendor = this.vendors.find((v) => v.id === vendorId);
+    if (vendor) {
       this.form.patchValue({
-        customerName: customer.name,
-        customerTrn: customer.customerTrn || '',
-        currency: customer.preferredCurrency || 'AED',
+        vendorName: vendor.name,
+        vendorTrn: vendor.vendorTrn || '',
+        currency: vendor.preferredCurrency || 'AED',
       });
     }
   }
@@ -227,10 +228,10 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
     const formValue = this.form.getRawValue();
 
     const payload: any = {
-      invoiceId: formValue.invoiceId || undefined,
-      customerId: formValue.customerId || undefined,
-      customerName: formValue.customerName || undefined,
-      customerTrn: formValue.customerTrn || undefined,
+      expenseId: formValue.expenseId || undefined,
+      vendorId: formValue.vendorId || undefined,
+      vendorName: formValue.vendorName || undefined,
+      vendorTrn: formValue.vendorTrn || undefined,
       debitNoteDate: formValue.debitNoteDate,
       reason: formValue.reason,
       amount: parseFloat(formValue.amount),
