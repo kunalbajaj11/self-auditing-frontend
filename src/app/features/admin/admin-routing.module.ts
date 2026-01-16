@@ -103,6 +103,7 @@ const routes: Routes = [
               { label: 'Payables', route: '/admin/reports/payables', icon: 'account_balance_wallet' },
               { label: 'Receivables', route: '/admin/reports/receivables', icon: 'receipt_long' },
               { label: 'VAT Control Account', route: '/admin/reports/vat-control-account', icon: 'account_balance' },
+              { label: 'Stock Balance', route: '/admin/reports/stock-balance', icon: 'inventory_2' },
             ],
           },
           {
@@ -212,6 +213,11 @@ const routes: Routes = [
             path: 'vat-control-account',
             component: AdminReportsComponent,
             data: { shell: { title: 'VAT Control Account' }, reportType: 'vat_control_account' },
+          },
+          {
+            path: 'stock-balance',
+            component: AdminReportsComponent,
+            data: { shell: { title: 'Stock Balance Report' }, reportType: 'stock_balance' },
           },
           {
             path: '',
