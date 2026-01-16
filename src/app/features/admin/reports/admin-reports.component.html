@@ -1045,8 +1045,8 @@
                 <tr mat-header-row *matHeaderRowDef="['date', 'description', 'amount', 'vatRate', 'vatAmount', 'trn']"></tr>
                 <tr mat-row *matRowDef="let row; columns: ['date', 'description', 'amount', 'vatRate', 'vatAmount', 'trn']"></tr>
               </table>
-              <div class="section-total" *ngIf="generatedReport.data.summary" [class.credit-amount]="(generatedReport.data.summary.vatOutput || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.vatOutput || 0) < 0">
-                Total VAT Output: {{ formatCurrency(generatedReport.data.summary.vatOutput || 0, true) }}
+              <div class="section-total" *ngIf="generatedReport.data.summary" [class.credit-amount]="(generatedReport.data.summary.netVatOutput || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.netVatOutput || 0) < 0">
+                Total VAT Output: {{ formatCurrency(generatedReport.data.summary.netVatOutput || 0, true) }}
               </div>
             </div>
           </div>
