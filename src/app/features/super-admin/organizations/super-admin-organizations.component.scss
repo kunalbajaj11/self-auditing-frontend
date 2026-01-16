@@ -350,4 +350,14 @@
       font-size: 0.85rem;
     }
   }
+
+  .features-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    mat-checkbox {
+      font-size: 13px;
+    }
+  }
 }

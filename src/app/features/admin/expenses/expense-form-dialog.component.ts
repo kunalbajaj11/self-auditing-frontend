@@ -464,11 +464,9 @@ export class ExpenseFormDialogComponent implements OnInit {
         } else if (vatTaxType === 'reverse_charge') {
           lineVatAmount = (lineAmount * vatRate) / 100;
         } else {
-          if (this.taxCalculationMethod === 'inclusive') {
-            lineVatAmount = (lineAmount * vatRate) / (100 + vatRate);
-          } else {
-            lineVatAmount = (lineAmount * vatRate) / 100;
-          }
+          // VAT rate percentage should always be applied exclusively (added on top)
+          // 5% VAT on 1000 = 50, not 47.62
+          lineVatAmount = (lineAmount * vatRate) / 100;
         }
 
         lineVatAmount = Math.round(lineVatAmount * 100) / 100;
@@ -503,11 +501,9 @@ export class ExpenseFormDialogComponent implements OnInit {
         } else if (item.vatTaxType === 'reverse_charge') {
           lineVatAmount = (lineAmount * item.vatRate) / 100;
         } else {
-          if (this.taxCalculationMethod === 'inclusive') {
-            lineVatAmount = (lineAmount * item.vatRate) / (100 + item.vatRate);
-          } else {
-            lineVatAmount = (lineAmount * item.vatRate) / 100;
-          }
+          // VAT rate percentage should always be applied exclusively (added on top)
+          // 5% VAT on 1000 = 50, not 47.62
+          lineVatAmount = (lineAmount * item.vatRate) / 100;
         }
         
         lineVatAmount = Math.round(lineVatAmount * 100) / 100;
@@ -787,11 +783,9 @@ export class ExpenseFormDialogComponent implements OnInit {
     } else if (vatTaxType === 'reverse_charge') {
       vatAmount = (amount * vatRate) / 100;
     } else {
-      if (this.taxCalculationMethod === 'inclusive') {
-        vatAmount = (amount * vatRate) / (100 + vatRate);
-      } else {
-        vatAmount = (amount * vatRate) / 100;
-      }
+      // VAT rate percentage should always be applied exclusively (added on top)
+      // 5% VAT on 1000 = 50, not 47.62
+      vatAmount = (amount * vatRate) / 100;
     }
 
     vatAmount = Math.round(vatAmount * 100) / 100;
@@ -830,11 +824,9 @@ export class ExpenseFormDialogComponent implements OnInit {
     } else if (vatTaxType === 'reverse_charge') {
       vatAmount = (amount * vatRate) / 100;
     } else {
-      if (this.taxCalculationMethod === 'inclusive') {
-        vatAmount = (amount * vatRate) / (100 + vatRate);
-      } else {
-        vatAmount = (amount * vatRate) / 100;
-      }
+      // VAT rate percentage should always be applied exclusively (added on top)
+      // 5% VAT on 1000 = 50, not 47.62
+      vatAmount = (amount * vatRate) / 100;
     }
 
     vatAmount = Math.round(vatAmount * 100) / 100;
@@ -863,11 +855,9 @@ export class ExpenseFormDialogComponent implements OnInit {
       } else if (vatTaxType === 'reverse_charge') {
         lineVatAmount = (lineAmount * vatRate) / 100;
       } else {
-        if (this.taxCalculationMethod === 'inclusive') {
-          lineVatAmount = (lineAmount * vatRate) / (100 + vatRate);
-        } else {
-          lineVatAmount = (lineAmount * vatRate) / 100;
-        }
+        // VAT rate percentage should always be applied exclusively (added on top)
+        // 5% VAT on 1000 = 50, not 47.62
+        lineVatAmount = (lineAmount * vatRate) / 100;
       }
 
       lineVatAmount = Math.round(lineVatAmount * 100) / 100;

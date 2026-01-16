@@ -184,7 +184,7 @@
 
         <mat-form-field appearance="outline" class="flex-1">
           <mat-label>VAT Amount (AED)</mat-label>
-          <input matInput type="number" formControlName="vatAmount" />
+          <input matInput type="text" formControlName="vatAmount" />
           <mat-hint *ngIf="form.get('vatTaxType')?.value === 'reverse_charge'">
             Reverse charge VAT is calculated but not added to total
           </mat-hint>

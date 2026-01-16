@@ -32,6 +32,8 @@ export interface OrganizationUsage {
   rankingScore: number; // Combined score for sorting
   createdAt: string;
   licenseExpiresAt?: string | null;
+  enablePayroll?: boolean;
+  enableInventory?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

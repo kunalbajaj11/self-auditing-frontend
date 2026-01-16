@@ -46,6 +46,7 @@ export class SuperAdminOrganizationsComponent implements OnInit {
     'planType',
     'status',
     'licenseExpires',
+    'features',
     'userCount',
     'expenseCount',
     'accrualCount',
@@ -411,6 +412,54 @@ export class SuperAdminOrganizationsComponent implements OnInit {
 
   private applyFilter(value: string): void {
     this.dataSource.filter = value.trim().toLowerCase();
+  }
+
+  togglePayroll(org: OrganizationUsage, enabled: boolean): void {
+    this.organizationService
+      .updateOrganization(org.id, { enablePayroll: enabled })
+      .subscribe({
+        next: () => {
+          org.enablePayroll = enabled;
+          this.snackBar.open(
+            `Payroll ${enabled ? 'enabled' : 'disabled'} for ${org.name}`,
+            'Close',
+            { duration: 3000 },
+          );
+        },
+        error: () => {
+          this.snackBar.open(
+            'Failed to update payroll setting. Please try again.',
+            'Close',
+            { duration: 4000, panelClass: ['snack-error'] },
+          );
+          // Revert checkbox state
+          org.enablePayroll = !enabled;
+        },
+      });
+  }
+
+  toggleInventory(org: OrganizationUsage, enabled: boolean): void {
+    this.organizationService
+      .updateOrganization(org.id, { enableInventory: enabled })
+      .subscribe({
+        next: () => {
+          org.enableInventory = enabled;
+          this.snackBar.open(
+            `Inventory ${enabled ? 'enabled' : 'disabled'} for ${org.name}`,
+            'Close',
+            { duration: 3000 },
+          );
+        },
+        error: () => {
+          this.snackBar.open(
+            'Failed to update inventory setting. Please try again.',
+            'Close',
+            { duration: 4000, panelClass: ['snack-error'] },
+          );
+          // Revert checkbox state
+          org.enableInventory = !enabled;
+        },
+      });
   }
 }
 

@@ -74,7 +74,7 @@
 
       <mat-form-field appearance="outline">
         <mat-label>VAT (AED)</mat-label>
-        <input matInput type="number" formControlName="vatAmount" [disabled]="(canUploadExpense$ | async) === false" />
+        <input matInput type="text" formControlName="vatAmount" [disabled]="(canUploadExpense$ | async) === false" />
       </mat-form-field>
 
       <mat-form-field appearance="outline">

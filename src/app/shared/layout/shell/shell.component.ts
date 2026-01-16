@@ -89,6 +89,9 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private loadLicenseInfo(): void {
+    // Clear cache to ensure fresh data
+    this.licenseService.clearCache();
+    
     combineLatest([
       this.licenseService.getPlanType().pipe(catchError(() => of('free' as PlanType))),
       this.licenseService.isEnterprise().pipe(catchError(() => of(false))),
@@ -105,6 +108,11 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
       this.isStandard = isStandard;
       this.isPayrollEnabled = isPayrollEnabled;
       this.isInventoryEnabled = isInventoryEnabled;
+      console.log('[ShellComponent] License info loaded:', {
+        planType,
+        isPayrollEnabled,
+        isInventoryEnabled,
+      });
       this.updateShellFromRoute();
     });
   }

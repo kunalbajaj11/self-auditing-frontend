@@ -41,6 +41,8 @@ export class OrganizationFormDialogComponent {
       currency: ['AED', Validators.required],
       region: ['UAE'],
       address: [''],
+      enablePayroll: [false],
+      enableInventory: [false],
     });
   }
 

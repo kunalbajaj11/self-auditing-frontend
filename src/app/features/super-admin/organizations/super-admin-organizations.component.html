@@ -88,6 +88,28 @@
           </td>
         </ng-container>
 
+        <ng-container matColumnDef="features">
+          <th mat-header-cell *matHeaderCellDef>Features</th>
+          <td mat-cell *matCellDef="let org">
+            <div class="features-cell">
+              <mat-checkbox
+                [checked]="org.enablePayroll ?? false"
+                (change)="togglePayroll(org, $event.checked)"
+                [matTooltip]="org.enablePayroll ? 'Payroll enabled' : 'Payroll disabled'"
+              >
+                Payroll
+              </mat-checkbox>
+              <mat-checkbox
+                [checked]="org.enableInventory ?? false"
+                (change)="toggleInventory(org, $event.checked)"
+                [matTooltip]="org.enableInventory ? 'Inventory enabled' : 'Inventory disabled'"
+              >
+                Inventory
+              </mat-checkbox>
+            </div>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="userCount">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Users</th>
           <td mat-cell *matCellDef="let org">{{ org.userCount | number }}</td>

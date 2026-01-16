@@ -15,6 +15,13 @@ export class LicenseService {
   ) {}
 
   /**
+   * Clear cached organization data to force refresh
+   */
+  clearCache(): void {
+    this.cachedOrganization = null;
+  }
+
+  /**
    * Get the current organization's plan type
    */
   getPlanType(): Observable<PlanType> {
@@ -141,65 +148,29 @@ export class LicenseService {
   }
 
   /**
-   * Check if payroll feature is enabled for the current organization's license
+   * Check if payroll feature is enabled for the current organization
+   * Features are controlled directly on the organization, not via license key
    */
   isPayrollEnabled(): Observable<boolean> {
     return this.organizationService.getMyOrganization().pipe(
-      map((org) => org.id),
-      catchError(() => of(null)),
-      switchMap((orgId) => {
-        if (!orgId) {
-          return of(false);
-        }
-        return this.licenseKeysService.getByOrganizationId(orgId).pipe(
-          map((license) => {
-            // Debug logging (remove in production if needed)
-            console.log('[LicenseService] Payroll check:', {
-              orgId,
-              license: license ? {
-                id: license.id,
-                enablePayroll: license.enablePayroll,
-              } : null,
-            });
-            return license?.enablePayroll ?? false;
-          }),
-          catchError((error) => {
-            console.error('[LicenseService] Error checking payroll:', error);
-            return of(false);
-          }),
-        );
+      map((org) => org.enablePayroll ?? false),
+      catchError((error) => {
+        console.error('[LicenseService] Error getting organization for payroll check:', error);
+        return of(false);
       }),
     );
   }
 
   /**
-   * Check if inventory feature is enabled for the current organization's license
+   * Check if inventory feature is enabled for the current organization
+   * Features are controlled directly on the organization, not via license key
    */
   isInventoryEnabled(): Observable<boolean> {
     return this.organizationService.getMyOrganization().pipe(
-      map((org) => org.id),
-      catchError(() => of(null)),
-      switchMap((orgId) => {
-        if (!orgId) {
-          return of(false);
-        }
-        return this.licenseKeysService.getByOrganizationId(orgId).pipe(
-          map((license) => {
-            // Debug logging (remove in production if needed)
-            console.log('[LicenseService] Inventory check:', {
-              orgId,
-              license: license ? {
-                id: license.id,
-                enableInventory: license.enableInventory,
-              } : null,
-            });
-            return license?.enableInventory ?? false;
-          }),
-          catchError((error) => {
-            console.error('[LicenseService] Error checking inventory:', error);
-            return of(false);
-          }),
-        );
+      map((org) => org.enableInventory ?? false),
+      catchError((error) => {
+        console.error('[LicenseService] Error getting organization for inventory check:', error);
+        return of(false);
       }),
     );
   }

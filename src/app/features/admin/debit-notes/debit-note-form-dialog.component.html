@@ -74,7 +74,7 @@
 
         <mat-form-field appearance="outline" class="flex-1 vat-amount-field">
           <mat-label>VAT Amount</mat-label>
-          <input matInput type="number" formControlName="vatAmount" step="0.01" min="0" />
+          <input matInput type="text" formControlName="vatAmount" step="0.01" min="0" />
           <span matSuffix>{{ form.get('currency')?.value }}</span>
           <button mat-icon-button matSuffix type="button" (click)="calculateVat()" matTooltip="Auto-calculate 5% VAT">
             <mat-icon>calculate</mat-icon>

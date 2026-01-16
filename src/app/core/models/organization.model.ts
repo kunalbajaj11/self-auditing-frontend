@@ -15,6 +15,8 @@ export interface Organization {
   contactPerson?: string;
   contactEmail?: string;
   region?: Region;
+  enablePayroll?: boolean;
+  enableInventory?: boolean;
 }
 
 export interface OrganizationSummary {
