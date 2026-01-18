@@ -204,9 +204,9 @@ export class ExpenseFormDialogComponent implements OnInit {
       if ('id' in this.data) {
         // Editing existing expense
         const expense = this.data as Expense;
-        // Mark VAT as manually entered when editing existing expense to prevent recalculation
-        // This ensures we show the VAT value from the database, not a recalculated value
-        this.vatManuallyEntered = true;
+        // Don't mark VAT as manually entered initially when editing
+        // This allows VAT to recalculate if amount changes, but user can still manually override
+        this.vatManuallyEntered = false;
         // Check if expense has line items
         if (expense.lineItems && expense.lineItems.length > 0) {
           this.entryMode = 'itemwise';
@@ -238,11 +238,14 @@ export class ExpenseFormDialogComponent implements OnInit {
           });
         }
 
+        const expenseAmount = typeof expense.amount === 'number' ? expense.amount : parseFloat(String(expense.amount || '0'));
+        const expenseVatAmount = typeof expense.vatAmount === 'number' ? expense.vatAmount : parseFloat(String(expense.vatAmount || '0'));
+        
         this.form.patchValue({
           type: expense.type,
           categoryId: expense.categoryId ?? '',
-          amount: typeof expense.amount === 'number' ? expense.amount : parseFloat(String(expense.amount || '0')),
-          vatAmount: typeof expense.vatAmount === 'number' ? expense.vatAmount : parseFloat(String(expense.vatAmount || '0')),
+          amount: expenseAmount,
+          vatAmount: expenseVatAmount,
           vatTaxType: (expense as any).vatTaxType || 'standard',
           expenseDate: expense.expenseDate,
           expectedPaymentDate: expense.expectedPaymentDate ?? '',
@@ -253,6 +256,13 @@ export class ExpenseFormDialogComponent implements OnInit {
           invoiceNumber: (expense as any).invoiceNumber ?? '',
           description: expense.description ?? '',
         }, { emitEvent: false }); // Don't emit events to prevent auto-calculation triggers
+        
+        // Recalculate VAT after loading to fix any incorrect values
+        // Use setTimeout to ensure form is fully patched before recalculating
+        setTimeout(() => {
+          this.autoCalculateVat();
+        }, 100);
+        
         // Filter categories after setting the type
         setTimeout(() => this.filterCategoriesByType(), 0);
       } else {
@@ -575,39 +585,78 @@ export class ExpenseFormDialogComponent implements OnInit {
       expensePayload.source = 'manual';
     }
 
-    console.log('[ExpenseForm] Submitting expense:', expensePayload);
+    // Check if we're editing an existing expense
+    const isEdit = this.isEditMode();
+    const expenseId = isEdit ? (this.data as Expense).id : undefined;
 
-    this.expensesService
-      .createExpense(expensePayload)
-      .subscribe({
+    // For updates, only include fields allowed in UpdateExpenseDto
+    // Remove: lineItems, source, vendorId, ocrConfidence
+    let finalPayload: any;
+    if (isEdit && expenseId) {
+      finalPayload = {
+        type: expensePayload.type,
+        categoryId: expensePayload.categoryId,
+        amount: expensePayload.amount,
+        vatAmount: expensePayload.vatAmount,
+        vatTaxType: expensePayload.vatTaxType,
+        expenseDate: expensePayload.expenseDate,
+        expectedPaymentDate: expensePayload.expectedPaymentDate,
+        purchaseStatus: expensePayload.purchaseStatus,
+        vendorName: expensePayload.vendorName,
+        vendorTrn: expensePayload.vendorTrn,
+        invoiceNumber: expensePayload.invoiceNumber,
+        description: expensePayload.description,
+        attachments: expensePayload.attachments,
+      };
+      // Remove undefined values
+      Object.keys(finalPayload).forEach(key => {
+        if (finalPayload[key] === undefined) {
+          delete finalPayload[key];
+        }
+      });
+    } else {
+      finalPayload = expensePayload;
+    }
+
+    console.log('[ExpenseForm] Submitting expense:', finalPayload);
+
+    const expenseObservable = isEdit && expenseId
+      ? this.expensesService.updateExpense(expenseId, finalPayload)
+      : this.expensesService.createExpense(finalPayload);
+
+    expenseObservable.subscribe({
         next: (expense) => {
           this.loading = false;
-          console.log('[ExpenseForm] Expense created successfully:', expense);
+          console.log(`[ExpenseForm] Expense ${isEdit ? 'updated' : 'created'} successfully:`, expense);
           
           // If a vendor was created or linked, refresh the vendor list
           // Check if expense has vendorId or if we sent vendorName (which might have created a vendor)
           if (expensePayload.vendorName || (expense as any).vendorId) {
-            console.log('[ExpenseForm] Refreshing vendor list after expense creation');
+            console.log('[ExpenseForm] Refreshing vendor list after expense ' + (isEdit ? 'update' : 'creation'));
             // Force refresh to get the newly created vendor
             this.loadVendors(true);
             
-            // Also try to select the vendor if it was just created
-            const cleanedVendorName = this.cleanVendorName(expensePayload.vendorName);
-            if (cleanedVendorName && !expensePayload.vendorId) {
-              // Vendor was likely just created, try to find and select it
-              setTimeout(() => {
-                const newVendor = this.vendors.find(v => 
-                  v.name.toLowerCase() === cleanedVendorName.toLowerCase()
-                );
-                if (newVendor) {
-                  this.onVendorSelected(newVendor);
-                  console.log('[ExpenseForm] Auto-selected newly created vendor:', newVendor.name);
-                }
-              }, 500);
+            // Also try to select the vendor if it was just created (only for new expenses)
+            if (!isEdit) {
+              const cleanedVendorName = this.cleanVendorName(expensePayload.vendorName);
+              if (cleanedVendorName && !expensePayload.vendorId) {
+                // Vendor was likely just created, try to find and select it
+                setTimeout(() => {
+                  const newVendor = this.vendors.find(v => 
+                    v.name.toLowerCase() === cleanedVendorName.toLowerCase()
+                  );
+                  if (newVendor) {
+                    this.onVendorSelected(newVendor);
+                    console.log('[ExpenseForm] Auto-selected newly created vendor:', newVendor.name);
+                  }
+                }, 500);
+              }
             }
           }
           
-          const message = this.getTransactionTypeMessage(type);
+          const message = isEdit 
+            ? 'Expense updated successfully'
+            : this.getTransactionTypeMessage(type);
           this.snackBar.open(message, 'Close', {
             duration: 3000,
           });
@@ -615,10 +664,12 @@ export class ExpenseFormDialogComponent implements OnInit {
         },
         error: (error) => {
           this.loading = false;
-          console.error('[ExpenseForm] Error creating expense:', error);
+          console.error(`[ExpenseForm] Error ${isEdit ? 'updating' : 'creating'} expense:`, error);
           
           // Provide specific error messages
-          let errorMessage = 'Failed to record expense. Please review the details.';
+          let errorMessage = isEdit 
+            ? 'Failed to update expense. Please review the details.'
+            : 'Failed to record expense. Please review the details.';
           
           if (error?.error?.message) {
             errorMessage = error.error.message;
