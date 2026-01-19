@@ -25,7 +25,7 @@ export class ExpensesService {
       .pipe(map((item) => this.normalizeExpense(item)));
   }
 
-  createExpense(payload: Partial<Expense> & { type: ExpenseType }): Observable<Expense> {
+  createExpense(payload: Partial<Expense> & { type: ExpenseType; expenseTypeId?: string }): Observable<Expense> {
     return this.api
       .post<Expense>('/expenses', payload)
       .pipe(map((item) => this.normalizeExpense(item)));
@@ -85,12 +85,16 @@ export class ExpensesService {
       lineNumber: item.lineNumber,
     })) || undefined;
 
+    // Extract expenseTypeId from expenseType relation if present
+    const expenseTypeId = raw.expenseType?.id || raw.expenseTypeId || null;
+
     return {
       ...raw,
       amount,
       vatAmount,
       totalAmount,
       categoryName: raw.category?.name ?? raw.categoryName ?? null,
+      expenseTypeId, // Include custom expense type ID
       attachments,
       lineItems,
     };

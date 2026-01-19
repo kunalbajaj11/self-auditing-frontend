@@ -145,8 +145,11 @@
       <div *ngIf="entryMode === 'single'" class="form-row">
         <mat-form-field appearance="outline" class="flex-1">
           <mat-label>Type *</mat-label>
-          <mat-select formControlName="type" required>
-            <mat-option *ngFor="let expenseType of expenseTypes" [value]="expenseType.name">
+          <mat-select formControlName="expenseTypeKey" required>
+            <mat-option
+              *ngFor="let expenseType of expenseTypes"
+              [value]="expenseType.isSystemDefault ? expenseType.name : ('custom:' + expenseType.id)"
+            >
               {{ expenseType.displayLabel || expenseType.name }}
             </mat-option>
           </mat-select>

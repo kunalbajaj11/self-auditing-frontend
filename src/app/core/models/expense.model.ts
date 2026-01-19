@@ -41,6 +41,8 @@ export interface PurchaseLineItem {
 export interface Expense {
   id: string;
   type: ExpenseType;
+  // Optional custom expense type id (when a user-defined type is selected)
+  expenseTypeId?: string;
   categoryId?: string;
   categoryName?: string;
   amount: number;

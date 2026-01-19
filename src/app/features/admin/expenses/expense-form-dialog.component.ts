@@ -74,7 +74,12 @@ export class ExpenseFormDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) readonly data: Expense | { attachment?: any; ocrResult?: any } | null,
   ) {
     this.form = this.fb.group({
+      // UI selection key for expense types. Can be either a system type name (e.g. "expense")
+      // or a custom type key ("custom:<uuid>").
+      expenseTypeKey: ['expense', Validators.required],
       type: ['expense' as ExpenseType, Validators.required],
+      // Custom expense type id (uuid) when a custom type is selected
+      expenseTypeId: [''],
       categoryId: [''],
       amount: [0, [Validators.min(0.01)]], // Not required when using line items
       vatAmount: [0, [Validators.min(0)]],
@@ -101,13 +106,15 @@ export class ExpenseFormDialogComponent implements OnInit {
     // Load expense types dynamically
     this.expenseTypesService.listExpenseTypes().subscribe((expenseTypes) => {
       this.expenseTypes = expenseTypes;
+      // Ensure the selection key is consistent with current system type on load
+      const currentKey = this.form.get('expenseTypeKey')?.value;
+      if (!currentKey) {
+        this.form.patchValue({ expenseTypeKey: this.form.get('type')?.value || 'expense' }, { emitEvent: false });
+      }
     });
 
     // Load all categories initially
-    this.categoriesService.listCategories().subscribe((categories) => {
-      this.allCategories = categories;
-      this.filterCategoriesByType();
-    });
+    this.loadCategories();
 
     // Load vendors for autocomplete
     this.loadVendors();
@@ -118,19 +125,9 @@ export class ExpenseFormDialogComponent implements OnInit {
     // Load products for line items
     this.loadProducts();
 
-    // Watch for expense type changes to filter categories
-    this.form.get('type')?.valueChanges.subscribe(() => {
-      this.filterCategoriesByType();
-      // Clear category if it's no longer valid for the selected type
-      const currentCategoryId = this.form.get('categoryId')?.value;
-      if (currentCategoryId) {
-        setTimeout(() => {
-          const currentCategory = this.categories.find(c => c.id === currentCategoryId);
-          if (!currentCategory) {
-            this.form.patchValue({ categoryId: '' });
-          }
-        }, 100);
-      }
+    // Watch for expense type selection changes (system or custom) to update payload fields and filter categories
+    this.form.get('expenseTypeKey')?.valueChanges.subscribe((key) => {
+      this.applyExpenseTypeSelection(key);
     });
 
     // Watch for purchase status changes to require expected payment date for accruals
@@ -241,8 +238,16 @@ export class ExpenseFormDialogComponent implements OnInit {
         const expenseAmount = typeof expense.amount === 'number' ? expense.amount : parseFloat(String(expense.amount || '0'));
         const expenseVatAmount = typeof expense.vatAmount === 'number' ? expense.vatAmount : parseFloat(String(expense.vatAmount || '0'));
         
+        // Determine expenseTypeKey: if custom type exists, use 'custom:<id>', otherwise use system type
+        const customExpenseTypeId = (expense as any).expenseTypeId;
+        const expenseTypeKey = customExpenseTypeId 
+          ? `custom:${customExpenseTypeId}` 
+          : expense.type;
+
         this.form.patchValue({
           type: expense.type,
+          expenseTypeKey: expenseTypeKey,
+          expenseTypeId: customExpenseTypeId || '',
           categoryId: expense.categoryId ?? '',
           amount: expenseAmount,
           vatAmount: expenseVatAmount,
@@ -528,6 +533,7 @@ export class ExpenseFormDialogComponent implements OnInit {
     // Prepare expense payload
     const expensePayload: any = {
       type,
+      expenseTypeId: value.expenseTypeId && value.expenseTypeId.trim() ? value.expenseTypeId : undefined,
       categoryId: value.categoryId || undefined,
       amount: finalAmount,
       vatAmount: finalVatAmount,
@@ -595,6 +601,7 @@ export class ExpenseFormDialogComponent implements OnInit {
     if (isEdit && expenseId) {
       finalPayload = {
         type: expensePayload.type,
+        expenseTypeId: expensePayload.expenseTypeId, // Include custom expense type ID
         categoryId: expensePayload.categoryId,
         amount: expensePayload.amount,
         vatAmount: expensePayload.vatAmount,
@@ -935,27 +942,99 @@ export class ExpenseFormDialogComponent implements OnInit {
     });
   }
 
+  loadCategories(): void {
+    // Load all categories - this includes system defaults and custom categories
+    this.categoriesService.listCategories().subscribe({
+      next: (categories) => {
+        this.allCategories = categories;
+        this.filterCategoriesByType();
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.allCategories = [];
+        this.categories = [];
+      },
+    });
+  }
+
   filterCategoriesByType(): void {
     const selectedType = this.form.get('type')?.value;
+    const selectedCustomExpenseTypeId = this.form.get('expenseTypeId')?.value;
     
     if (!selectedType) {
       this.categories = this.allCategories;
       return;
     }
 
+    // If a custom expense type is selected, filter locally by expenseTypeId + general categories
+    if (selectedCustomExpenseTypeId) {
+      this.categories = this.allCategories.filter((c) => {
+        const isGeneral = (!c.expenseType || c.expenseType === null) && (!c.expenseTypeId || c.expenseTypeId === null);
+        return isGeneral || c.expenseTypeId === selectedCustomExpenseTypeId;
+      });
+      // Clear invalid selection
+      const currentCategoryId = this.form.get('categoryId')?.value;
+      if (currentCategoryId && !this.categories.find((c) => c.id === currentCategoryId)) {
+        this.form.patchValue({ categoryId: '' }, { emitEvent: false });
+      }
+      return;
+    }
+
     // For fixed_assets and cost_of_sales, show only relevant categories
+    // Also filter for custom expense types that match the selected type
     if (selectedType === 'fixed_assets' || selectedType === 'cost_of_sales') {
-      this.categoriesService.listCategories(selectedType).subscribe((filteredCategories) => {
-        this.categories = filteredCategories;
-        // Clear category selection if current category is not in filtered list
-        const currentCategoryId = this.form.get('categoryId')?.value;
-        if (currentCategoryId && !filteredCategories.find(c => c.id === currentCategoryId)) {
-          this.form.patchValue({ categoryId: '' });
-        }
+      this.categoriesService.listCategories(selectedType).subscribe({
+        next: (filteredCategories) => {
+          this.categories = filteredCategories;
+          // Clear category selection if current category is not in filtered list
+          const currentCategoryId = this.form.get('categoryId')?.value;
+          if (currentCategoryId && !filteredCategories.find(c => c.id === currentCategoryId)) {
+            this.form.patchValue({ categoryId: '' });
+          }
+        },
+        error: (error) => {
+          console.error('Error filtering categories:', error);
+          // Fallback to all categories on error
+          this.categories = this.allCategories;
+        },
       });
     } else {
-      // For other types, show all categories (general + any specific ones)
+      // For other types (including custom expense types), show all categories
+      // This includes general categories and categories linked to custom expense types
       this.categories = this.allCategories;
+    }
+  }
+
+  private applyExpenseTypeSelection(key: string | null | undefined): void {
+    const selectedKey = String(key || '');
+    if (!selectedKey) return;
+
+    if (selectedKey.startsWith('custom:')) {
+      const id = selectedKey.substring('custom:'.length);
+      // Keep system type valid for backend + existing accounting flows
+      this.form.patchValue(
+        { type: 'expense', expenseTypeId: id },
+        { emitEvent: false },
+      );
+    } else {
+      // System default
+      this.form.patchValue(
+        { type: selectedKey as ExpenseType, expenseTypeId: '' },
+        { emitEvent: false },
+      );
+    }
+
+    this.filterCategoriesByType();
+
+    // Clear category if it's no longer valid for the selected type
+    const currentCategoryId = this.form.get('categoryId')?.value;
+    if (currentCategoryId) {
+      setTimeout(() => {
+        const currentCategory = this.categories.find(c => c.id === currentCategoryId);
+        if (!currentCategory) {
+          this.form.patchValue({ categoryId: '' }, { emitEvent: false });
+        }
+      }, 100);
     }
   }
 
