@@ -317,12 +317,15 @@ export class AdminDashboardComponent implements OnInit {
           allInvoicePayments,
         }) => {
           // Extract data from profit and loss report
-          // Revenue is from sales invoices only (not expenses)
-          const totalRevenue = profitAndLoss?.revenue?.amount ?? 0;
+          // Use NET revenue (invoices - credit notes + debit notes) for consistency across reports
+          // Backend provides both gross (amount/vat) and net (netAmount/netVat) fields.
+          const totalRevenue =
+            profitAndLoss?.revenue?.netAmount ?? profitAndLoss?.revenue?.amount ?? 0;
           const totalExpenses = profitAndLoss?.expenses?.total ?? 0;
-          // Calculate net profit explicitly: Revenue (sales only) - Expenses
-          const netProfit = totalRevenue - totalExpenses;
-          const revenueVat = profitAndLoss?.revenue?.vat ?? 0;
+          // Prefer backend netProfit (already based on net revenue), fall back to calculation.
+          const netProfit = profitAndLoss?.summary?.netProfit ?? (totalRevenue - totalExpenses);
+          const revenueVat =
+            profitAndLoss?.revenue?.netVat ?? profitAndLoss?.revenue?.vat ?? 0;
           const expenseVat = profitAndLoss?.expenses?.vat ?? 0;
           
           // Calculate VAT summary from P&L data

@@ -519,7 +519,8 @@ export class AdminReportsComponent implements OnInit {
         {
           label: 'Amount (AED)',
           data: [
-            data.revenue?.amount || 0,
+            // Use NET revenue for consistency (invoices - credit notes + debit notes)
+            data.revenue?.netAmount ?? data.revenue?.amount ?? 0,
             data.expenses?.total || 0,
             data.summary?.netProfit || 0,
           ],
@@ -741,8 +742,9 @@ export class AdminReportsComponent implements OnInit {
         {
           label: 'Amount (AED)',
           data: [
-            data.summary.vatInput || 0,
-            data.summary.vatOutput || 0,
+            // Use NET input/output so the chart reconciles with Net VAT
+            data.summary.netVatInput ?? data.summary.vatInput ?? 0,
+            data.summary.netVatOutput ?? data.summary.vatOutput ?? 0,
             data.summary.netVat || 0,
           ],
           backgroundColor: [

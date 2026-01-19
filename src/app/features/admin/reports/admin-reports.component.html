@@ -245,7 +245,7 @@
           </div>
 
           <!-- VAT Accounts Section -->
-          <ng-container *ngIf="generatedReport?.data?.accounts as accounts">
+          <ng-container *ngIf="generatedReport.data.accounts as accounts">
             <div class="vat-section" *ngIf="getVatAccounts(accounts).length > 0">
               <h3 class="section-title">
                 <mat-icon>receipt</mat-icon>
@@ -943,14 +943,14 @@
           <div class="report-summary" *ngIf="generatedReport.data.summary">
             <div class="summary-card">
               <div class="summary-label">VAT Input</div>
-              <div class="summary-value" [class.positive-amount]="(generatedReport.data.summary.vatInput || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.vatInput || 0) < 0">
-                {{ formatCurrency(generatedReport.data.summary.vatInput || 0, true) }}
+              <div class="summary-value" [class.positive-amount]="(generatedReport.data.summary.netVatInput ?? generatedReport.data.summary.vatInput ?? 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.netVatInput ?? generatedReport.data.summary.vatInput ?? 0) < 0">
+                {{ formatCurrency((generatedReport.data.summary.netVatInput ?? generatedReport.data.summary.vatInput ?? 0), true) }}
               </div>
             </div>
             <div class="summary-card">
               <div class="summary-label">VAT Output</div>
-              <div class="summary-value" [class.credit-amount]="(generatedReport.data.summary.vatOutput || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.vatOutput || 0) < 0">
-                {{ formatCurrency(generatedReport.data.summary.vatOutput || 0, true) }}
+              <div class="summary-value" [class.credit-amount]="(generatedReport.data.summary.netVatOutput ?? generatedReport.data.summary.vatOutput ?? 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.netVatOutput ?? generatedReport.data.summary.vatOutput ?? 0) < 0">
+                {{ formatCurrency((generatedReport.data.summary.netVatOutput ?? generatedReport.data.summary.vatOutput ?? 0), true) }}
               </div>
             </div>
             <div class="summary-card">
@@ -1010,8 +1010,8 @@
                 <tr mat-header-row *matHeaderRowDef="['date', 'description', 'amount', 'vatRate', 'vatAmount', 'trn']"></tr>
                 <tr mat-row *matRowDef="let row; columns: ['date', 'description', 'amount', 'vatRate', 'vatAmount', 'trn']"></tr>
               </table>
-              <div class="section-total" *ngIf="generatedReport.data.summary" [class.positive-amount]="(generatedReport.data.summary.vatInput || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.vatInput || 0) < 0">
-                Total VAT Input: {{ formatCurrency(generatedReport.data.summary.vatInput || 0, true) }}
+              <div class="section-total" *ngIf="generatedReport.data.summary" [class.positive-amount]="(generatedReport.data.summary.netVatInput ?? generatedReport.data.summary.vatInput ?? 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.netVatInput ?? generatedReport.data.summary.vatInput ?? 0) < 0">
+                Total VAT Input: {{ formatCurrency((generatedReport.data.summary.netVatInput ?? generatedReport.data.summary.vatInput ?? 0), true) }}
               </div>
             </div>
 
