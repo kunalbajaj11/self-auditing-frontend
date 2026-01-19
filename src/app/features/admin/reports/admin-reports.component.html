@@ -652,20 +652,20 @@
               <div class="section-details">
                 <div class="detail-row">
                   <span>Amount:</span>
-                  <span [class.credit-amount]="(generatedReport.data.revenue?.amount || 0) >= 0" [class.negative-amount]="(generatedReport.data.revenue?.amount || 0) < 0">
-                    {{ formatCurrency(generatedReport.data.revenue?.amount || 0, true) }}
+                  <span [class.credit-amount]="((generatedReport.data.revenue?.netAmount ?? generatedReport.data.revenue?.amount) || 0) >= 0" [class.negative-amount]="((generatedReport.data.revenue?.netAmount ?? generatedReport.data.revenue?.amount) || 0) < 0">
+                    {{ formatCurrency((generatedReport.data.revenue?.netAmount ?? generatedReport.data.revenue?.amount) || 0, true) }}
                   </span>
                 </div>
                 <div class="detail-row">
                   <span>VAT:</span>
-                  <span [class.credit-amount]="(generatedReport.data.revenue?.vat || 0) >= 0" [class.negative-amount]="(generatedReport.data.revenue?.vat || 0) < 0">
-                    {{ formatCurrency(generatedReport.data.revenue?.vat || 0, true) }}
+                  <span [class.credit-amount]="((generatedReport.data.revenue?.netVat ?? generatedReport.data.revenue?.vat) || 0) >= 0" [class.negative-amount]="((generatedReport.data.revenue?.netVat ?? generatedReport.data.revenue?.vat) || 0) < 0">
+                    {{ formatCurrency((generatedReport.data.revenue?.netVat ?? generatedReport.data.revenue?.vat) || 0, true) }}
                   </span>
                 </div>
                 <div class="detail-row total">
                   <span>Total:</span>
-                  <span [class.credit-amount]="(generatedReport.data.revenue?.total || 0) >= 0" [class.negative-amount]="(generatedReport.data.revenue?.total || 0) < 0">
-                    {{ formatCurrency(generatedReport.data.revenue?.total || 0, true) }}
+                  <span [class.credit-amount]="((generatedReport.data.revenue?.netTotal ?? generatedReport.data.revenue?.total) || 0) >= 0" [class.negative-amount]="((generatedReport.data.revenue?.netTotal ?? generatedReport.data.revenue?.total) || 0) < 0">
+                    {{ formatCurrency((generatedReport.data.revenue?.netTotal ?? generatedReport.data.revenue?.total) || 0, true) }}
                   </span>
                 </div>
               </div>
