@@ -418,13 +418,17 @@ export class SuperAdminOrganizationsComponent implements OnInit {
     this.organizationService
       .updateOrganization(org.id, { enablePayroll: enabled })
       .subscribe({
-        next: () => {
-          org.enablePayroll = enabled;
+        next: (updated) => {
+          // Update local state from API response to ensure consistency
+          org.enablePayroll = updated.enablePayroll ?? enabled;
           this.snackBar.open(
-            `Payroll ${enabled ? 'enabled' : 'disabled'} for ${org.name}`,
+            `Payroll ${org.enablePayroll ? 'enabled' : 'disabled'} for ${org.name}`,
             'Close',
             { duration: 3000 },
           );
+          // Refresh the list to ensure cache is invalidated on backend
+          // This ensures reloads show the correct state
+          this.loadOrganizations();
         },
         error: () => {
           this.snackBar.open(
@@ -442,13 +446,17 @@ export class SuperAdminOrganizationsComponent implements OnInit {
     this.organizationService
       .updateOrganization(org.id, { enableInventory: enabled })
       .subscribe({
-        next: () => {
-          org.enableInventory = enabled;
+        next: (updated) => {
+          // Update local state from API response to ensure consistency
+          org.enableInventory = updated.enableInventory ?? enabled;
           this.snackBar.open(
-            `Inventory ${enabled ? 'enabled' : 'disabled'} for ${org.name}`,
+            `Inventory ${org.enableInventory ? 'enabled' : 'disabled'} for ${org.name}`,
             'Close',
             { duration: 3000 },
           );
+          // Refresh the list to ensure cache is invalidated on backend
+          // This ensures reloads show the correct state
+          this.loadOrganizations();
         },
         error: () => {
           this.snackBar.open(

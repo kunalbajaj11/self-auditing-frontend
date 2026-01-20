@@ -9,6 +9,7 @@ import { VendorsService, Vendor } from '../../../core/services/vendors.service';
 import { SettingsService, TaxSettings } from '../../../core/services/settings.service';
 import { ExpenseTypesService, ExpenseType as ExpenseTypeEntity } from '../../../core/services/expense-types.service';
 import { ProductsService, Product } from '../../../core/services/products.service';
+import { SalesInvoicesService } from '../../../core/services/sales-invoices.service';
 import { Expense, ExpenseType, VatTaxType, PurchaseLineItem } from '../../../core/models/expense.model';
 import { Observable, of } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
@@ -37,9 +38,29 @@ export class ExpenseFormDialogComponent implements OnInit {
   filteredVendors$!: Observable<Vendor[]>; // Will be initialized in setupVendorAutocomplete()
   selectedVendor: Vendor | null = null;
 
-  // Products for line items
+  // Item suggestions autocomplete (from past invoices and expenses)
+  itemSuggestionsMap = new Map<number, Observable<Array<{
+    itemName: string;
+    description?: string;
+    unitPrice: number;
+    vatRate: number;
+    vatTaxType: string;
+    unitOfMeasure?: string;
+    usageCount: number;
+  }>>>();
+  activeItemIndex: number | null = null;
+  filteredItems$: Observable<Array<{
+    itemName: string;
+    description?: string;
+    unitPrice: number;
+    vatRate: number;
+    vatTaxType: string;
+    unitOfMeasure?: string;
+    usageCount: number;
+  }>> = of([]);
+  
+  // Legacy products for backward compatibility (if needed)
   products: Product[] = [];
-  filteredProducts$: Observable<Product[]>[] = []; // Array of observables for each line item
   
   @ViewChildren(MatAutocomplete) productAutocompletes!: QueryList<MatAutocomplete>;
 
@@ -70,6 +91,7 @@ export class ExpenseFormDialogComponent implements OnInit {
     private readonly settingsService: SettingsService,
     private readonly expenseTypesService: ExpenseTypesService,
     private readonly productsService: ProductsService,
+    private readonly salesInvoicesService: SalesInvoicesService,
     private readonly snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) readonly data: Expense | { attachment?: any; ocrResult?: any } | null,
   ) {
@@ -122,8 +144,11 @@ export class ExpenseFormDialogComponent implements OnInit {
     // Setup vendor autocomplete
     this.setupVendorAutocomplete();
 
-    // Load products for line items
+    // Load products for line items (legacy support, but we'll use item suggestions instead)
     this.loadProducts();
+    
+    // Initialize filteredItems$ with empty suggestions
+    this.filteredItems$ = this.salesInvoicesService.getItemSuggestions();
 
     // Watch for expense type selection changes (system or custom) to update payload fields and filter categories
     this.form.get('expenseTypeKey')?.valueChanges.subscribe((key) => {
@@ -756,8 +781,13 @@ export class ExpenseFormDialogComponent implements OnInit {
   }
 
   removeLineItem(index: number): void {
+    this.itemSuggestionsMap.delete(index);
     this.lineItemsFormArray.removeAt(index);
-    this.filteredProducts$.splice(index, 1);
+    // Re-index remaining items
+    this.itemSuggestionsMap.clear();
+    this.lineItemsFormArray.controls.forEach((control, idx) => {
+      this.setupProductAutocomplete(idx);
+    });
     this.calculateTotalsFromLineItems();
   }
 
@@ -767,36 +797,92 @@ export class ExpenseFormDialogComponent implements OnInit {
 
     if (!itemNameControl) return;
 
-    // Initialize filtered products observable for this line item
-    this.filteredProducts$[index] = itemNameControl.valueChanges.pipe(
+    // Initialize filtered item suggestions observable for this line item
+    const filteredItems$ = itemNameControl.valueChanges.pipe(
       startWith(''),
       debounceTime(300),
       distinctUntilChanged(),
       switchMap((searchTerm: string | null) => {
-        const search = searchTerm || '';
-        if (!search || search.length < 2) {
-          return of(this.products.slice(0, 10));
+        const search = (searchTerm || '').trim();
+        if (search.length < 1) {
+          // Show top suggestions when empty
+          return this.salesInvoicesService.getItemSuggestions();
         }
-        const filtered = this.products.filter(p =>
-          p.name.toLowerCase().includes(search.toLowerCase()) ||
-          (p.sku && p.sku.toLowerCase().includes(search.toLowerCase()))
-        );
-        return of(filtered.slice(0, 10));
+        return this.salesInvoicesService.getItemSuggestions(search);
       }),
+      map((suggestions) => suggestions.slice(0, 10)), // Limit to 10 suggestions
     );
 
-    // Watch for product selection
-    itemNameControl.valueChanges.subscribe((value) => {
-      // Check if value matches a product
-      const product = this.products.find(p =>
-        p.name === value || (p.sku && p.sku === value)
-      );
-      if (product) {
-        this.onProductSelected(index, product);
-      }
-    });
+    this.itemSuggestionsMap.set(index, filteredItems$);
   }
 
+  onItemNameFocus(index: number): void {
+    this.activeItemIndex = index;
+    const lineItemGroup = this.lineItemsFormArray.at(index) as FormGroup;
+    if (lineItemGroup) {
+      const itemNameControl = lineItemGroup.get('itemName');
+      if (itemNameControl) {
+        this.filteredItems$ = itemNameControl.valueChanges.pipe(
+          startWith(itemNameControl.value || ''),
+          debounceTime(300),
+          distinctUntilChanged(),
+          switchMap((searchTerm: string | null) => {
+            const search = (searchTerm || '').trim();
+            if (search.length < 1) {
+              return this.salesInvoicesService.getItemSuggestions();
+            }
+            return this.salesInvoicesService.getItemSuggestions(search);
+          }),
+          map((suggestions) => suggestions.slice(0, 10)),
+        );
+      }
+    }
+  }
+
+  getItemSuggestions(index: number): Observable<Array<{
+    itemName: string;
+    description?: string;
+    unitPrice: number;
+    vatRate: number;
+    vatTaxType: string;
+    unitOfMeasure?: string;
+    usageCount: number;
+  }>> {
+    return this.itemSuggestionsMap.get(index) || of([]);
+  }
+
+  onItemSelected(index: number, selectedItem: {
+    itemName: string;
+    description?: string;
+    unitPrice: number;
+    vatRate: number;
+    vatTaxType: string;
+    unitOfMeasure?: string;
+  }): void {
+    const lineItemGroup = this.lineItemsFormArray.at(index) as FormGroup;
+    if (!lineItemGroup) return;
+
+    // Convert vatTaxType from uppercase (STANDARD) to lowercase (standard) if needed
+    const vatTaxType = (selectedItem.vatTaxType || 'STANDARD').toLowerCase() as VatTaxType;
+    const normalizedVatTaxType = ['standard', 'zero_rated', 'exempt', 'reverse_charge'].includes(vatTaxType) 
+      ? vatTaxType 
+      : 'standard' as VatTaxType;
+
+    // Auto-fill fields from selected suggestion
+    lineItemGroup.patchValue({
+      itemName: selectedItem.itemName,
+      description: selectedItem.description || lineItemGroup.get('description')?.value || '',
+      unitPrice: selectedItem.unitPrice || lineItemGroup.get('unitPrice')?.value || 0,
+      vatRate: selectedItem.vatRate || this.defaultTaxRate,
+      vatTaxType: normalizedVatTaxType,
+      unitOfMeasure: selectedItem.unitOfMeasure || lineItemGroup.get('unitOfMeasure')?.value || 'unit',
+    }, { emitEvent: true }); // Emit events to trigger calculations
+
+    // Recalculate line item
+    this.calculateLineItemTotal(index);
+  }
+
+  // Legacy method for backward compatibility
   onProductSelected(index: number, product: Product): void {
     const lineItemGroup = this.lineItemsFormArray.at(index) as FormGroup;
     const vatRate = product.vatRate ? parseFloat(product.vatRate) : this.defaultTaxRate;
@@ -813,6 +899,13 @@ export class ExpenseFormDialogComponent implements OnInit {
     this.calculateLineItemTotal(index);
   }
 
+  displayItemName(item: { itemName: string } | string | null): string {
+    if (!item) return '';
+    if (typeof item === 'string') return item;
+    return item.itemName || '';
+  }
+
+  // Legacy method for backward compatibility
   displayProduct(product: Product | string | null): string {
     if (!product) return '';
     if (typeof product === 'string') return product;

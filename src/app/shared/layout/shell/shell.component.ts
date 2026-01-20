@@ -323,19 +323,29 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       
       // Payroll feature flag: keep visible but disabled when off
-      if (label === 'payroll' || route.includes('/payroll')) {
+      // Check both parent label and child routes (case-insensitive)
+      const isPayrollItem = label === 'payroll' || route.includes('/payroll');
+      if (isPayrollItem) {
         if (!this.isPayrollEnabled) {
           item.disabled = true;
           item.disabledReason = 'Payroll is not enabled for this organization';
+        } else {
+          // Ensure enabled items are not disabled
+          item.disabled = false;
         }
         return true;
       }
       
       // Inventory feature flag: keep visible but disabled when off
-      if (label === 'inventory' || route.includes('/inventory')) {
+      // Check both parent label and child routes (case-insensitive)
+      const isInventoryItem = label === 'inventory' || route.includes('/inventory');
+      if (isInventoryItem) {
         if (!this.isInventoryEnabled) {
           item.disabled = true;
           item.disabledReason = 'Inventory is not enabled for this organization';
+        } else {
+          // Ensure enabled items are not disabled
+          item.disabled = false;
         }
         return true;
       }
@@ -347,6 +357,9 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
         if (!this.isInventoryEnabled) {
           item.disabled = true;
           item.disabledReason = 'Inventory is not enabled for this organization';
+        } else {
+          // Ensure enabled items are not disabled
+          item.disabled = false;
         }
         return true;
       }

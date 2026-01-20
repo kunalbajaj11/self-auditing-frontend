@@ -57,6 +57,26 @@
         </div>
 
         <div formArrayName="lineItems" class="line-items-list">
+          <!-- Shared autocomplete panel for item suggestions -->
+          <mat-autocomplete
+            #itemAuto="matAutocomplete"
+            [displayWith]="displayItemName"
+            (optionSelected)="onItemSelected(activeItemIndex !== null ? activeItemIndex : 0, $event.option.value)"
+            [panelWidth]="'auto'"
+          >
+            <mat-option *ngFor="let suggestion of filteredItems$ | async" [value]="suggestion">
+              <div class="item-suggestion">
+                <span class="item-name">{{ suggestion.itemName }}</span>
+                <span *ngIf="suggestion.description" class="item-description">{{ suggestion.description }}</span>
+                <span class="item-details">
+                  AED {{ suggestion.unitPrice | number: '1.2-2' }} 
+                  · VAT: {{ suggestion.vatRate }}% 
+                  · Used {{ suggestion.usageCount }} time{{ suggestion.usageCount !== 1 ? 's' : '' }}
+                </span>
+              </div>
+            </mat-option>
+          </mat-autocomplete>
+
           <ng-container
             *ngFor="let lineItem of lineItemsFormArray.controls; let i = index"
           >
@@ -70,21 +90,10 @@
                   <input
                     matInput
                     formControlName="itemName"
-                    [matAutocomplete]="productAuto"
+                    [matAutocomplete]="itemAuto"
                     placeholder="Search product or enter item name"
+                    (focus)="onItemNameFocus(i)"
                   />
-                  <mat-autocomplete
-                    #productAuto="matAutocomplete"
-                    [displayWith]="displayProduct"
-                    (optionSelected)="onProductSelected(i, $event.option.value)"
-                  >
-                    <mat-option *ngFor="let product of (filteredProducts$[i] | async)" [value]="product">
-                      <div class="product-option">
-                        <span class="product-name">{{ product.name }}</span>
-                        <span *ngIf="product.sku" class="product-sku">SKU: {{ product.sku }}</span>
-                      </div>
-                    </mat-option>
-                  </mat-autocomplete>
                 </mat-form-field>
 
               <mat-form-field appearance="outline" class="flex-1">

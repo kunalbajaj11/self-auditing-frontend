@@ -666,6 +666,34 @@ mat-form-field {
   }
 }
 
+// Item suggestion styling (for autocomplete)
+.item-suggestion {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+
+  .item-name {
+    font-weight: 500;
+    color: #0f172a;
+    font-size: 0.938rem;
+  }
+
+  .item-description {
+    font-size: 0.813rem;
+    color: #64748b;
+    font-style: italic;
+  }
+
+  .item-details {
+    font-size: 0.75rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
 // Dialog Actions
 mat-dialog-actions {
   padding: 24px 40px !important;
