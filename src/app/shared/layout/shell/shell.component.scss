@@ -126,6 +126,26 @@
     }
   }
 
+  .nav-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none; // ensure non-clickable
+
+    &:hover {
+      background: transparent;
+      color: #333333;
+      transform: none;
+    }
+
+    .lock-icon {
+      margin-left: 6px;
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      color: #999999;
+    }
+  }
+
   .nav-group {
     margin-bottom: 3px;
   }

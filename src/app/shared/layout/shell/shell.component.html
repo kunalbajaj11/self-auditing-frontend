@@ -37,41 +37,72 @@
                 class="nav-group-children"
                 [class.expanded]="isNavGroupExpanded(item.label)"
               >
-                <a
-                  mat-list-item
-                  class="nav-child"
-                  *ngFor="let child of item.children"
-                  [routerLink]="child.route"
-                  [queryParams]="child.queryParams"
-                  routerLinkActive="active-child"
-                  [routerLinkActiveOptions]="{ exact: true }"
-                  (click)="closeDrawerIfHandset(drawer)"
-                >
-                  <span>{{ child.label }}</span>
-                  <span class="badge" *ngIf="child.badgeCount$ | async as count">
-                    {{ count }}
-                  </span>
-                </a>
+                <ng-container *ngFor="let child of item.children">
+                  <a
+                    *ngIf="!isNavItemDisabled(child); else disabledChildLink"
+                    mat-list-item
+                    class="nav-child"
+                    [routerLink]="child.route"
+                    [queryParams]="child.queryParams"
+                    routerLinkActive="active-child"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    (click)="closeDrawerIfHandset(drawer)"
+                  >
+                    <span>{{ child.label }}</span>
+                    <span class="badge" *ngIf="child.badgeCount$ | async as count">
+                      {{ count }}
+                    </span>
+                  </a>
+                  <ng-template #disabledChildLink>
+                    <div
+                      mat-list-item
+                      class="nav-child nav-disabled"
+                      [matTooltip]="child.disabledReason || 'Locked'"
+                    >
+                      <span>{{ child.label }}</span>
+                      <span class="badge" *ngIf="child.badgeCount$ | async as count">
+                        {{ count }}
+                      </span>
+                      <mat-icon class="lock-icon">lock</mat-icon>
+                    </div>
+                  </ng-template>
+                </ng-container>
               </div>
             </div>
           </ng-container>
           <ng-template #singleLink>
-            <a
-              mat-list-item
-              class="nav-link"
-              *ngIf="item.route"
-              [routerLink]="item.route"
-              [queryParams]="item.queryParams"
-              routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }"
-              (click)="closeDrawerIfHandset(drawer)"
-            >
-              <mat-icon matListIcon>{{ item.icon || 'chevron_right' }}</mat-icon>
-              <span matLine>{{ item.label }}</span>
-              <span class="badge" *ngIf="item.badgeCount$ | async as count">
-                {{ count }}
-              </span>
-            </a>
+            <ng-container *ngIf="item.route">
+              <a
+                *ngIf="!isNavItemDisabled(item); else disabledSingleLink"
+                mat-list-item
+                class="nav-link"
+                [routerLink]="item.route"
+                [queryParams]="item.queryParams"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+                (click)="closeDrawerIfHandset(drawer)"
+              >
+                <mat-icon matListIcon>{{ item.icon || 'chevron_right' }}</mat-icon>
+                <span matLine>{{ item.label }}</span>
+                <span class="badge" *ngIf="item.badgeCount$ | async as count">
+                  {{ count }}
+                </span>
+              </a>
+              <ng-template #disabledSingleLink>
+                <div
+                  mat-list-item
+                  class="nav-link nav-disabled"
+                  [matTooltip]="item.disabledReason || 'Locked'"
+                >
+                  <mat-icon matListIcon>{{ item.icon || 'chevron_right' }}</mat-icon>
+                  <span matLine>{{ item.label }}</span>
+                  <span class="badge" *ngIf="item.badgeCount$ | async as count">
+                    {{ count }}
+                  </span>
+                  <mat-icon class="lock-icon">lock</mat-icon>
+                </div>
+              </ng-template>
+            </ng-container>
           </ng-template>
         </ng-container>
       </mat-nav-list>
@@ -79,7 +110,7 @@
         <div class="contact-info">
           <mat-icon>phone</mat-icon>
           <span class="contact-label">For queries:</span>
-          <span class="contact-number">+971 58 900 3150</span>
+          <span class="contact-number">+971-58-900-3150</span>
         </div>
         <button mat-stroked-button color="primary" (click)="logout()">
           <mat-icon>logout</mat-icon>

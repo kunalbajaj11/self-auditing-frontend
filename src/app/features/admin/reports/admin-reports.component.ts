@@ -1,11 +1,13 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { ReportsService } from '../../../core/services/reports.service';
 import { ApiService } from '../../../core/services/api.service';
 import { GeneratedReport, ReportType } from '../../../core/models/report.model';
+import { LicenseService } from '../../../core/services/license.service';
+import { take } from 'rxjs/operators';
 
 interface ReportConfig {
   value: ReportType;
@@ -109,6 +111,8 @@ export class AdminReportsComponent implements OnInit {
     private readonly snackBar: MatSnackBar,
     private readonly api: ApiService,
     private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly licenseService: LicenseService,
   ) {
     this.form = this.fb.group({
       reportType: [''],
@@ -213,33 +217,58 @@ export class AdminReportsComponent implements OnInit {
   ngOnInit(): void {
     // Get report type from route data
     const reportType = this.route.snapshot.data['reportType'] as ReportType;
-    if (reportType) {
-      this.selectedReport = this.reports.find(r => r.value === reportType) || null;
-      if (this.selectedReport) {
-        this.form.patchValue({ reportType: this.selectedReport.value });
-      } else {
-        // Fallback: redirect to trial balance if report type not found
-        console.warn(`Report type ${reportType} not found, redirecting to trial balance`);
-      }
-    } else {
-      // If no report type in route, default to trial balance
-      this.selectedReport = this.reports.find(r => r.value === 'trial_balance') || null;
-      if (this.selectedReport) {
-        this.form.patchValue({ reportType: this.selectedReport.value });
-      }
-    }
+    this.licenseService
+      .isInventoryEnabled()
+      .pipe(take(1))
+      .subscribe((isInventoryEnabled) => {
+        // Stock Balance report is inventory-controlled
+        if (reportType === 'stock_balance' && !isInventoryEnabled) {
+          this.snackBar.open(
+            'Inventory is not enabled for this organization. Stock Balance Report is unavailable.',
+            'Close',
+            { duration: 4500 },
+          );
+          this.router.navigate(['/admin/reports/trial-balance']);
+          return;
+        }
 
-    // Set default date range to this month
-    const today = new Date();
-    const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-    const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    this.form.patchValue({
-      startDate: startDate.toISOString().substring(0, 10),
-      endDate: endDate.toISOString().substring(0, 10),
-    });
+        if (reportType) {
+          this.selectedReport =
+            this.reports.find((r) => r.value === reportType) || null;
+          if (this.selectedReport) {
+            this.form.patchValue({ reportType: this.selectedReport.value });
+          } else {
+            // Fallback: keep component usable even if route data is wrong
+            console.warn(
+              `Report type ${reportType} not found, defaulting to trial balance`,
+            );
+            this.selectedReport =
+              this.reports.find((r) => r.value === 'trial_balance') || null;
+            if (this.selectedReport) {
+              this.form.patchValue({ reportType: this.selectedReport.value });
+            }
+          }
+        } else {
+          // If no report type in route, default to trial balance
+          this.selectedReport =
+            this.reports.find((r) => r.value === 'trial_balance') || null;
+          if (this.selectedReport) {
+            this.form.patchValue({ reportType: this.selectedReport.value });
+          }
+        }
 
-    // Load filter options (vendors and customers)
-    this.loadFilterOptions();
+        // Set default date range to this month
+        const today = new Date();
+        const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        this.form.patchValue({
+          startDate: startDate.toISOString().substring(0, 10),
+          endDate: endDate.toISOString().substring(0, 10),
+        });
+
+        // Load filter options (vendors and customers)
+        this.loadFilterOptions();
+      });
   }
 
   private loadFilterOptions(): void {

@@ -20,6 +20,8 @@ interface ShellNavItemConfig {
   badgeKey?: BadgeKey;
   children?: ShellNavItemConfig[];
   queryParams?: Record<string, any>;
+  disabled?: boolean;
+  disabledReason?: string;
 }
 
 interface ShellNavItem extends ShellNavItemConfig {
@@ -285,8 +287,13 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
           }
           return true;
         }
-        // Hide all other modules for Standard
-        return false;
+        // Keep other modules visible but disabled (locked) for Standard
+        item.disabled = true;
+        item.disabledReason = 'Upgrade your plan to unlock this feature';
+        if (item.children) {
+          item.children = this.filterNavItemsByLicense(item.children);
+        }
+        return true;
       }
       
       // For Premium and Enterprise: Show all modules
@@ -295,9 +302,6 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
       // Check children too
       if (item.children) {
         const filteredChildren = this.filterNavItemsByLicense(item.children);
-        if (filteredChildren.length === 0) {
-          return false; // Hide parent if all children are filtered out
-        }
         item.children = filteredChildren;
       }
       
@@ -318,17 +322,41 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
         return false;
       }
       
-      // Filter payroll and inventory based on license feature flags
+      // Payroll feature flag: keep visible but disabled when off
       if (label === 'payroll' || route.includes('/payroll')) {
-        return this.isPayrollEnabled;
+        if (!this.isPayrollEnabled) {
+          item.disabled = true;
+          item.disabledReason = 'Payroll is not enabled for this organization';
+        }
+        return true;
       }
       
+      // Inventory feature flag: keep visible but disabled when off
       if (label === 'inventory' || route.includes('/inventory')) {
-        return this.isInventoryEnabled;
+        if (!this.isInventoryEnabled) {
+          item.disabled = true;
+          item.disabledReason = 'Inventory is not enabled for this organization';
+        }
+        return true;
+      }
+
+      // Inventory-controlled report: Stock Balance should only be visible when inventory is enabled
+      const isStockBalanceReport =
+        route.includes('/reports/stock-balance') || label.includes('stock balance');
+      if (isStockBalanceReport) {
+        if (!this.isInventoryEnabled) {
+          item.disabled = true;
+          item.disabledReason = 'Inventory is not enabled for this organization';
+        }
+        return true;
       }
       
       return true;
     });
+  }
+
+  isNavItemDisabled(item: ShellNavItemConfig): boolean {
+    return Boolean(item.disabled);
   }
 
   private enrichNavItem(item: ShellNavItemConfig): ShellNavItem {

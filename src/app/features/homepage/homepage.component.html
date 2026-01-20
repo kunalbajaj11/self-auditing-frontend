@@ -1,52 +1,53 @@
 <div class="homepage-container">
-  <!-- Hero Section -->
-  <section class="hero-section" aria-label="Hero section">
-    <div class="hero-background">
-      <div class="hero-gradient"></div>
-      <div class="hero-pattern"></div>
-      <div class="floating-shapes">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
-        <div class="shape shape-3"></div>
+  <div class="homepage-scale">
+    <!-- Hero Section -->
+    <section class="hero-section" aria-label="Hero section">
+      <div class="hero-background">
+        <div class="hero-gradient"></div>
+        <div class="hero-pattern"></div>
+        <div class="floating-shapes">
+          <div class="shape shape-1"></div>
+          <div class="shape shape-2"></div>
+          <div class="shape shape-3"></div>
+        </div>
       </div>
-    </div>
-    <div class="hero-content">
-      <div class="hero-logo">
-        <img src="assets/images/backless_logo_white.png" alt="SelfAccounting.AI Logo" class="logo-image" />
+      <div class="hero-content">
+        <div class="hero-logo">
+          <img src="assets/images/backless_logo_white.png" alt="SelfAccounting.AI Logo" class="logo-image" />
+        </div>
+        <h1 class="hero-title">
+          <span class="title-highlight">Self Accounting Software</span>
+          <span class="title-main">for UAE Businesses</span>
+        </h1>
+        <p class="hero-subtitle">
+          The leading self accounting platform for UAE businesses. SelfAccounting.AI provides comprehensive self accounting solutions including expense tracking, invoice management, payment recording, credit notes, and VAT compliance with AI-powered automation. Trusted by audit firms and accounting departments across the United Arab Emirates for reliable self accounting software.
+        </p>
+        <div class="hero-actions">
+          <button mat-raised-button class="cta-button cta-button-primary" (click)="navigateToRegister()" aria-label="Get started with SelfAccounting.AI">
+            <span>Get Started</span>
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+          <button *ngIf="false" mat-stroked-button class="cta-button cta-button-outline" (click)="navigateToPricing()" aria-label="View pricing plans">
+            View Pricing
+          </button>
+          <button mat-stroked-button class="cta-button cta-button-outline" (click)="navigateToLogin()" aria-label="Sign in to your account">
+            Sign In
+          </button>
+        </div>
+        <div class="hero-secondary-actions">
+          <a mat-stroked-button class="secondary-action-button download-manual-btn" href="assets/USER-MANUAL.pdf" download="SelfAccounting-User-Manual.pdf" aria-label="Download user manual PDF">
+            <mat-icon>download</mat-icon>
+            <span>Download User Manual</span>
+          </a>
+          <a mat-stroked-button class="secondary-action-button whatsapp-btn" [href]="whatsappLink" target="_blank" aria-label="Contact us on WhatsApp">
+            <svg class="whatsapp-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+            <span style="padding-left: 8px; vertical-align: text-bottom; height: 24px;">Chat on WhatsApp</span>
+          </a>
+        </div>
       </div>
-      <h1 class="hero-title">
-        <span class="title-highlight">Self Accounting Software</span>
-        <span class="title-main">for UAE Businesses</span>
-      </h1>
-      <p class="hero-subtitle">
-        The leading self accounting platform for UAE businesses. SelfAccounting.AI provides comprehensive self accounting solutions including expense tracking, invoice management, payment recording, credit notes, and VAT compliance with AI-powered automation. Trusted by audit firms and accounting departments across the United Arab Emirates for reliable self accounting software.
-      </p>
-      <div class="hero-actions">
-        <button mat-raised-button class="cta-button cta-button-primary" (click)="navigateToRegister()" aria-label="Get started with SelfAccounting.AI">
-          <span>Get Started</span>
-          <mat-icon>arrow_forward</mat-icon>
-        </button>
-        <button mat-stroked-button class="cta-button cta-button-outline" (click)="navigateToPricing()" aria-label="View pricing plans">
-          View Pricing
-        </button>
-        <button mat-stroked-button class="cta-button cta-button-outline" (click)="navigateToLogin()" aria-label="Sign in to your account">
-          Sign In
-        </button>
-      </div>
-      <div class="hero-secondary-actions">
-        <a mat-stroked-button class="secondary-action-button download-manual-btn" href="assets/USER-MANUAL.pdf" download="SelfAccounting-User-Manual.pdf" aria-label="Download user manual PDF">
-          <mat-icon>download</mat-icon>
-          <span>Download User Manual</span>
-        </a>
-        <a mat-stroked-button class="secondary-action-button whatsapp-btn" [href]="whatsappLink" target="_blank" aria-label="Contact us on WhatsApp">
-          <svg class="whatsapp-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-          </svg>
-          <span style="padding-left: 8px; vertical-align: text-bottom; height: 24px;">Chat on WhatsApp</span>
-        </a>
-      </div>
-    </div>
-  </section>
+    </section>
 
   <!-- Benefits Section -->
   <section class="benefits-section" aria-label="Benefits of using SelfAccounting.AI">
@@ -95,8 +96,8 @@
     </div>
   </section>
 
-  <!-- Use Cases Section -->
-  <section class="use-cases-section" aria-label="Who can use SelfAccounting.AI">
+    <!-- Use Cases Section -->
+    <section class="use-cases-section" aria-label="Who can use SelfAccounting.AI">
     <div class="section-container">
       <div class="section-header">
         <span class="section-badge">Perfect For</span>
@@ -143,8 +144,8 @@
     </div>
   </section>
 
-  <!-- CTA Section -->
-  <section class="cta-section" aria-label="Call to action">
+    <!-- CTA Section -->
+    <section class="cta-section" aria-label="Call to action">
     <div class="cta-background">
       <div class="cta-gradient"></div>
     </div>
@@ -162,8 +163,8 @@
     </div>
   </section>
 
-  <!-- Contact Form Section -->
-  <section class="contact-section" aria-label="Contact us">
+    <!-- Contact Form Section -->
+    <section class="contact-section" aria-label="Contact us">
     <div class="section-container">
       <div class="section-header">
         <span class="section-badge">Contact Us</span>
@@ -248,17 +249,18 @@
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="section-container">
-      <p>&copy; {{ currentYear }} SelfAccounting.AI. All rights reserved.</p>
-      <div class="footer-links">
-        <a href="/auth/login">Sign In</a>
-        <a href="/auth/register">Register</a>
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="section-container">
+        <p>&copy; {{ currentYear }} SelfAccounting.AI. All rights reserved.</p>
+        <div class="footer-links">
+          <a href="/auth/login">Sign In</a>
+          <a href="/auth/register">Register</a>
+        </div>
+        <p class="powered-by">Powered by <a href="https://stryvon.ai" target="_blank" rel="noopener noreferrer">stryvon.ai</a></p>
       </div>
-      <p class="powered-by">Powered by <a href="https://stryvon.ai" target="_blank" rel="noopener noreferrer">stryvon.ai</a></p>
-    </div>
-  </footer>
+    </footer>
+  </div>
 
   <!-- Floating WhatsApp Button -->
   <a class="floating-whatsapp" [href]="whatsappLink" target="_blank" aria-label="Contact us on WhatsApp">
