@@ -10,9 +10,19 @@ export interface DebitNote {
   customerId?: string | null;
   customerName?: string | null;
   customerTrn?: string | null;
+  customer?: {
+    id: string;
+    name: string;
+    customerTrn?: string | null;
+  } | null;
   vendorId?: string | null;
   vendorName?: string | null;
   vendorTrn?: string | null;
+  vendor?: {
+    id: string;
+    name: string;
+    vendorTrn?: string | null;
+  } | null;
   debitNoteDate: string;
   reason: string;
   amount: string;

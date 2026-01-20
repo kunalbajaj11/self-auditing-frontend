@@ -27,9 +27,15 @@
             </ng-container>
 
             <ng-container matColumnDef="customerName">
-              <th mat-header-cell *matHeaderCellDef>Customer</th>
+              <th mat-header-cell *matHeaderCellDef>Customer/Vendor</th>
               <td mat-cell *matCellDef="let debitNote">
-                {{ debitNote.customerName || '—' }}
+                {{
+                  debitNote.customer?.name ||
+                  debitNote.customerName ||
+                  debitNote.vendor?.name ||
+                  debitNote.vendorName ||
+                  '—'
+                }}
               </td>
             </ng-container>
 

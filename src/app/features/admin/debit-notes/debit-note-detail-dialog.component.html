@@ -38,18 +38,40 @@
       </div>
 
       <div class="customer-info">
-        <h3>Customer Information</h3>
+        <h3>{{ debitNote.vendor || debitNote.vendorId ? 'Vendor Information' : 'Customer Information' }}</h3>
         <div class="info-row">
           <span class="label">Name:</span>
-          <span class="value">{{ debitNote.customerName || '—' }}</span>
+          <span class="value">
+            {{
+              debitNote.vendor?.name ||
+              debitNote.vendorName ||
+              debitNote.customer?.name ||
+              debitNote.customerName ||
+              '—'
+            }}
+          </span>
         </div>
-        <div class="info-row" *ngIf="debitNote.customerTrn">
+        <div
+          class="info-row"
+          *ngIf="debitNote.vendor?.vendorTrn || debitNote.vendorTrn || debitNote.customer?.customerTrn || debitNote.customerTrn"
+        >
           <span class="label">TRN:</span>
-          <span class="value">{{ debitNote.customerTrn }}</span>
+          <span class="value">
+            {{
+              debitNote.vendor?.vendorTrn ||
+              debitNote.vendorTrn ||
+              debitNote.customer?.customerTrn ||
+              debitNote.customerTrn
+            }}
+          </span>
         </div>
         <div class="info-row" *ngIf="debitNote.invoiceId">
           <span class="label">Related Invoice:</span>
           <span class="value">{{ debitNote.invoiceId }}</span>
+        </div>
+        <div class="info-row" *ngIf="debitNote.expenseId">
+          <span class="label">Related Expense:</span>
+          <span class="value">{{ debitNote.expenseId }}</span>
         </div>
       </div>
     </div>
