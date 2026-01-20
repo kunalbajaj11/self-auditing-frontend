@@ -660,6 +660,22 @@ $shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
   padding: 100px 0;
   background: $bg-light;
 
+  .contact-email {
+    margin-top: 10px;
+    font-size: 1rem;
+    color: $text-gray;
+
+    a {
+      color: $primary-color;
+      text-decoration: none;
+      font-weight: 600;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
   .contact-form-card {
     max-width: 800px;
     margin: 0 auto;
@@ -738,18 +754,47 @@ $shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
   padding: 48px 0;
   background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
   color: white;
-  text-align: center;
+  text-align: left;
 
   .section-container {
+    display: block;
+  }
+
+  .footer-row {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 20px;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .footer-copy {
+    margin: 0;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+  }
+
+  .footer-email {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.85);
+
+    a {
+      color: rgba(255, 255, 255, 0.95);
+      text-decoration: none;
+      font-weight: 600;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 
   .footer-links {
     display: flex;
     gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
 
     a {
       color: rgba(255, 255, 255, 0.9);
@@ -766,16 +811,27 @@ $shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
     }
   }
 
-  .powered-by {
+  .footer-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-left: auto;
+  }
+
+  .footer-powered-by {
+    margin-top: 14px;
+    text-align: center;
     font-size: 0.875rem;
     color: rgba(255, 255, 255, 0.7);
-    margin-top: 8px;
 
     a {
       color: rgba(255, 255, 255, 0.9);
       text-decoration: none;
       font-weight: 600;
       transition: opacity 0.2s;
+      margin-left: 6px;
 
       &:hover {
         opacity: 1;
@@ -1026,6 +1082,18 @@ $shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
     .footer-links {
       flex-direction: column;
       gap: 12px;
+    }
+
+    .footer-row {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+    }
+
+    .footer-meta {
+      justify-content: center;
+      margin-left: 0;
     }
   }
 

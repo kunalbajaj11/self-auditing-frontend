@@ -257,6 +257,14 @@
         color: #0077c8;
         margin-left: auto;
       }
+
+      a.contact-number {
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
     }
 
     button {
