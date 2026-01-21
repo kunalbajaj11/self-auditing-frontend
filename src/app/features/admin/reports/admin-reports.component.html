@@ -421,20 +421,20 @@
               <div class="balance-amount">
                 <div class="balance-row">
                   <span>Assets:</span>
-                  <span [class.positive-amount]="(generatedReport.data.summary.periodAssets || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.periodAssets || 0) < 0">
-                    {{ formatCurrency(generatedReport.data.summary.periodAssets || 0, true) }}
+                  <span [class.positive-amount]="(generatedReport.data.summary.closingAssets || generatedReport.data.summary.totalAssets || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.closingAssets || generatedReport.data.summary.totalAssets || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.summary.closingAssets || generatedReport.data.summary.totalAssets || 0, true) }}
                   </span>
                 </div>
                 <div class="balance-row">
                   <span>Liabilities:</span>
-                  <span [class.credit-amount]="(generatedReport.data.summary.periodLiabilities || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.periodLiabilities || 0) < 0">
-                    {{ formatCurrency(generatedReport.data.summary.periodLiabilities || 0, true) }}
+                  <span [class.credit-amount]="(generatedReport.data.summary.closingLiabilities || generatedReport.data.summary.totalLiabilities || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.closingLiabilities || generatedReport.data.summary.totalLiabilities || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.summary.closingLiabilities || generatedReport.data.summary.totalLiabilities || 0, true) }}
                   </span>
                 </div>
                 <div class="balance-row">
                   <span>Equity:</span>
-                  <span [class.credit-amount]="(generatedReport.data.summary.periodEquity || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.periodEquity || 0) < 0">
-                    {{ formatCurrency(generatedReport.data.summary.periodEquity || 0, true) }}
+                  <span [class.credit-amount]="(generatedReport.data.summary.closingEquity || generatedReport.data.summary.totalEquity || 0) >= 0" [class.negative-amount]="(generatedReport.data.summary.closingEquity || generatedReport.data.summary.totalEquity || 0) < 0">
+                    {{ formatCurrency(generatedReport.data.summary.closingEquity || generatedReport.data.summary.totalEquity || 0, true) }}
                   </span>
                 </div>
               </div>
