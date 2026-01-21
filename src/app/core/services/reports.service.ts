@@ -23,6 +23,52 @@ export class ReportsService {
     return this.api.get<{ vendors: string[]; customers: string[] }>('/reports/filter-options');
   }
 
+  getDashboardSummary(filters?: { startDate?: string; endDate?: string }): Observable<{
+    profitAndLoss: {
+      revenue: { netAmount: number; netVat: number };
+      expenses: { total: number; vat: number };
+      summary: { netProfit: number };
+    };
+    payables: {
+      summary: {
+        totalAmount: number;
+        pendingItems: number;
+        paidItems: number;
+      };
+    };
+    receivables: {
+      summary: {
+        totalOutstanding: number;
+        unpaidInvoices: number;
+        partialInvoices: number;
+        overdueInvoices: number;
+      };
+    };
+  }> {
+    return this.api.get<{
+      profitAndLoss: {
+        revenue: { netAmount: number; netVat: number };
+        expenses: { total: number; vat: number };
+        summary: { netProfit: number };
+      };
+      payables: {
+        summary: {
+          totalAmount: number;
+          pendingItems: number;
+          paidItems: number;
+        };
+      };
+      receivables: {
+        summary: {
+          totalOutstanding: number;
+          unpaidInvoices: number;
+          partialInvoices: number;
+          overdueInvoices: number;
+        };
+      };
+    }>('/reports/dashboard-summary', filters);
+  }
+
   scheduleReport(payload: {
     type: ReportType;
     filters?: Record<string, any>;

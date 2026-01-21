@@ -237,60 +237,30 @@ export class AdminDashboardComponent implements OnInit {
     // Get date range from form
     const { startDate, endDate, periodLabel } = this.getDateRange();
 
-    // Get all expenses for accurate calculations
-    const allExpenses$ = this.expensesService.listExpenses({
-      startDate,
-      endDate,
-    });
-
     this.dashboard$ = this.organizationService.getMyOrganization().pipe(
       switchMap((organization) => {
+        // Fetch all expenses once (no date filter) - we'll filter in memory for period calculations
+        // This avoids duplicate queries and allows us to use the same data for recent expenses
+        const allExpenses$ = this.expensesService.listExpenses({}).pipe(
+          catchError(() => of([])),
+        );
+
         return forkJoin({
           organization: of(organization),
           uploadUsage: this.licenseKeysService.getUploadUsage(organization.id).pipe(
             catchError(() => of(undefined)),
           ),
-          profitAndLoss: this.reportsService
-        .generateReport({ 
-          type: 'profit_and_loss' as ReportType,
-          filters: { startDate, endDate }
-        })
-        .pipe(
-          catchError(() => of({ type: 'profit_and_loss' as ReportType, generatedAt: new Date().toISOString(), data: null } as GeneratedReport<any>)),
-          map((report: GeneratedReport<any>) => report.data)
-        ),
-      payables: this.reportsService
-        .generateReport({ type: 'payables' as ReportType })
-        .pipe(
-          catchError(() => of({ type: 'payables' as ReportType, generatedAt: new Date().toISOString(), data: null } as GeneratedReport<any>)),
-          map((report: GeneratedReport<any>) => report.data)
-        ),
-      receivables: this.reportsService
-        .generateReport({ type: 'receivables' as ReportType, filters: { endDate } })
-        .pipe(
-          catchError(() => of({ type: 'receivables' as ReportType, generatedAt: new Date().toISOString(), data: null } as GeneratedReport<any>)),
-          map((report: GeneratedReport<any>) => report.data)
-        ),
-      allInvoices: this.salesInvoicesService
-        .listInvoices({ startDate, endDate })
-        .pipe(
-          catchError(() => of([]))
-        ),
-      recentExpenses: this.expensesService
-        .listExpenses({})
-        .pipe(
-          map((expenses) =>
-            expenses
-              .slice()
-              .sort(
-                (a, b) =>
-                  new Date(b.expenseDate).getTime() -
-                  new Date(a.expenseDate).getTime(),
-              )
-              .slice(0, 8),
-          ),
-        ),
-      allExpenses: allExpenses$,
+          dashboardSummary: this.reportsService
+            .getDashboardSummary({ startDate, endDate })
+            .pipe(
+              catchError(() => of(null)),
+            ),
+          allInvoices: this.salesInvoicesService
+            .listInvoices({ startDate, endDate })
+            .pipe(
+              catchError(() => of([]))
+            ),
+          allExpenses: allExpenses$,
       // Load data for bank and cash balance calculations
       allPayments: this.expensePaymentsService.listPayments().pipe(
         catchError(() => of([]))
@@ -306,27 +276,27 @@ export class AdminDashboardComponent implements OnInit {
         ({
           organization,
           uploadUsage,
-          profitAndLoss,
-          payables,
-          receivables,
+          dashboardSummary,
           allInvoices,
-          recentExpenses,
           allExpenses,
           allPayments,
           allJournalEntries,
           allInvoicePayments,
         }) => {
-          // Extract data from profit and loss report
-          // Use NET revenue (invoices - credit notes + debit notes) for consistency across reports
-          // Backend provides both gross (amount/vat) and net (netAmount/netVat) fields.
+          // Filter expenses for the period
+          const periodExpenses = allExpenses.filter(
+            (exp) =>
+              exp.expenseDate >= startDate && exp.expenseDate <= endDate,
+          );
+
+          // Extract data from dashboard summary (lightweight, optimized queries)
           const totalRevenue =
-            profitAndLoss?.revenue?.netAmount ?? profitAndLoss?.revenue?.amount ?? 0;
-          const totalExpenses = profitAndLoss?.expenses?.total ?? 0;
-          // Prefer backend netProfit (already based on net revenue), fall back to calculation.
-          const netProfit = profitAndLoss?.summary?.netProfit ?? (totalRevenue - totalExpenses);
+            dashboardSummary?.profitAndLoss?.revenue?.netAmount ?? 0;
+          const totalExpenses = dashboardSummary?.profitAndLoss?.expenses?.total ?? 0;
+          const netProfit = dashboardSummary?.profitAndLoss?.summary?.netProfit ?? (totalRevenue - totalExpenses);
           const revenueVat =
-            profitAndLoss?.revenue?.netVat ?? profitAndLoss?.revenue?.vat ?? 0;
-          const expenseVat = profitAndLoss?.expenses?.vat ?? 0;
+            dashboardSummary?.profitAndLoss?.revenue?.netVat ?? 0;
+          const expenseVat = dashboardSummary?.profitAndLoss?.expenses?.vat ?? 0;
           
           // Calculate VAT summary from P&L data
           const inputVat = expenseVat;
@@ -335,30 +305,26 @@ export class AdminDashboardComponent implements OnInit {
           const taxableAmount = totalRevenue + totalExpenses;
 
           // Convert expense items from P&L to expense summary format
-          const expenseSummary: ExpenseSummaryRow[] = (profitAndLoss?.expenses?.items ?? []).map((item: any) => ({
-            category: item.category,
-            type: 'expense',
-            amount: item.amount,
-            vatAmount: item.vat,
-            totalAmount: item.total,
-          }));
+          // Note: Dashboard summary doesn't include expense items breakdown, so we'll use empty array
+          // If detailed breakdown is needed, we can fetch it separately or add to summary endpoint
+          const expenseSummary: ExpenseSummaryRow[] = [];
 
           // Convert payables to accrual summary format
           const accrualSummary: AccrualSummaryRow[] = [];
-          if (payables?.summary) {
+          if (dashboardSummary?.payables?.summary) {
             accrualSummary.push({
               status: 'pending_settlement',
-              count: payables.summary.pendingItems ?? 0,
-              amount: payables.summary.totalAmount ?? 0,
+              count: dashboardSummary.payables.summary.pendingItems ?? 0,
+              amount: dashboardSummary.payables.summary.totalAmount ?? 0,
             });
             accrualSummary.push({
               status: 'settled',
-              count: payables.summary.paidItems ?? 0,
+              count: dashboardSummary.payables.summary.paidItems ?? 0,
               amount: 0, // Settled items have 0 outstanding
             });
           }
 
-          // Count expenses
+          // Count expenses in period
           const expenseTypes = [
             'expense',
             'adjustment',
@@ -367,20 +333,30 @@ export class AdminDashboardComponent implements OnInit {
             'fixed_assets',
             'cost_of_sales',
           ];
-          const expenseCount = allExpenses.filter(
+          const expenseCount = periodExpenses.filter(
             (exp) => expenseTypes.includes(exp.type)
           ).length;
 
-          // Average expense amount
+          // Get recent expenses (top 8, sorted by date descending)
+          const recentExpenses = allExpenses
+            .slice()
+            .sort(
+              (a, b) =>
+                new Date(b.expenseDate).getTime() -
+                new Date(a.expenseDate).getTime(),
+            )
+            .slice(0, 8);
+
+          // Average expense amount (for period)
           const averageExpense = expenseCount > 0 ? totalExpenses / expenseCount : 0;
 
           // Invoice metrics
           // Total invoices: count all invoices in the period
           const totalInvoices = allInvoices?.length ?? 0;
-          // Outstanding invoices and amounts from receivables report (unpaid + partial)
-          const outstandingInvoices = (receivables?.summary?.unpaidInvoices ?? 0) + (receivables?.summary?.partialInvoices ?? 0);
-          const outstandingAmount = receivables?.summary?.totalOutstanding ?? 0;
-          const overdueInvoices = receivables?.summary?.overdueInvoices ?? 0;
+          // Outstanding invoices and amounts from dashboard summary (unpaid + partial)
+          const outstandingInvoices = (dashboardSummary?.receivables?.summary?.unpaidInvoices ?? 0) + (dashboardSummary?.receivables?.summary?.partialInvoices ?? 0);
+          const outstandingAmount = dashboardSummary?.receivables?.summary?.totalOutstanding ?? 0;
+          const overdueInvoices = dashboardSummary?.receivables?.summary?.overdueInvoices ?? 0;
 
           // Receivables amount (total outstanding)
           const receivablesAmount = outstandingAmount ?? 0;
@@ -389,7 +365,7 @@ export class AdminDashboardComponent implements OnInit {
           const vatPayable = netVatPayable;
 
           // Payables amount (total outstanding payables)
-          const payablesAmount = payables?.summary?.totalAmount ?? 0;
+          const payablesAmount = dashboardSummary?.payables?.summary?.totalAmount ?? 0;
 
           // Calculate Bank Balance
           // Bank transactions include:
@@ -523,7 +499,7 @@ export class AdminDashboardComponent implements OnInit {
         this.error = 'Unable to load dashboard data.';
         return of(null);
       }),
-        );
+    );
       }),
     );
   }
