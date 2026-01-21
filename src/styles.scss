@@ -260,7 +260,7 @@ button.mat-mdc-outlined-button {
   border-radius: 6px !important;
   font-weight: 500 !important;
   padding: 8px 16px !important;
-  font-size: 0.875rem !important;
+  font-size: 0.800rem !important;
   text-transform: none !important;
 }
 
@@ -342,7 +342,7 @@ table {
 
 // Reduced form field sizes globally
 .mat-mdc-form-field {
-  font-size: 0.875rem !important;
+  font-size: 0.800rem !important;
 
   .mat-mdc-text-field-wrapper {
     border-radius: 6px !important;
@@ -379,7 +379,7 @@ table {
   input[type="password"],
   input[type="date"],
   input[type="time"] {
-    font-size: 0.875rem !important;
+    font-size: 0.800rem !important;
     line-height: 1.5 !important;
     padding: 0 !important;
     padding-left: 0 !important;
@@ -398,7 +398,7 @@ table {
 
   textarea.mat-mdc-input-element,
   textarea {
-    font-size: 0.875rem !important;
+    font-size: 0.800rem !important;
     line-height: 1.5 !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -407,12 +407,12 @@ table {
   }
 
   .mat-mdc-select {
-    font-size: 0.875rem !important;
+    font-size: 0.800rem !important;
     line-height: 1.5 !important;
   }
 
   .mat-mdc-select-trigger {
-    font-size: 0.875rem !important;
+    font-size: 0.800rem !important;
     padding: 0 !important;
     padding-left: 0 !important;
     line-height: 1.5 !important;
@@ -675,11 +675,11 @@ table {
 // Date picker calendar
 .mat-datepicker-content {
   .mat-calendar {
-    font-size: 0.875rem !important;
+    font-size: 0.800rem !important;
   }
 
   .mat-calendar-body-cell-content {
-    font-size: 0.875rem !important;
+    font-size: 0.800rem !important;
     width: 32px !important;
     height: 32px !important;
     line-height: 32px !important;
@@ -753,7 +753,7 @@ table {
 
 .mat-mdc-select-panel {
   .mat-mdc-option {
-    font-size: 0.875rem !important;
+    font-size: 0.800rem !important;
     min-height: 36px !important;
     padding: 8px 16px !important;
   }
@@ -761,7 +761,7 @@ table {
 
 // Textarea
 textarea.mat-mdc-input-element {
-  font-size: 0.875rem !important;
+  font-size: 0.800rem !important;
   line-height: 1.5 !important;
   padding: 6px 0 !important;
   margin: 0 !important;
@@ -849,7 +849,7 @@ button[mat-unelevated-button][color="primary"] mat-icon {
 }
 
 .section-subtitle {
-  font-size: 0.875rem;
+  font-size: 0.800rem;
   color: #666666;
   margin: 4px 0 0;
 }
