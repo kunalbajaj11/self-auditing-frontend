@@ -8,6 +8,10 @@ import { ApiService } from '../../../core/services/api.service';
 import { GeneratedReport, ReportType } from '../../../core/models/report.model';
 import { LicenseService } from '../../../core/services/license.service';
 import { take } from 'rxjs/operators';
+import {
+  LedgerAccountsService,
+  LedgerAccount,
+} from '../../../core/services/ledger-accounts.service';
 
 interface ReportConfig {
   value: ReportType;
@@ -105,6 +109,8 @@ export class AdminReportsComponent implements OnInit {
 
   @ViewChild('reportPreviewCard') reportPreviewCard?: ElementRef;
 
+  private readonly ledgerAccountsById = new Map<string, LedgerAccount>();
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly reportsService: ReportsService,
@@ -113,6 +119,7 @@ export class AdminReportsComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly licenseService: LicenseService,
+    private readonly ledgerAccountsService: LedgerAccountsService,
   ) {
     this.form = this.fb.group({
       reportType: [''],
@@ -215,6 +222,16 @@ export class AdminReportsComponent implements OnInit {
   };
 
   ngOnInit(): void {
+    this.ledgerAccountsService.listLedgerAccounts().subscribe({
+      next: (accounts) => {
+        this.ledgerAccountsById.clear();
+        accounts.forEach((a) => this.ledgerAccountsById.set(a.id, a));
+      },
+      error: () => {
+        // Non-blocking: reports can still render using backend-provided names or raw codes.
+      },
+    });
+
     // Get report type from route data
     const reportType = this.route.snapshot.data['reportType'] as ReportType;
     this.licenseService
@@ -269,6 +286,15 @@ export class AdminReportsComponent implements OnInit {
         // Load filter options (vendors and customers)
         this.loadFilterOptions();
       });
+  }
+
+  resolveAccountName(nameOrCode: string | null | undefined): string {
+    if (!nameOrCode) return '—';
+    if (nameOrCode.startsWith('ledger:')) {
+      const id = nameOrCode.slice('ledger:'.length);
+      return this.ledgerAccountsById.get(id)?.name || 'Custom Ledger Account';
+    }
+    return nameOrCode;
   }
 
   private loadFilterOptions(): void {

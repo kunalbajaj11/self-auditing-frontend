@@ -14,6 +14,7 @@ import { CustomersService, Customer } from '../../../core/services/customers.ser
 import { ExpensePaymentsService, ExpenseWithOutstanding } from '../../../core/services/expense-payments.service';
 import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales-invoices.service';
 import { LedgerAccountsService, LedgerAccount } from '../../../core/services/ledger-accounts.service';
+import { SettingsService, TaxSettings } from '../../../core/services/settings.service';
 import { Observable, of, forkJoin } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap, tap, catchError, finalize } from 'rxjs/operators';
 
@@ -85,6 +86,16 @@ export class JournalEntryFormDialogComponent implements OnInit {
   loadingVendorsWithInvoices = false;
   loadingCustomersWithInvoices = false;
 
+  // Tax settings (for VAT auto-calculation)
+  taxSettings: TaxSettings | null = null;
+  defaultTaxRate = 5;
+  taxCalculationMethod: 'inclusive' | 'exclusive' = 'exclusive';
+  reverseChargeRate = 5;
+  reverseChargeEnabled = false;
+
+  // Track if VAT was manually entered by user
+  private vatManuallyEntered = false;
+
   readonly templates: JournalEntryTemplate[] = [
     {
       name: 'Owner Introduced Capital',
@@ -116,6 +127,7 @@ export class JournalEntryFormDialogComponent implements OnInit {
     private readonly expensePaymentsService: ExpensePaymentsService,
     private readonly salesInvoicesService: SalesInvoicesService,
     private readonly ledgerAccountsService: LedgerAccountsService,
+    private readonly settingsService: SettingsService,
     @Inject(MAT_DIALOG_DATA) readonly data: JournalEntry | null,
   ) {
     this.isEditMode = Boolean(data);
@@ -148,6 +160,7 @@ export class JournalEntryFormDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadTaxSettings();
     this.setupVendorAutocomplete();
     this.setupCustomerAutocomplete();
     // Initialize with default accounts
@@ -207,6 +220,129 @@ export class JournalEntryFormDialogComponent implements OnInit {
     this.form.get('creditAccount')?.valueChanges.subscribe((account) => {
       this.checkAccountSelection();
     });
+
+    // VAT auto-calculation watchers
+    this.form.get('amount')?.valueChanges.subscribe(() => {
+      this.autoCalculateVat();
+    });
+
+    this.form.get('vatTaxType')?.valueChanges.subscribe(() => {
+      this.autoCalculateVat();
+    });
+
+    // Track manual VAT entry: if user clears it, allow recalculation; if they change it, lock it.
+    this.form.get('vatAmount')?.valueChanges.subscribe((vatValue) => {
+      const vatNum = typeof vatValue === 'number' ? vatValue : parseFloat(String(vatValue || '0'));
+      const isEmpty =
+        vatValue === null ||
+        vatValue === undefined ||
+        (typeof vatValue === 'string' && vatValue === '') ||
+        vatNum === 0;
+
+      if (isEmpty) {
+        this.vatManuallyEntered = false;
+        setTimeout(() => this.autoCalculateVat(), 50);
+        return;
+      }
+
+      // If it doesn't match expected, treat it as manual override.
+      setTimeout(() => {
+        const amountValue = this.form.get('amount')?.value;
+        const amount = typeof amountValue === 'number' ? amountValue : parseFloat(String(amountValue || '0'));
+        if (amount <= 0) return;
+        const expectedVat = this.computeExpectedVat(amount);
+        if (Math.abs(vatNum - expectedVat) > 0.01) {
+          this.vatManuallyEntered = true;
+        }
+      }, 50);
+    });
+  }
+
+  private loadTaxSettings(): void {
+    this.settingsService.getTaxSettings().subscribe({
+      next: (settings) => {
+        this.taxSettings = settings;
+
+        // Normalize default rate: some configs store 0.05 vs 5
+        let rate = settings.taxDefaultRate ?? 5;
+        if (rate > 0 && rate < 1) rate = rate * 100;
+        if (rate <= 0) rate = 5;
+        this.defaultTaxRate = rate;
+
+        const method = (settings.taxCalculationMethod || 'exclusive') as any;
+        this.taxCalculationMethod = method === 'inclusive' ? 'inclusive' : 'exclusive';
+
+        // Reverse charge rate normalization
+        let reverseRate = settings.taxReverseChargeRate ?? 5;
+        if (reverseRate > 0 && reverseRate < 1) reverseRate = reverseRate * 100;
+        if (reverseRate <= 0) reverseRate = 5;
+        this.reverseChargeRate = reverseRate;
+
+        this.reverseChargeEnabled = settings.taxEnableReverseCharge ?? false;
+
+        // If amount already filled, compute VAT (unless user overrides)
+        this.autoCalculateVat();
+      },
+      error: () => {
+        // Safe fallbacks
+        this.taxSettings = null;
+        this.defaultTaxRate = 5;
+        this.taxCalculationMethod = 'exclusive';
+        this.reverseChargeRate = 5;
+        this.reverseChargeEnabled = false;
+        this.autoCalculateVat();
+      },
+    });
+  }
+
+  private computeExpectedVat(amount: number): number {
+    const vatTaxType = (this.form.get('vatTaxType')?.value || 'standard') as string;
+
+    // For journal entries, desired behavior is "5% here also" for standard VAT.
+    // We still respect zero/exempt and reverse charge when selected.
+    let calculatedVat = 0;
+
+    if (vatTaxType === 'reverse_charge') {
+      const reverseRate = typeof this.reverseChargeRate === 'number'
+        ? this.reverseChargeRate
+        : parseFloat(String(this.reverseChargeRate)) || 5;
+      calculatedVat = (amount * reverseRate) / 100;
+    } else if (vatTaxType === 'zero_rated' || vatTaxType === 'exempt') {
+      calculatedVat = 0;
+    } else {
+      const taxRate = typeof this.defaultTaxRate === 'number'
+        ? this.defaultTaxRate
+        : parseFloat(String(this.defaultTaxRate)) || 5;
+
+      // Journal Entries: ALWAYS treat entered amount as tax-exclusive.
+      // Do NOT back-calculate VAT by dividing by (100 + rate).
+      calculatedVat = (amount * taxRate) / 100;
+    }
+
+    return Math.round(calculatedVat * 100) / 100;
+  }
+
+  private autoCalculateVat(): void {
+    const amountValue = this.form.get('amount')?.value;
+    const vatFormValue = this.form.get('vatAmount')?.value;
+
+    const amount = typeof amountValue === 'number' ? amountValue : parseFloat(String(amountValue || '0'));
+    const currentVat = typeof vatFormValue === 'number' ? vatFormValue : parseFloat(String(vatFormValue || '0'));
+
+    const isVatEmpty =
+      vatFormValue === null ||
+      vatFormValue === undefined ||
+      (typeof vatFormValue === 'string' && vatFormValue === '') ||
+      currentVat === 0;
+
+    if (this.vatManuallyEntered && !isVatEmpty) return;
+    if (!(amount > 0)) return;
+
+    const calculatedVat = this.computeExpectedVat(amount);
+    if (isVatEmpty || !this.vatManuallyEntered) {
+      this.form.patchValue({ vatAmount: calculatedVat }, { emitEvent: false });
+      this.vatManuallyEntered = false;
+    }
   }
 
   checkAccountSelection(): void {
@@ -261,6 +397,7 @@ export class JournalEntryFormDialogComponent implements OnInit {
     if (!this.data) return;
 
     // Editing existing entry
+    this.vatManuallyEntered = false;
     this.form.patchValue({
       debitAccount: this.data.debitAccount,
       creditAccount: this.data.creditAccount,
@@ -278,6 +415,9 @@ export class JournalEntryFormDialogComponent implements OnInit {
       expenseId: (this.data as any).expenseId || '',
       invoiceId: (this.data as any).invoiceId || '',
     });
+
+    // Recalculate VAT based on settings (keeps 5% consistent if amount changes later)
+    setTimeout(() => this.autoCalculateVat(), 50);
 
     // Check if Accounts Payable/Receivable is selected and load vendors/customers accordingly
     // This will be called after form values are set, so use setTimeout

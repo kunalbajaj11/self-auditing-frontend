@@ -39,7 +39,7 @@ export class TaxSettingsComponent implements OnInit {
       taxAuthority: ['Federal Tax Authority'],
       
       // Tax Calculation
-      taxCalculationMethod: ['inclusive', [Validators.required]], // inclusive or exclusive
+      taxCalculationMethod: ['exclusive', [Validators.required]], // inclusive or exclusive
       defaultTaxRate: ['5', [Validators.required]],
       roundingMethod: ['standard'], // standard, up, down
       
@@ -84,7 +84,7 @@ export class TaxSettingsComponent implements OnInit {
           taxRegistrationNumber: settings.taxRegistrationNumber ?? '',
           taxRegistrationDate: settings.taxRegistrationDate ?? '',
           taxAuthority: settings.taxAuthority ?? 'Federal Tax Authority',
-          taxCalculationMethod: settings.taxCalculationMethod ?? 'inclusive',
+          taxCalculationMethod: settings.taxCalculationMethod ?? 'exclusive',
           defaultTaxRate: settings.taxDefaultRate?.toString() ?? '5',
           roundingMethod: settings.taxRoundingMethod ?? 'standard',
           defaultTaxCode: settings.taxDefaultCode ?? '',

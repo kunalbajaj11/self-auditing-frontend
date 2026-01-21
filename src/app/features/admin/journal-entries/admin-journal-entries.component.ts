@@ -10,6 +10,10 @@ import {
   ACCOUNT_METADATA,
   getAccountsByCategory,
 } from '../../../core/services/journal-entries.service';
+import {
+  LedgerAccountsService,
+  LedgerAccount,
+} from '../../../core/services/ledger-accounts.service';
 import { JournalEntryFormDialogComponent } from './journal-entry-form-dialog.component';
 
 @Component({
@@ -40,9 +44,12 @@ export class AdminJournalEntriesComponent implements OnInit {
     (acc) => !acc.isReadOnly,
   );
 
+  private readonly ledgerAccountsById = new Map<string, LedgerAccount>();
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly journalEntriesService: JournalEntriesService,
+    private readonly ledgerAccountsService: LedgerAccountsService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
   ) {
@@ -56,6 +63,16 @@ export class AdminJournalEntriesComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.ledgerAccountsService.listLedgerAccounts().subscribe({
+      next: (accounts) => {
+        this.ledgerAccountsById.clear();
+        accounts.forEach((a) => this.ledgerAccountsById.set(a.id, a));
+      },
+      error: () => {
+        // Non-blocking: if ledger accounts can't be loaded, fall back to showing the code.
+      },
+    });
+
     this.loadJournalEntries();
 
     this.filters.valueChanges.subscribe(() => {
@@ -140,8 +157,17 @@ export class AdminJournalEntriesComponent implements OnInit {
     });
   }
 
-  getAccountName(accountCode: JournalEntryAccount): string {
-    return ACCOUNT_METADATA[accountCode]?.name || accountCode;
+  getAccountName(accountCode: string | null | undefined): string {
+    if (!accountCode) return '—';
+
+    if (accountCode.startsWith('ledger:')) {
+      const id = accountCode.slice('ledger:'.length);
+      const ledger = this.ledgerAccountsById.get(id);
+      return ledger?.name || 'Custom Ledger Account';
+    }
+
+    const meta = ACCOUNT_METADATA[accountCode as JournalEntryAccount];
+    return meta?.name || accountCode;
   }
 
   getAccountCategory(accountCode: JournalEntryAccount): string {
