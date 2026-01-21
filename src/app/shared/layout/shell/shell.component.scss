@@ -233,7 +233,7 @@
     .contact-info {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       padding: 8px;
       background: rgba(0, 119, 200, 0.05);
       border-radius: 6px;
@@ -241,24 +241,15 @@
       color: #666666;
 
       mat-icon {
-        font-size: 14px;
-        width: 14px;
-        height: 14px;
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
         color: #0077c8;
-      }
-
-      .contact-label {
-        font-weight: 500;
-        color: #333333;
       }
 
       .contact-number {
-        font-weight: 600;
+        font-weight: 500;
         color: #0077c8;
-        margin-left: auto;
-      }
-
-      a.contact-number {
         text-decoration: none;
 
         &:hover {
@@ -412,14 +403,18 @@
       padding: 10px;
       gap: 8px;
 
-      .contact-info {
+      .contact-icons {
         padding: 8px 6px;
-        font-size: 0.7rem;
 
-        mat-icon {
-          font-size: 13px;
-          width: 13px;
-          height: 13px;
+        .contact-icon-link {
+          width: 30px;
+          height: 30px;
+
+          mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+          }
         }
       }
 
