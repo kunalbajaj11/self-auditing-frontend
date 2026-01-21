@@ -1,0 +1,51 @@
+<h2 mat-dialog-title>
+  {{ isEdit ? 'Edit Ledger Account' : 'New Ledger Account' }}
+</h2>
+<form mat-dialog-content [formGroup]="form" class="form" style="padding: 20px;">
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Name</mat-label>
+    <input matInput formControlName="name" placeholder="e.g., Office Rent" />
+    <mat-hint>Account name for journal entries</mat-hint>
+    <mat-error *ngIf="form.get('name')?.hasError('required')">
+      Name is required
+    </mat-error>
+    <mat-error *ngIf="form.get('name')?.hasError('maxlength')">
+      Name must be 100 characters or less
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Category</mat-label>
+    <mat-select formControlName="category" required>
+      <mat-option *ngFor="let cat of categories" [value]="cat.value">
+        {{ cat.label }}
+      </mat-option>
+    </mat-select>
+    <mat-hint>Account category (Asset, Liability, Equity, Revenue, or Expense)</mat-hint>
+    <mat-error *ngIf="form.get('category')?.hasError('required')">
+      Category is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Description</mat-label>
+    <textarea matInput formControlName="description" rows="3" placeholder="Optional description"></textarea>
+  </mat-form-field>
+</form>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="submit()"
+    [disabled]="loading || form.invalid"
+  >
+    <mat-progress-spinner
+      *ngIf="loading"
+      [diameter]="20"
+      mode="indeterminate"
+    ></mat-progress-spinner>
+    <span *ngIf="!loading">{{ isEdit ? 'Update' : 'Create' }}</span>
+  </button>
+</mat-dialog-actions>
+

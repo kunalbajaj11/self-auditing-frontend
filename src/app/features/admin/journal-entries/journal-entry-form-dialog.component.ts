@@ -13,6 +13,7 @@ import { VendorsService, Vendor } from '../../../core/services/vendors.service';
 import { CustomersService, Customer } from '../../../core/services/customers.service';
 import { ExpensePaymentsService, ExpenseWithOutstanding } from '../../../core/services/expense-payments.service';
 import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales-invoices.service';
+import { LedgerAccountsService, LedgerAccount } from '../../../core/services/ledger-accounts.service';
 import { Observable, of, forkJoin } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap, tap, catchError, finalize } from 'rxjs/operators';
 
@@ -21,6 +22,23 @@ interface JournalEntryTemplate {
   description: string;
   debitAccount: JournalEntryAccount;
   creditAccount: JournalEntryAccount;
+}
+
+interface AccountMetadata {
+  code: string;
+  name: string;
+  category: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
+  isReadOnly?: boolean;
+  isCustom?: boolean;
+}
+
+interface CustomAccountMetadata {
+  code: string;
+  name: string;
+  category: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
+  isReadOnly?: boolean;
+  isCustom: true;
+  ledgerAccountId: string;
 }
 
 @Component({
@@ -34,8 +52,9 @@ export class JournalEntryFormDialogComponent implements OnInit {
   isEditMode = false;
   selectedTemplate: JournalEntryTemplate | null = null;
 
-  readonly accountsByCategory = getAccountsByCategory();
+  accountsByCategory: Record<string, Array<AccountMetadata | CustomAccountMetadata>> = {} as Record<string, Array<AccountMetadata | CustomAccountMetadata>>;
   readonly allAccounts = Object.values(ACCOUNT_METADATA);
+  customLedgerAccounts: LedgerAccount[] = [];
 
   // Vendor/Customer autocomplete
   vendors: Vendor[] = [];
@@ -96,6 +115,7 @@ export class JournalEntryFormDialogComponent implements OnInit {
     private readonly customersService: CustomersService,
     private readonly expensePaymentsService: ExpensePaymentsService,
     private readonly salesInvoicesService: SalesInvoicesService,
+    private readonly ledgerAccountsService: LedgerAccountsService,
     @Inject(MAT_DIALOG_DATA) readonly data: JournalEntry | null,
   ) {
     this.isEditMode = Boolean(data);
@@ -130,6 +150,9 @@ export class JournalEntryFormDialogComponent implements OnInit {
   ngOnInit(): void {
     this.setupVendorAutocomplete();
     this.setupCustomerAutocomplete();
+    // Initialize with default accounts
+    this.accountsByCategory = this.combineAccountsWithCustom();
+    this.loadLedgerAccounts();
 
     // Load vendors and customers, then handle edit mode
     this.loadVendors();
@@ -192,11 +215,15 @@ export class JournalEntryFormDialogComponent implements OnInit {
     
     const hasAccountsPayable = 
       debitAccount === JournalEntryAccount.ACCOUNTS_PAYABLE ||
-      creditAccount === JournalEntryAccount.ACCOUNTS_PAYABLE;
+      creditAccount === JournalEntryAccount.ACCOUNTS_PAYABLE ||
+      debitAccount === 'accounts_payable' ||
+      creditAccount === 'accounts_payable';
     
     const hasAccountsReceivable = 
       debitAccount === JournalEntryAccount.ACCOUNTS_RECEIVABLE ||
-      creditAccount === JournalEntryAccount.ACCOUNTS_RECEIVABLE;
+      creditAccount === JournalEntryAccount.ACCOUNTS_RECEIVABLE ||
+      debitAccount === 'accounts_receivable' ||
+      creditAccount === 'accounts_receivable';
 
     // Track if section is being shown for the first time or becoming visible again
     const wasPayableSectionHidden = !this.showAccountsPayableSection;
@@ -277,6 +304,52 @@ export class JournalEntryFormDialogComponent implements OnInit {
         }
       }
     }
+  }
+
+  loadLedgerAccounts(): void {
+    this.ledgerAccountsService.listLedgerAccounts().subscribe({
+      next: (ledgerAccounts) => {
+        this.customLedgerAccounts = ledgerAccounts;
+        // Combine default accounts with custom ledger accounts
+        this.accountsByCategory = this.combineAccountsWithCustom();
+      },
+      error: (error) => {
+        console.error('Error loading ledger accounts:', error);
+      },
+    });
+  }
+
+  private combineAccountsWithCustom(): Record<string, Array<AccountMetadata | CustomAccountMetadata>> {
+    const defaultAccounts = getAccountsByCategory();
+    const combined: Record<string, Array<AccountMetadata | CustomAccountMetadata>> = {};
+    
+    // Copy default accounts
+    Object.keys(defaultAccounts).forEach(category => {
+      combined[category] = defaultAccounts[category].map(acc => ({
+        code: acc.code as string,
+        name: acc.name,
+        category: acc.category,
+        isReadOnly: acc.isReadOnly,
+      })) as AccountMetadata[];
+    });
+    
+    // Add custom ledger accounts to their respective categories
+    this.customLedgerAccounts.forEach(ledgerAccount => {
+      const customAccount: CustomAccountMetadata = {
+        code: `ledger:${ledgerAccount.id}`,
+        name: ledgerAccount.name,
+        category: ledgerAccount.category,
+        isCustom: true,
+        ledgerAccountId: ledgerAccount.id,
+      };
+      
+      if (!combined[ledgerAccount.category]) {
+        combined[ledgerAccount.category] = [];
+      }
+      combined[ledgerAccount.category].push(customAccount);
+    });
+    
+    return combined;
   }
 
   loadVendors(): void {
@@ -790,19 +863,45 @@ export class JournalEntryFormDialogComponent implements OnInit {
 
     if (
       debitAccount === JournalEntryAccount.RETAINED_EARNINGS ||
-      creditAccount === JournalEntryAccount.RETAINED_EARNINGS
+      creditAccount === JournalEntryAccount.RETAINED_EARNINGS ||
+      debitAccount === 'retained_earnings' ||
+      creditAccount === 'retained_earnings'
     ) {
       return { retainedEarningsNotAllowed: true };
     }
     return null;
   }
 
-  getAccountName(accountCode: JournalEntryAccount): string {
-    return ACCOUNT_METADATA[accountCode]?.name || accountCode;
+  getAccountName(accountCode: JournalEntryAccount | string): string {
+    // Check if it's a custom ledger account
+    if (typeof accountCode === 'string' && accountCode.startsWith('ledger:')) {
+      const ledgerAccountId = accountCode.replace('ledger:', '');
+      const ledgerAccount = this.customLedgerAccounts.find(la => la.id === ledgerAccountId);
+      if (ledgerAccount) {
+        return ledgerAccount.name;
+      }
+    }
+    // Check default accounts
+    if (accountCode in ACCOUNT_METADATA) {
+      return ACCOUNT_METADATA[accountCode as JournalEntryAccount]?.name || accountCode;
+    }
+    return accountCode;
   }
 
-  getAccountCategory(accountCode: JournalEntryAccount): string {
-    return ACCOUNT_METADATA[accountCode]?.category || 'asset';
+  getAccountCategory(accountCode: JournalEntryAccount | string): string {
+    // Check if it's a custom ledger account
+    if (typeof accountCode === 'string' && accountCode.startsWith('ledger:')) {
+      const ledgerAccountId = accountCode.replace('ledger:', '');
+      const ledgerAccount = this.customLedgerAccounts.find(la => la.id === ledgerAccountId);
+      if (ledgerAccount) {
+        return ledgerAccount.category;
+      }
+    }
+    // Check default accounts
+    if (accountCode in ACCOUNT_METADATA) {
+      return ACCOUNT_METADATA[accountCode as JournalEntryAccount]?.category || 'asset';
+    }
+    return 'asset';
   }
 
   applyTemplate(template: JournalEntryTemplate): void {

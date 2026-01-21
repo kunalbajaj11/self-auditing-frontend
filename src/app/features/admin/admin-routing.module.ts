@@ -6,6 +6,7 @@ import { AdminCompanyComponent } from './company/admin-company.component';
 import { AdminUsersComponent } from './users/admin-users.component';
 import { AdminCategoriesComponent } from './categories/admin-categories.component';
 import { AdminExpenseTypesComponent } from './expense-types/admin-expense-types.component';
+import { AdminLedgerAccountsComponent } from './ledger-accounts/admin-ledger-accounts.component';
 import { AdminExpensesComponent } from './expenses/admin-expenses.component';
 import { AdminPaymentsComponent } from './payments/admin-payments.component';
 import { AdminJournalEntriesComponent } from './journal-entries/admin-journal-entries.component';
@@ -135,6 +136,7 @@ const routes: Routes = [
               { label: 'Email / Notifications', route: '/admin/notifications', badgeKey: 'unreadNotifications' },
               { label: 'Expense Types', route: '/admin/expense-types' },
               { label: 'Expense Categories', route: '/admin/categories' },
+              { label: 'Ledger Accounts', route: '/admin/ledger-accounts' },
             ],
           },
         ],
@@ -165,6 +167,11 @@ const routes: Routes = [
         path: 'categories',
         component: AdminCategoriesComponent,
         data: { shell: { title: 'Expense Categories' } },
+      },
+      {
+        path: 'ledger-accounts',
+        component: AdminLedgerAccountsComponent,
+        data: { shell: { title: 'Ledger Accounts' } },
       },
       {
         path: 'expenses',

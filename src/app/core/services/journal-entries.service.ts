@@ -121,8 +121,8 @@ export function getAccountsByCategory(): Record<string, AccountMetadata[]> {
 
 export interface JournalEntry {
   id: string;
-  debitAccount: JournalEntryAccount;
-  creditAccount: JournalEntryAccount;
+  debitAccount: string; // Can be enum value (e.g., 'cash') or custom ledger account (e.g., 'ledger:{id}')
+  creditAccount: string; // Can be enum value (e.g., 'cash') or custom ledger account (e.g., 'ledger:{id}')
   amount: number;
   entryDate: string;
   description?: string | null;
@@ -145,8 +145,8 @@ export interface JournalEntry {
 }
 
 export interface CreateJournalEntryPayload {
-  debitAccount: JournalEntryAccount;
-  creditAccount: JournalEntryAccount;
+  debitAccount: string; // Can be enum value (e.g., 'cash') or custom ledger account (e.g., 'ledger:{id}')
+  creditAccount: string; // Can be enum value (e.g., 'cash') or custom ledger account (e.g., 'ledger:{id}')
   amount: number;
   entryDate: string;
   description?: string;
@@ -162,8 +162,8 @@ export interface CreateJournalEntryPayload {
 }
 
 export interface UpdateJournalEntryPayload {
-  debitAccount?: JournalEntryAccount;
-  creditAccount?: JournalEntryAccount;
+  debitAccount?: string; // Can be enum value (e.g., 'cash') or custom ledger account (e.g., 'ledger:{id}')
+  creditAccount?: string; // Can be enum value (e.g., 'cash') or custom ledger account (e.g., 'ledger:{id}')
   amount?: number;
   entryDate?: string;
   description?: string;
@@ -179,8 +179,8 @@ export interface UpdateJournalEntryPayload {
 }
 
 export interface JournalEntryFilters {
-  debitAccount?: JournalEntryAccount;
-  creditAccount?: JournalEntryAccount;
+  debitAccount?: string; // Can be enum value or custom ledger account code
+  creditAccount?: string; // Can be enum value or custom ledger account code
   startDate?: string;
   endDate?: string;
   description?: string;

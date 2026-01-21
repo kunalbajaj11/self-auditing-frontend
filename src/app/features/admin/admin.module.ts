@@ -6,6 +6,7 @@ import { AdminCompanyComponent } from './company/admin-company.component';
 import { AdminUsersComponent } from './users/admin-users.component';
 import { AdminCategoriesComponent } from './categories/admin-categories.component';
 import { AdminExpenseTypesComponent } from './expense-types/admin-expense-types.component';
+import { AdminLedgerAccountsComponent } from './ledger-accounts/admin-ledger-accounts.component';
 import { AdminExpensesComponent } from './expenses/admin-expenses.component';
 import { AdminPaymentsComponent } from './payments/admin-payments.component';
 import { PaymentFormDialogComponent } from './payments/payment-form-dialog.component';
@@ -14,6 +15,7 @@ import { AdminNotificationsComponent } from './notifications/admin-notifications
 import { UserFormDialogComponent } from './users/user-form-dialog.component';
 import { CategoryFormDialogComponent } from './categories/category-form-dialog.component';
 import { ExpenseTypeFormDialogComponent } from './expense-types/expense-type-form-dialog.component';
+import { LedgerAccountFormDialogComponent } from './ledger-accounts/ledger-account-form-dialog.component';
 import { ExpenseFormDialogComponent } from './expenses/expense-form-dialog.component';
 import { ReconciliationListComponent } from './bank-reconciliation/reconciliation-list.component';
 import { ReconciliationDetailComponent } from './bank-reconciliation/reconciliation-detail.component';
@@ -71,6 +73,7 @@ import { CreateDeadlineDialogComponent } from './compliance/create-deadline-dial
     AdminUsersComponent,
     AdminCategoriesComponent,
     AdminExpenseTypesComponent,
+    AdminLedgerAccountsComponent,
     AdminExpensesComponent,
     AdminPaymentsComponent,
     PaymentFormDialogComponent,
@@ -79,6 +82,7 @@ import { CreateDeadlineDialogComponent } from './compliance/create-deadline-dial
     UserFormDialogComponent,
     CategoryFormDialogComponent,
     ExpenseTypeFormDialogComponent,
+    LedgerAccountFormDialogComponent,
     ExpenseFormDialogComponent,
     ReconciliationListComponent,
     ReconciliationDetailComponent,

@@ -1,0 +1,85 @@
+<section class="ledger-accounts">
+  <header class="header">
+    <div class="header-content">
+      <h1>Ledger Accounts</h1>
+      <p>Manage custom debit and credit accounts for journal entries.</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openDialog()">
+      <mat-icon>add</mat-icon>
+      New Ledger Account
+    </button>
+  </header>
+
+  <section class="ledger-accounts-section">
+    <h3 class="section-title">Ledger Accounts</h3>
+    <mat-card class="ledger-accounts-card">
+      <mat-card-header>
+        <div class="card-title-with-icon">
+          <mat-icon>account_balance</mat-icon>
+          <mat-card-title>Ledger Account List</mat-card-title>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="dataSource" class="ledger-accounts-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let ledgerAccount">{{ ledgerAccount.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>Description</th>
+          <td mat-cell *matCellDef="let ledgerAccount">
+            {{ ledgerAccount.description || '—' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef>Category</th>
+          <td mat-cell *matCellDef="let ledgerAccount">
+            {{ ledgerAccount.category | titlecase }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let ledgerAccount">
+            <mat-chip [disabled]="!ledgerAccount.isSystemDefault" selected>
+              {{ ledgerAccount.isSystemDefault ? 'System' : 'Custom' }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let ledgerAccount">
+            <button mat-button (click)="openDialog(ledgerAccount)">Edit</button>
+            <button
+              mat-button
+              color="warn"
+              (click)="delete(ledgerAccount)"
+              [disabled]="ledgerAccount.isSystemDefault"
+            >
+              Delete
+            </button>
+          </td>
+        </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columns" class="table-header"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns" class="table-row"></tr>
+          </table>
+
+          <div class="table-overlay" *ngIf="loading">
+            <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+          </div>
+
+          <div class="empty" *ngIf="!loading && dataSource.data.length === 0">
+            <mat-icon>account_balance</mat-icon>
+            <p>No ledger accounts configured yet.</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</section>
+
