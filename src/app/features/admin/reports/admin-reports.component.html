@@ -557,8 +557,9 @@
                 </ng-container>
                 <ng-container matColumnDef="amount">
                   <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
-                  <td mat-cell *matCellDef="let row" class="text-right" [class.credit-amount]="((row.account === 'Retained Earnings' ? row.period : row.closing) || 0) >= 0" [class.negative-amount]="((row.account === 'Retained Earnings' ? row.period : row.closing) || 0) < 0">
-                    {{ formatCurrency((row.account === 'Retained Earnings' ? row.period : row.closing) || 0, true) }}
+                  <!-- Balance Sheet should show CLOSING balances for Equity accounts -->
+                  <td mat-cell *matCellDef="let row" class="text-right" [class.credit-amount]="(row.closing || 0) >= 0" [class.negative-amount]="(row.closing || 0) < 0">
+                    {{ formatCurrency(row.closing || 0, true) }}
                   </td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="['account', 'amount']"></tr>
