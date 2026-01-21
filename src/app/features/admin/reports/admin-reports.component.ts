@@ -822,6 +822,27 @@ export class AdminReportsComponent implements OnInit {
     return `AED ${formatted}`;
   }
 
+  /**
+   * Format currency for Trial Balance with inverted sign for credit accounts
+   * Credit accounts (Liability/Revenue/Equity) show positive balances as negative for display
+   * This ensures that when summing all accounts, the total equals zero
+   */
+  formatTrialBalanceCurrency(value: number, accountType: string, showSign: boolean = true): string {
+    const numValue = Number(value);
+    const isCreditAccount = accountType === 'Liability' || accountType === 'Revenue' || accountType === 'Equity';
+    
+    // For credit accounts, invert the sign for display purposes
+    // Positive balance (normal for credit) should display as negative
+    const displayValue = isCreditAccount ? -numValue : numValue;
+    const formatted = Math.abs(displayValue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    
+    if (showSign) {
+      const sign = displayValue >= 0 ? '+' : '-';
+      return `${sign}AED ${formatted}`;
+    }
+    return `AED ${formatted}`;
+  }
+
   formatDate(date: string): string {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString('en-US', {
@@ -829,12 +850,5 @@ export class AdminReportsComponent implements OnInit {
       month: 'short',
       day: 'numeric',
     });
-  }
-
-  getVatAccounts(accounts: any[] | null | undefined): any[] {
-    if (!accounts || accounts.length === 0) return [];
-    return accounts.filter((acc: any) => 
-      acc.accountName && (acc.accountName.includes('VAT') || acc.accountName.toLowerCase().includes('vat'))
-    );
   }
 }
