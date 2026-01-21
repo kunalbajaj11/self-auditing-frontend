@@ -89,7 +89,7 @@
 
           <app-summary-card
             label="VAT Payable"
-            icon="percent"
+            icon="receipt_long"
             [value]="'AED ' + (vm.vatAmount | number: '1.0-2')"
             accent="accent"
             [hint]="
@@ -133,7 +133,7 @@
 
           <app-summary-card
             label="Cash"
-            icon="attach_money"
+            icon="payments"
             [value]="'AED ' + (vm.cashBalance | number: '1.0-2')"
             accent="accent"
             [hint]="vm.cashBalance >= 0 ? 'Positive balance' : 'Negative balance'"
