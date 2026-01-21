@@ -204,23 +204,42 @@ export class AdminExpensesComponent implements OnInit {
     this.pendingAttachment = result;
     console.log('[AdminExpenses] File uploaded:', result);
     
-    // If OCR is not enabled or file is not an image, open dialog immediately
-    // Otherwise, wait for OCR result
-    // Note: We can't easily detect if OCR is enabled here, so we'll use a timeout
-    // If OCR doesn't complete within 8 seconds, open dialog with just attachment
-    if (this.ocrTimeout) {
-      clearTimeout(this.ocrTimeout);
-    }
-    this.ocrTimeout = setTimeout(() => {
-      if (this.pendingAttachment && !this.dialogOpened) {
-        // OCR didn't complete or wasn't enabled, open dialog with just attachment
-        console.log('[AdminExpenses] OCR timeout - opening dialog without OCR data');
-        this.snackBar.open('Opening form. OCR may still be processing.', 'Close', {
-          duration: 3000,
-        });
-        this.openExpenseDialog(this.pendingAttachment, null);
+    // Check if file is a PDF - PDFs take longer to process with OCR
+    const isPdf = result?.fileName?.toLowerCase().endsWith('.pdf') || 
+                  result?.fileType === 'application/pdf' ||
+                  result?.mimeType === 'application/pdf';
+    
+    console.log('[AdminExpenses] File type detected:', {
+      isPdf,
+      fileName: result?.fileName,
+      fileType: result?.fileType,
+      mimeType: result?.mimeType,
+    });
+    
+    // For PDFs: Don't open dialog on timeout - wait for OCR to complete
+    // PDF OCR takes longer (PDF-to-image conversion), so we should wait
+    // For images: Use timeout (8 seconds) since OCR is faster
+    if (isPdf) {
+      console.log('[AdminExpenses] PDF detected - will wait for OCR to complete before opening dialog');
+      // Don't set timeout for PDFs - wait for OCR result
+      // The dialog will only open when onOcrResult is called
+    } else {
+      // For images, use timeout in case OCR is not enabled or fails
+      const timeoutDuration = 8000;
+      if (this.ocrTimeout) {
+        clearTimeout(this.ocrTimeout);
       }
-    }, 8000); // Wait 8 seconds for OCR (increased from 5)
+      this.ocrTimeout = setTimeout(() => {
+        if (this.pendingAttachment && !this.dialogOpened) {
+          // OCR didn't complete or wasn't enabled, open dialog with just attachment
+          console.log('[AdminExpenses] OCR timeout - opening dialog without OCR data');
+          this.snackBar.open('Opening form. OCR may still be processing.', 'Close', {
+            duration: 3000,
+          });
+          this.openExpenseDialog(this.pendingAttachment, null);
+        }
+      }, timeoutDuration);
+    }
   }
 
   onOcrResult(result: any): void {
@@ -231,15 +250,56 @@ export class AdminExpensesComponent implements OnInit {
     }
     
     console.log('[AdminExpenses] OCR result received:', result);
+    console.log('[AdminExpenses] OCR result details:', {
+      hasResult: !!result,
+      amount: result?.amount,
+      vatAmount: result?.vatAmount,
+      vendorName: result?.vendorName,
+      vendorTrn: result?.vendorTrn,
+      invoiceNumber: result?.invoiceNumber,
+      expenseDate: result?.expenseDate,
+      description: result?.description,
+      confidence: result?.confidence,
+      fields: result?.fields,
+    });
     
     // OCR result available, open expense form with both attachment and OCR data
     if (this.dialogOpened) {
-      console.warn('[AdminExpenses] Dialog already opened, ignoring OCR result');
-      return; // Prevent opening dialog twice
+      console.warn('[AdminExpenses] Dialog already opened, OCR result arrived late');
+      console.warn('[AdminExpenses] This should not happen for PDFs - dialog should wait for OCR to complete');
+      // If dialog is already open, we can't easily update it
+      // This shouldn't happen for PDFs since we don't set timeout for PDFs
+      // But if it does, show a message to the user
+      this.snackBar.open('OCR data received but form already opened. Please refresh and try again.', 'Close', {
+        duration: 5000,
+        panelClass: ['snack-error'],
+      });
+      return;
     }
     
     // Validate OCR result has useful data
-    if (result && (result.amount || result.vendorName || result.expenseDate)) {
+    // Check for amount > 0, not just truthy (since 0 is falsy but valid)
+    const hasAmount = result?.amount !== undefined && result?.amount !== null && Number(result.amount) > 0;
+    const hasVendorName = result?.vendorName && result.vendorName.trim() !== '';
+    const hasExpenseDate = result?.expenseDate && result.expenseDate.trim() !== '';
+    const hasVatAmount = result?.vatAmount !== undefined && result?.vatAmount !== null;
+    const hasVendorTrn = result?.vendorTrn && result.vendorTrn.trim() !== '';
+    const hasInvoiceNumber = result?.invoiceNumber && result.invoiceNumber.trim() !== '';
+    
+    const hasUsefulData = hasAmount || hasVendorName || hasExpenseDate || hasVatAmount || hasVendorTrn || hasInvoiceNumber;
+    
+    console.log('[AdminExpenses] OCR validation:', {
+      hasAmount,
+      hasVendorName,
+      hasExpenseDate,
+      hasVatAmount,
+      hasVendorTrn,
+      hasInvoiceNumber,
+      hasUsefulData,
+    });
+    
+    if (result && hasUsefulData) {
+      console.log('[AdminExpenses] Opening expense dialog with OCR data');
       this.openExpenseDialog(this.pendingAttachment, result);
     } else {
       // OCR completed but no useful data extracted

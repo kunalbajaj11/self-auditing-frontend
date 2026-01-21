@@ -305,6 +305,20 @@ export class ExpenseFormDialogComponent implements OnInit {
 
         if (this.ocrResult) {
           console.log('[ExpenseForm] OCR Result received:', this.ocrResult);
+          console.log('[ExpenseForm] OCR Result structure:', {
+            hasAmount: 'amount' in this.ocrResult,
+            hasVatAmount: 'vatAmount' in this.ocrResult,
+            hasVendorName: 'vendorName' in this.ocrResult,
+            hasVendorTrn: 'vendorTrn' in this.ocrResult,
+            hasInvoiceNumber: 'invoiceNumber' in this.ocrResult,
+            hasExpenseDate: 'expenseDate' in this.ocrResult,
+            amountType: typeof this.ocrResult.amount,
+            vatAmountType: typeof this.ocrResult.vatAmount,
+            amountValue: this.ocrResult.amount,
+            vatAmountValue: this.ocrResult.vatAmount,
+            vendorNameValue: this.ocrResult.vendorName,
+            vendorTrnValue: this.ocrResult.vendorTrn,
+          });
           
           // Convert OCR values to proper types with robust parsing
           const ocrAmount = this.ocrResult.amount;
