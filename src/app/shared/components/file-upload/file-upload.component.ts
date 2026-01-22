@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { AttachmentsService, UploadResult } from '../../../core/services/attachments.service';
 import { OcrService } from '../../../core/services/ocr.service';
 
@@ -9,7 +9,7 @@ import { OcrService } from '../../../core/services/ocr.service';
   templateUrl: './file-upload.component.html',
   styleUrls: ['./file-upload.component.scss'],
 })
-export class FileUploadComponent {
+export class FileUploadComponent implements OnDestroy {
   @Input() accept = 'image/*,.pdf';
   @Input() multiple = false;
   @Input() folder?: string;
@@ -23,6 +23,7 @@ export class FileUploadComponent {
   processingOcr = false;
   isMobile = false;
   loadingMessage = 'Uploading file...';
+  private ocrSubscription?: Subscription;
 
   constructor(
     private readonly attachmentsService: AttachmentsService,
@@ -125,30 +126,86 @@ export class FileUploadComponent {
 
   private async processOcr(file: File): Promise<void> {
     // Keep uploading state true, just update message
-    this.loadingMessage = 'Extracting data from document...';
+    this.processingOcr = true;
+    this.loadingMessage = 'Queuing OCR job...';
 
     try {
-      const ocrResult = await firstValueFrom(
-        this.ocrService.processFile(file)
-      );
-      if (ocrResult) {
-        this.ocrResult.emit(ocrResult);
-        // Don't show snackbar here - let the parent component handle the dialog opening
+      // Process OCR with polling - this will emit status updates
+      const ocrStatus$ = this.ocrService.processFile(file);
+      
+      // Unsubscribe from previous subscription if exists
+      if (this.ocrSubscription) {
+        this.ocrSubscription.unsubscribe();
       }
+      
+      // Subscribe to status updates
+      this.ocrSubscription = ocrStatus$.subscribe({
+        next: (status) => {
+          // Update loading message based on status
+          if (status.status === 'pending') {
+            this.loadingMessage = 'OCR job queued, waiting to start...';
+          } else if (status.status === 'processing') {
+            const progress = status.progress || 0;
+            this.loadingMessage = `Extracting data from document... ${progress}%`;
+          } else if (status.status === 'completed') {
+            this.loadingMessage = 'OCR completed!';
+            if (status.result) {
+              this.ocrResult.emit(status.result);
+              // Don't show snackbar here - let the parent component handle the dialog opening
+            }
+            this.uploading = false;
+            this.processingOcr = false;
+          } else if (status.status === 'failed') {
+            this.uploading = false;
+            this.processingOcr = false;
+            const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+            const errorMessage = status.error 
+              ? `OCR failed: ${status.error}`
+              : (isPdf 
+                ? 'Failed to extract data from PDF. Please try again or enter details manually.'
+                : 'OCR processing failed. Please try again or enter details manually.');
+            this.snackBar.open(errorMessage, 'Close', {
+              duration: 5000,
+              panelClass: ['snack-error'],
+            });
+          }
+        },
+        error: (error: any) => {
+          console.error('Error processing OCR:', error);
+          this.uploading = false;
+          this.processingOcr = false;
+          const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+          const errorMessage = error?.message 
+            ? `OCR error: ${error.message}`
+            : (isPdf 
+              ? 'Failed to extract data from PDF. Please try again or enter details manually.'
+              : 'OCR processing failed. Please try again or enter details manually.');
+          this.snackBar.open(errorMessage, 'Close', {
+            duration: 5000,
+            panelClass: ['snack-error'],
+          });
+        },
+        complete: () => {
+          // Observable completed
+          if (this.processingOcr) {
+            // If still processing, something went wrong
+            this.uploading = false;
+            this.processingOcr = false;
+          }
+        }
+      });
     } catch (error: any) {
-      console.error('Error processing OCR:', error);
+      console.error('Error starting OCR processing:', error);
       this.uploading = false;
+      this.processingOcr = false;
       const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
       const errorMessage = isPdf 
-        ? 'Failed to extract data from PDF. Please try again or enter details manually.'
-        : 'OCR processing failed. Please try again or enter details manually.';
+        ? 'Failed to start OCR processing. Please try again or enter details manually.'
+        : 'Failed to start OCR processing. Please try again or enter details manually.';
       this.snackBar.open(errorMessage, 'Close', {
         duration: 5000,
         panelClass: ['snack-error'],
       });
-    } finally {
-      // Only set uploading to false after OCR completes (success or failure)
-      this.uploading = false;
     }
   }
 
@@ -180,6 +237,13 @@ export class FileUploadComponent {
 
   clearFiles(): void {
     this.uploadedFiles = [];
+  }
+
+  ngOnDestroy(): void {
+    // Clean up subscription to prevent memory leaks
+    if (this.ocrSubscription) {
+      this.ocrSubscription.unsubscribe();
+    }
   }
 }
 
