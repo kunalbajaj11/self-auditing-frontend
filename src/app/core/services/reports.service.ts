@@ -44,6 +44,10 @@ export class ReportsService {
         overdueInvoices: number;
       };
     };
+    cashBalance: number;
+    bankBalance: number;
+    outputVat: number;
+    inputVat: number;
   }> {
     return this.api.get<{
       profitAndLoss: {
@@ -66,6 +70,10 @@ export class ReportsService {
           overdueInvoices: number;
         };
       };
+      cashBalance: number;
+      bankBalance: number;
+      outputVat: number;
+      inputVat: number;
     }>('/reports/dashboard-summary', filters);
   }
 

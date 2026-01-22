@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { Observable, forkJoin, of, combineLatest } from 'rxjs';
-import { catchError, map, switchMap, tap, debounceTime, skip } from 'rxjs/operators';
+import { Observable, forkJoin, of, combineLatest, Subject } from 'rxjs';
+import { catchError, map, switchMap, tap, debounceTime, skip, takeUntil } from 'rxjs/operators';
 import { Organization } from '../../../core/models/organization.model';
 import { OrganizationService } from '../../../core/services/organization.service';
 import { ReportsService } from '../../../core/services/reports.service';
@@ -77,11 +77,12 @@ interface AdminDashboardViewModel {
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.scss'],
 })
-export class AdminDashboardComponent implements OnInit {
+export class AdminDashboardComponent implements OnInit, OnDestroy {
   dashboard$!: Observable<AdminDashboardViewModel | null>;
   loading = false;
   error: string | null = null;
   dateRangeForm: FormGroup;
+  private readonly destroy$ = new Subject<void>();
   
   readonly dateRangePresets: { value: string; label: string }[] = [
     { value: 'thisMonth', label: 'This Month' },
@@ -128,7 +129,8 @@ export class AdminDashboardComponent implements OnInit {
       ])
         .pipe(
           skip(1), // Skip initial emission to avoid double loading on init
-          debounceTime(100) // Small debounce to avoid double loading when both dates change
+          debounceTime(100), // Small debounce to avoid double loading when both dates change
+          takeUntil(this.destroy$)
         )
         .subscribe(() => {
           if (this.dateRangeForm.get('dateRangePreset')?.value !== 'custom') {
@@ -139,6 +141,11 @@ export class AdminDashboardComponent implements OnInit {
     }
     
     this.loadDashboard();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   refresh(): void {
@@ -238,6 +245,7 @@ export class AdminDashboardComponent implements OnInit {
     const { startDate, endDate, periodLabel } = this.getDateRange();
 
     this.dashboard$ = this.organizationService.getMyOrganization().pipe(
+      takeUntil(this.destroy$),
       switchMap((organization) => {
         // Fetch all expenses once (no date filter) - we'll filter in memory for period calculations
         // This avoids duplicate queries and allows us to use the same data for recent expenses
@@ -298,9 +306,9 @@ export class AdminDashboardComponent implements OnInit {
             dashboardSummary?.profitAndLoss?.revenue?.netVat ?? 0;
           const expenseVat = dashboardSummary?.profitAndLoss?.expenses?.vat ?? 0;
           
-          // Calculate VAT summary from P&L data
-          const inputVat = expenseVat;
-          const outputVat = revenueVat;
+          // Use VAT values from backend (matching TB calculation)
+          const outputVat = dashboardSummary?.outputVat ?? revenueVat;
+          const inputVat = dashboardSummary?.inputVat ?? expenseVat;
           const netVatPayable = outputVat - inputVat;
           const taxableAmount = totalRevenue + totalExpenses;
 
@@ -367,87 +375,9 @@ export class AdminDashboardComponent implements OnInit {
           // Payables amount (total outstanding payables)
           const payablesAmount = dashboardSummary?.payables?.summary?.totalAmount ?? 0;
 
-          // Calculate Bank Balance
-          // Bank transactions include:
-          // 1. Expense payments with paymentMethod = 'bank_transfer'
-          // 2. Invoice payments with paymentMethod = 'bank_transfer'
-          // 3. Journal entries with status = 'BANK_PAID' or 'BANK_RECEIVED'
-          let bankBalance = 0;
-          
-          // Bank payments (expenses paid via bank - negative)
-          const bankPayments = allPayments.filter(p => p.paymentMethod === 'bank_transfer');
-          bankPayments.forEach(payment => {
-            bankBalance -= parseFloat(payment.amount.toString());
-          });
-
-          // Bank invoice payments (invoices paid via bank - positive)
-          const bankInvoicePayments = allInvoicePayments.filter(p => p.paymentMethod === 'bank_transfer');
-          bankInvoicePayments.forEach(payment => {
-            bankBalance += parseFloat(payment.amount);
-          });
-
-          // Bank journal entries
-          const bankJournalEntries = allJournalEntries.filter(
-            entry =>
-              entry.debitAccount === JournalEntryAccount.CASH ||
-              entry.creditAccount === JournalEntryAccount.CASH ||
-              entry.debitAccount === JournalEntryAccount.BANK ||
-              entry.creditAccount === JournalEntryAccount.BANK,
-          );
-          bankJournalEntries.forEach((entry) => {
-            const amount = parseFloat(entry.amount.toString());
-            if (entry.debitAccount === JournalEntryAccount.BANK) {
-              bankBalance += amount;
-            } else if (entry.creditAccount === JournalEntryAccount.BANK) {
-              bankBalance -= amount;
-            }
-          });
-
-          // Calculate Cash Balance
-          // Cash transactions include:
-          // 1. Expenses with purchaseStatus = 'Purchase - Cash Paid' (negative)
-          // 2. Invoices with status = 'tax_invoice_cash_received' (positive)
-          // 3. Invoice payments with paymentMethod = 'cash' (positive)
-          // 4. Journal entries with status = 'CASH_PAID' or 'CASH_RECEIVED'
-          let cashBalance = 0;
-
-          // Cash expenses (negative)
-          const cashExpenses = allExpenses.filter(exp => exp.purchaseStatus === 'Purchase - Cash Paid');
-          cashExpenses.forEach(expense => {
-            cashBalance -= expense.totalAmount;
-          });
-
-          // Cash invoice payments (positive)
-          const cashInvoicePayments = allInvoicePayments.filter(p => p.paymentMethod === 'cash');
-          cashInvoicePayments.forEach(payment => {
-            cashBalance += parseFloat(payment.amount);
-          });
-
-          // Invoices with cash received status (positive)
-          const cashReceivedInvoices = allInvoices.filter(
-            inv => inv.status === 'tax_invoice_cash_received' && 
-            !cashInvoicePayments.some(p => p.invoice?.id === inv.id) // Exclude if already counted in payments
-          );
-          cashReceivedInvoices.forEach(invoice => {
-            cashBalance += parseFloat(invoice.totalAmount);
-          });
-
-          // Cash journal entries
-          const cashJournalEntries = allJournalEntries.filter(
-            entry =>
-              entry.debitAccount === JournalEntryAccount.CASH ||
-              entry.creditAccount === JournalEntryAccount.CASH ||
-              entry.debitAccount === JournalEntryAccount.BANK ||
-              entry.creditAccount === JournalEntryAccount.BANK,
-          );
-          cashJournalEntries.forEach((entry) => {
-            const amount = parseFloat(entry.amount.toString());
-            if (entry.debitAccount === JournalEntryAccount.CASH) {
-              cashBalance += amount;
-            } else if (entry.creditAccount === JournalEntryAccount.CASH) {
-              cashBalance -= amount;
-            }
-          });
+          // Use cash and bank balances from backend (matching TB calculation)
+          const cashBalance = dashboardSummary?.cashBalance ?? 0;
+          const bankBalance = dashboardSummary?.bankBalance ?? 0;
 
           // VAT summary object for compatibility
           const vatSummary: VatSummary = {
@@ -499,6 +429,7 @@ export class AdminDashboardComponent implements OnInit {
         this.error = 'Unable to load dashboard data.';
         return of(null);
       }),
+      takeUntil(this.destroy$),
     );
       }),
     );

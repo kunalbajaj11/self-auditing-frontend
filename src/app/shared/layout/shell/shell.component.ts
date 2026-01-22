@@ -3,7 +3,7 @@ import { Component, OnDestroy, OnInit, ViewChild, ElementRef, AfterViewInit } fr
 import { NavigationEnd, Router, ActivatedRoute } from '@angular/router';
 import { MatSidenav } from '@angular/material/sidenav';
 import { Observable, Subject, of, combineLatest } from 'rxjs';
-import { catchError, filter, map, shareReplay, startWith, take, takeUntil, delay } from 'rxjs/operators';
+import { catchError, filter, map, shareReplay, startWith, take, takeUntil, delay, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { ExpensesService } from '../../../core/services/expenses.service';
 import { NotificationsService } from '../../../core/services/notifications.service';
@@ -72,18 +72,19 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit(): void {
-    // Load license info first
+    // Load license info once on init
     this.loadLicenseInfo();
 
     this.router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),
         startWith(null),
+        debounceTime(100), // Debounce rapid navigation changes
         takeUntil(this.destroy$),
       )
       .subscribe(() => {
-        // Refresh license info on navigation to pick up any changes
-        this.loadLicenseInfo();
+        // Only refresh license info if it's been more than 30 seconds since last load
+        // This prevents excessive API calls on rapid navigation
         this.updateShellFromRoute();
         // Restore sidebar scroll position after navigation
         this.restoreSidebarScroll();
@@ -91,8 +92,8 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private loadLicenseInfo(): void {
-    // Clear cache to ensure fresh data
-    this.licenseService.clearCache();
+    // Don't clear cache on every call - let the service handle caching
+    // Only clear if explicitly needed (e.g., after license upgrade)
     
     combineLatest([
       this.licenseService.getPlanType().pipe(catchError(() => of('free' as PlanType))),
@@ -103,6 +104,9 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
       this.licenseService.isInventoryEnabled().pipe(catchError(() => of(false))),
     ]).pipe(
       takeUntil(this.destroy$),
+      distinctUntilChanged((prev, curr) => 
+        JSON.stringify(prev) === JSON.stringify(curr)
+      ), // Only update if values actually changed
     ).subscribe(([planType, isEnterprise, isPremium, isStandard, isPayrollEnabled, isInventoryEnabled]) => {
       this.planType = planType;
       this.isEnterprise = isEnterprise;

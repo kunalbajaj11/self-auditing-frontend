@@ -102,9 +102,9 @@
           <app-summary-card
             label="Expenses"
             icon="receipt_long"
-            [value]="vm.expenseCount"
+            [value]="'AED ' + (vm.totalExpenses | number: '1.0-2')"
             accent="primary"
-            [hint]="'Avg: AED ' + (vm.averageExpense | number: '1.0-2')"
+            [hint]="vm.expenseCount + ' items'"
           ></app-summary-card>
 
           <app-summary-card
