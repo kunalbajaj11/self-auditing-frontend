@@ -163,10 +163,32 @@ export class AdminReportsComponent implements OnInit {
           duration: 0, // Disable tooltip animations
         },
         callbacks: {
-          label: (context) => {
+          label: (context: any) => {
             const label = context.label || '';
-            const value = context.parsed || 0;
-            return `${label}: AED ${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            // Handle different chart types - parsed might be a number or object
+            let value: number = 0;
+            const parsed = context.parsed;
+            if (typeof parsed === 'number') {
+              value = parsed;
+            } else if (parsed && typeof parsed === 'object') {
+              if ('y' in parsed && typeof parsed.y === 'number') {
+                value = parsed.y;
+              } else if ('x' in parsed && typeof parsed.x === 'number') {
+                value = parsed.x;
+              } else {
+                value = Number(parsed) || 0;
+              }
+            } else if (parsed !== null && parsed !== undefined) {
+              value = Number(parsed) || 0;
+            } else {
+              // Fallback to raw value from dataset
+              value = Number(context.raw) || 0;
+            }
+            // Ensure value is a valid number
+            if (isNaN(value) || !isFinite(value)) {
+              value = 0;
+            }
+            return `${label}: AED ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
           },
         },
       },
@@ -209,12 +231,39 @@ export class AdminReportsComponent implements OnInit {
           duration: 0, // Disable tooltip animations
         },
         callbacks: {
-          label: (context) => {
+          label: (context: any) => {
             const label = context.label || '';
-            const value = context.parsed || 0;
-            const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+            // Handle pie chart - parsed is usually a number
+            let value: number = 0;
+            const parsed = context.parsed;
+            if (typeof parsed === 'number') {
+              value = parsed;
+            } else if (parsed && typeof parsed === 'object') {
+              if ('y' in parsed && typeof parsed.y === 'number') {
+                value = parsed.y;
+              } else if ('x' in parsed && typeof parsed.x === 'number') {
+                value = parsed.x;
+              } else {
+                value = Number(parsed) || 0;
+              }
+            } else if (parsed !== null && parsed !== undefined) {
+              value = Number(parsed) || 0;
+            } else {
+              // Fallback to raw value from dataset
+              value = Number(context.raw) || 0;
+            }
+            // Ensure value is a valid number
+            if (isNaN(value) || !isFinite(value)) {
+              value = 0;
+            }
+            // Calculate total and percentage
+            const total = (context.dataset.data as number[]).reduce((a: number, b: number) => {
+              const numA = Number(a) || 0;
+              const numB = Number(b) || 0;
+              return numA + numB;
+            }, 0);
             const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
-            return `${label}: AED ${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${percentage}%)`;
+            return `${label}: AED ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${percentage}%)`;
           },
         },
       },
@@ -575,9 +624,9 @@ export class AdminReportsComponent implements OnInit {
           label: 'Amount (AED)',
           data: [
             // Use NET revenue for consistency (invoices - credit notes + debit notes)
-            data.revenue?.netAmount ?? data.revenue?.amount ?? 0,
-            data.expenses?.total || 0,
-            data.summary?.netProfit || 0,
+            Number(data.revenue?.netAmount ?? data.revenue?.amount ?? 0) || 0,
+            Number(data.expenses?.total || 0) || 0,
+            Number(data.summary?.netProfit || 0) || 0,
           ],
           backgroundColor: [
             'rgba(46, 125, 50, 0.7)',
@@ -599,7 +648,7 @@ export class AdminReportsComponent implements OnInit {
       labels: data.expenses.items.map((item: any) => item.category),
       datasets: [
         {
-          data: data.expenses.items.map((item: any) => item.total),
+          data: data.expenses.items.map((item: any) => Number(item.amount || 0)),
           backgroundColor: [
             '#1976d2',
             '#42a5f5',
@@ -627,7 +676,8 @@ export class AdminReportsComponent implements OnInit {
     const vendorMap = new Map<string, number>();
     data.items.forEach((item: any) => {
       const vendor = item.vendor || 'N/A';
-      vendorMap.set(vendor, (vendorMap.get(vendor) || 0) + item.amount);
+      const amount = Number(item.amount || 0) || 0;
+      vendorMap.set(vendor, (vendorMap.get(vendor) || 0) + amount);
     });
 
     return {
@@ -635,7 +685,7 @@ export class AdminReportsComponent implements OnInit {
       datasets: [
         {
           label: 'Outstanding Amount (AED)',
-          data: Array.from(vendorMap.values()),
+          data: Array.from(vendorMap.values()).map(v => Number(v) || 0),
           backgroundColor: 'rgba(156, 39, 176, 0.7)',
         },
       ],
@@ -652,7 +702,8 @@ export class AdminReportsComponent implements OnInit {
     const customerMap = new Map<string, number>();
     data.items.forEach((item: any) => {
       const customer = item.customer || 'N/A';
-      customerMap.set(customer, (customerMap.get(customer) || 0) + item.outstanding);
+      const outstanding = Number(item.outstanding || 0) || 0;
+      customerMap.set(customer, (customerMap.get(customer) || 0) + outstanding);
     });
 
     return {
@@ -660,7 +711,7 @@ export class AdminReportsComponent implements OnInit {
       datasets: [
         {
           label: 'Outstanding Amount (AED)',
-          data: Array.from(customerMap.values()),
+          data: Array.from(customerMap.values()).map(v => Number(v) || 0),
           backgroundColor: 'rgba(0, 150, 136, 0.7)',
         },
       ],
@@ -679,9 +730,9 @@ export class AdminReportsComponent implements OnInit {
         {
           label: 'Amount (AED)',
           data: [
-            data.summary.totalDebit || 0,
-            data.summary.totalCredit || 0,
-            Math.abs(data.summary.totalBalance || 0),
+            Number(data.summary.totalDebit || 0) || 0,
+            Number(data.summary.totalCredit || 0) || 0,
+            Math.abs(Number(data.summary.totalBalance || 0) || 0),
           ],
           backgroundColor: [
             'rgba(25, 118, 210, 0.7)',
@@ -721,7 +772,7 @@ export class AdminReportsComponent implements OnInit {
       labels: allAccounts.map((acc: any) => acc.accountName),
       datasets: [
         {
-          data: allAccounts.map((acc: any) => Math.abs(acc.balance)),
+          data: allAccounts.map((acc: any) => Math.abs(Number(acc.balance || 0) || 0)),
           backgroundColor: [
             // Colors for VAT accounts (first)
             '#d32f2f', // Red for VAT Payable
@@ -753,9 +804,9 @@ export class AdminReportsComponent implements OnInit {
       datasets: [
         {
           data: [
-            Math.abs(data.summary.totalAssets || 0),
-            Math.abs(data.summary.totalLiabilities || 0),
-            Math.abs(data.summary.totalEquity || 0),
+            Math.abs(Number(data.summary.totalAssets || 0) || 0),
+            Math.abs(Number(data.summary.totalLiabilities || 0) || 0),
+            Math.abs(Number(data.summary.totalEquity || 0) || 0),
           ],
           backgroundColor: [
             'rgba(46, 125, 50, 0.7)',
@@ -778,7 +829,7 @@ export class AdminReportsComponent implements OnInit {
       datasets: [
         {
           label: 'Amount (AED)',
-          data: data.assets.items.map((item: any) => item.amount),
+          data: data.assets.items.map((item: any) => Number(item.amount || 0) || 0),
           backgroundColor: 'rgba(46, 125, 50, 0.7)',
         },
       ],
@@ -798,9 +849,9 @@ export class AdminReportsComponent implements OnInit {
           label: 'Amount (AED)',
           data: [
             // Use NET input/output so the chart reconciles with Net VAT
-            data.summary.netVatInput ?? data.summary.vatInput ?? 0,
-            data.summary.netVatOutput ?? data.summary.vatOutput ?? 0,
-            data.summary.netVat || 0,
+            Number(data.summary.netVatInput ?? data.summary.vatInput ?? 0) || 0,
+            Number(data.summary.netVatOutput ?? data.summary.vatOutput ?? 0) || 0,
+            Number(data.summary.netVat || 0) || 0,
           ],
           backgroundColor: [
             'rgba(211, 47, 47, 0.7)',
