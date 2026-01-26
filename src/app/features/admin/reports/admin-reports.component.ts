@@ -77,6 +77,13 @@ export class AdminReportsComponent implements OnInit {
       description: 'Stock inwards, outwards, adjustments, and balance for each product',
       color: '#7b1fa2',
     },
+    {
+      value: 'general_ledger',
+      label: 'General Ledger',
+      icon: 'book',
+      description: 'Complete transaction history for all accounts with opening and closing balances',
+      color: '#1565c0',
+    },
   ];
 
   readonly dateRangePresets: { value: string; label: string }[] = [

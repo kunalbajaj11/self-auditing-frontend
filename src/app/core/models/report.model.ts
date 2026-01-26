@@ -5,7 +5,8 @@ export type ReportType =
   | 'payables'
   | 'receivables'
   | 'vat_control_account'
-  | 'stock_balance';
+  | 'stock_balance'
+  | 'general_ledger';
 
 export interface ReportHistoryItem {
   id: string;

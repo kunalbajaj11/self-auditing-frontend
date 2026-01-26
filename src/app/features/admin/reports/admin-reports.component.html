@@ -1100,6 +1100,111 @@
             </div>
           </div>
         </div>
+
+        <!-- General Ledger Report -->
+        <div *ngIf="generatedReport.type === 'general_ledger'">
+          <div class="report-info" *ngIf="generatedReport.data?.period">
+            <p>
+              <strong>Period:</strong> {{ generatedReport.data.period.startDate }} to {{ generatedReport.data.period.endDate }}
+            </p>
+            <p>
+              <strong>Total Accounts:</strong> {{ generatedReport.data?.accounts?.length || 0 }}
+            </p>
+          </div>
+
+          <div class="general-ledger-accounts" *ngIf="generatedReport.data?.accounts && generatedReport.data.accounts.length > 0">
+            <mat-expansion-panel *ngFor="let account of generatedReport.data.accounts" class="account-panel">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <div class="account-header">
+                    <span class="account-name">{{ account.accountName }}</span>
+                    <span class="account-category">{{ account.accountCategory }}</span>
+                  </div>
+                </mat-panel-title>
+                <mat-panel-description>
+                  <div class="account-balances">
+                    <span>Opening: {{ formatCurrency(account.openingBalance || 0, true) }}</span>
+                    <span>Closing: {{ formatCurrency(account.closingBalance || 0, true) }}</span>
+                    <span>Transactions: {{ account.transactions?.length || 0 }}</span>
+                  </div>
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+
+              <div class="account-details">
+                <div class="balance-info">
+                  <div class="balance-item">
+                    <span class="label">Opening Balance:</span>
+                    <span class="value" [class.positive-amount]="(account.openingBalance || 0) >= 0" [class.negative-amount]="(account.openingBalance || 0) < 0">
+                      {{ formatCurrency(account.openingBalance || 0, true) }}
+                    </span>
+                  </div>
+                  <div class="balance-item">
+                    <span class="label">Closing Balance:</span>
+                    <span class="value" [class.positive-amount]="(account.closingBalance || 0) >= 0" [class.negative-amount]="(account.closingBalance || 0) < 0">
+                      {{ formatCurrency(account.closingBalance || 0, true) }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="transactions-table" *ngIf="account.transactions && account.transactions.length > 0">
+                  <table mat-table [dataSource]="account.transactions" class="ledger-table">
+                    <ng-container matColumnDef="date">
+                      <th mat-header-cell *matHeaderCellDef>Date</th>
+                      <td mat-cell *matCellDef="let transaction">{{ transaction.date }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="description">
+                      <th mat-header-cell *matHeaderCellDef>Description</th>
+                      <td mat-cell *matCellDef="let transaction">{{ transaction.description || '-' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="referenceNumber">
+                      <th mat-header-cell *matHeaderCellDef>Reference</th>
+                      <td mat-cell *matCellDef="let transaction">{{ transaction.referenceNumber || '-' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="source">
+                      <th mat-header-cell *matHeaderCellDef>Source</th>
+                      <td mat-cell *matCellDef="let transaction">{{ transaction.source }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="debitAmount">
+                      <th mat-header-cell *matHeaderCellDef class="text-right">Debit</th>
+                      <td mat-cell *matCellDef="let transaction" class="text-right">
+                        <span *ngIf="transaction.debitAmount > 0">{{ formatCurrency(transaction.debitAmount) }}</span>
+                        <span *ngIf="transaction.debitAmount === 0">-</span>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="creditAmount">
+                      <th mat-header-cell *matHeaderCellDef class="text-right">Credit</th>
+                      <td mat-cell *matCellDef="let transaction" class="text-right">
+                        <span *ngIf="transaction.creditAmount > 0">{{ formatCurrency(transaction.creditAmount) }}</span>
+                        <span *ngIf="transaction.creditAmount === 0">-</span>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="runningBalance">
+                      <th mat-header-cell *matHeaderCellDef class="text-right">Balance</th>
+                      <td mat-cell *matCellDef="let transaction" class="text-right" 
+                          [class.positive-amount]="(transaction.runningBalance || 0) >= 0" 
+                          [class.negative-amount]="(transaction.runningBalance || 0) < 0">
+                        {{ formatCurrency(transaction.runningBalance || 0, true) }}
+                      </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="['date', 'description', 'referenceNumber', 'source', 'debitAmount', 'creditAmount', 'runningBalance']"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['date', 'description', 'referenceNumber', 'source', 'debitAmount', 'creditAmount', 'runningBalance']"></tr>
+                  </table>
+                </div>
+
+                <div class="empty-state" *ngIf="!account.transactions || account.transactions.length === 0">
+                  <mat-icon>receipt</mat-icon>
+                  <p>No transactions found for this account in the selected period.</p>
+                </div>
+              </div>
+            </mat-expansion-panel>
+          </div>
+
+          <div class="empty-state" *ngIf="!generatedReport.data?.accounts || generatedReport.data.accounts.length === 0">
+            <mat-icon>book</mat-icon>
+            <p>No accounts found for the selected period.</p>
+          </div>
+        </div>
       </mat-card-content>
     </mat-card>
   </div>
