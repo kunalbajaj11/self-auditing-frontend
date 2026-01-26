@@ -105,6 +105,7 @@ const routes: Routes = [
               { label: 'Receivables', route: '/admin/reports/receivables', icon: 'receipt_long' },
               { label: 'VAT Control Account', route: '/admin/reports/vat-control-account', icon: 'account_balance' },
               { label: 'Stock Balance', route: '/admin/reports/stock-balance', icon: 'inventory_2' },
+              { label: 'General Ledger', route: '/admin/reports/general-ledger', icon: 'book' },
             ],
           },
           {
@@ -225,6 +226,11 @@ const routes: Routes = [
             path: 'stock-balance',
             component: AdminReportsComponent,
             data: { shell: { title: 'Stock Balance Report' }, reportType: 'stock_balance' },
+          },
+          {
+            path: 'general-ledger',
+            component: AdminReportsComponent,
+            data: { shell: { title: 'General Ledger' }, reportType: 'general_ledger' },
           },
           {
             path: '',
