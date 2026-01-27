@@ -1,0 +1,125 @@
+<div class="account-entries-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>account_balance</mat-icon>
+      Account Entries: {{ data.accountName }}
+    </h2>
+    <button mat-icon-button (click)="close()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <div *ngIf="loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading account entries...</p>
+    </div>
+
+    <div *ngIf="!loading && accountEntries" class="account-entries-content">
+      <!-- Account Summary -->
+      <div class="account-summary">
+        <div class="summary-item">
+          <span class="label">Account Type:</span>
+          <span class="value">{{ accountEntries.accountType }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Period:</span>
+          <span class="value">
+            {{ formatDate(accountEntries.period.startDate) }} -
+            {{ formatDate(accountEntries.period.endDate) }}
+          </span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Total Entries:</span>
+          <span class="value">{{ accountEntries.totalEntries }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Total Debit:</span>
+          <span class="value debit">{{ formatCurrency(accountEntries.totalDebit) }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Total Credit:</span>
+          <span class="value credit">{{ formatCurrency(accountEntries.totalCredit) }}</span>
+        </div>
+      </div>
+
+      <!-- Entries Table -->
+      <div class="entries-table-container">
+        <table mat-table [dataSource]="accountEntries.entries" class="entries-table">
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let entry">
+              {{ formatDate(entry.date) }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let entry">
+              <mat-chip [color]="getTypeColor(entry.type)" selected>
+                {{ entry.type }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="referenceNumber">
+            <th mat-header-cell *matHeaderCellDef>Reference</th>
+            <td mat-cell *matCellDef="let entry">
+              {{ entry.referenceNumber || '—' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef>Description</th>
+            <td mat-cell *matCellDef="let entry">
+              {{ entry.description || '—' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="debitAmount">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Debit</th>
+            <td mat-cell *matCellDef="let entry" class="text-right">
+              <span *ngIf="entry.debitAmount > 0" class="debit-amount">
+                {{ formatCurrency(entry.debitAmount) }}
+              </span>
+              <span *ngIf="entry.debitAmount === 0">—</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="creditAmount">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Credit</th>
+            <td mat-cell *matCellDef="let entry" class="text-right">
+              <span *ngIf="entry.creditAmount > 0" class="credit-amount">
+                {{ formatCurrency(entry.creditAmount) }}
+              </span>
+              <span *ngIf="entry.creditAmount === 0">—</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
+            <td mat-cell *matCellDef="let entry" class="text-right">
+              {{ formatCurrency(entry.amount) }}
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+              <div class="no-data">
+                <mat-icon>info</mat-icon>
+                <p>No entries found for this account in the selected period.</p>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="close()">Close</button>
+  </mat-dialog-actions>
+</div>

@@ -11,6 +11,7 @@ import { AdminExpensesComponent } from './expenses/admin-expenses.component';
 import { AdminPaymentsComponent } from './payments/admin-payments.component';
 import { PaymentFormDialogComponent } from './payments/payment-form-dialog.component';
 import { AdminReportsComponent } from './reports/admin-reports.component';
+import { AccountEntriesDialogComponent } from './reports/account-entries-dialog.component';
 import { AdminNotificationsComponent } from './notifications/admin-notifications.component';
 import { UserFormDialogComponent } from './users/user-form-dialog.component';
 import { CategoryFormDialogComponent } from './categories/category-form-dialog.component';
@@ -80,6 +81,7 @@ import { CreateDeadlineDialogComponent } from './compliance/create-deadline-dial
     AdminPaymentsComponent,
     PaymentFormDialogComponent,
     AdminReportsComponent,
+    AccountEntriesDialogComponent,
     AdminNotificationsComponent,
     UserFormDialogComponent,
     CategoryFormDialogComponent,

@@ -87,4 +87,55 @@ export class ReportsService {
   }): Observable<any> {
     return this.api.post<any>('/reports/schedule', payload);
   }
+
+  getAccountEntries(params: {
+    accountName: string;
+    accountType: string;
+    startDate?: string;
+    endDate?: string;
+  }): Observable<{
+    accountName: string;
+    accountType: string;
+    period: { startDate: string; endDate: string };
+    entries: Array<{
+      id: string;
+      type: string;
+      date: string;
+      referenceNumber?: string;
+      description?: string;
+      debitAmount: number;
+      creditAmount: number;
+      amount: number;
+      currency?: string;
+      status?: string;
+      entityId?: string;
+      entityType?: string;
+    }>;
+    totalEntries: number;
+    totalDebit: number;
+    totalCredit: number;
+  }> {
+    return this.api.get<{
+      accountName: string;
+      accountType: string;
+      period: { startDate: string; endDate: string };
+      entries: Array<{
+        id: string;
+        type: string;
+        date: string;
+        referenceNumber?: string;
+        description?: string;
+        debitAmount: number;
+        creditAmount: number;
+        amount: number;
+        currency?: string;
+        status?: string;
+        entityId?: string;
+        entityType?: string;
+      }>;
+      totalEntries: number;
+      totalDebit: number;
+      totalCredit: number;
+    }>('/reports/account-entries', params);
+  }
 }

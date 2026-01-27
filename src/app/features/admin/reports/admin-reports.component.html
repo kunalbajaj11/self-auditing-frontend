@@ -252,7 +252,17 @@
           <table mat-table [dataSource]="generatedReport.data?.accounts || []" class="report-table">
             <ng-container matColumnDef="accountName">
               <th mat-header-cell *matHeaderCellDef>Account Name</th>
-              <td mat-cell *matCellDef="let row">{{ resolveAccountName(row.accountName) }}</td>
+              <td mat-cell *matCellDef="let row">
+                <button 
+                  mat-button 
+                  color="primary" 
+                  class="account-name-link"
+                  (click)="openAccountEntries(row)"
+                  [matTooltip]="'Click to view all entries for this account'">
+                  <mat-icon>open_in_new</mat-icon>
+                  {{ resolveAccountName(row.accountName) }}
+                </button>
+              </td>
             </ng-container>
             <ng-container matColumnDef="accountType">
               <th mat-header-cell *matHeaderCellDef>Type</th>

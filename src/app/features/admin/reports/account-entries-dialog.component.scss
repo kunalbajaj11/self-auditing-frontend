@@ -1,0 +1,136 @@
+.account-entries-dialog {
+  min-width: 900px;
+  max-width: 1200px;
+  max-height: 90vh;
+
+  .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      font-size: 20px;
+      font-weight: 500;
+
+      mat-icon {
+        color: #1976d2;
+      }
+    }
+
+    .close-button {
+      margin-right: -8px;
+    }
+  }
+
+  mat-dialog-content {
+    padding: 24px;
+    max-height: calc(90vh - 200px);
+    overflow-y: auto;
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    gap: 16px;
+
+    p {
+      margin: 0;
+      color: rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  .account-entries-content {
+    .account-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      padding: 16px;
+      background: #f5f5f5;
+      border-radius: 4px;
+      margin-bottom: 24px;
+
+      .summary-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .label {
+          font-size: 12px;
+          color: rgba(0, 0, 0, 0.6);
+          font-weight: 500;
+        }
+
+        .value {
+          font-size: 16px;
+          font-weight: 500;
+          color: rgba(0, 0, 0, 0.87);
+
+          &.debit {
+            color: #d32f2f;
+          }
+
+          &.credit {
+            color: #2e7d32;
+          }
+        }
+      }
+    }
+
+    .entries-table-container {
+      overflow-x: auto;
+
+      .entries-table {
+        width: 100%;
+
+        .text-right {
+          text-align: right;
+        }
+
+        .debit-amount {
+          color: #d32f2f;
+          font-weight: 500;
+        }
+
+        .credit-amount {
+          color: #2e7d32;
+          font-weight: 500;
+        }
+
+        .no-data {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 40px;
+          gap: 8px;
+          color: rgba(0, 0, 0, 0.6);
+
+          mat-icon {
+            font-size: 48px;
+            width: 48px;
+            height: 48px;
+            opacity: 0.5;
+          }
+
+          p {
+            margin: 0;
+          }
+        }
+      }
+    }
+  }
+
+  mat-dialog-actions {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+  }
+}

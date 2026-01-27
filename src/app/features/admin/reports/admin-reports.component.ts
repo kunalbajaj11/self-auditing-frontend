@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { ReportsService } from '../../../core/services/reports.service';
@@ -12,6 +13,10 @@ import {
   LedgerAccountsService,
   LedgerAccount,
 } from '../../../core/services/ledger-accounts.service';
+import {
+  AccountEntriesDialogComponent,
+  AccountEntriesDialogData,
+} from './account-entries-dialog.component';
 
 interface ReportConfig {
   value: ReportType;
@@ -127,6 +132,7 @@ export class AdminReportsComponent implements OnInit {
     private readonly router: Router,
     private readonly licenseService: LicenseService,
     private readonly ledgerAccountsService: LedgerAccountsService,
+    private readonly dialog: MatDialog,
   ) {
     this.form = this.fb.group({
       reportType: [''],
@@ -907,6 +913,28 @@ export class AdminReportsComponent implements OnInit {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
+    });
+  }
+
+  openAccountEntries(row: any): void {
+    if (!this.generatedReport || !this.generatedReport.data) {
+      return;
+    }
+
+    const startDate = this.form.get('startDate')?.value;
+    const endDate = this.form.get('endDate')?.value;
+    const dialogData: AccountEntriesDialogData = {
+      accountName: row.accountName,
+      accountType: row.accountType,
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
+    };
+
+    this.dialog.open(AccountEntriesDialogComponent, {
+      width: '1200px',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      data: dialogData,
     });
   }
 }
