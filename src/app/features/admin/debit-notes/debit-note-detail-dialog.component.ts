@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialog } from '@angular/material/dialog';
 import { DebitNotesService, DebitNote } from '../../../core/services/debit-notes.service';
-// Apply dialog can be added later if needed
+import { DebitNoteApplyDialogComponent } from './debit-note-apply-dialog.component';
 
 @Component({
   selector: 'app-debit-note-detail-dialog',
@@ -64,11 +64,41 @@ export class DebitNoteDetailDialogComponent implements OnInit {
     }
   }
 
-  // Apply dialog can be added later if needed
-  // openApplyDialog(): void {
-  //   if (!this.debitNote) return;
-  //   // Implementation for applying debit note to invoice
-  // }
+  openApplyDialog(): void {
+    if (!this.debitNote) return;
+    
+    // Check if this is a customer debit note (linked to invoice) or supplier debit note (linked to expense)
+    if (this.debitNote.invoiceId || this.debitNote.invoice?.id) {
+      // Customer debit note - apply to invoice
+      const dialogRef = this.dialog.open(DebitNoteApplyDialogComponent, {
+        width: '600px',
+        data: { debitNote: this.debitNote },
+      });
+
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result) {
+          // Reload debit note to show updated applied amount
+          this.loadDebitNote();
+        }
+      });
+    } else if (this.debitNote.expenseId || this.debitNote.expense?.id) {
+      // Supplier debit note - apply to expense
+      // TODO: Create apply-to-expense dialog component
+      // For now, show a message
+      alert('Apply to expense functionality will be available soon. This debit note is linked to an expense.');
+    } else {
+      alert('This debit note is not linked to an invoice or expense. Please link it first.');
+    }
+  }
+
+  canApply(): boolean {
+    if (!this.debitNote) return false;
+    // Can apply if status is ISSUED and there's remaining amount
+    return (
+      this.debitNote.status?.toLowerCase() === 'issued' &&
+      this.remainingAmount > 0
+    );
+  }
 
   close(): void {
     this.dialogRef.close();

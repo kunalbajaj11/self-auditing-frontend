@@ -119,9 +119,13 @@ export class CreditNoteFormDialogComponent implements OnInit, AfterViewInit {
 
     const creditNote = this.data;
 
-    // Load customer data if customerId exists
-    if (creditNote.customerId) {
-      this.customersService.getCustomer(creditNote.customerId).subscribe({
+    // Resolve customer ID from either flat field or nested relation
+    const resolvedCustomerId =
+      creditNote.customerId || (creditNote.customer && creditNote.customer.id);
+
+    if (resolvedCustomerId) {
+      // Load full customer to ensure latest name/TRN
+      this.customersService.getCustomer(resolvedCustomerId).subscribe({
         next: (customer) => {
           this.form.patchValue({
             customerId: customer.id,
@@ -130,16 +134,39 @@ export class CreditNoteFormDialogComponent implements OnInit, AfterViewInit {
           });
         },
         error: () => {
+          // Fallback to whatever is already on the credit note
           this.form.patchValue({
-            customerName: creditNote.customerName || '',
-            customerTrn: creditNote.customerTrn || '',
+            customerName:
+              creditNote.customerName ||
+              (creditNote.customer && creditNote.customer.name) ||
+              '',
+            customerTrn:
+              creditNote.customerTrn ||
+              (creditNote.customer && creditNote.customer.customerTrn) ||
+              '',
           });
         },
       });
+    } else {
+      // No customer id, just use the values on the credit note (if any)
+      this.form.patchValue({
+        customerName:
+          creditNote.customerName ||
+          (creditNote.customer && creditNote.customer.name) ||
+          '',
+        customerTrn:
+          creditNote.customerTrn ||
+          (creditNote.customer && creditNote.customer.customerTrn) ||
+          '',
+      });
     }
 
-    if (creditNote.invoiceId) {
-      this.invoicesService.getInvoice(creditNote.invoiceId).subscribe({
+    // Resolve invoice ID from either flat field or nested relation
+    const resolvedInvoiceId =
+      creditNote.invoiceId || (creditNote.invoice && creditNote.invoice.id);
+
+    if (resolvedInvoiceId) {
+      this.invoicesService.getInvoice(resolvedInvoiceId).subscribe({
         next: (invoice) => {
           this.selectedInvoice = invoice;
           this.form.patchValue({
@@ -236,7 +263,6 @@ export class CreditNoteFormDialogComponent implements OnInit, AfterViewInit {
       amount: parseFloat(formValue.amount),
       vatAmount: parseFloat(formValue.vatAmount || '0'),
       currency: formValue.currency || 'AED',
-      status: formValue.status || 'draft',
       description: formValue.description || undefined,
       notes: formValue.notes || undefined,
     };
@@ -248,24 +274,93 @@ export class CreditNoteFormDialogComponent implements OnInit, AfterViewInit {
       }
     });
 
-    const operation = this.data
-      ? this.creditNotesService.updateCreditNote(this.data.id, payload)
-      : this.creditNotesService.createCreditNote(payload);
+    const desiredStatus: string = formValue.status || 'draft';
 
-    operation.subscribe({
-      next: () => {
-        this.loading = false;
-        this.dialogRef.close(true);
-      },
-      error: (error) => {
-        this.loading = false;
-        this.snackBar.open(
-          error?.error?.message || 'Failed to save credit note',
-          'Close',
-          { duration: 4000, panelClass: ['snack-error'] },
-        );
-      },
-    });
+    // Editing existing credit note
+    if (this.data) {
+      const creditNoteId = this.data.id;
+      const originalStatus = this.data.status;
+      const statusChanged = originalStatus !== desiredStatus;
+
+      // First update core fields (date, reason, amounts, etc.)
+      this.creditNotesService.updateCreditNote(creditNoteId, payload).subscribe({
+        next: (updatedNote) => {
+          // If status did not change, we're done
+          if (!statusChanged) {
+            this.loading = false;
+            this.dialogRef.close(true);
+            return;
+          }
+
+          // If status changed, call dedicated status endpoint
+          this.creditNotesService
+            .updateCreditNoteStatus(creditNoteId, desiredStatus)
+            .subscribe({
+              next: () => {
+                this.loading = false;
+                this.dialogRef.close(true);
+              },
+              error: (error) => {
+                this.loading = false;
+                this.snackBar.open(
+                  error?.error?.message ||
+                    'Credit note updated, but failed to update status',
+                  'Close',
+                  { duration: 4000, panelClass: ['snack-error'] },
+                );
+              },
+            });
+        },
+        error: (error) => {
+          this.loading = false;
+          this.snackBar.open(
+            error?.error?.message || 'Failed to save credit note',
+            'Close',
+            { duration: 4000, panelClass: ['snack-error'] },
+          );
+        },
+      });
+    } else {
+      // Creating new credit note: backend always starts as DRAFT,
+      // then we optionally update status if user chose a different one.
+      this.creditNotesService.createCreditNote(payload).subscribe({
+        next: (created) => {
+          const creditNoteId = created.id;
+
+          if (!creditNoteId || desiredStatus === 'draft') {
+            this.loading = false;
+            this.dialogRef.close(true);
+            return;
+          }
+
+          this.creditNotesService
+            .updateCreditNoteStatus(creditNoteId, desiredStatus)
+            .subscribe({
+              next: () => {
+                this.loading = false;
+                this.dialogRef.close(true);
+              },
+              error: (error) => {
+                this.loading = false;
+                this.snackBar.open(
+                  error?.error?.message ||
+                    'Credit note created, but failed to update status',
+                  'Close',
+                  { duration: 4000, panelClass: ['snack-error'] },
+                );
+              },
+            });
+        },
+        error: (error) => {
+          this.loading = false;
+          this.snackBar.open(
+            error?.error?.message || 'Failed to save credit note',
+            'Close',
+            { duration: 4000, panelClass: ['snack-error'] },
+          );
+        },
+      });
+    }
   }
 
   cancel(): void {

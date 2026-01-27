@@ -10,6 +10,16 @@ export interface DebitNote {
   customerId?: string | null;
   customerName?: string | null;
   customerTrn?: string | null;
+  // When fetched via /debit-notes/:id the backend also returns related entities.
+  // Keep them optional so existing code continues to work, but we can use them
+  // to pre-fill forms.
+  invoice?: {
+    id: string;
+    customerId?: string | null;
+    customerName?: string | null;
+    customerTrn?: string | null;
+    currency?: string | null;
+  } | null;
   customer?: {
     id: string;
     name: string;
@@ -22,6 +32,16 @@ export interface DebitNote {
     id: string;
     name: string;
     vendorTrn?: string | null;
+  } | null;
+  expense?: {
+    id: string;
+    vendorId?: string | null;
+    vendorName?: string | null;
+    vendorTrn?: string | null;
+    currency?: string | null;
+    amount?: string | null;
+    vatAmount?: string | null;
+    description?: string | null;
   } | null;
   debitNoteDate: string;
   reason: string;
@@ -80,7 +100,17 @@ export class DebitNotesService {
   }
 
   updateDebitNote(id: string, payload: Partial<CreateDebitNotePayload>): Observable<DebitNote> {
+    // Backend exposes PUT /debit-notes/:id (PATCH is only for /:id/status),
+    // so use PUT here to avoid 404s when editing debit notes.
     return this.api.put<DebitNote>(`/debit-notes/${id}`, payload);
+  }
+
+  /**
+   * Update ONLY the status of a debit note.
+   * Maps to PATCH /debit-notes/:id/status on the backend.
+   */
+  updateDebitNoteStatus(id: string, status: string): Observable<DebitNote> {
+    return this.api.patch<DebitNote>(`/debit-notes/${id}/status`, { status });
   }
 
   deleteDebitNote(id: string): Observable<void> {

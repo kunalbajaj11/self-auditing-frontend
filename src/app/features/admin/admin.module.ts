@@ -34,6 +34,7 @@ import { CreditNoteApplyDialogComponent } from './credit-notes/credit-note-apply
 import { AdminDebitNotesComponent } from './debit-notes/admin-debit-notes.component';
 import { DebitNoteFormDialogComponent } from './debit-notes/debit-note-form-dialog.component';
 import { DebitNoteDetailDialogComponent } from './debit-notes/debit-note-detail-dialog.component';
+import { DebitNoteApplyDialogComponent } from './debit-notes/debit-note-apply-dialog.component';
 import { InvoiceEmailDialogComponent } from './sales-invoices/invoice-email-dialog.component';
 import { AdminVendorsComponent } from './vendors/admin-vendors.component';
 import { VendorFormDialogComponent } from './vendors/vendor-form-dialog.component';
@@ -101,6 +102,7 @@ import { CreateDeadlineDialogComponent } from './compliance/create-deadline-dial
     AdminDebitNotesComponent,
     DebitNoteFormDialogComponent,
     DebitNoteDetailDialogComponent,
+    DebitNoteApplyDialogComponent,
     InvoiceEmailDialogComponent,
     AdminVendorsComponent,
     VendorFormDialogComponent,
@@ -135,5 +137,7 @@ import { CreateDeadlineDialogComponent } from './compliance/create-deadline-dial
   ],
   imports: [SharedModule, AdminRoutingModule],
 })
-export class AdminModule {}
+export class AdminModule {
+  // Component declarations ensure DebitNoteApplyDialogComponent has access to Material modules via SharedModule
+}
 

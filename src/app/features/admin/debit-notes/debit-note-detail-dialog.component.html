@@ -110,7 +110,14 @@
 
   <mat-dialog-actions align="end" *ngIf="!loading && debitNote">
     <button mat-button (click)="close()">Close</button>
-    <!-- Apply to Invoice button can be added later if needed -->
+    <button
+      *ngIf="canApply()"
+      mat-raised-button
+      color="primary"
+      (click)="openApplyDialog()"
+    >
+      Apply Debit Note
+    </button>
   </mat-dialog-actions>
 </div>
 

@@ -120,9 +120,10 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
 
     const debitNote = this.data as any;
 
-    // Load vendor data if vendorId exists
-    if (debitNote.vendorId) {
-      this.vendorsService.getVendor(debitNote.vendorId).subscribe({
+    // Resolve vendorId from either flat field or nested relation
+    const vendorId = debitNote.vendorId || debitNote.vendor?.id;
+    if (vendorId) {
+      this.vendorsService.getVendor(vendorId).subscribe({
         next: (vendor) => {
           this.form.patchValue({
             vendorId: vendor.id,
@@ -131,24 +132,41 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
           });
         },
         error: () => {
+          // Fallback to debit note data
           this.form.patchValue({
-            vendorName: debitNote.vendorName || '',
-            vendorTrn: debitNote.vendorTrn || '',
+            vendorId: vendorId,
+            vendorName: debitNote.vendorName || debitNote.vendor?.name || '',
+            vendorTrn: debitNote.vendorTrn || debitNote.vendor?.vendorTrn || '',
           });
         },
       });
+    } else {
+      // No vendorId, but might have vendor name/TRN from flat fields
+      this.form.patchValue({
+        vendorName: debitNote.vendorName || '',
+        vendorTrn: debitNote.vendorTrn || '',
+      });
     }
 
-    if (debitNote.expenseId) {
-      this.expensesService.getExpense(debitNote.expenseId).subscribe({
+    // Resolve expenseId from either flat field or nested relation
+    const expenseId = debitNote.expenseId || debitNote.expense?.id;
+    if (expenseId) {
+      this.expensesService.getExpense(expenseId).subscribe({
         next: (expense) => {
           this.selectedExpense = expense;
           this.form.patchValue({
             expenseId: expense.id,
-            vendorId: expense.vendorId || '',
-            vendorName: expense.vendorName || '',
-            vendorTrn: expense.vendorTrn || '',
-            currency: expense.currency || 'AED',
+            vendorId: expense.vendorId || vendorId || '',
+            vendorName: expense.vendorName || debitNote.vendorName || '',
+            vendorTrn: expense.vendorTrn || debitNote.vendorTrn || '',
+            currency: expense.currency || debitNote.currency || 'AED',
+          });
+        },
+        error: () => {
+          // Fallback to debit note data
+          this.form.patchValue({
+            expenseId: expenseId,
+            currency: debitNote.expense?.currency || debitNote.currency || 'AED',
           });
         },
       });
@@ -226,7 +244,10 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
 
     this.loading = true;
     const formValue = this.form.getRawValue();
+    const desiredStatus = formValue.status || 'draft';
+    const originalStatus = this.data?.status;
 
+    // Prepare payload without status (backend creates as DRAFT by default)
     const payload: any = {
       expenseId: formValue.expenseId || undefined,
       vendorId: formValue.vendorId || undefined,
@@ -237,7 +258,6 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
       amount: parseFloat(formValue.amount),
       vatAmount: parseFloat(formValue.vatAmount || '0'),
       currency: formValue.currency || 'AED',
-      status: formValue.status || 'draft',
       description: formValue.description || undefined,
       notes: formValue.notes || undefined,
     };
@@ -249,24 +269,76 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
       }
     });
 
-    const operation = this.data
-      ? this.debitNotesService.updateDebitNote(this.data.id, payload)
-      : this.debitNotesService.createDebitNote(payload);
-
-    operation.subscribe({
-      next: () => {
-        this.loading = false;
-        this.dialogRef.close(true);
-      },
-      error: (error) => {
-        this.loading = false;
-        this.snackBar.open(
-          error?.error?.message || 'Failed to save debit note',
-          'Close',
-          { duration: 4000, panelClass: ['snack-error'] },
-        );
-      },
-    });
+    if (this.data) {
+      // Updating existing debit note
+      // First update general fields
+      this.debitNotesService.updateDebitNote(this.data.id, payload).subscribe({
+        next: () => {
+          // If status changed, update it separately
+          if (desiredStatus !== originalStatus && this.data) {
+            this.debitNotesService.updateDebitNoteStatus(this.data.id, desiredStatus).subscribe({
+              next: () => {
+                this.loading = false;
+                this.dialogRef.close(true);
+              },
+              error: (error) => {
+                this.loading = false;
+                this.snackBar.open(
+                  error?.error?.message || 'Failed to update debit note status',
+                  'Close',
+                  { duration: 4000, panelClass: ['snack-error'] },
+                );
+              },
+            });
+          } else {
+            this.loading = false;
+            this.dialogRef.close(true);
+          }
+        },
+        error: (error) => {
+          this.loading = false;
+          this.snackBar.open(
+            error?.error?.message || 'Failed to update debit note',
+            'Close',
+            { duration: 4000, panelClass: ['snack-error'] },
+          );
+        },
+      });
+    } else {
+      // Creating new debit note
+      this.debitNotesService.createDebitNote(payload).subscribe({
+        next: (created) => {
+          // Backend creates as DRAFT by default. If user selected a different status, update it.
+          if (desiredStatus !== 'draft') {
+            this.debitNotesService.updateDebitNoteStatus(created.id, desiredStatus).subscribe({
+              next: () => {
+                this.loading = false;
+                this.dialogRef.close(true);
+              },
+              error: (error) => {
+                this.loading = false;
+                this.snackBar.open(
+                  error?.error?.message || 'Failed to update debit note status',
+                  'Close',
+                  { duration: 4000, panelClass: ['snack-error'] },
+                );
+              },
+            });
+          } else {
+            this.loading = false;
+            this.dialogRef.close(true);
+          }
+        },
+        error: (error) => {
+          this.loading = false;
+          this.snackBar.open(
+            error?.error?.message || 'Failed to create debit note',
+            'Close',
+            { duration: 4000, panelClass: ['snack-error'] },
+          );
+        },
+      });
+    }
   }
 
   cancel(): void {

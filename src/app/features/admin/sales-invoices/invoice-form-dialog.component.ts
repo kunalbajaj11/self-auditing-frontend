@@ -168,9 +168,10 @@ export class InvoiceFormDialogComponent implements OnInit {
 
     const invoice = this.data;
     
-    // Load customer data if customerId exists
-    if (invoice.customerId) {
-      this.customersService.getCustomer(invoice.customerId).subscribe({
+    // Resolve customerId from either flat field or nested relation
+    const customerId = invoice.customerId || invoice.customer?.id;
+    if (customerId) {
+      this.customersService.getCustomer(customerId).subscribe({
         next: (customer) => {
           this.form.patchValue({
             customerId: customer.id,
@@ -179,12 +180,19 @@ export class InvoiceFormDialogComponent implements OnInit {
           });
         },
         error: () => {
-          // Fallback to invoice data
+          // Fallback to invoice data (from nested customer or flat fields)
           this.form.patchValue({
-            customerName: invoice.customerName || '',
-            customerTrn: invoice.customerTrn || '',
+            customerId: customerId,
+            customerName: invoice.customerName || invoice.customer?.name || '',
+            customerTrn: invoice.customerTrn || invoice.customer?.customerTrn || '',
           });
         },
+      });
+    } else {
+      // No customerId, but might have customer name/TRN from flat fields
+      this.form.patchValue({
+        customerName: invoice.customerName || '',
+        customerTrn: invoice.customerTrn || '',
       });
     }
 

@@ -1,0 +1,71 @@
+<h2 mat-dialog-title>Apply Debit Note to Invoice</h2>
+
+<mat-dialog-content>
+  <div class="debit-note-info" *ngIf="debitNote">
+    <div class="info-row">
+      <span class="label">Debit Note:</span>
+      <span class="value">{{ debitNote.debitNoteNumber }}</span>
+    </div>
+    <div class="info-row">
+      <span class="label">Total Amount:</span>
+      <span class="value">{{ debitNote.totalAmount | number: '1.2-2' }} {{ debitNote.currency }}</span>
+    </div>
+    <div class="info-row">
+      <span class="label">Applied Amount:</span>
+      <span class="value">{{ debitNote.appliedAmount | number: '1.2-2' }} {{ debitNote.currency }}</span>
+    </div>
+    <div class="info-row">
+      <span class="label">Remaining:</span>
+      <span class="value remaining">{{ maxApplyAmount | number: '1.2-2' }} {{ debitNote.currency }}</span>
+    </div>
+  </div>
+
+  <form [formGroup]="form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Invoice to Apply To *</mat-label>
+      <mat-select formControlName="invoiceId" required>
+        <mat-option [value]="null">Select Invoice</mat-option>
+        <mat-option *ngFor="let invoice of invoices" [value]="invoice.id">
+          {{ invoice.invoiceNumber }} - {{ invoice.customerName || 'N/A' }} 
+          (Outstanding: {{ getInvoiceOutstanding(invoice) | number: '1.2-2' }} {{ invoice.currency }})
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('invoiceId')?.hasError('required')">
+        Please select an invoice
+      </mat-error>
+    </mat-form-field>
+
+    <div class="invoice-info" *ngIf="selectedInvoice">
+      <div class="info-row">
+        <span class="label">Invoice Outstanding:</span>
+        <span class="value">{{ invoiceOutstandingAmount | number: '1.2-2' }} {{ debitNote.currency }}</span>
+      </div>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Amount to Apply *</mat-label>
+      <input matInput type="number" formControlName="applyAmount" step="0.01" min="0.01" [max]="maxApplyAmount" required />
+      <span matSuffix>{{ debitNote.currency }}</span>
+      <mat-hint>Maximum: {{ maxApplyAmount | number: '1.2-2' }} {{ debitNote.currency }}</mat-hint>
+      <mat-error *ngIf="form.get('applyAmount')?.hasError('required')">
+        Amount is required
+      </mat-error>
+      <mat-error *ngIf="form.get('applyAmount')?.hasError('max')">
+        Cannot exceed remaining debit note amount
+      </mat-error>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="save()"
+    [disabled]="form.invalid || loading"
+  >
+    <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
+    <span *ngIf="!loading">Apply Debit Note</span>
+  </button>
+</mat-dialog-actions>

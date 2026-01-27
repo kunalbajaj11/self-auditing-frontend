@@ -37,6 +37,16 @@ export interface SalesInvoice {
   customerId?: string | null;
   customerName?: string | null;
   customerTrn?: string | null;
+  // When fetched via /sales-invoices/:id the backend also returns related entities.
+  // Keep them optional so existing code continues to work, but we can use them
+  // to pre-fill forms.
+  customer?: {
+    id: string;
+    name: string;
+    customerTrn?: string | null;
+    preferredCurrency?: string | null;
+    paymentTerms?: number | null;
+  } | null;
   invoiceDate: string;
   dueDate?: string | null;
   amount: string;
