@@ -53,7 +53,6 @@ const routes: Routes = [
               { label: 'Invoices', route: '/admin/sales-invoices' },
               { label: 'Payments Received', route: '/admin/sales-invoices', queryParams: { filter: 'payments' } },
               { label: 'Credit Notes', route: '/admin/credit-notes' },
-              { label: 'Debit Notes', route: '/admin/debit-notes' },
             ],
           },
           {
@@ -62,6 +61,7 @@ const routes: Routes = [
             children: [
               { label: 'Expenses', route: '/admin/expenses' },
               { label: 'Payments', route: '/admin/payments' },
+              { label: 'Debit Notes', route: '/admin/debit-notes' },
               { label: 'Journal Entries', route: '/admin/journal-entries' },
               { label: 'Vendors', route: '/admin/vendors' },
             ],

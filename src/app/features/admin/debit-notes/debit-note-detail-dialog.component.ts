@@ -3,6 +3,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialog } from '@angular/material/dialog';
 import { DebitNotesService, DebitNote } from '../../../core/services/debit-notes.service';
 import { DebitNoteApplyDialogComponent } from './debit-note-apply-dialog.component';
+import { DebitNoteApplyToExpenseDialogComponent } from './debit-note-apply-to-expense-dialog.component';
 
 @Component({
   selector: 'app-debit-note-detail-dialog',
@@ -83,9 +84,17 @@ export class DebitNoteDetailDialogComponent implements OnInit {
       });
     } else if (this.debitNote.expenseId || this.debitNote.expense?.id) {
       // Supplier debit note - apply to expense
-      // TODO: Create apply-to-expense dialog component
-      // For now, show a message
-      alert('Apply to expense functionality will be available soon. This debit note is linked to an expense.');
+      const dialogRef = this.dialog.open(DebitNoteApplyToExpenseDialogComponent, {
+        width: '600px',
+        data: { debitNote: this.debitNote },
+      });
+
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result) {
+          // Reload debit note to show updated applied amount
+          this.loadDebitNote();
+        }
+      });
     } else {
       alert('This debit note is not linked to an invoice or expense. Please link it first.');
     }
