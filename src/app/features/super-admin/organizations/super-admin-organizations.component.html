@@ -198,6 +198,13 @@
         ></tr>
       </table>
 
+      <mat-paginator
+        [pageSizeOptions]="[10, 25, 50, 100]"
+        [pageSize]="25"
+        showFirstLastButtons
+        aria-label="Select page of organizations">
+      </mat-paginator>
+
           <div class="table-overlay" *ngIf="loading">
             <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
           </div>

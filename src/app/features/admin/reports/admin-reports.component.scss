@@ -244,15 +244,15 @@
     align-items: center;
     gap: 12px;
     margin: 0 0 8px;
-    font-size: 1.75rem;
+    font-size: 1.25rem !important; // Fixed size - keep consistent
     font-weight: 700;
     color: #0f172a;
     flex: 1;
 
     mat-icon {
-      font-size: 32px;
-      width: 32px;
-      height: 32px;
+      font-size: 20px !important; // Fixed size - keep consistent
+      width: 20px !important;
+      height: 20px !important;
     }
   }
 
@@ -382,6 +382,7 @@
   background: transparent !important;
   box-shadow: none !important;
   cursor: pointer !important;
+  text-align: left !important;
 
   ::ng-deep .mat-button-wrapper {
     display: inline-flex !important;
@@ -795,5 +796,87 @@
 
   .report-table {
     overflow-x: auto;
+  }
+}
+
+// General Ledger Styling
+.general-ledger-accounts {
+  font-size: 0.875rem; // Reduced font size (14px)
+
+  .account-panel {
+    margin-bottom: 8px;
+
+    ::ng-deep .mat-expansion-panel-header {
+      padding: 8px 16px;
+      font-size: 0.875rem;
+    }
+
+    .account-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.875rem;
+
+      .account-name {
+        font-weight: 500;
+        color: #0f172a;
+      }
+
+      .account-category {
+        color: #64748b;
+        font-size: 0.8125rem; // Slightly smaller for category
+        text-transform: capitalize;
+      }
+    }
+
+    .account-balances {
+      display: flex;
+      gap: 16px;
+      font-size: 0.8125rem;
+      color: #64748b;
+
+      span {
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .account-details {
+    padding: 16px;
+    font-size: 0.875rem;
+
+    .balance-info {
+      margin-bottom: 16px;
+      font-size: 0.875rem;
+
+      .balance-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+
+        .label {
+          font-weight: 500;
+          color: #64748b;
+        }
+
+        .value {
+          font-weight: 600;
+        }
+      }
+    }
+
+    .transactions-table {
+      font-size: 0.8125rem;
+
+      .ledger-table {
+        font-size: 0.8125rem;
+
+        th, td {
+          font-size: 0.8125rem;
+          padding: 8px 12px;
+        }
+      }
+    }
   }
 }

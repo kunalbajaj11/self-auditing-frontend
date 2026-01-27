@@ -47,11 +47,23 @@
         <h3>Customer Information</h3>
         <div class="info-row">
           <span class="label">Name:</span>
-          <span class="value">{{ invoice.customerName || '—' }}</span>
+          <span class="value">{{ invoice.customer?.name || invoice.customerName || '—' }}</span>
         </div>
-        <div class="info-row" *ngIf="invoice.customerTrn">
+        <div class="info-row" *ngIf="invoice.customer?.address">
+          <span class="label">Address:</span>
+          <span class="value">{{ invoice.customer?.address }}</span>
+        </div>
+        <div class="info-row" *ngIf="invoice.customer?.phone">
+          <span class="label">Phone:</span>
+          <span class="value">{{ invoice.customer?.phone }}</span>
+        </div>
+        <div class="info-row" *ngIf="invoice.customer?.email">
+          <span class="label">Email:</span>
+          <span class="value">{{ invoice.customer?.email }}</span>
+        </div>
+        <div class="info-row" *ngIf="invoice.customer?.customerTrn || invoice.customerTrn">
           <span class="label">TRN:</span>
-          <span class="value">{{ invoice.customerTrn }}</span>
+          <span class="value">{{ invoice.customer?.customerTrn || invoice.customerTrn }}</span>
         </div>
       </div>
     </div>

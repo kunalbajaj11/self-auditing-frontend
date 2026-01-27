@@ -163,5 +163,27 @@ export class InvoicePreviewComponent implements OnInit {
     };
     return colorMap[scheme || 'blue'] || '#1976d2';
   }
+
+  getInvoiceTitle(): string {
+    if (!this.previewData?.templateSettings?.title) return 'TAX INVOICE';
+    const baseTitle = this.previewData.templateSettings.title;
+    const status = this.previewData.invoice?.status;
+    
+    if (!status) return baseTitle;
+    
+    // Map status to display format
+    const statusMap: Record<string, string> = {
+      'tax_invoice_receivable': 'RECEIVABLE',
+      'tax_invoice_bank_received': 'BANK RECEIVED',
+      'tax_invoice_cash_received': 'CASH RECEIVED',
+    };
+    
+    const statusDisplay = statusMap[status.toLowerCase()];
+    if (statusDisplay) {
+      return `${baseTitle} - ${statusDisplay}`;
+    }
+    
+    return baseTitle;
+  }
 }
 

@@ -27,6 +27,12 @@ export class AdminCompanyComponent implements OnInit {
       contactPerson: [''],
       contactEmail: ['', [Validators.email]],
       address: [''],
+      bankAccountHolder: [''],
+      bankName: [''],
+      bankAccountNumber: [''],
+      bankIban: [''],
+      bankBranch: [''],
+      bankSwiftCode: [''],
     });
   }
 
@@ -70,6 +76,12 @@ export class AdminCompanyComponent implements OnInit {
         contactPerson: org.contactPerson ?? '',
         contactEmail: org.contactEmail ?? '',
         address: org.address ?? '',
+        bankAccountHolder: org.bankAccountHolder ?? '',
+        bankName: org.bankName ?? '',
+        bankAccountNumber: org.bankAccountNumber ?? '',
+        bankIban: org.bankIban ?? '',
+        bankBranch: org.bankBranch ?? '',
+        bankSwiftCode: org.bankSwiftCode ?? '',
       });
     });
   }
@@ -82,6 +94,12 @@ export class AdminCompanyComponent implements OnInit {
       contactPerson: value.contactPerson ?? undefined,
       contactEmail: value.contactEmail ?? undefined,
       address: value.address ?? undefined,
+      bankAccountHolder: value.bankAccountHolder ?? undefined,
+      bankName: value.bankName ?? undefined,
+      bankAccountNumber: value.bankAccountNumber ?? undefined,
+      bankIban: value.bankIban ?? undefined,
+      bankBranch: value.bankBranch ?? undefined,
+      bankSwiftCode: value.bankSwiftCode ?? undefined,
     };
   }
 }

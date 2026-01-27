@@ -204,6 +204,13 @@
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
 
+      <mat-paginator
+        [pageSizeOptions]="[10, 25, 50, 100]"
+        [pageSize]="25"
+        showFirstLastButtons
+        aria-label="Select page of license keys">
+      </mat-paginator>
+
       <div class="empty-state" *ngIf="licenseKeys.length === 0">
         <mat-icon>vpn_key</mat-icon>
         <p>No license keys generated yet. Create one to onboard a new tenant.</p>

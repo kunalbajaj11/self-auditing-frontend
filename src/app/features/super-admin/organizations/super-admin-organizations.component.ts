@@ -1,5 +1,6 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
@@ -40,7 +41,7 @@ import { forkJoin } from 'rxjs';
   templateUrl: './super-admin-organizations.component.html',
   styleUrls: ['./super-admin-organizations.component.scss'],
 })
-export class SuperAdminOrganizationsComponent implements OnInit {
+export class SuperAdminOrganizationsComponent implements OnInit, AfterViewInit {
   displayedColumns = [
     'name',
     'planType',
@@ -61,6 +62,7 @@ export class SuperAdminOrganizationsComponent implements OnInit {
   error: string | null = null;
 
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
     private readonly superAdminService: SuperAdminService,
@@ -79,6 +81,11 @@ export class SuperAdminOrganizationsComponent implements OnInit {
     this.searchControl.valueChanges
       .pipe(debounceTime(250), distinctUntilChanged())
       .subscribe((value) => this.applyFilter(value ?? ''));
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.sort = this.sort;
+    this.dataSource.paginator = this.paginator;
   }
 
   refresh(): void {
@@ -399,9 +406,7 @@ export class SuperAdminOrganizationsComponent implements OnInit {
       next: (usage) => {
         this.loading = false;
         this.dataSource.data = usage;
-        if (this.sort) {
-          this.dataSource.sort = this.sort;
-        }
+        // Sort and paginator are set in ngAfterViewInit
       },
       error: () => {
         this.loading = false;

@@ -937,4 +937,103 @@ export class AdminReportsComponent implements OnInit {
       data: dialogData,
     });
   }
+
+  /**
+   * Open account entries for Balance Sheet items
+   */
+  openBalanceSheetAccountEntries(row: any, section: 'assets' | 'liabilities' | 'equity'): void {
+    if (!this.generatedReport || !this.generatedReport.data) {
+      return;
+    }
+
+    // Balance Sheet shows closing balances (all-time up to endDate)
+    // So we should show all entries up to endDate, not just within the period
+    const endDate = this.form.get('endDate')?.value;
+    // Use a very early start date to show all historical entries up to endDate
+    const startDate = '2000-01-01'; // Very early date to capture all entries
+    
+    let accountName: string;
+    let accountType: string;
+
+    if (section === 'assets') {
+      // Assets categories map to asset account names
+      // Common mappings: Cash -> Cash, Bank -> Bank, Accounts Receivable -> Accounts Receivable, etc.
+      accountName = row.category;
+      accountType = 'Asset';
+    } else if (section === 'liabilities') {
+      // Liabilities can be Accounts Payable or VAT Payable (Output VAT)
+      // Check the vendor field to determine which account to open
+      if (row.vendor === 'VAT Payable (Output VAT)') {
+        accountName = 'VAT Payable (Output VAT)';
+        accountType = 'Liability';
+      } else {
+        // Default to Accounts Payable for vendor-based liabilities
+        accountName = 'Accounts Payable';
+        accountType = 'Liability';
+      }
+    } else {
+      // Equity accounts
+      accountName = row.account;
+      accountType = 'Equity';
+    }
+
+    const dialogData: AccountEntriesDialogData = {
+      accountName,
+      accountType,
+      startDate: startDate,
+      endDate: endDate || undefined,
+    };
+
+    this.dialog.open(AccountEntriesDialogComponent, {
+      width: '1200px',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      data: dialogData,
+    });
+  }
+
+  /**
+   * Open account entries for Profit & Loss items
+   */
+  openProfitLossAccountEntries(row: any, section: 'revenue' | 'expenses'): void {
+    if (!this.generatedReport || !this.generatedReport.data) {
+      return;
+    }
+
+    // P&L shows period amounts, so we should show all entries within the period
+    // Use the form's date range to show entries within the selected period
+    const startDate = this.form.get('startDate')?.value;
+    const endDate = this.form.get('endDate')?.value;
+    
+    let accountName: string;
+    let accountType: string;
+
+    if (section === 'revenue') {
+      accountName = 'Sales Revenue';
+      accountType = 'Revenue';
+    } else {
+      // Expenses categories map to expense account names
+      // Map "Uncategorized" to "Uncategorized Expenses" for backend matching
+      let categoryName = row.category;
+      if (categoryName === 'Uncategorized') {
+        categoryName = 'Uncategorized Expenses';
+      }
+      accountName = categoryName;
+      accountType = 'Expense';
+    }
+
+    const dialogData: AccountEntriesDialogData = {
+      accountName,
+      accountType,
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
+    };
+
+    this.dialog.open(AccountEntriesDialogComponent, {
+      width: '1200px',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      data: dialogData,
+    });
+  }
 }

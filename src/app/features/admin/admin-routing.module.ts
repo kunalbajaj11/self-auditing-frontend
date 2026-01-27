@@ -8,6 +8,7 @@ import { AdminCategoriesComponent } from './categories/admin-categories.componen
 import { AdminExpenseTypesComponent } from './expense-types/admin-expense-types.component';
 import { AdminLedgerAccountsComponent } from './ledger-accounts/admin-ledger-accounts.component';
 import { AdminExpensesComponent } from './expenses/admin-expenses.component';
+import { AdminPurchaseOrdersComponent } from './purchase-orders/admin-purchase-orders.component';
 import { AdminPaymentsComponent } from './payments/admin-payments.component';
 import { AdminJournalEntriesComponent } from './journal-entries/admin-journal-entries.component';
 import { AdminReportsComponent } from './reports/admin-reports.component';
@@ -17,6 +18,7 @@ import { ReconciliationDetailComponent } from './bank-reconciliation/reconciliat
 import { UploadBankStatementComponent } from './bank-reconciliation/upload-bank-statement.component';
 import { AdminCustomersComponent } from './customers/admin-customers.component';
 import { AdminSalesInvoicesComponent } from './sales-invoices/admin-sales-invoices.component';
+import { AdminProformaInvoicesComponent } from './proforma-invoices/admin-proforma-invoices.component';
 import { InvoicePreviewComponent } from './sales-invoices/invoice-preview.component';
 import { AdminCreditNotesComponent } from './credit-notes/admin-credit-notes.component';
 import { AdminDebitNotesComponent } from './debit-notes/admin-debit-notes.component';
@@ -51,6 +53,7 @@ const routes: Routes = [
             children: [
               { label: 'Customers', route: '/admin/customers' },
               { label: 'Invoices', route: '/admin/sales-invoices' },
+              { label: 'Proforma Invoice', route: '/admin/proforma-invoices' },
               { label: 'Payments Received', route: '/admin/sales-invoices', queryParams: { filter: 'payments' } },
               { label: 'Credit Notes', route: '/admin/credit-notes' },
             ],
@@ -60,6 +63,7 @@ const routes: Routes = [
             icon: 'receipt_long',
             children: [
               { label: 'Expenses', route: '/admin/expenses' },
+              { label: 'Purchase Order', route: '/admin/purchase-orders' },
               { label: 'Payments', route: '/admin/payments' },
               { label: 'Debit Notes', route: '/admin/debit-notes' },
               { label: 'Journal Entries', route: '/admin/journal-entries' },
@@ -178,6 +182,11 @@ const routes: Routes = [
         path: 'expenses',
         component: AdminExpensesComponent,
         data: { shell: { title: 'Expense Management' } },
+      },
+      {
+        path: 'purchase-orders',
+        component: AdminPurchaseOrdersComponent,
+        data: { shell: { title: 'Purchase Order Management' } },
       },
       {
         path: 'payments',
@@ -318,6 +327,11 @@ const routes: Routes = [
         path: 'sales-invoices/:id/preview',
         component: InvoicePreviewComponent,
         data: { shell: { title: 'Invoice Preview' } },
+      },
+      {
+        path: 'proforma-invoices',
+        component: AdminProformaInvoicesComponent,
+        data: { shell: { title: 'Proforma Invoice Management' } },
       },
           {
             path: 'credit-notes',

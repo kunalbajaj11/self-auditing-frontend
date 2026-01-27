@@ -17,6 +17,12 @@ export interface Organization {
   region?: Region;
   enablePayroll?: boolean;
   enableInventory?: boolean;
+  bankAccountHolder?: string;
+  bankName?: string;
+  bankAccountNumber?: string;
+  bankIban?: string;
+  bankBranch?: string;
+  bankSwiftCode?: string;
 }
 
 export interface OrganizationSummary {

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
+import { Customer } from './customers.service';
 
 export interface InvoiceLineItem {
   id?: string;
@@ -40,13 +41,7 @@ export interface SalesInvoice {
   // When fetched via /sales-invoices/:id the backend also returns related entities.
   // Keep them optional so existing code continues to work, but we can use them
   // to pre-fill forms.
-  customer?: {
-    id: string;
-    name: string;
-    customerTrn?: string | null;
-    preferredCurrency?: string | null;
-    paymentTerms?: number | null;
-  } | null;
+  customer?: Customer | null;
   invoiceDate: string;
   dueDate?: string | null;
   amount: string;

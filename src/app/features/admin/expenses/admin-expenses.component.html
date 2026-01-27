@@ -22,190 +22,190 @@
 
   <!-- Upload Section -->
   <mat-card *ngIf="currentView === 'upload'" class="upload-section">
-    <mat-card-header>
-      <div class="card-title-with-icon">
-        <mat-icon>cloud_upload</mat-icon>
-        <mat-card-title>Upload Receipt / Bill</mat-card-title>
-      </div>
-      <mat-card-subtitle>Drag and drop or select files to upload. OCR will automatically extract details.</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <app-file-upload
-        [enableOcr]="true"
-        [multiple]="false"
-        accept="image/*,.pdf"
-        (fileUploaded)="onFileUploaded($event)"
-        (ocrResult)="onOcrResult($event)"
-      ></app-file-upload>
-    </mat-card-content>
-  </mat-card>
-
-  <!-- List View -->
-  <div *ngIf="currentView === 'list'" class="list-view">
-    <section class="filters-section">
-      <h3 class="section-title">Filters</h3>
-      <mat-card class="filters-card" [formGroup]="filters">
-        <mat-card-content>
-      <div class="filter-row">
-        <mat-form-field appearance="outline">
-          <mat-label>Type</mat-label>
-          <mat-select formControlName="type">
-            <mat-option value="">All</mat-option>
-            <mat-option value="expense">Expense</mat-option>
-            <mat-option value="credit">Sales</mat-option>
-            <mat-option value="adjustment">Adjustment</mat-option>
-            <mat-option value="advance">Advance</mat-option>
-            <mat-option value="accrual">Accrual</mat-option>
-            <mat-option value="fixed_assets">Fixed Assets</mat-option>
-            <mat-option value="share_capital">Share Capital</mat-option>
-            <mat-option value="retained_earnings">Retained Earnings</mat-option>
-            <mat-option value="shareholder_account">Shareholder Account</mat-option>
-            <mat-option value="cost_of_sales">Cost of Sales</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Start Date</mat-label>
-          <input matInput [matDatepicker]="startDatePicker" formControlName="startDate" placeholder="Select start date" />
-          <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>
-          <mat-datepicker #startDatePicker></mat-datepicker>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>End Date</mat-label>
-          <input matInput [matDatepicker]="endDatePicker" formControlName="endDate" placeholder="Select end date" />
-          <mat-datepicker-toggle matIconSuffix [for]="endDatePicker"></mat-datepicker-toggle>
-          <mat-datepicker #endDatePicker></mat-datepicker>
-        </mat-form-field>
-      </div>
-
-      <mat-form-field appearance="outline" class="wide">
-        <mat-label>Vendor</mat-label>
-        <input matInput formControlName="vendorName" />
-      </mat-form-field>
-        </mat-card-content>
-      </mat-card>
-    </section>
-
-    <section class="expenses-section">
-      <h3 class="section-title">Expenses</h3>
-      <mat-card class="expenses-card">
-        <mat-card-header>
-          <div class="card-title-with-icon">
-            <mat-icon>receipt_long</mat-icon>
-            <mat-card-title>Expense List</mat-card-title>
-          </div>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="table-container">
-            <table mat-table [dataSource]="dataSource" class="expenses-table">
-        <ng-container matColumnDef="vendor">
-          <th mat-header-cell *matHeaderCellDef>Vendor</th>
-          <td mat-cell *matCellDef="let expense" [matTooltip]="expense.description || ''" [matTooltipDisabled]="!expense.description" matTooltipPosition="above" matTooltipClass="expense-description-tooltip">
-            <div class="primary">{{ expense.vendorName || '—' }}</div>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="category">
-          <th mat-header-cell *matHeaderCellDef>Category</th>
-          <td mat-cell *matCellDef="let expense">
-            {{ expense.categoryName || 'Uncategorized' }}
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="amount">
-          <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
-          <td mat-cell *matCellDef="let expense" class="text-right">
-            <strong [class.positive-amount]="getAmountWithSign(expense) >= 0" [class.negative-amount]="getAmountWithSign(expense) < 0">
-              {{ getAmountWithSign(expense) >= 0 ? '+' : '-' }}AED {{ Math.abs(getAmountWithSign(expense)) | number: '1.0-2' }}
-            </strong>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="type">
-          <th mat-header-cell *matHeaderCellDef>Type</th>
-          <td mat-cell *matCellDef="let expense">
-            <mat-chip selected class="type-chip">{{ expense.type | titlecase }}</mat-chip>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="date">
-          <th mat-header-cell *matHeaderCellDef>Date</th>
-          <td mat-cell *matCellDef="let expense">
-            {{ expense.expenseDate | date: 'mediumDate' }}
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="attachments">
-          <th mat-header-cell *matHeaderCellDef>Attachments</th>
-          <td mat-cell *matCellDef="let expense">
-            <div *ngIf="getAttachmentCount(expense) > 0" class="attachments-cell">
-              <button
-                mat-icon-button
-                [matMenuTriggerFor]="attachmentsMenu"
-                [matTooltip]="getAttachmentCount(expense) + ' attachment(s)'"
-                (click)="$event.stopPropagation()"
-              >
-                <mat-icon>attach_file</mat-icon>
-                <span class="attachment-count">{{ getAttachmentCount(expense) }}</span>
-              </button>
-              <mat-menu #attachmentsMenu="matMenu">
-                <ng-container *ngFor="let attachment of expense.attachments; let last = last">
-                  <button mat-menu-item (click)="viewAttachment(attachment)">
-                    <mat-icon>visibility</mat-icon>
-                    <span>{{ attachment.fileName }}</span>
-                  </button>
-                  <button mat-menu-item (click)="downloadAttachment(attachment)">
-                    <mat-icon>download</mat-icon>
-                    <span>Download {{ attachment.fileName }}</span>
-                  </button>
-                  <mat-divider *ngIf="!last"></mat-divider>
-                </ng-container>
-              </mat-menu>
+          <mat-card-header>
+            <div class="card-title-with-icon">
+              <mat-icon>cloud_upload</mat-icon>
+              <mat-card-title>Upload Receipt / Bill</mat-card-title>
             </div>
-            <span *ngIf="getAttachmentCount(expense) === 0" class="no-attachments">—</span>
-          </td>
-        </ng-container>
+            <mat-card-subtitle>Drag and drop or select files to upload. OCR will automatically extract details.</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <app-file-upload
+              [enableOcr]="true"
+              [multiple]="false"
+              accept="image/*,.pdf"
+              (fileUploaded)="onFileUploaded($event)"
+              (ocrResult)="onOcrResult($event)"
+            ></app-file-upload>
+          </mat-card-content>
+        </mat-card>
 
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let expense">
-            <button
-              mat-icon-button
-              matTooltip="View/Edit Expense"
-              (click)="viewOrEditExpense(expense)"
-              color="primary"
-            >
-              <mat-icon>visibility</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              matTooltip="Print Invoice"
-              *ngIf="isSalesType(expense)"
-              (click)="printInvoice(expense)"
-              color="primary"
-            >
-              <mat-icon>print</mat-icon>
-            </button>
-          </td>
-        </ng-container>
+        <!-- List View -->
+        <div *ngIf="currentView === 'list'" class="list-view">
+          <section class="filters-section">
+            <h3 class="section-title">Filters</h3>
+            <mat-card class="filters-card" [formGroup]="filters">
+              <mat-card-content>
+          <div class="filter-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Type</mat-label>
+              <mat-select formControlName="type">
+                <mat-option value="">All</mat-option>
+                <mat-option value="expense">Expense</mat-option>
+                <mat-option value="credit">Sales</mat-option>
+                <mat-option value="adjustment">Adjustment</mat-option>
+                <mat-option value="advance">Advance</mat-option>
+                <mat-option value="accrual">Accrual</mat-option>
+                <mat-option value="fixed_assets">Fixed Assets</mat-option>
+                <mat-option value="share_capital">Share Capital</mat-option>
+                <mat-option value="retained_earnings">Retained Earnings</mat-option>
+                <mat-option value="shareholder_account">Shareholder Account</mat-option>
+                <mat-option value="cost_of_sales">Cost of Sales</mat-option>
+              </mat-select>
+            </mat-form-field>
 
-              <tr mat-header-row *matHeaderRowDef="columns" class="table-header"></tr>
-              <tr mat-row *matRowDef="let row; columns: columns" class="table-row"></tr>
-            </table>
+            <mat-form-field appearance="outline">
+              <mat-label>Start Date</mat-label>
+              <input matInput [matDatepicker]="startDatePicker" formControlName="startDate" placeholder="Select start date" />
+              <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #startDatePicker></mat-datepicker>
+            </mat-form-field>
 
-            <div class="table-overlay" *ngIf="loading">
-              <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
-            </div>
+            <mat-form-field appearance="outline">
+              <mat-label>End Date</mat-label>
+              <input matInput [matDatepicker]="endDatePicker" formControlName="endDate" placeholder="Select end date" />
+              <mat-datepicker-toggle matIconSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #endDatePicker></mat-datepicker>
+            </mat-form-field>
           </div>
 
-          <div class="empty" *ngIf="!loading && dataSource.data.length === 0">
-            <mat-icon>receipt_long</mat-icon>
-            <p>No expenses match your filters yet.</p>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </section>
-  </div>
+          <mat-form-field appearance="outline" class="wide">
+            <mat-label>Vendor</mat-label>
+            <input matInput formControlName="vendorName" />
+          </mat-form-field>
+              </mat-card-content>
+            </mat-card>
+          </section>
+
+          <section class="expenses-section">
+            <h3 class="section-title">Expenses</h3>
+            <mat-card class="expenses-card">
+              <mat-card-header>
+                <div class="card-title-with-icon">
+                  <mat-icon>receipt_long</mat-icon>
+                  <mat-card-title>Expense List</mat-card-title>
+                </div>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="table-container">
+                  <table mat-table [dataSource]="dataSource" class="expenses-table">
+            <ng-container matColumnDef="vendor">
+              <th mat-header-cell *matHeaderCellDef>Vendor</th>
+              <td mat-cell *matCellDef="let expense" [matTooltip]="expense.description || ''" [matTooltipDisabled]="!expense.description" matTooltipPosition="above" matTooltipClass="expense-description-tooltip">
+                <div class="primary">{{ expense.vendorName || '—' }}</div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef>Category</th>
+              <td mat-cell *matCellDef="let expense">
+                {{ expense.categoryName || 'Uncategorized' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
+              <td mat-cell *matCellDef="let expense" class="text-right">
+                <strong [class.positive-amount]="getAmountWithSign(expense) >= 0" [class.negative-amount]="getAmountWithSign(expense) < 0">
+                  {{ getAmountWithSign(expense) >= 0 ? '+' : '-' }}AED {{ Math.abs(getAmountWithSign(expense)) | number: '1.0-2' }}
+                </strong>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef>Type</th>
+              <td mat-cell *matCellDef="let expense">
+                <mat-chip selected class="type-chip">{{ expense.type | titlecase }}</mat-chip>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let expense">
+                {{ expense.expenseDate | date: 'mediumDate' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="attachments">
+              <th mat-header-cell *matHeaderCellDef>Attachments</th>
+              <td mat-cell *matCellDef="let expense">
+                <div *ngIf="getAttachmentCount(expense) > 0" class="attachments-cell">
+                  <button
+                    mat-icon-button
+                    [matMenuTriggerFor]="attachmentsMenu"
+                    [matTooltip]="getAttachmentCount(expense) + ' attachment(s)'"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <mat-icon>attach_file</mat-icon>
+                    <span class="attachment-count">{{ getAttachmentCount(expense) }}</span>
+                  </button>
+                  <mat-menu #attachmentsMenu="matMenu">
+                    <ng-container *ngFor="let attachment of expense.attachments; let last = last">
+                      <button mat-menu-item (click)="viewAttachment(attachment)">
+                        <mat-icon>visibility</mat-icon>
+                        <span>{{ attachment.fileName }}</span>
+                      </button>
+                      <button mat-menu-item (click)="downloadAttachment(attachment)">
+                        <mat-icon>download</mat-icon>
+                        <span>Download {{ attachment.fileName }}</span>
+                      </button>
+                      <mat-divider *ngIf="!last"></mat-divider>
+                    </ng-container>
+                  </mat-menu>
+                </div>
+                <span *ngIf="getAttachmentCount(expense) === 0" class="no-attachments">—</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let expense">
+                <button
+                  mat-icon-button
+                  matTooltip="View/Edit Expense"
+                  (click)="viewOrEditExpense(expense)"
+                  color="primary"
+                >
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  matTooltip="Print Invoice"
+                  *ngIf="isSalesType(expense)"
+                  (click)="printInvoice(expense)"
+                  color="primary"
+                >
+                  <mat-icon>print</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="columns" class="table-header"></tr>
+                  <tr mat-row *matRowDef="let row; columns: columns" class="table-row"></tr>
+                </table>
+
+                <div class="table-overlay" *ngIf="loading">
+                  <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+                </div>
+              </div>
+
+              <div class="empty" *ngIf="!loading && dataSource.data.length === 0">
+                <mat-icon>receipt_long</mat-icon>
+                <p>No expenses match your filters yet.</p>
+              </div>
+              </mat-card-content>
+            </mat-card>
+          </section>
+        </div>
 </section>
 

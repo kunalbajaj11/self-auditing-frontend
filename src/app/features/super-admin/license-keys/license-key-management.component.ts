@@ -1,8 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormControl } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatSelect } from '@angular/material/select';
 import { Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -22,7 +23,7 @@ import {
   templateUrl: './license-key-management.component.html',
   styleUrls: ['./license-key-management.component.scss'],
 })
-export class LicenseKeyManagementComponent implements OnInit {
+export class LicenseKeyManagementComponent implements OnInit, AfterViewInit {
   loading = false;
   licenseKeys: LicenseKey[] = [];
   dataSource = new MatTableDataSource<LicenseKey>([]);
@@ -30,6 +31,8 @@ export class LicenseKeyManagementComponent implements OnInit {
   searchControl = new FormControl('');
   statusFilterControl = new FormControl('all');
   expiryFilterControl = new FormControl('all');
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
     private readonly licenseKeysService: LicenseKeysService,
@@ -41,6 +44,10 @@ export class LicenseKeyManagementComponent implements OnInit {
   ngOnInit(): void {
     this.loadKeys();
     this.setupFilters();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   setupFilters(): void {

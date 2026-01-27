@@ -8,6 +8,7 @@ import { AdminCategoriesComponent } from './categories/admin-categories.componen
 import { AdminExpenseTypesComponent } from './expense-types/admin-expense-types.component';
 import { AdminLedgerAccountsComponent } from './ledger-accounts/admin-ledger-accounts.component';
 import { AdminExpensesComponent } from './expenses/admin-expenses.component';
+import { AdminPurchaseOrdersComponent } from './purchase-orders/admin-purchase-orders.component';
 import { AdminPaymentsComponent } from './payments/admin-payments.component';
 import { PaymentFormDialogComponent } from './payments/payment-form-dialog.component';
 import { AdminReportsComponent } from './reports/admin-reports.component';
@@ -18,6 +19,7 @@ import { CategoryFormDialogComponent } from './categories/category-form-dialog.c
 import { ExpenseTypeFormDialogComponent } from './expense-types/expense-type-form-dialog.component';
 import { LedgerAccountFormDialogComponent } from './ledger-accounts/ledger-account-form-dialog.component';
 import { ExpenseFormDialogComponent } from './expenses/expense-form-dialog.component';
+import { PurchaseOrderFormDialogComponent } from './expenses/purchase-order-form-dialog.component';
 import { ReconciliationListComponent } from './bank-reconciliation/reconciliation-list.component';
 import { ReconciliationDetailComponent } from './bank-reconciliation/reconciliation-detail.component';
 import { UploadBankStatementComponent } from './bank-reconciliation/upload-bank-statement.component';
@@ -25,6 +27,8 @@ import { AdminCustomersComponent } from './customers/admin-customers.component';
 import { CustomerFormDialogComponent } from './customers/customer-form-dialog.component';
 import { AdminSalesInvoicesComponent } from './sales-invoices/admin-sales-invoices.component';
 import { InvoiceFormDialogComponent } from './sales-invoices/invoice-form-dialog.component';
+import { AdminProformaInvoicesComponent } from './proforma-invoices/admin-proforma-invoices.component';
+import { ProformaInvoiceFormDialogComponent } from './proforma-invoices/proforma-invoice-form-dialog.component';
 import { InvoiceDetailDialogComponent } from './sales-invoices/invoice-detail-dialog.component';
 import { InvoicePreviewComponent } from './sales-invoices/invoice-preview.component';
 import { InvoicePaymentDialogComponent } from './sales-invoices/invoice-payment-dialog.component';
@@ -78,6 +82,7 @@ import { CreateDeadlineDialogComponent } from './compliance/create-deadline-dial
     AdminExpenseTypesComponent,
     AdminLedgerAccountsComponent,
     AdminExpensesComponent,
+    AdminPurchaseOrdersComponent,
     AdminPaymentsComponent,
     PaymentFormDialogComponent,
     AdminReportsComponent,
@@ -88,6 +93,7 @@ import { CreateDeadlineDialogComponent } from './compliance/create-deadline-dial
     ExpenseTypeFormDialogComponent,
     LedgerAccountFormDialogComponent,
     ExpenseFormDialogComponent,
+    PurchaseOrderFormDialogComponent,
     ReconciliationListComponent,
     ReconciliationDetailComponent,
     UploadBankStatementComponent,
@@ -95,6 +101,8 @@ import { CreateDeadlineDialogComponent } from './compliance/create-deadline-dial
     CustomerFormDialogComponent,
     AdminSalesInvoicesComponent,
     InvoiceFormDialogComponent,
+    AdminProformaInvoicesComponent,
+    ProformaInvoiceFormDialogComponent,
     InvoiceDetailDialogComponent,
     InvoicePreviewComponent,
     InvoicePaymentDialogComponent,

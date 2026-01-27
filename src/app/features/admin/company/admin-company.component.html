@@ -74,5 +74,63 @@
       </mat-card-actions>
     </mat-card>
   </section>
+
+  <section class="company-section">
+    <h3 class="section-title">Bank Account Details</h3>
+    <mat-card class="company-card">
+      <mat-card-header>
+        <div class="card-title-with-icon">
+          <mat-icon>account_balance</mat-icon>
+          <mat-card-title>Banking Information</mat-card-title>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" class="form">
+          <mat-form-field appearance="outline">
+            <mat-label>Account Holder Name</mat-label>
+            <input matInput formControlName="bankAccountHolder" />
+            <mat-hint>Name as it appears on the bank account</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Bank Name</mat-label>
+            <input matInput formControlName="bankName" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Account Number</mat-label>
+            <input matInput formControlName="bankAccountNumber" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>IBAN</mat-label>
+            <input matInput formControlName="bankIban" />
+            <mat-hint>International Bank Account Number</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Branch</mat-label>
+            <input matInput formControlName="bankBranch" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>SWIFT Code</mat-label>
+            <input matInput formControlName="bankSwiftCode" />
+            <mat-hint>Bank Identifier Code (BIC)</mat-hint>
+          </mat-form-field>
+        </form>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-raised-button color="primary" (click)="save()" [disabled]="loading">
+          <mat-progress-spinner
+            *ngIf="loading"
+            diameter="20"
+            mode="indeterminate"
+          ></mat-progress-spinner>
+          <span *ngIf="!loading">Save Changes</span>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </section>
 </section>
 

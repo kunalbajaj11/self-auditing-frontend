@@ -48,7 +48,7 @@
             [style.color]="getColorScheme()"
             *ngIf="previewData.templateSettings.title"
           >
-            {{ previewData.templateSettings.title }}
+            {{ getInvoiceTitle() }}
           </h1>
           <p
             class="header-text"
@@ -75,6 +75,35 @@
           <p *ngIf="previewData.invoice.organization?.contactEmail">
             Email: {{ previewData.invoice.organization.contactEmail }}
           </p>
+          <!-- Bank Details - Display inline with company info -->
+          <div
+            *ngIf="
+              previewData.templateSettings.showBankDetails &&
+              (previewData.invoice.organization?.bankAccountNumber ||
+                previewData.invoice.organization?.bankIban ||
+                previewData.invoice.organization?.bankName ||
+                previewData.invoice.organization?.bankAccountHolder)
+            "
+          >
+            <p *ngIf="previewData.invoice.organization?.bankAccountHolder">
+              Account Holder: {{ previewData.invoice.organization.bankAccountHolder }}
+            </p>
+            <p *ngIf="previewData.invoice.organization?.bankName">
+              Bank: {{ previewData.invoice.organization.bankName }}
+            </p>
+            <p *ngIf="previewData.invoice.organization?.bankAccountNumber">
+              Account Number: {{ previewData.invoice.organization.bankAccountNumber }}
+            </p>
+            <p *ngIf="previewData.invoice.organization?.bankIban">
+              IBAN: {{ previewData.invoice.organization.bankIban }}
+            </p>
+            <p *ngIf="previewData.invoice.organization?.bankBranch">
+              Branch: {{ previewData.invoice.organization.bankBranch }}
+            </p>
+            <p *ngIf="previewData.invoice.organization?.bankSwiftCode">
+              SWIFT Code: {{ previewData.invoice.organization.bankSwiftCode }}
+            </p>
+          </div>
           <p
             *ngIf="
               previewData.templateSettings.showVatDetails &&
@@ -124,15 +153,24 @@
         <div class="customer-info">
           <h3>Bill To:</h3>
           <p class="customer-name">
-            {{ previewData.invoice.customerName || '—' }}
+            {{ previewData.invoice.customer?.name || previewData.invoice.customerName || '—' }}
+          </p>
+          <p *ngIf="previewData.invoice.customer?.address">
+            {{ previewData.invoice.customer.address }}
+          </p>
+          <p *ngIf="previewData.invoice.customer?.phone">
+            Phone: {{ previewData.invoice.customer.phone }}
+          </p>
+          <p *ngIf="previewData.invoice.customer?.email">
+            Email: {{ previewData.invoice.customer.email }}
           </p>
           <p
             *ngIf="
               previewData.templateSettings.showVatDetails &&
-              previewData.invoice.customerTrn
+              (previewData.invoice.customer?.customerTrn || previewData.invoice.customerTrn)
             "
           >
-            TRN: {{ previewData.invoice.customerTrn }}
+            TRN: {{ previewData.invoice.customer?.customerTrn || previewData.invoice.customerTrn }}
           </p>
         </div>
       </div>
@@ -195,7 +233,7 @@
               <td
                 *ngIf="previewData?.templateSettings?.showItemTotal !== false"
               >
-                {{ item.totalAmount | number: '1.2-2' }}
+                {{ item.amount | number: '1.2-2' }}
                 {{ previewData.invoice?.currency || 'AED' }}
               </td>
             </tr>
@@ -231,32 +269,10 @@
       <!-- Default Notes -->
       <div
         class="notes-section"
-        *ngIf="previewData.templateSettings.defaultNotes"
+        *ngIf="previewData.templateSettings.defaultNotes && previewData.templateSettings.defaultNotes.trim().length > 0"
       >
         <h4>Notes</h4>
         <p>{{ previewData.templateSettings.defaultNotes }}</p>
-      </div>
-
-      <!-- Bank Details -->
-      <div
-        class="bank-details-section"
-        *ngIf="
-          previewData.templateSettings.showBankDetails &&
-          (previewData.invoice.organization?.bankAccountNumber ||
-            previewData.invoice.organization?.bankIban)
-        "
-      >
-        <h4>Bank Details</h4>
-        <p *ngIf="previewData.invoice.organization?.bankAccountNumber">
-          Account Number:
-          {{ previewData.invoice.organization.bankAccountNumber }}
-        </p>
-        <p *ngIf="previewData.invoice.organization?.bankIban">
-          IBAN: {{ previewData.invoice.organization.bankIban }}
-        </p>
-        <p *ngIf="previewData.invoice.organization?.bankName">
-          Bank: {{ previewData.invoice.organization.bankName }}
-        </p>
       </div>
 
       <!-- Terms & Conditions -->
@@ -264,7 +280,8 @@
         class="terms-section"
         *ngIf="
           previewData.templateSettings.showTermsAndConditions &&
-          previewData.templateSettings.termsAndConditions
+          previewData.templateSettings.termsAndConditions &&
+          previewData.templateSettings.termsAndConditions.trim().length > 0
         "
       >
         <h4>Terms & Conditions</h4>
@@ -276,7 +293,7 @@
         class="invoice-footer"
         *ngIf="previewData.templateSettings.showFooter"
       >
-        <p>{{ previewData.templateSettings.footerText || 'This is a Computer Generated Invoice' }}</p>
+        <p>{{ (previewData.templateSettings.footerText && previewData.templateSettings.footerText.trim().length > 0) ? previewData.templateSettings.footerText : 'This is a Computer Generated Invoice' }}</p>
       </div>
     </div>
   </div>

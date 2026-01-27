@@ -1,0 +1,126 @@
+<section class="proforma-invoices">
+  <header class="header">
+    <div class="header-content">
+      <h1>Proforma Invoice Management</h1>
+      <p>Create and manage proforma invoices for your customers.</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      <span class="button-label">Create Proforma Invoice</span>
+    </button>
+  </header>
+
+  <div class="list-view">
+    <section class="filters-section">
+      <h3 class="section-title">Filters</h3>
+      <mat-card class="filters-card" [formGroup]="filters">
+        <mat-card-content>
+          <div class="filter-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Start Date</mat-label>
+              <input matInput [matDatepicker]="startDatePicker" formControlName="startDate" placeholder="Select start date" />
+              <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #startDatePicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>End Date</mat-label>
+              <input matInput [matDatepicker]="endDatePicker" formControlName="endDate" placeholder="Select end date" />
+              <mat-datepicker-toggle matIconSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #endDatePicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="wide">
+            <mat-label>Customer</mat-label>
+            <input matInput formControlName="customerName" />
+          </mat-form-field>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <section class="invoices-section">
+      <h3 class="section-title">Proforma Invoices</h3>
+      <mat-card class="invoices-card">
+        <mat-card-header>
+          <div class="card-title-with-icon">
+            <mat-icon>description</mat-icon>
+            <mat-card-title>Proforma Invoice List</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="table-container">
+            <table mat-table [dataSource]="dataSource" class="invoices-table">
+              <ng-container matColumnDef="invoiceNumber">
+                <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+                <td mat-cell *matCellDef="let invoice">{{ invoice.invoiceNumber }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="customerName">
+                <th mat-header-cell *matHeaderCellDef>Customer</th>
+                <td mat-cell *matCellDef="let invoice">
+                  {{ invoice.customerName || '—' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="invoiceDate">
+                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <td mat-cell *matCellDef="let invoice">
+                  {{ invoice.invoiceDate | date: 'shortDate' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="dueDate">
+                <th mat-header-cell *matHeaderCellDef>Due Date</th>
+                <td mat-cell *matCellDef="let invoice">
+                  {{ invoice.dueDate ? (invoice.dueDate | date: 'shortDate') : '—' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="totalAmount">
+                <th mat-header-cell *matHeaderCellDef class="text-right">Total Amount</th>
+                <td mat-cell *matCellDef="let invoice" class="text-right">
+                  <strong class="positive-amount">
+                    +{{ invoice.currency }} {{ invoice.totalAmount | number: '1.2-2' }}
+                  </strong>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let invoice">
+                  <mat-chip [color]="getStatusColor(invoice.status)" selected>
+                    {{ getStatusDisplayLabel(invoice.status) }}
+                  </mat-chip>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let invoice">
+                  <button mat-button (click)="viewInvoice(invoice)">View</button>
+                  <button mat-button (click)="editInvoice(invoice)">Edit</button>
+                  <button mat-button color="warn" (click)="deleteInvoice(invoice)">
+                    Delete
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="columns" class="table-header"></tr>
+              <tr mat-row *matRowDef="let row; columns: columns" class="table-row"></tr>
+            </table>
+
+            <div class="table-overlay" *ngIf="loading">
+              <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+            </div>
+          </div>
+
+          <div class="empty" *ngIf="!loading && dataSource.data.length === 0">
+            <mat-icon>description</mat-icon>
+            <p>No proforma invoices yet. Create your first proforma invoice to get started.</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+  </div>
+</section>
