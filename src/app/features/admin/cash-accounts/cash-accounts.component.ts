@@ -140,34 +140,31 @@ export class CashAccountsComponent implements OnInit {
         const transactions: CashTransaction[] = [];
         const allTransactions: CashTransaction[] = [];
 
-        // Filter payments with cash method
-        const cashPayments = payments.filter(
-          (payment) => payment.paymentMethod === 'cash',
-        );
+        // Filter payments with cash method and deduplicate by id (API may return duplicates)
+        const seenPaymentIds = new Set<string>();
+        const cashPayments = payments.filter((payment) => {
+          if (payment.paymentMethod !== 'cash') return false;
+          if (seenPaymentIds.has(payment.id)) return false;
+          seenPaymentIds.add(payment.id);
+          return true;
+        });
 
-        // Create a map of expense IDs to their cash payments
+        // Create a map of expense IDs to their cash payments.
+        // When a payment has allocations, use ONLY allocations (do not add direct expenseId).
+        // Otherwise we can double-count: same payment added as direct + allocation for same expense.
         const expenseCashPaymentsMap = new Map<string, ExpensePayment[]>();
         cashPayments.forEach((payment) => {
-          // Handle both direct expenseId and expense relation
           const expenseId = payment.expenseId || payment.expense?.id;
-          
-          // Process direct expense payment
-          if (expenseId) {
-          if (!expenseCashPaymentsMap.has(expenseId)) {
-            expenseCashPaymentsMap.set(expenseId, []);
-          }
-          expenseCashPaymentsMap.get(expenseId)!.push(payment);
-          }
-          
-          // Process allocations for multi-invoice payments
-          if (payment.allocations && payment.allocations.length > 0) {
-            payment.allocations.forEach((allocation) => {
+          const hasAllocations = payment.allocations && payment.allocations.length > 0;
+
+          if (hasAllocations) {
+            // Multi-expense payment: only add allocation-derived entries
+            payment.allocations!.forEach((allocation) => {
               const allocExpenseId = allocation.expenseId || allocation.expense?.id;
               if (allocExpenseId) {
                 if (!expenseCashPaymentsMap.has(allocExpenseId)) {
                   expenseCashPaymentsMap.set(allocExpenseId, []);
                 }
-                // Create a virtual payment object for the allocation
                 const allocationPayment = {
                   ...payment,
                   amount: allocation.allocatedAmount.toString(),
@@ -176,6 +173,12 @@ export class CashAccountsComponent implements OnInit {
                 expenseCashPaymentsMap.get(allocExpenseId)!.push(allocationPayment as ExpensePayment);
               }
             });
+          } else if (expenseId) {
+            // Single-expense payment: add direct payment only
+            if (!expenseCashPaymentsMap.has(expenseId)) {
+              expenseCashPaymentsMap.set(expenseId, []);
+            }
+            expenseCashPaymentsMap.get(expenseId)!.push(payment);
           }
         });
 
@@ -201,32 +204,14 @@ export class CashAccountsComponent implements OnInit {
         });
 
         // Process cash payments that weren't matched to expenses in the list
-        // This handles cases where expenses might not be loaded or payments exist without expenses
+        // Use same rule as map: when payment has allocations, only process allocations (no direct expenseId).
         const processedExpenseIds = new Set(expenses.map(e => e.id));
         cashPayments.forEach((payment) => {
           const expenseId = payment.expenseId || payment.expense?.id;
-          
-          // If payment has a direct expense that's not in the expenses list, process it
-          if (expenseId && !processedExpenseIds.has(expenseId)) {
-            const expense = payment.expense;
-            if (expense) {
-              const transaction: CashTransaction = {
-                id: `${expenseId}-${payment.id}`,
-                type: 'payment',
-                date: payment.paymentDate,
-                description: payment.notes || expense.description || 'Payment',
-                vendorOrCustomer: expense.vendorName || '—',
-                amount: -parseFloat(payment.amount), // Negative because it's a cash outflow
-                currency: expense.currency || 'AED',
-                expense: expense as any,
-              };
-              allTransactions.push(transaction);
-            }
-          }
-          
-          // Process allocations that weren't matched
-          if (payment.allocations && payment.allocations.length > 0) {
-            payment.allocations.forEach((allocation) => {
+          const hasAllocations = payment.allocations && payment.allocations.length > 0;
+
+          if (hasAllocations) {
+            payment.allocations!.forEach((allocation) => {
               const allocExpenseId = allocation.expenseId || allocation.expense?.id;
               if (allocExpenseId && !processedExpenseIds.has(allocExpenseId)) {
                 const expense = allocation.expense;
@@ -237,7 +222,7 @@ export class CashAccountsComponent implements OnInit {
                     date: payment.paymentDate,
                     description: payment.notes || expense.description || 'Payment',
                     vendorOrCustomer: expense.vendorName || '—',
-                    amount: -parseFloat(allocation.allocatedAmount), // Negative because it's a cash outflow
+                    amount: -parseFloat(allocation.allocatedAmount),
                     currency: expense.currency || 'AED',
                     expense: expense as any,
                   };
@@ -245,6 +230,21 @@ export class CashAccountsComponent implements OnInit {
                 }
               }
             });
+          } else if (expenseId && !processedExpenseIds.has(expenseId)) {
+            const expense = payment.expense;
+            if (expense) {
+              const transaction: CashTransaction = {
+                id: `${expenseId}-${payment.id}`,
+                type: 'payment',
+                date: payment.paymentDate,
+                description: payment.notes || expense.description || 'Payment',
+                vendorOrCustomer: expense.vendorName || '—',
+                amount: -parseFloat(payment.amount),
+                currency: expense.currency || 'AED',
+                expense: expense as any,
+              };
+              allTransactions.push(transaction);
+            }
           }
         });
 
@@ -345,11 +345,19 @@ export class CashAccountsComponent implements OnInit {
           allTransactions.push(transaction);
         });
 
+        // Deduplicate by transaction id (last line of defense against double entries)
+        const seenIds = new Set<string>();
+        const deduped = allTransactions.filter((t) => {
+          if (seenIds.has(t.id)) return false;
+          seenIds.add(t.id);
+          return true;
+        });
+
         // Calculate opening balance (sum of all transactions before start date)
         const startDateObj = new Date(startDate);
         startDateObj.setHours(0, 0, 0, 0);
-        
-        this.openingBalance = allTransactions
+
+        this.openingBalance = deduped
           .filter((t) => {
             const tDate = new Date(t.date);
             tDate.setHours(0, 0, 0, 0);
@@ -360,11 +368,13 @@ export class CashAccountsComponent implements OnInit {
         // Filter transactions for the period
         const endDateObj = new Date(endDate);
         endDateObj.setHours(23, 59, 59, 999);
-        
-        transactions.push(...allTransactions.filter((t) => {
-          const tDate = new Date(t.date);
-          return tDate >= startDateObj && tDate <= endDateObj;
-        }));
+
+        transactions.push(
+          ...deduped.filter((t) => {
+            const tDate = new Date(t.date);
+            return tDate >= startDateObj && tDate <= endDateObj;
+          }),
+        );
 
         // Calculate period total
         this.periodTotal = transactions.reduce((sum, t) => sum + t.amount, 0);

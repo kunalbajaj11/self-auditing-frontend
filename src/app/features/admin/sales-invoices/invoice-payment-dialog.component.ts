@@ -122,9 +122,11 @@ export class InvoicePaymentDialogComponent implements OnInit {
     preSelectedInvoice: SalesInvoice | null,
     preSelectInvoiceId?: string,
   ): void {
+    // Exclude proforma invoices – payments are recorded against tax invoices only
+    const taxInvoices = invoices.filter((inv) => inv.status !== 'proforma_invoice');
     // Filter invoices with outstanding balance > 0
     // Calculate outstanding: totalAmount - paidAmount - appliedCreditNoteAmount
-    const invoicesWithOutstanding: InvoiceWithOutstanding[] = invoices
+    const invoicesWithOutstanding: InvoiceWithOutstanding[] = taxInvoices
       .map(invoice => {
         const totalAmount = parseFloat(invoice.totalAmount || '0');
         const paidAmount = parseFloat(invoice.paidAmount || '0');
@@ -148,7 +150,7 @@ export class InvoicePaymentDialogComponent implements OnInit {
       })
       .filter(inv => inv.outstandingAmount > 0.01); // Only include invoices with outstanding balance
     
-    console.log(`Found ${invoicesWithOutstanding.length} invoices with outstanding balance out of ${invoices.length} total invoices`);
+    console.log(`Found ${invoicesWithOutstanding.length} invoices with outstanding balance out of ${taxInvoices.length} total tax invoices`);
     
     // If we have a pre-selected invoice, calculate its outstanding balance correctly
     if (preSelectedInvoice) {

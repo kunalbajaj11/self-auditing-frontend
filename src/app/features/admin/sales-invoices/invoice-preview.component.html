@@ -75,35 +75,6 @@
           <p *ngIf="previewData.invoice.organization?.contactEmail">
             Email: {{ previewData.invoice.organization.contactEmail }}
           </p>
-          <!-- Bank Details - Display inline with company info -->
-          <div
-            *ngIf="
-              previewData.templateSettings.showBankDetails &&
-              (previewData.invoice.organization?.bankAccountNumber ||
-                previewData.invoice.organization?.bankIban ||
-                previewData.invoice.organization?.bankName ||
-                previewData.invoice.organization?.bankAccountHolder)
-            "
-          >
-            <p *ngIf="previewData.invoice.organization?.bankAccountHolder">
-              Account Holder: {{ previewData.invoice.organization.bankAccountHolder }}
-            </p>
-            <p *ngIf="previewData.invoice.organization?.bankName">
-              Bank: {{ previewData.invoice.organization.bankName }}
-            </p>
-            <p *ngIf="previewData.invoice.organization?.bankAccountNumber">
-              Account Number: {{ previewData.invoice.organization.bankAccountNumber }}
-            </p>
-            <p *ngIf="previewData.invoice.organization?.bankIban">
-              IBAN: {{ previewData.invoice.organization.bankIban }}
-            </p>
-            <p *ngIf="previewData.invoice.organization?.bankBranch">
-              Branch: {{ previewData.invoice.organization.bankBranch }}
-            </p>
-            <p *ngIf="previewData.invoice.organization?.bankSwiftCode">
-              SWIFT Code: {{ previewData.invoice.organization.bankSwiftCode }}
-            </p>
-          </div>
           <p
             *ngIf="
               previewData.templateSettings.showVatDetails &&
@@ -115,41 +86,8 @@
         </div>
       </div>
 
-      <!-- Invoice Details -->
+      <!-- Invoice Details: Bill To (left), Invoice meta (right) -->
       <div class="invoice-details-section">
-        <div class="invoice-meta">
-          <div class="meta-row">
-            <span class="meta-label">Invoice Number:</span>
-            <span class="meta-value">{{
-              previewData.invoice.invoiceNumber
-            }}</span>
-          </div>
-          <div class="meta-row">
-            <span class="meta-label">Invoice Date:</span>
-            <span class="meta-value">{{
-              previewData.invoice.invoiceDate | date: 'mediumDate'
-            }}</span>
-          </div>
-          <div class="meta-row" *ngIf="previewData.invoice.dueDate">
-            <span class="meta-label">Due Date:</span>
-            <span class="meta-value">{{
-              previewData.invoice.dueDate | date: 'mediumDate'
-            }}</span>
-          </div>
-          <div
-            class="meta-row"
-            *ngIf="
-              previewData.templateSettings.showPaymentTerms &&
-              (previewData.templateSettings.defaultPaymentTerms || previewData.templateSettings.customPaymentTerms)
-            "
-          >
-            <span class="meta-label">Payment Terms:</span>
-            <span class="meta-value">{{
-              previewData.templateSettings.customPaymentTerms || previewData.templateSettings.defaultPaymentTerms
-            }}</span>
-          </div>
-        </div>
-
         <div class="customer-info">
           <h3>Bill To:</h3>
           <p class="customer-name">
@@ -172,6 +110,39 @@
           >
             TRN: {{ previewData.invoice.customer?.customerTrn || previewData.invoice.customerTrn }}
           </p>
+        </div>
+
+        <div class="invoice-meta">
+          <div class="meta-row">
+            <span class="meta-label">{{ (previewData.invoice.status?.toLowerCase() === 'proforma_invoice') ? 'Proforma Invoice Number:' : 'Invoice Number:' }}</span>
+            <span class="meta-value">{{
+              previewData.invoice.invoiceNumber
+            }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">{{ (previewData.invoice.status?.toLowerCase() === 'proforma_invoice') ? 'Proforma Invoice Date:' : 'Invoice Date:' }}</span>
+            <span class="meta-value">{{
+              previewData.invoice.invoiceDate | date: 'mediumDate'
+            }}</span>
+          </div>
+          <div class="meta-row" *ngIf="previewData.invoice.dueDate">
+            <span class="meta-label">Due Date:</span>
+            <span class="meta-value">{{
+              previewData.invoice.dueDate | date: 'mediumDate'
+            }}</span>
+          </div>
+          <div
+            class="meta-row"
+            *ngIf="
+              previewData.templateSettings.showPaymentTerms &&
+              (previewData.templateSettings.defaultPaymentTerms || previewData.templateSettings.customPaymentTerms)
+            "
+          >
+            <span class="meta-label">Payment Terms:</span>
+            <span class="meta-value">{{
+              previewData.templateSettings.customPaymentTerms || previewData.templateSettings.defaultPaymentTerms
+            }}</span>
+          </div>
         </div>
       </div>
 
@@ -264,6 +235,38 @@
             {{ previewData.invoice?.currency || 'AED' }}
           </span>
         </div>
+      </div>
+
+      <!-- Bank Details - Own section below totals, before notes -->
+      <div
+        class="bank-details-section"
+        *ngIf="
+          previewData.templateSettings.showBankDetails &&
+          (previewData.invoice.organization?.bankAccountNumber ||
+            previewData.invoice.organization?.bankIban ||
+            previewData.invoice.organization?.bankName ||
+            previewData.invoice.organization?.bankAccountHolder)
+        "
+      >
+        <h4>Bank Details</h4>
+        <p *ngIf="previewData.invoice.organization?.bankAccountHolder">
+          Account Holder: {{ previewData.invoice.organization.bankAccountHolder }}
+        </p>
+        <p *ngIf="previewData.invoice.organization?.bankName">
+          Bank: {{ previewData.invoice.organization.bankName }}
+        </p>
+        <p *ngIf="previewData.invoice.organization?.bankAccountNumber">
+          Account Number: {{ previewData.invoice.organization.bankAccountNumber }}
+        </p>
+        <p *ngIf="previewData.invoice.organization?.bankIban">
+          IBAN: {{ previewData.invoice.organization.bankIban }}
+        </p>
+        <p *ngIf="previewData.invoice.organization?.bankBranch">
+          Branch: {{ previewData.invoice.organization.bankBranch }}
+        </p>
+        <p *ngIf="previewData.invoice.organization?.bankSwiftCode">
+          SWIFT Code: {{ previewData.invoice.organization.bankSwiftCode }}
+        </p>
       </div>
 
       <!-- Default Notes -->

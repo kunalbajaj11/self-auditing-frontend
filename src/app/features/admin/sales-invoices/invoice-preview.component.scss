@@ -216,43 +216,13 @@
         border-radius: 12px;
         border: 1px solid #e2e8f0;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-
-        .invoice-meta {
-          flex: 1;
-
-          .meta-row {
-            display: flex;
-            margin-bottom: 12px;
-            font-size: 14px;
-            align-items: baseline;
-
-            &:last-child {
-              margin-bottom: 0;
-            }
-
-            .meta-label {
-              font-weight: 600;
-              margin-right: 12px;
-              color: #64748b;
-              min-width: 140px;
-              font-size: 13px;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
-            }
-
-            .meta-value {
-              color: #0f172a;
-              font-weight: 600;
-              font-size: 14px;
-            }
-          }
-        }
+        overflow: visible;
 
         .customer-info {
           flex: 1;
-          text-align: right;
-          padding-left: 32px;
-          border-left: 1px solid #e2e8f0;
+          text-align: left;
+          padding-right: 32px;
+          border-right: 1px solid #e2e8f0;
 
           h3 {
             font-size: 12px;
@@ -276,6 +246,53 @@
             font-size: 13px;
             color: #475569;
             font-weight: 500;
+          }
+        }
+
+        .invoice-meta {
+          flex: 1;
+          min-width: 0;
+          text-align: right;
+          padding-left: 32px;
+          border-left: 1px solid #e2e8f0;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          padding-top: 4px;
+          overflow: visible;
+
+          .meta-row {
+            display: flex;
+            flex-wrap: nowrap;
+            margin-bottom: 12px;
+            font-size: 14px;
+            align-items: baseline;
+            justify-content: flex-end;
+            min-height: 22px;
+            line-height: 1.4;
+
+            &:last-child {
+              margin-bottom: 0;
+            }
+
+            .meta-label {
+              flex-shrink: 0;
+              font-weight: 600;
+              margin-right: 12px;
+              color: #64748b;
+              min-width: 180px;
+              font-size: 13px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+
+            .meta-value {
+              flex-shrink: 0;
+              color: #0f172a;
+              font-weight: 600;
+              font-size: 14px;
+              white-space: nowrap;
+            }
           }
         }
       }

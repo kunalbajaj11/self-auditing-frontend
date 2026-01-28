@@ -68,7 +68,9 @@ export class AdminSalesInvoicesComponent implements OnInit {
     this.invoicesService.listInvoices(filters).subscribe({
       next: (invoices) => {
         this.loading = false;
-        this.dataSource.data = invoices;
+        // Exclude proforma invoices – they appear only on the Proforma Invoice page
+        const taxInvoices = invoices.filter((inv) => inv.status !== 'proforma_invoice');
+        this.dataSource.data = taxInvoices;
       },
       error: () => {
         this.loading = false;
