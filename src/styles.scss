@@ -920,65 +920,35 @@ button[mat-unelevated-button][color="primary"] mat-icon {
   }
 }
 
-// Global print styles - Hide all UI elements when printing invoices
-// NOTE: These styles ONLY apply when printing (@media print)
-@page {
-  size: A4;
-  margin: 10mm;
-}
+// Global print styles - Minimal, let components handle their own print styles
 @media print {
-  // Hide all navigation and UI elements
+  // Only hide navigation elements globally
   mat-sidenav,
   .side-nav,
   .top-bar,
   mat-toolbar,
   .spacer,
   .user-chip,
-  .menu-button,
-  
-  // Hide all buttons and actions
-  button:not(.print-only),
-  .mat-mdc-button,
-  .mat-mdc-raised-button,
-  .mat-mdc-stroked-button,
-  .mat-mdc-icon-button,
-  .actions,
-  .preview-header,
-  
-  // Hide dialogs and overlays
-  .cdk-overlay-container,
-  .mat-mdc-dialog-container,
-  .mat-mdc-menu-panel,
-  mat-dialog-actions,
-  
-  // Hide loading and error states (only when printing)
-  .loading-container,
-  .error-container,
-  mat-progress-spinner {
+  .menu-button {
     display: none !important;
-    visibility: hidden !important;
   }
 
-  // Ensure body is clean for printing
+  // Clean body for printing
   body {
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;
+    overflow: visible !important;
   }
 
-  // Let individual invoice components control their print layout.
-  // We only normalize spacing/background here so the component-specific
-  // @media print styles (e.g. in `invoice-preview.component.scss`) can
-  // handle paging correctly.
-  .invoice-preview-container {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
+  // Don't hide containers - let content flow
+  app-shell,
+  mat-sidenav-container,
+  mat-sidenav-content,
+  .content-area {
+    position: static !important;
+    overflow: visible !important;
     height: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: white !important;
   }
 }
 

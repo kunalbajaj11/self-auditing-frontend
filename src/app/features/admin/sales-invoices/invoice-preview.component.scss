@@ -615,80 +615,235 @@
   }
 }
 
-// Print styles - Hide all UI elements and show only invoice
+// Print styles - NO visibility trick, just hide specific UI elements
 @media print {
-  // Hide all application UI elements
-  app-shell,
+  @page {
+    size: A4;
+    margin: 15mm 5mm 15mm -70mm; // Top, Right, Bottom, Left - ZERO left margin
+  }
+
+  // Reset everything
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  // Hide ONLY UI elements, NOT content
   mat-sidenav,
-  mat-sidenav-container,
-  mat-sidenav-content,
   .side-nav,
   .top-bar,
   mat-toolbar,
-  .content-area,
   .spacer,
   .user-chip,
-  button,
-  .mat-mdc-button,
-  .mat-mdc-raised-button,
-  .mat-mdc-stroked-button {
-    display: none !important;
-  }
-
-  // Hide loading and error states
-  .loading-container,
-  .error-container {
-    display: none !important;
-  }
-
-  // Invoice preview container
-  .invoice-preview-container {
-    padding: 0 !important;
-    margin: 0 !important;
-    background: white !important;
-    min-height: auto !important;
-    position: static !important; // allow natural document flow for multi-page printing
-    width: 100% !important;
-
-    .preview-header {
-      display: none !important;
-    }
-
-    .invoice-preview {
-      padding: 0 !important;
-      margin: 0 auto !important;
-      display: block !important;
-
-      .invoice-paper {
-        box-shadow: none !important;
-        border: none !important;
-        width: 180mm !important;      // safe width for A4 print area
-        max-width: 180mm !important;
-        min-height: auto !important;
-        padding: 10mm !important;     // 10mm inner margins
-        margin: 0 auto !important;    // center on page
-        page-break-after: always;     // allow multiple pages
-        page-break-inside: auto;
-        overflow: visible !important; // let content extend to additional pages
-      }
-    }
-  }
-
-  // Ensure body and html are clean for printing
-  body,
-  html {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: white !important;
-    width: 100% !important;
-    height: 100% !important;
-  }
-
-  // Hide any dialogs or overlays
+  .menu-button,
+  .invoice-preview-container > .preview-header,
+  .invoice-preview-container .actions,
+  .invoice-preview-container button,
+  .invoice-preview-container .loading-container,
+  .invoice-preview-container .error-container,
   .cdk-overlay-container,
-  .mat-mdc-dialog-container,
-  .mat-mdc-menu-panel {
+  .mat-mdc-dialog-container {
     display: none !important;
+  }
+
+  // Make parent containers flow naturally with NO padding/margin
+  app-shell,
+  mat-sidenav-container,
+  mat-sidenav-content,
+  .content-area,
+  .content-wrapper,
+  .content {
+    position: static !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    left: 0 !important;
+  }
+
+  // Invoice container - natural flow, left aligned, NO margins/padding
+  .invoice-preview-container {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    overflow: visible !important;
+    display: block !important;
+    text-align: left !important;
+    left: 0 !important;
+  }
+
+  // Invoice preview wrapper - left aligned, override flex centering
+  .invoice-preview {
+    position: static !important;
+    display: block !important; // Override flex from regular styles
+    justify-content: flex-start !important; // Override center
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    text-align: left !important;
+    left: 0 !important;
+  }
+
+  // Invoice paper - the document (left aligned, use full A4 width)
+  .invoice-paper {
+    position: relative !important;
+    display: block !important;
+    width: 210mm !important; // Full A4 width
+    max-width: 210mm !important;
+    min-width: 210mm !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 8mm 8mm 8mm 3mm !important; // Top, Right, Bottom, Left - minimal left padding
+    background: white !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    page-break-after: auto !important;
+    page-break-inside: auto !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+    left: 0 !important;
+  }
+
+  // Ensure all content inside invoice paper fits
+  .invoice-paper * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  // Fix the 3-column layout to prevent overflow
+  .invoice-details-section {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    gap: 8px !important;
+    padding: 8px !important;
+    margin: 0 0 16px 0 !important;
+  }
+
+  .customer-info,
+  .invoice-meta,
+  .commercial-meta {
+    box-sizing: border-box !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .customer-info {
+    padding-right: 8px !important;
+  }
+
+  .invoice-meta,
+  .commercial-meta {
+    padding-left: 8px !important;
+  }
+
+  // Ensure meta rows don't overflow
+  .meta-row {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+  }
+
+  .meta-label,
+  .meta-value {
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    max-width: 100% !important;
+  }
+
+  // Remove shadows and reset transforms
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  // Reset any transforms that might shift content
+  .invoice-preview-container,
+  .invoice-preview,
+  .invoice-paper {
+    transform: none !important;
+  }
+
+  // Ensure tables fit within page
+  .line-items-section {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    page-break-inside: auto !important;
+  }
+
+  .line-items-table {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: auto !important;
+    border-collapse: collapse !important;
+  }
+
+  .line-items-table tbody tr {
+    page-break-inside: avoid !important;
+  }
+
+  .line-items-table th,
+  .line-items-table td {
+    padding: 8px 6px !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+
+  // Ensure all sections fit
+  .invoice-header,
+  .company-details,
+  .totals-section,
+  .amount-in-words,
+  .signatory-section,
+  .notes-section,
+  .bank-details-section,
+  .terms-section,
+  .invoice-footer {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .totals-section,
+  .amount-in-words,
+  .signatory-section,
+  .notes-section,
+  .bank-details-section,
+  .terms-section,
+  .invoice-footer {
+    page-break-inside: avoid !important;
   }
 }
+
 
