@@ -1,1 +1,21 @@
 @import '../sales-invoices/invoice-form-dialog.component.scss';
+
+// Override for proforma invoice to match invoice detail dialog sizing
+::ng-deep {
+  .cdk-overlay-pane {
+    max-height: 90vh !important;
+  }
+
+  .mat-dialog-container {
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
+  }
+}
+
+mat-dialog-content.invoice-form-content {
+  max-height: calc(90vh - 200px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}

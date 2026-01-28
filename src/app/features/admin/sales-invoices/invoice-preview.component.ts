@@ -165,9 +165,15 @@ export class InvoicePreviewComponent implements OnInit {
   }
 
   getInvoiceTitle(): string {
-    if (!this.previewData?.templateSettings?.title) return 'TAX INVOICE';
-    const baseTitle = this.previewData.templateSettings.title;
-    const status = this.previewData.invoice?.status;
+    const status = this.previewData?.invoice?.status;
+    
+    // For proforma invoices, always show "PROFORMA INVOICE"
+    if (status?.toLowerCase() === 'proforma_invoice') {
+      return 'PROFORMA INVOICE';
+    }
+    
+    // For other statuses, use template title or default to TAX INVOICE
+    const baseTitle = this.previewData?.templateSettings?.title || 'TAX INVOICE';
     
     if (!status) return baseTitle;
     

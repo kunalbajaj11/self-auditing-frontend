@@ -159,5 +159,9 @@ export class SalesInvoicesService {
       usageCount: number;
     }>>('/sales-invoices/item-suggestions', params);
   }
+
+  convertProformaToInvoice(id: string): Observable<SalesInvoice> {
+    return this.api.post<SalesInvoice>(`/sales-invoices/${id}/convert`, {});
+  }
 }
 

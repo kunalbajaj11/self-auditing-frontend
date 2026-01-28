@@ -1,0 +1,78 @@
+<h2 mat-dialog-title>Receive Items</h2>
+
+<mat-dialog-content *ngIf="loading">
+  <div class="loading">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+    <p>Loading purchase order...</p>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-content *ngIf="!loading && purchaseOrder" class="receive-items-content">
+  <form [formGroup]="form">
+    <div class="po-info">
+      <p><strong>PO Number:</strong> {{ purchaseOrder.poNumber }}</p>
+      <p><strong>Vendor:</strong> {{ purchaseOrder.vendorName || purchaseOrder.vendor?.name || '—' }}</p>
+    </div>
+
+    <div class="line-items-section" formArrayName="lineItems">
+      <h3>Line Items</h3>
+      <table class="line-items-table" *ngIf="lineItems.length > 0">
+        <thead>
+          <tr>
+            <th>Item Name</th>
+            <th>Ordered</th>
+            <th>Already Received</th>
+            <th>Remaining</th>
+            <th>New Received Qty *</th>
+            <th>Unit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of lineItems.controls; let i = index" [formGroupName]="i">
+            <td>{{ item.get('itemName')?.value }}</td>
+            <td class="readonly">{{ item.get('orderedQuantity')?.value | number: '1.3-3' }}</td>
+            <td class="readonly">{{ item.get('receivedQuantity')?.value | number: '1.3-3' }}</td>
+            <td class="readonly">{{ item.get('remainingQuantity')?.value | number: '1.3-3' }}</td>
+            <td>
+              <mat-form-field appearance="outline" class="quantity-field">
+                <input
+                  matInput
+                  type="number"
+                  formControlName="newReceivedQuantity"
+                  step="0.001"
+                  min="0"
+                  [max]="item.get('remainingQuantity')?.value"
+                  placeholder="0"
+                />
+                <mat-error *ngIf="item.get('newReceivedQuantity')?.hasError('required')">
+                  Required
+                </mat-error>
+                <mat-error *ngIf="item.get('newReceivedQuantity')?.hasError('max')">
+                  Cannot exceed remaining quantity
+                </mat-error>
+              </mat-form-field>
+            </td>
+            <td class="readonly">{{ item.get('unitOfMeasure')?.value }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="lineItems.length === 0" class="empty">
+        <p>No line items to receive.</p>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="save()"
+    [disabled]="form.invalid || loading || lineItems.length === 0"
+  >
+    <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
+    <span *ngIf="!loading">Receive Items</span>
+  </button>
+</mat-dialog-actions>

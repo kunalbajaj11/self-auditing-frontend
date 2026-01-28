@@ -1,0 +1,49 @@
+<h2 mat-dialog-title>Send Purchase Order via Email</h2>
+
+<mat-dialog-content class="email-dialog-content">
+  <form [formGroup]="form">
+    <p class="info-text">The Purchase Order will be sent as a PDF attachment.</p>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Recipient Email *</mat-label>
+      <input matInput type="email" formControlName="recipientEmail" placeholder="vendor@example.com" />
+      <mat-icon matPrefix>email</mat-icon>
+      <mat-error *ngIf="form.get('recipientEmail')?.hasError('required')">
+        Email is required
+      </mat-error>
+      <mat-error *ngIf="form.get('recipientEmail')?.hasError('email')">
+        Please enter a valid email address
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Subject *</mat-label>
+      <input matInput formControlName="subject" />
+      <mat-error *ngIf="form.get('subject')?.hasError('required')">
+        Subject is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Message *</mat-label>
+      <textarea matInput formControlName="message" rows="5"></textarea>
+      <mat-error *ngIf="form.get('message')?.hasError('required')">
+        Message is required
+      </mat-error>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="send()"
+    [disabled]="form.invalid || loading"
+  >
+    <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
+    <mat-icon *ngIf="!loading">send</mat-icon>
+    <span *ngIf="!loading">Send Email</span>
+  </button>
+</mat-dialog-actions>

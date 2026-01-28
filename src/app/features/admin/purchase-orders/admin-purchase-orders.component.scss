@@ -1,8 +1,8 @@
-@import '../expenses/admin-expenses.component.scss';
+@import '../proforma-invoices/admin-proforma-invoices.component.scss';
 
 .purchase-orders {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 0;
+  .negative-amount {
+    color: #dc2626;
+    font-weight: 600;
+  }
 }

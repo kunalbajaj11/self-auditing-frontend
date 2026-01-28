@@ -19,7 +19,11 @@ import { CategoryFormDialogComponent } from './categories/category-form-dialog.c
 import { ExpenseTypeFormDialogComponent } from './expense-types/expense-type-form-dialog.component';
 import { LedgerAccountFormDialogComponent } from './ledger-accounts/ledger-account-form-dialog.component';
 import { ExpenseFormDialogComponent } from './expenses/expense-form-dialog.component';
-import { PurchaseOrderFormDialogComponent } from './expenses/purchase-order-form-dialog.component';
+import { PurchaseOrderFormDialogComponent } from './purchase-orders/purchase-order-form-dialog.component';
+import { PurchaseOrderDetailDialogComponent } from './purchase-orders/purchase-order-detail-dialog.component';
+import { ReceiveItemsDialogComponent } from './purchase-orders/receive-items-dialog.component';
+import { ConvertToExpenseDialogComponent } from './purchase-orders/convert-to-expense-dialog.component';
+import { POEmailDialogComponent } from './purchase-orders/po-email-dialog.component';
 import { ReconciliationListComponent } from './bank-reconciliation/reconciliation-list.component';
 import { ReconciliationDetailComponent } from './bank-reconciliation/reconciliation-detail.component';
 import { UploadBankStatementComponent } from './bank-reconciliation/upload-bank-statement.component';
@@ -94,6 +98,10 @@ import { CreateDeadlineDialogComponent } from './compliance/create-deadline-dial
     LedgerAccountFormDialogComponent,
     ExpenseFormDialogComponent,
     PurchaseOrderFormDialogComponent,
+    PurchaseOrderDetailDialogComponent,
+    ReceiveItemsDialogComponent,
+    ConvertToExpenseDialogComponent,
+    POEmailDialogComponent,
     ReconciliationListComponent,
     ReconciliationDetailComponent,
     UploadBankStatementComponent,

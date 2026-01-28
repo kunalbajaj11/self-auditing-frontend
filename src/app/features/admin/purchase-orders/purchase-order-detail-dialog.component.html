@@ -1,0 +1,140 @@
+<div class="po-detail">
+  <div class="header" *ngIf="purchaseOrder">
+    <h2 mat-dialog-title>Purchase Order - {{ purchaseOrder.poNumber }}</h2>
+    <button mat-icon-button (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content *ngIf="loading">
+    <div class="loading">
+      <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+      <p>Loading purchase order details...</p>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-content *ngIf="!loading && purchaseOrder" class="po-content">
+    <!-- PO Header -->
+    <div class="po-header">
+      <div class="po-info">
+        <div class="info-row">
+          <span class="label">PO Number:</span>
+          <span class="value">{{ purchaseOrder.poNumber }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">PO Date:</span>
+          <span class="value">{{ purchaseOrder.poDate | date: 'mediumDate' }}</span>
+        </div>
+        <div class="info-row" *ngIf="purchaseOrder.expectedDeliveryDate">
+          <span class="label">Expected Delivery:</span>
+          <span class="value">{{ purchaseOrder.expectedDeliveryDate | date: 'mediumDate' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Status:</span>
+          <mat-chip [color]="getStatusColor(purchaseOrder.status)" selected>
+            {{ getStatusDisplayLabel(purchaseOrder.status) }}
+          </mat-chip>
+        </div>
+      </div>
+
+      <div class="vendor-info">
+        <h3>Vendor Information</h3>
+        <div class="info-row">
+          <span class="label">Name:</span>
+          <span class="value">{{ purchaseOrder.vendor?.name || purchaseOrder.vendorName || '—' }}</span>
+        </div>
+        <div class="info-row" *ngIf="purchaseOrder.vendor?.address">
+          <span class="label">Address:</span>
+          <span class="value">{{ purchaseOrder.vendor.address }}</span>
+        </div>
+        <div class="info-row" *ngIf="purchaseOrder.vendor?.phone">
+          <span class="label">Phone:</span>
+          <span class="value">{{ purchaseOrder.vendor.phone }}</span>
+        </div>
+        <div class="info-row" *ngIf="purchaseOrder.vendor?.email">
+          <span class="label">Email:</span>
+          <span class="value">{{ purchaseOrder.vendor.email }}</span>
+        </div>
+        <div class="info-row" *ngIf="purchaseOrder.vendor?.vendorTrn || purchaseOrder.vendorTrn">
+          <span class="label">TRN:</span>
+          <span class="value">{{ purchaseOrder.vendor?.vendorTrn || purchaseOrder.vendorTrn }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Line Items -->
+    <div class="line-items-section" *ngIf="purchaseOrder.lineItems && purchaseOrder.lineItems.length > 0">
+      <h3>Line Items</h3>
+      <table class="line-items-table">
+        <thead>
+          <tr>
+            <th>Item Name</th>
+            <th>Description</th>
+            <th>Ordered Qty</th>
+            <th>Received Qty</th>
+            <th>Unit Price</th>
+            <th>VAT Rate</th>
+            <th>Amount</th>
+            <th>VAT</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of purchaseOrder.lineItems">
+            <td>{{ item.itemName }}</td>
+            <td>{{ item.description || '—' }}</td>
+            <td>{{ item.orderedQuantity }} {{ item.unitOfMeasure || 'unit' }}</td>
+            <td>{{ item.receivedQuantity || 0 }} {{ item.unitOfMeasure || 'unit' }}</td>
+            <td>{{ item.unitPrice | number: '1.2-2' }} {{ purchaseOrder.currency }}</td>
+            <td>{{ item.vatRate }}%</td>
+            <td>{{ item.amount | number: '1.2-2' }} {{ purchaseOrder.currency }}</td>
+            <td>{{ item.vatAmount | number: '1.2-2' }} {{ purchaseOrder.currency }}</td>
+            <td>{{ item.totalAmount | number: '1.2-2' }} {{ purchaseOrder.currency }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Totals -->
+    <div class="totals-section">
+      <div class="totals-row total-line">
+        <span class="label">Total Amount:</span>
+        <span class="value negative-amount">-{{ purchaseOrder.currency }} {{ purchaseOrder.totalAmount | number: '1.2-2' }}</span>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="notes-section" *ngIf="purchaseOrder.notes">
+      <h3>Notes</h3>
+      <p>{{ purchaseOrder.notes }}</p>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" *ngIf="!loading && purchaseOrder">
+    <button mat-button (click)="close()">Close</button>
+    <button mat-button (click)="downloadPDF()" matTooltip="Download PDF">
+      <mat-icon>download</mat-icon>
+      PDF
+    </button>
+    <button mat-button (click)="sendEmail()" matTooltip="Send via Email">
+      <mat-icon>email</mat-icon>
+      Email
+    </button>
+    <button mat-button (click)="receiveItems()" *ngIf="purchaseOrder.status !== 'cancelled' && purchaseOrder.status !== 'closed'" matTooltip="Mark items as received">
+      <mat-icon>inventory</mat-icon>
+      Receive Items
+    </button>
+    <button mat-button (click)="editPurchaseOrder()" *ngIf="purchaseOrder.status === 'draft'">
+      <mat-icon>edit</mat-icon>
+      Edit
+    </button>
+    <button mat-button (click)="sendToVendor()" *ngIf="purchaseOrder.status === 'draft'">
+      <mat-icon>send</mat-icon>
+      Send
+    </button>
+    <button mat-raised-button color="primary" (click)="convertToExpense()" *ngIf="purchaseOrder.status !== 'cancelled'">
+      <mat-icon>transform</mat-icon>
+      Convert to Expense
+    </button>
+  </mat-dialog-actions>
+</div>

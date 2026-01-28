@@ -1,0 +1,112 @@
+.receive-items-content {
+  min-width: 800px;
+  max-width: 1000px;
+  padding: 24px;
+}
+
+.po-info {
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+
+  p {
+    margin: 8px 0;
+    font-size: 0.938rem;
+    color: #475569;
+  }
+}
+
+.line-items-section {
+  h3 {
+    margin: 0 0 16px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+}
+
+.line-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  thead {
+    background: #0f172a;
+
+    th {
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      color: #ffffff;
+      font-size: 0.813rem;
+
+      &:nth-child(2),
+      &:nth-child(3),
+      &:nth-child(4),
+      &:nth-child(5) {
+        text-align: right;
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid #e2e8f0;
+
+      &:hover {
+        background: #f8fafc;
+      }
+
+      td {
+        padding: 12px;
+        color: #0f172a;
+
+        &.readonly {
+          color: #64748b;
+          font-family: 'SF Mono', 'Monaco', monospace;
+        }
+
+        &:nth-child(2),
+        &:nth-child(3),
+        &:nth-child(4),
+        &:nth-child(5) {
+          text-align: right;
+        }
+      }
+    }
+  }
+}
+
+.quantity-field {
+  width: 120px;
+
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    margin-top: 4px;
+  }
+}
+
+.empty {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px;
+  gap: 20px;
+
+  p {
+    margin: 0;
+    color: #64748b;
+  }
+}
+
+.inline-spinner {
+  display: inline-block;
+  margin-right: 8px;
+}

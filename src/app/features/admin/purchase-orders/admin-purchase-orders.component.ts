@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ExpensesService } from '../../../core/services/expenses.service';
-import { Expense } from '../../../core/models/expense.model';
-import { PurchaseOrderFormDialogComponent } from '../expenses/purchase-order-form-dialog.component';
+import { PurchaseOrdersService, PurchaseOrder } from '../../../core/services/purchase-orders.service';
+import { PurchaseOrderFormDialogComponent } from './purchase-order-form-dialog.component';
+import { PurchaseOrderDetailDialogComponent } from './purchase-order-detail-dialog.component';
 
 @Component({
   selector: 'app-admin-purchase-orders',
@@ -15,66 +14,32 @@ import { PurchaseOrderFormDialogComponent } from '../expenses/purchase-order-for
 export class AdminPurchaseOrdersComponent implements OnInit {
   readonly columns = [
     'poNumber',
-    'vendor',
-    'category',
-    'amount',
-    'date',
+    'vendorName',
+    'poDate',
+    'expectedDeliveryDate',
+    'totalAmount',
     'status',
     'actions',
   ] as const;
-  readonly dataSource = new MatTableDataSource<Expense>([]);
+  readonly dataSource = new MatTableDataSource<PurchaseOrder>([]);
   loading = false;
 
-  readonly filters;
-
   constructor(
-    private readonly fb: FormBuilder,
-    private readonly expensesService: ExpensesService,
+    private readonly purchaseOrdersService: PurchaseOrdersService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
-  ) {
-    this.filters = this.fb.group({
-      startDate: [''],
-      endDate: [''],
-      vendorName: [''],
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
     this.loadPurchaseOrders();
-    this.filters.valueChanges.subscribe(() => {
-      this.loadPurchaseOrders();
-    });
   }
 
   loadPurchaseOrders(): void {
     this.loading = true;
-    const rawValue = this.filters.getRawValue();
-    const filters = Object.entries(rawValue)
-      .filter(([, value]) => value)
-      .reduce(
-        (acc, [key, value]) => {
-          const dateValue = value as any;
-          if (dateValue && typeof dateValue === 'object' && dateValue.getTime && typeof dateValue.getTime === 'function') {
-            acc[key] = new Date(dateValue).toISOString().substring(0, 10);
-          } else {
-            acc[key] = value;
-          }
-          return acc;
-        },
-        {} as Record<string, any>,
-      );
-    
-    filters['type'] = 'expense';
-    this.expensesService.listExpenses(filters).subscribe({
-      next: (expenses) => {
+    this.purchaseOrdersService.listPurchaseOrders().subscribe({
+      next: (pos) => {
         this.loading = false;
-        const sorted = expenses.sort((a, b) => {
-          const dateA = new Date(a.expenseDate).getTime();
-          const dateB = new Date(b.expenseDate).getTime();
-          return dateB - dateA;
-        });
-        this.dataSource.data = sorted;
+        this.dataSource.data = pos;
       },
       error: () => {
         this.loading = false;
@@ -88,33 +53,100 @@ export class AdminPurchaseOrdersComponent implements OnInit {
 
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(PurchaseOrderFormDialogComponent, {
-      width: '750px',
+      width: '900px',
       maxWidth: '95vw',
+      maxHeight: '90vh',
       data: null,
     });
-    dialogRef.afterClosed().subscribe((created) => {
-      if (created) {
-        this.snackBar.open('Purchase Order created successfully', 'Close', { duration: 3000 });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.snackBar.open('Purchase Order created successfully', 'Close', {
+          duration: 3000,
+        });
         this.loadPurchaseOrders();
       }
     });
   }
 
-  viewOrEditPurchaseOrder(po: Expense): void {
-    const dialogRef = this.dialog.open(PurchaseOrderFormDialogComponent, {
-      width: '750px',
+  viewPurchaseOrder(po: PurchaseOrder): void {
+    const dialogRef = this.dialog.open(PurchaseOrderDetailDialogComponent, {
+      width: '900px',
       maxWidth: '95vw',
+      maxHeight: '90vh',
+      data: { poId: po.id },
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      this.loadPurchaseOrders();
+    });
+  }
+
+  editPurchaseOrder(po: PurchaseOrder): void {
+    const dialogRef = this.dialog.open(PurchaseOrderFormDialogComponent, {
+      width: '900px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
       data: po,
     });
-    dialogRef.afterClosed().subscribe((updated) => {
-      if (updated) {
-        this.snackBar.open('Purchase Order updated successfully', 'Close', { duration: 3000 });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.snackBar.open('Purchase Order updated successfully', 'Close', {
+          duration: 3000,
+        });
         this.loadPurchaseOrders();
       }
     });
   }
 
-  getPONumber(po: Expense): string {
-    return (po as any).poNumber || '—';
+  deletePurchaseOrder(po: PurchaseOrder): void {
+    if (!confirm(`Are you sure you want to delete purchase order ${po.poNumber}?`)) {
+      return;
+    }
+
+    this.purchaseOrdersService.deletePurchaseOrder(po.id).subscribe({
+      next: () => {
+        this.snackBar.open('Purchase Order deleted successfully', 'Close', {
+          duration: 3000,
+        });
+        this.loadPurchaseOrders();
+      },
+      error: (error) => {
+        this.snackBar.open(
+          error?.error?.message || 'Failed to delete purchase order',
+          'Close',
+          { duration: 4000, panelClass: ['snack-error'] },
+        );
+      },
+    });
+  }
+
+  getStatusDisplayLabel(status: string): string {
+    const statusMap: Record<string, string> = {
+      'draft': 'Draft',
+      'sent': 'Sent',
+      'acknowledged': 'Acknowledged',
+      'partially_received': 'Partially Received',
+      'fully_received': 'Fully Received',
+      'invoiced': 'Invoiced',
+      'closed': 'Closed',
+      'cancelled': 'Cancelled',
+    };
+    return statusMap[status] || status;
+  }
+
+  getStatusColor(status: string): string {
+    const colorMap: Record<string, string> = {
+      'draft': 'accent',
+      'sent': 'primary',
+      'acknowledged': 'primary',
+      'partially_received': 'accent',
+      'fully_received': 'primary',
+      'invoiced': 'primary',
+      'closed': 'primary',
+      'cancelled': 'warn',
+    };
+    return colorMap[status] || 'accent';
   }
 }

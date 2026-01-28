@@ -1,0 +1,139 @@
+<h2 mat-dialog-title>Convert Purchase Order to Expense</h2>
+
+<mat-dialog-content *ngIf="loading">
+  <div class="loading">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+    <p>Loading purchase order...</p>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-content *ngIf="!loading && purchaseOrder" class="convert-content">
+  <form [formGroup]="form">
+    <div class="po-info">
+      <p><strong>PO Number:</strong> {{ purchaseOrder.poNumber }}</p>
+      <p><strong>Vendor:</strong> {{ purchaseOrder.vendorName || purchaseOrder.vendor?.name || '—' }}</p>
+      <p><strong>Total PO Amount:</strong> {{ purchaseOrder.currency }} {{ purchaseOrder.totalAmount | number: '1.2-2' }}</p>
+    </div>
+
+    <div class="form-section">
+      <h3>Expense Details</h3>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Expense Date *</mat-label>
+          <input matInput [matDatepicker]="expenseDatePicker" formControlName="expenseDate" required />
+          <mat-datepicker-toggle matIconSuffix [for]="expenseDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #expenseDatePicker></mat-datepicker>
+          <mat-error *ngIf="form.get('expenseDate')?.hasError('required')">
+            Expense date is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Expected Payment Date</mat-label>
+          <input matInput [matDatepicker]="expectedPaymentDatePicker" formControlName="expectedPaymentDate" />
+          <mat-datepicker-toggle matIconSuffix [for]="expectedPaymentDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #expectedPaymentDatePicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Invoice Number</mat-label>
+          <input matInput formControlName="invoiceNumber" placeholder="Vendor invoice number" />
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="2" placeholder="Expense description"></textarea>
+      </mat-form-field>
+    </div>
+
+    <div class="line-items-section" formArrayName="lineItems">
+      <div class="section-header">
+        <h3>Select Line Items to Convert</h3>
+        <span class="selected-count">{{ getSelectedItemsCount() }} of {{ lineItems.length }} selected</span>
+      </div>
+
+      <table class="line-items-table" *ngIf="lineItems.length > 0">
+        <thead>
+          <tr>
+            <th style="width: 50px;">
+              <mat-checkbox
+                [checked]="isAllSelected()"
+                [indeterminate]="isSomeSelected()"
+                (change)="toggleSelectAll($event.checked)"
+              ></mat-checkbox>
+            </th>
+            <th>Item Name</th>
+            <th>Ordered</th>
+            <th>Received</th>
+            <th>Available</th>
+            <th>Quantity to Convert *</th>
+            <th>Unit Price</th>
+            <th>Amount</th>
+            <th>Unit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of lineItems.controls; let i = index" [formGroupName]="i" [class.selected]="item.get('selected')?.value">
+            <td>
+              <mat-checkbox formControlName="selected" (change)="toggleItemSelection(i)"></mat-checkbox>
+            </td>
+            <td>{{ item.get('itemName')?.value }}</td>
+            <td class="readonly">{{ item.get('orderedQuantity')?.value | number: '1.3-3' }}</td>
+            <td class="readonly">{{ item.get('receivedQuantity')?.value | number: '1.3-3' }}</td>
+            <td class="readonly">{{ item.get('availableQuantity')?.value | number: '1.3-3' }}</td>
+            <td>
+              <mat-form-field appearance="outline" class="quantity-field" *ngIf="item.get('selected')?.value">
+                <input
+                  matInput
+                  type="number"
+                  formControlName="quantity"
+                  step="0.001"
+                  min="0.001"
+                  [max]="item.get('availableQuantity')?.value"
+                  placeholder="0"
+                />
+                <mat-error *ngIf="item.get('quantity')?.hasError('required')">
+                  Required
+                </mat-error>
+                <mat-error *ngIf="item.get('quantity')?.hasError('max')">
+                  Cannot exceed available quantity
+                </mat-error>
+              </mat-form-field>
+              <span *ngIf="!item.get('selected')?.value" class="not-selected">—</span>
+            </td>
+            <td class="readonly">{{ item.get('unitPrice')?.value | number: '1.2-2' }}</td>
+            <td class="readonly amount">{{ item.get('amount')?.value | number: '1.2-2' }}</td>
+            <td class="readonly">{{ item.get('unitOfMeasure')?.value }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="lineItems.length === 0" class="empty">
+        <p>No line items available to convert.</p>
+      </div>
+
+      <div class="totals-section" *ngIf="getSelectedItemsCount() > 0">
+        <div class="total-row">
+          <span class="label">Total Amount to Convert:</span>
+          <span class="value">{{ purchaseOrder.currency || 'AED' }} {{ getTotalAmount() | number: '1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="save()"
+    [disabled]="form.invalid || loading || getSelectedItemsCount() === 0"
+  >
+    <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
+    <span *ngIf="!loading">Convert to Expense</span>
+  </button>
+</mat-dialog-actions>
