@@ -92,6 +92,68 @@
   }
 }
 
+.bank-details-section {
+  margin-top: 32px;
+  margin-bottom: 32px;
+  padding: 24px 28px;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  width: 60%;
+
+  h3 {
+    margin: 0 0 16px 0;
+    font-size: 0.800rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+}
+
+.bank-details-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.bank-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #f1f5f9;
+
+  &:hover {
+    border-color: #e2e8f0;
+    background: #ffffff;
+  }
+}
+
+.bank-label {
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.bank-value {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #0f172a;
+  word-break: break-word;
+}
+
+.mono {
+  font-family: 'SF Mono', 'Monaco', ui-monospace, SFMono-Regular, Menlo, Consolas,
+    'Liberation Mono', monospace;
+  letter-spacing: 0.2px;
+}
+
 .line-items-table {
   width: 100%;
   border-collapse: separate;

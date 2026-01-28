@@ -27,6 +27,7 @@ export interface PurchaseOrder {
   vendorName?: string | null;
   vendorTrn?: string | null;
   vendor?: any | null;
+  organization?: any | null;
   poDate: string;
   expectedDeliveryDate?: string | null;
   status: string;

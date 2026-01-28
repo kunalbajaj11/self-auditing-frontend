@@ -811,6 +811,45 @@ $shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
     }
   }
 
+  .footer-social {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    .footer-social-label {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.85);
+      white-space: nowrap;
+    }
+
+    .footer-social-link {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.95);
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.1);
+      transition: background 0.2s ease, transform 0.2s ease;
+
+      .footer-social-icon {
+        width: 18px;
+        height: 18px;
+        display: block;
+        color: rgba(255, 255, 255, 0.95);
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.18);
+        transform: translateY(-1px);
+      }
+    }
+  }
+
   .footer-meta {
     display: inline-flex;
     align-items: center;

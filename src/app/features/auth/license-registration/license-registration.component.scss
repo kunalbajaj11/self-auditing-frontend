@@ -710,6 +710,39 @@
   }
 }
 
+.social-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 0 16px;
+
+  .social-link {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #0077c8;
+    background: rgba(0, 119, 200, 0.08);
+    transition: background 0.2s ease, transform 0.2s ease;
+
+    .social-icon {
+      width: 18px;
+      height: 18px;
+      display: block;
+      color: #0077c8;
+    }
+
+    &:hover {
+      background: rgba(0, 119, 200, 0.14);
+      transform: translateY(-1px);
+    }
+  }
+}
+
 .powered-by {
   padding-top: 24px;
   border-top: 1px solid #e2e8f0;

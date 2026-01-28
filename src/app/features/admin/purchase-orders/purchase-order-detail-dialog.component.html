@@ -103,6 +103,48 @@
       </div>
     </div>
 
+    <!-- Bank Details -->
+    <div
+      class="bank-details-section"
+      *ngIf="
+        purchaseOrder.organization &&
+        (purchaseOrder.organization.bankAccountHolder ||
+          purchaseOrder.organization.bankName ||
+          purchaseOrder.organization.bankAccountNumber ||
+          purchaseOrder.organization.bankIban ||
+          purchaseOrder.organization.bankBranch)
+      "
+    >
+      <h3>Bank Details</h3>
+
+      <div class="bank-details-grid">
+        <div class="bank-row" *ngIf="purchaseOrder.organization.bankAccountHolder">
+          <div class="bank-label">Account Holder</div>
+          <div class="bank-value">{{ purchaseOrder.organization.bankAccountHolder }}</div>
+        </div>
+
+        <div class="bank-row" *ngIf="purchaseOrder.organization.bankName">
+          <div class="bank-label">Bank</div>
+          <div class="bank-value">{{ purchaseOrder.organization.bankName }}</div>
+        </div>
+
+        <div class="bank-row" *ngIf="purchaseOrder.organization.bankAccountNumber">
+          <div class="bank-label">Account Number</div>
+          <div class="bank-value mono">{{ purchaseOrder.organization.bankAccountNumber }}</div>
+        </div>
+
+        <div class="bank-row" *ngIf="purchaseOrder.organization.bankIban">
+          <div class="bank-label">IBAN</div>
+          <div class="bank-value mono">{{ purchaseOrder.organization.bankIban }}</div>
+        </div>
+
+        <div class="bank-row" *ngIf="purchaseOrder.organization.bankBranch">
+          <div class="bank-label">Branch</div>
+          <div class="bank-value">{{ purchaseOrder.organization.bankBranch }}</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Notes -->
     <div class="notes-section" *ngIf="purchaseOrder.notes">
       <h3>Notes</h3>
