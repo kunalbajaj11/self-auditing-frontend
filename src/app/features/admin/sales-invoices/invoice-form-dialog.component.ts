@@ -103,6 +103,14 @@ export class InvoiceFormDialogComponent implements OnInit {
       status: ['proforma_invoice'],
       description: [''],
       notes: [''],
+      deliveryNote: [''],
+      suppliersRef: [''],
+      otherReference: [''],
+      buyerOrderNo: [''],
+      buyerOrderDate: [''],
+      despatchedThrough: [''],
+      destination: [''],
+      termsOfDelivery: [''],
       lineItems: this.fb.array([]),
     });
   }
@@ -203,6 +211,14 @@ export class InvoiceFormDialogComponent implements OnInit {
       status: invoice.status,
       description: invoice.description || '',
       notes: invoice.notes || '',
+      deliveryNote: (invoice as any).deliveryNote || '',
+      suppliersRef: (invoice as any).suppliersRef || '',
+      otherReference: (invoice as any).otherReference || '',
+      buyerOrderNo: (invoice as any).buyerOrderNo || '',
+      buyerOrderDate: (invoice as any).buyerOrderDate || '',
+      despatchedThrough: (invoice as any).despatchedThrough || '',
+      destination: (invoice as any).destination || '',
+      termsOfDelivery: (invoice as any).termsOfDelivery || '',
     });
 
     // Load line items
@@ -458,6 +474,15 @@ export class InvoiceFormDialogComponent implements OnInit {
       status: formValue.status || 'proforma_invoice',
       description: formValue.description || undefined,
       notes: formValue.notes || undefined,
+      // Commercial header fields
+      deliveryNote: formValue.deliveryNote || undefined,
+      suppliersRef: formValue.suppliersRef || undefined,
+      otherReference: formValue.otherReference || undefined,
+      buyerOrderNo: formValue.buyerOrderNo || undefined,
+      buyerOrderDate: formValue.buyerOrderDate || undefined,
+      despatchedThrough: formValue.despatchedThrough || undefined,
+      destination: formValue.destination || undefined,
+      termsOfDelivery: formValue.termsOfDelivery || undefined,
       lineItems: lineItems,
     };
 

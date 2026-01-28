@@ -72,6 +72,63 @@
       </mat-form-field>
     </div>
 
+    <!-- Commercial Details Section -->
+    <div class="form-section">
+      <h3>Commercial Details</h3>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Delivery Note</mat-label>
+          <input matInput formControlName="deliveryNote" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Supplier's Ref</mat-label>
+          <input matInput formControlName="suppliersRef" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Other Reference</mat-label>
+          <input matInput formControlName="otherReference" />
+        </mat-form-field>
+      </div>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Buyer Order No.</mat-label>
+          <input matInput formControlName="buyerOrderNo" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Dated</mat-label>
+          <input
+            matInput
+            [matDatepicker]="buyerOrderDatePicker"
+            formControlName="buyerOrderDate"
+            placeholder="Select date"
+          />
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="buyerOrderDatePicker"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #buyerOrderDatePicker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Despatched Through</mat-label>
+          <input matInput formControlName="despatchedThrough" />
+        </mat-form-field>
+      </div>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Destination</mat-label>
+          <input matInput formControlName="destination" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="flex-1 full-width">
+          <mat-label>Terms of Delivery</mat-label>
+          <textarea
+            matInput
+            formControlName="termsOfDelivery"
+            rows="2"
+          ></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+
     <!-- Line Items Section -->
     <div class="form-section">
       <div class="section-header">

@@ -1,6 +1,6 @@
 .invoice-detail {
-  min-width: 900px;
-  max-width: 1200px;
+  min-width: 820px;
+  max-width: 1100px;
   display: flex;
   flex-direction: column;
   max-height: 90vh;
@@ -58,10 +58,10 @@
 
 .invoice-header {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
-  margin-bottom: 32px;
-  padding: 24px 28px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+  padding: 18px 22px;
   background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
   border-radius: 12px;
   border: 1px solid #e2e8f0;
@@ -69,11 +69,12 @@
 }
 
 .invoice-info,
-.customer-info {
+.customer-info,
+.commercial-info {
   h3 {
-    margin: 0 0 16px 0;
-    font-size: 0.800rem;
-    font-weight: 700;
+    margin: 0 0 6px 0;
+    font-size: 0.7rem;
+    font-weight: 600;
     color: #475569;
     text-transform: uppercase;
     letter-spacing: 0.8px;
@@ -82,17 +83,21 @@
 
 .invoice-info {
   border-right: 1px solid #e2e8f0;
-  padding-right: 28px;
+  padding-right: 20px;
 }
 
 .customer-info {
-  padding-left: 28px;
+  border-right: 1px solid #e2e8f0;
+  padding: 0 16px;
+}
+
+.commercial-info {
+  padding-left: 16px;
 }
 
 .info-row {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 12px;
+  display: block;
+  padding: 4px;
   align-items: center;
 
   &:last-child {
@@ -100,23 +105,26 @@
   }
 
   .label {
-    font-weight: 600;
+    font-weight: 500;
     color: #64748b;
-    min-width: 140px;
-    font-size: 0.813rem;
+    min-width: 105px;
+    font-size: 0.72rem;
+    margin-right: 4px;
   }
 
   .value {
     color: #0f172a;
     font-weight: 600;
-    font-size: 0.938rem;
+    font-size: 0.85rem;
     flex: 1;
+    line-height: 1.25;
   }
 
   mat-chip {
-    font-size: 0.75rem;
-    height: 24px;
-    font-weight: 600;
+    font-size: 0.7rem;
+    height: 20px;
+    font-weight: 500;
+    margin-left: auto;
   }
 }
 
@@ -243,15 +251,15 @@
   }
 
   .label {
-    font-weight: 600;
+    font-weight: 700;
     color: #166534;
-    font-size: 0.938rem;
+    font-size: 0.813rem;
   }
 
   .value {
     font-weight: 700;
     color: #059669;
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-family: 'SF Mono', 'Monaco', monospace;
 
     &.paid {
@@ -284,16 +292,16 @@
     margin-right: -16px;
 
     .label {
-      font-size: 1.125rem;
+      font-size: 0.95rem;
       color: #0f172a;
-      font-weight: 700;
+      font-weight: 600;
     }
 
     .value {
-      font-size: 1.5rem;
-      font-weight: 800;
+      font-size: 1.05rem;
+      font-weight: 700;
       color: #059669;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.01em;
     }
   }
 }

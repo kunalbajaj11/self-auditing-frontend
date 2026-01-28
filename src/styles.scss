@@ -922,6 +922,10 @@ button[mat-unelevated-button][color="primary"] mat-icon {
 
 // Global print styles - Hide all UI elements when printing invoices
 // NOTE: These styles ONLY apply when printing (@media print)
+@page {
+  size: A4;
+  margin: 10mm;
+}
 @media print {
   // Hide all navigation and UI elements
   mat-sidenav,
@@ -962,13 +966,16 @@ button[mat-unelevated-button][color="primary"] mat-icon {
     background: white !important;
   }
 
-  // Show only invoice preview content
+  // Let individual invoice components control their print layout.
+  // We only normalize spacing/background here so the component-specific
+  // @media print styles (e.g. in `invoice-preview.component.scss`) can
+  // handle paging correctly.
   .invoice-preview-container {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     width: 100% !important;
-    height: 100% !important;
+    height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;

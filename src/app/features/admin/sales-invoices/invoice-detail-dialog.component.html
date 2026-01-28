@@ -66,6 +66,42 @@
           <span class="value">{{ invoice.customer?.customerTrn || invoice.customerTrn }}</span>
         </div>
       </div>
+
+      <div class="commercial-info">
+        <h3>Commercial Details</h3>
+        <div class="info-row" *ngIf="invoice.deliveryNote">
+          <span class="label">Delivery Note:</span>
+          <span class="value">{{ invoice.deliveryNote }}</span>
+        </div>
+        <div class="info-row" *ngIf="invoice.suppliersRef">
+          <span class="label">Supplier's Ref:</span>
+          <span class="value">{{ invoice.suppliersRef }}</span>
+        </div>
+        <div class="info-row" *ngIf="invoice.otherReference">
+          <span class="label">Other Reference:</span>
+          <span class="value">{{ invoice.otherReference }}</span>
+        </div>
+        <div class="info-row" *ngIf="invoice.buyerOrderNo">
+          <span class="label">Buyer Order No.:</span>
+          <span class="value">{{ invoice.buyerOrderNo }}</span>
+        </div>
+        <div class="info-row" *ngIf="invoice.buyerOrderDate">
+          <span class="label">Dated:</span>
+          <span class="value">{{ invoice.buyerOrderDate | date: 'mediumDate' }}</span>
+        </div>
+        <div class="info-row" *ngIf="invoice.despatchedThrough">
+          <span class="label">Despatched Through:</span>
+          <span class="value">{{ invoice.despatchedThrough }}</span>
+        </div>
+        <div class="info-row" *ngIf="invoice.destination">
+          <span class="label">Destination:</span>
+          <span class="value">{{ invoice.destination }}</span>
+        </div>
+        <div class="info-row" *ngIf="invoice.termsOfDelivery">
+          <span class="label">Terms of Delivery:</span>
+          <span class="value">{{ invoice.termsOfDelivery }}</span>
+        </div>
+      </div>
     </div>
 
     <!-- Line Items -->

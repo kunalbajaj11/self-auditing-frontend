@@ -54,6 +54,15 @@ export interface SalesInvoice {
   paidDate?: string | null;
   description?: string | null;
   notes?: string | null;
+  // Commercial header fields
+  deliveryNote?: string | null;
+  suppliersRef?: string | null;
+  otherReference?: string | null;
+  buyerOrderNo?: string | null;
+  buyerOrderDate?: string | null;
+  despatchedThrough?: string | null;
+  destination?: string | null;
+  termsOfDelivery?: string | null;
   lineItems?: InvoiceLineItem[];
   createdAt: string;
   updatedAt: string;
@@ -72,6 +81,15 @@ export interface CreateSalesInvoicePayload {
   description?: string;
   notes?: string;
   status?: string;
+  // Commercial header fields
+  deliveryNote?: string;
+  suppliersRef?: string;
+  otherReference?: string;
+  buyerOrderNo?: string;
+  buyerOrderDate?: string;
+  despatchedThrough?: string;
+  destination?: string;
+  termsOfDelivery?: string;
 }
 
 @Injectable({ providedIn: 'root' })

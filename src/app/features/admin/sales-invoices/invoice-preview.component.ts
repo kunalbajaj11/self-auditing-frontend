@@ -6,6 +6,7 @@ import { ApiService } from '../../../core/services/api.service';
 
 interface InvoicePreviewData {
   invoice: any;
+  amountInWords?: string | null;
   templateSettings: {
     logoUrl?: string;
     headerText?: string;

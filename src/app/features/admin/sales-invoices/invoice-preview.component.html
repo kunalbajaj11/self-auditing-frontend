@@ -86,7 +86,7 @@
         </div>
       </div>
 
-      <!-- Invoice Details: Bill To (left), Invoice meta (right) -->
+      <!-- Invoice Details: 3-column layout (Customer, Invoice, Commercial) -->
       <div class="invoice-details-section">
         <div class="customer-info">
           <h3>Bill To:</h3>
@@ -142,6 +142,57 @@
             <span class="meta-value">{{
               previewData.templateSettings.customPaymentTerms || previewData.templateSettings.defaultPaymentTerms
             }}</span>
+          </div>
+        </div>
+        <div class="commercial-meta">
+          <h3>Commercial Details</h3>
+          <div class="meta-row" *ngIf="previewData.invoice.deliveryNote">
+            <span class="meta-label">Delivery Note</span>
+            <span class="meta-value">
+              {{ previewData.invoice.deliveryNote }}
+            </span>
+          </div>
+          <div class="meta-row" *ngIf="previewData.invoice.suppliersRef">
+            <span class="meta-label">Supplier's Ref</span>
+            <span class="meta-value">
+              {{ previewData.invoice.suppliersRef }}
+            </span>
+          </div>
+          <div class="meta-row" *ngIf="previewData.invoice.otherReference">
+            <span class="meta-label">Other Reference</span>
+            <span class="meta-value">
+              {{ previewData.invoice.otherReference }}
+            </span>
+          </div>
+          <div class="meta-row" *ngIf="previewData.invoice.buyerOrderNo">
+            <span class="meta-label">Buyer Order No.</span>
+            <span class="meta-value">
+              {{ previewData.invoice.buyerOrderNo }}
+            </span>
+          </div>
+          <div class="meta-row" *ngIf="previewData.invoice.buyerOrderDate">
+            <span class="meta-label">Dated</span>
+            <span class="meta-value">
+              {{ previewData.invoice.buyerOrderDate | date: 'mediumDate' }}
+            </span>
+          </div>
+          <div class="meta-row" *ngIf="previewData.invoice.despatchedThrough">
+            <span class="meta-label">Despatched Through</span>
+            <span class="meta-value">
+              {{ previewData.invoice.despatchedThrough }}
+            </span>
+          </div>
+          <div class="meta-row" *ngIf="previewData.invoice.destination">
+            <span class="meta-label">Destination</span>
+            <span class="meta-value">
+              {{ previewData.invoice.destination }}
+            </span>
+          </div>
+          <div class="meta-row" *ngIf="previewData.invoice.termsOfDelivery">
+            <span class="meta-label">Terms of Delivery</span>
+            <span class="meta-value">
+              {{ previewData.invoice.termsOfDelivery }}
+            </span>
           </div>
         </div>
       </div>
@@ -237,7 +288,42 @@
         </div>
       </div>
 
-      <!-- Bank Details - Own section below totals, before notes -->
+      <!-- Amount in words -->
+      <div
+        class="amount-in-words"
+        *ngIf="previewData.amountInWords"
+      >
+        <div class="amount-in-words-label">
+          Amount Chargeable (in words):
+        </div>
+        <div class="amount-in-words-value">
+          {{ previewData.amountInWords }}
+        </div>
+      </div>
+
+      <!-- Default Notes -->
+      <div
+        class="notes-section"
+        *ngIf="previewData.templateSettings.defaultNotes && previewData.templateSettings.defaultNotes.trim().length > 0"
+      >
+        <h4>Notes</h4>
+        <p>{{ previewData.templateSettings.defaultNotes }}</p>
+      </div>
+
+      <!-- Terms & Conditions -->
+      <div
+        class="terms-section"
+        *ngIf="
+          previewData.templateSettings.showTermsAndConditions &&
+          previewData.templateSettings.termsAndConditions &&
+          previewData.templateSettings.termsAndConditions.trim().length > 0
+        "
+      >
+        <h4>Terms & Conditions</h4>
+        <p>{{ previewData.templateSettings.termsAndConditions }}</p>
+      </div>
+
+      <!-- Bank Details - move below terms & conditions -->
       <div
         class="bank-details-section"
         *ngIf="
@@ -269,26 +355,15 @@
         </p>
       </div>
 
-      <!-- Default Notes -->
-      <div
-        class="notes-section"
-        *ngIf="previewData.templateSettings.defaultNotes && previewData.templateSettings.defaultNotes.trim().length > 0"
-      >
-        <h4>Notes</h4>
-        <p>{{ previewData.templateSettings.defaultNotes }}</p>
-      </div>
-
-      <!-- Terms & Conditions -->
-      <div
-        class="terms-section"
-        *ngIf="
-          previewData.templateSettings.showTermsAndConditions &&
-          previewData.templateSettings.termsAndConditions &&
-          previewData.templateSettings.termsAndConditions.trim().length > 0
-        "
-      >
-        <h4>Terms & Conditions</h4>
-        <p>{{ previewData.templateSettings.termsAndConditions }}</p>
+      <!-- Authorised Signatory -->
+      <div class="signatory-section">
+        <div class="signatory-block">
+          <div class="signatory-for">
+            For {{ previewData.invoice.organization?.name || 'the Company' }}
+          </div>
+          <div class="signatory-line"></div>
+          <div class="signatory-label">Authorised Signatory</div>
+        </div>
       </div>
 
       <!-- Footer -->
