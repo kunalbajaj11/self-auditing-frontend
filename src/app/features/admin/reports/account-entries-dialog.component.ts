@@ -1,6 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ReportsService } from '../../../core/services/reports.service';
+import { InvoiceDetailDialogComponent } from '../sales-invoices/invoice-detail-dialog.component';
 
 export interface AccountEntriesDialogData {
   accountName: string;
@@ -30,11 +31,36 @@ export class AccountEntriesDialogComponent implements OnInit {
   constructor(
     private readonly dialogRef: MatDialogRef<AccountEntriesDialogComponent>,
     private readonly reportsService: ReportsService,
+    private readonly dialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public data: AccountEntriesDialogData,
   ) {}
 
   ngOnInit(): void {
+    if (this.data.accountName === 'Accounts Receivable') {
+      this.displayedColumns = [
+        'date',
+        'type',
+        'referenceNumber',
+        'customerName',
+        'debitAmount',
+        'creditAmount',
+        'amount',
+      ];
+    }
     this.loadAccountEntries();
+  }
+
+  isAccountsReceivable(): boolean {
+    return this.data.accountName === 'Accounts Receivable';
+  }
+
+  openInvoice(invoiceId: string): void {
+    this.dialog.open(InvoiceDetailDialogComponent, {
+      width: '900px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      data: { invoiceId },
+    });
   }
 
   loadAccountEntries(): void {

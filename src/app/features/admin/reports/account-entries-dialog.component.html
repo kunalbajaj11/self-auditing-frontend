@@ -65,7 +65,24 @@
           <ng-container matColumnDef="referenceNumber">
             <th mat-header-cell *matHeaderCellDef>Reference</th>
             <td mat-cell *matCellDef="let entry">
-              {{ entry.referenceNumber || '—' }}
+              <button
+                *ngIf="isAccountsReceivable() && entry.entityType === 'invoice' && entry.entityId"
+                mat-button
+                color="primary"
+                class="invoice-number-link"
+                (click)="openInvoice(entry.entityId)">
+                {{ entry.referenceNumber || '—' }}
+              </button>
+              <span *ngIf="!isAccountsReceivable() || entry.entityType !== 'invoice' || !entry.entityId">
+                {{ entry.referenceNumber || '—' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="customerName">
+            <th mat-header-cell *matHeaderCellDef>Customer</th>
+            <td mat-cell *matCellDef="let entry">
+              {{ entry.customerName || '—' }}
             </td>
           </ng-container>
 
