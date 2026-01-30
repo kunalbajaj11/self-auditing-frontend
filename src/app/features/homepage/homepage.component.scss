@@ -21,18 +21,18 @@ $shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
 }
 
 .homepage-scale {
-  // Homepage-only "shrink everything to 80%" (fonts + padding/margins/gaps)
-  zoom: 0.8;
+  // Homepage scale: 96% = 20% larger than previous 80% (fonts + padding/margins/gaps)
+  zoom: 0.96;
 }
 
 // Fallback for browsers that don't support `zoom` well (e.g. Firefox)
 @supports not (zoom: 1) {
   .homepage-scale {
-    transform: scale(0.8);
+    transform: scale(0.96);
     transform-origin: top center;
-    // Keep visual width roughly consistent after scaling (125% * 0.8 ≈ 100%)
-    width: 125%;
-    margin-left: -12.5%;
+    // Keep visual width roughly consistent after scaling
+    width: 104.17%;
+    margin-left: -2.08%;
   }
 }
 
@@ -883,7 +883,7 @@ $shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
 // Floating WhatsApp Button
 .floating-whatsapp {
   // Keep the floating CTA sized consistently with the rest of the homepage
-  zoom: 0.8;
+  zoom: 0.96;
   position: fixed;
   bottom: 24px;
   right: 24px;
@@ -957,7 +957,7 @@ $shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
 
 @supports not (zoom: 1) {
   .floating-whatsapp {
-    transform: scale(0.8);
+    transform: scale(0.96);
     transform-origin: bottom right;
   }
 }
