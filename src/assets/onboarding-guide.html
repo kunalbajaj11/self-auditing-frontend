@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onboarding Guide — SelfAccounting.AI</title>
+  <style>
+    :root {
+      --primary: #0077c8;
+      --primary-dark: #005fa3;
+      --secondary: #00bfa5;
+      --text: #333;
+      --text-muted: #666;
+      --bg: #f8fafc;
+      --card-bg: #fff;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+      margin: 0;
+      padding: 0 1rem 2rem;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 2rem;
+      margin: 0 -1rem 2rem;
+      border-radius: 0 0 12px 12px;
+    }
+    header h1 {
+      margin: 0 0 0.25rem;
+      font-size: 1.75rem;
+    }
+    header p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 0.95rem;
+    }
+    h2 {
+      color: var(--primary);
+      margin: 2rem 0 1rem;
+      font-size: 1.25rem;
+      border-bottom: 2px solid var(--secondary);
+      padding-bottom: 0.5rem;
+    }
+    h3 {
+      color: var(--text);
+      margin: 1.5rem 0 0.75rem;
+      font-size: 1.1rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border: 1px solid var(--border);
+    }
+    ul { padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 1rem 0;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+    }
+    th {
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+    }
+    tr:nth-child(even) { background: #f8fafc; }
+    .checklist { list-style: none; padding-left: 0; }
+    .checklist li {
+      padding-left: 1.75rem;
+      position: relative;
+    }
+    .checklist li::before {
+      content: '☐';
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+    }
+    .path {
+      font-family: ui-monospace, monospace;
+      font-size: 0.85rem;
+      background: #f1f5f9;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+    }
+    .muted { color: var(--text-muted); font-size: 0.9rem; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+    .footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    a:hover { text-decoration: underline; }
+    strong { color: var(--text); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SelfAccounting.AI — Client Onboarding Checklist</h1>
+    <p>First-time setup guide for new organizations • Estimated time: 30–60 minutes</p>
+  </header>
+
+  <section class="card">
+    <h2>Overview</h2>
+    <p>Welcome to SelfAccounting.AI. This checklist guides you through the essential setup steps so your organization can start tracking expenses, managing invoices, and running reports effectively.</p>
+    <p><strong>You will need:</strong></p>
+    <ul>
+      <li>Your <strong>license key</strong> (provided by your account manager)</li>
+      <li>Company registration details (name, VAT number, address)</li>
+      <li>Admin user details (name, email, password)</li>
+      <li>Bank account details (for invoices and reconciliation)</li>
+      <li>List of key vendors and customers (optional for initial setup)</li>
+    </ul>
+  </section>
+
+  <h2>Part 1: Account Registration</h2>
+  <section class="card">
+    <h3>Step 1: Register with License Key</h3>
+    <ol>
+      <li>Go to the registration page (<strong>Get Started</strong> or <strong>Register with License</strong>).</li>
+      <li>Enter your <strong>license key</strong> and click <strong>Validate</strong>.</li>
+      <li>Complete the registration form:</li>
+    </ol>
+    <table>
+      <thead>
+        <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Organization Name</td><td>Yes</td><td>Legal business name; must be unique</td></tr>
+        <tr><td>VAT Number</td><td>No</td><td>Your TRN for UAE VAT compliance</td></tr>
+        <tr><td>Address</td><td>No</td><td>Registered business address</td></tr>
+        <tr><td>Currency</td><td>Yes</td><td>Default: AED (or your base currency)</td></tr>
+        <tr><td>Region</td><td>Yes</td><td>UAE, Saudi Arabia, Oman, etc.</td></tr>
+        <tr><td>Contact Person</td><td>No</td><td>Primary contact name</td></tr>
+        <tr><td>Contact Email</td><td>No</td><td>Billing/contact email</td></tr>
+        <tr><td>Admin Name</td><td>Yes</td><td>Your full name</td></tr>
+        <tr><td>Admin Email</td><td>Yes</td><td>Login email; must be unique</td></tr>
+        <tr><td>Admin Password</td><td>Yes</td><td>Min 8 characters</td></tr>
+      </tbody>
+    </table>
+    <p>4. Click <strong>Register</strong>. You will be logged in and a welcome email will be sent.</p>
+    <p><strong>What happens automatically:</strong></p>
+    <ul>
+      <li>Organization is created</li>
+      <li>Default expense categories (Fuel, Food, Utilities, Travel, etc.) are created</li>
+      <li>Admin user is created and linked to the organization</li>
+      <li>License is activated</li>
+    </ul>
+  </section>
+
+  <h2>Part 2: Essential Configuration (Do First)</h2>
+  <section class="card">
+    <h3>Step 2: Complete Company Profile</h3>
+    <p><span class="path">Settings → Organization Settings</span> (or <code>/admin/company</code>)</p>
+    <ul class="checklist">
+      <li><strong>Company Name</strong> — Verify and update if needed</li>
+      <li><strong>VAT Number (TRN)</strong> — Required for UAE tax invoices</li>
+      <li><strong>Currency</strong> — Confirm base currency</li>
+      <li><strong>Primary Contact</strong> — Name of main contact</li>
+      <li><strong>Contact Email</strong> — Email for invoices and correspondence</li>
+      <li><strong>Registered Address</strong> — Full address for invoices and legal documents</li>
+      <li><strong>Bank Account Details</strong> — Bank name, account holder, IBAN, Swift, branch (for invoices)</li>
+    </ul>
+    <p class="muted"><strong>Why:</strong> This information is printed on sales invoices and used in reports. Incomplete details can cause compliance issues.</p>
+  </section>
+
+  <section class="card">
+    <h3>Step 3: Tax Settings</h3>
+    <p><span class="path">Settings → Tax Settings</span> (or <code>/admin/settings/tax</code>)</p>
+    <ul class="checklist">
+      <li>Add <strong>standard VAT rate</strong> (e.g., 5% for UAE)</li>
+      <li>Add <strong>zero-rated</strong> and <strong>exempt</strong> rules if applicable</li>
+      <li>Ensure rates match your TRN and local regulations</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h3>Step 4: Invoice Template</h3>
+    <p><span class="path">Settings → Invoice Template</span></p>
+    <ul class="checklist">
+      <li>Upload your <strong>company logo</strong></li>
+      <li>Set <strong>invoice footer</strong> (terms, payment instructions)</li>
+      <li>Configure <strong>branding</strong> (colours, layout if supported)</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h3>Step 5: Numbering Sequences</h3>
+    <p><span class="path">Settings → Numbering Sequences</span></p>
+    <ul class="checklist">
+      <li>Set <strong>invoice number prefix</strong> (e.g., INV-2025-)</li>
+      <li>Set <strong>expense/receipt reference format</strong> if needed</li>
+    </ul>
+  </section>
+
+  <h2>Part 3: Master Data Setup</h2>
+  <section class="card">
+    <h3>Step 6: Expense Categories</h3>
+    <p><span class="path">Settings → Expense Categories</span></p>
+    <p>Default categories are created automatically. <strong>Review</strong>, <strong>add</strong>, or <strong>edit</strong> as needed.</p>
+  </section>
+
+  <section class="card">
+    <h3>Step 7: Expense Types</h3>
+    <p><span class="path">Settings → Expense Types</span></p>
+    <p>Review system defaults (OPEX, CAPEX) and add custom types if needed.</p>
+  </section>
+
+  <section class="card">
+    <h3>Step 8: Ledger Accounts</h3>
+    <p><span class="path">Settings → Ledger Accounts</span></p>
+    <p>Review or import your chart of accounts. Ensure core accounts exist: Revenue, Expenses, Bank, Receivables, Payables, VAT.</p>
+  </section>
+
+  <section class="card">
+    <h3>Step 9: Bank Accounts & Cash Accounts</h3>
+    <p><span class="path">Banking → Bank Accounts / Cash Accounts</span></p>
+    <p>Add each bank account and petty cash accounts if used.</p>
+  </section>
+
+  <h2>Part 4: Operational Setup</h2>
+  <section class="card">
+    <h3>Step 10: Vendors</h3>
+    <p><span class="path">Contacts → Vendors</span></p>
+    <p>Add your main vendors/suppliers with name, contact, and TRN (if VAT registered).</p>
+  </section>
+
+  <section class="card">
+    <h3>Step 11: Customers</h3>
+    <p><span class="path">Contacts → Customers</span></p>
+    <p>Add customers before creating sales invoices. Include name, contact, TRN, and payment terms.</p>
+  </section>
+
+  <section class="card">
+    <h3>Step 12: User Management</h3>
+    <p><span class="path">Settings → User Management</span></p>
+    <p>Invite team members and assign roles: <strong>Admin</strong>, <strong>Accountant</strong>, <strong>Employee</strong>.</p>
+  </section>
+
+  <h2>Quick Reference</h2>
+  <table>
+    <thead>
+      <tr><th>Task</th><th>Path</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Company Profile</td><td>Settings → Organization Settings</td></tr>
+      <tr><td>Tax</td><td>Settings → Tax Settings</td></tr>
+      <tr><td>Invoice Template</td><td>Settings → Invoice Template</td></tr>
+      <tr><td>Numbering</td><td>Settings → Numbering Sequences</td></tr>
+      <tr><td>Users</td><td>Settings → User Management</td></tr>
+      <tr><td>Categories</td><td>Settings → Expense Categories</td></tr>
+      <tr><td>Expense Types</td><td>Settings → Expense Types</td></tr>
+      <tr><td>Ledger Accounts</td><td>Settings → Ledger Accounts</td></tr>
+      <tr><td>Customers</td><td>Contacts → Customers</td></tr>
+      <tr><td>Vendors</td><td>Contacts → Vendors</td></tr>
+      <tr><td>Bank Accounts</td><td>Banking → Bank Accounts</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+  <section class="footer">
+    <p><strong>Support:</strong> For technical support or onboarding assistance, contact your account manager or <a href="mailto:support@selfaccounting.ai">support&#64;selfaccounting.ai</a>.</p>
+    <p class="muted">Document version 1.0 • February 2025</p>
+  </section>
+</body>
+</html>

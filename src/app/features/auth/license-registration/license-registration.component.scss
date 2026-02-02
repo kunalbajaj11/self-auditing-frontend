@@ -224,6 +224,31 @@
   line-height: 1.5;
 }
 
+.onboarding-guide-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+  color: #0077c8;
+  text-decoration: none;
+  border-radius: 6px;
+  background: rgba(0, 119, 200, 0.08);
+  transition: background 0.2s ease, color 0.2s ease;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    background: rgba(0, 119, 200, 0.14);
+    color: #005fa3;
+  }
+}
+
 .auth-form {
   display: flex;
   flex-direction: column;
