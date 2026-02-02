@@ -34,6 +34,7 @@ export interface OrganizationUsage {
   licenseExpiresAt?: string | null;
   enablePayroll?: boolean;
   enableInventory?: boolean;
+  enableBulkJournalImport?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

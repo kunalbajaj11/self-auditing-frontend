@@ -1,0 +1,86 @@
+<h2 mat-dialog-title>
+  <mat-icon>upload_file</mat-icon>
+  Bulk Import Journal Entries
+</h2>
+
+<mat-dialog-content class="bulk-import-content">
+  <p class="intro">
+    Import opening balances from Tally or Zoho Books. Paste your CSV or use the template below.
+  </p>
+
+  <div class="format-section">
+    <h3>CSV Format</h3>
+    <code>debitAccount,creditAccount,amount,entryDate,description</code>
+    <p class="hint">
+      Account codes: cash, bank, accounts_receivable, accounts_payable, owner_shareholder_account,
+      share_capital, vat_receivable, vat_payable, prepaid_expenses, customer_advances,
+      sales_revenue, general_expense. For custom ledger: ledger:uuid
+    </p>
+    <button mat-stroked-button (click)="loadTemplate()">
+      <mat-icon>content_copy</mat-icon>
+      Load template
+    </button>
+  </div>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Paste CSV data</mat-label>
+    <textarea
+      matInput
+      [(ngModel)]="csvText"
+      (ngModelChange)="parseCsv()"
+      rows="8"
+      placeholder="debitAccount,creditAccount,amount,entryDate,description"
+    ></textarea>
+  </mat-form-field>
+
+  <p class="parse-error" *ngIf="parseError">
+    <mat-icon color="warn">error</mat-icon>
+    {{ parseError }}
+  </p>
+
+  <section class="preview-section" *ngIf="parsedRows.length > 0">
+    <h3>Preview ({{ validRows.length }} valid, {{ parsedRows.length - validRows.length }} with errors)</h3>
+    <div class="preview-table-container">
+      <table mat-table [dataSource]="parsedRows" class="preview-table">
+        <ng-container matColumnDef="debitAccount">
+          <th mat-header-cell *matHeaderCellDef>Debit</th>
+          <td mat-cell *matCellDef="let row">{{ getAccountLabel(row.debitAccount) || '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="creditAccount">
+          <th mat-header-cell *matHeaderCellDef>Credit</th>
+          <td mat-cell *matCellDef="let row">{{ getAccountLabel(row.creditAccount) || '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="amount">
+          <th mat-header-cell *matHeaderCellDef>Amount</th>
+          <td mat-cell *matCellDef="let row">AED {{ row.amount | number: '1.2-2' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="entryDate">
+          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <td mat-cell *matCellDef="let row">{{ row.entryDate }}</td>
+        </ng-container>
+        <ng-container matColumnDef="error">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="error-text" *ngIf="row.error">{{ row.error }}</span>
+            <mat-icon class="ok-icon" *ngIf="!row.error" color="primary">check_circle</mat-icon>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="['debitAccount', 'creditAccount', 'amount', 'entryDate', 'error']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['debitAccount', 'creditAccount', 'amount', 'entryDate', 'error']"></tr>
+      </table>
+    </div>
+  </section>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="submit()"
+    [disabled]="!canSubmit || loading"
+  >
+    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+    <span *ngIf="!loading">Import {{ validRows.length }} entries</span>
+  </button>
+</mat-dialog-actions>

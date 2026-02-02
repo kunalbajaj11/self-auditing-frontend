@@ -60,6 +60,7 @@ import { BankTransactionFormDialogComponent } from './bank-accounts/bank-transac
 import { AdjustmentsComponent } from './adjustments/adjustments.component';
 import { AdminJournalEntriesComponent } from './journal-entries/admin-journal-entries.component';
 import { JournalEntryFormDialogComponent } from './journal-entries/journal-entry-form-dialog.component';
+import { BulkImportDialogComponent } from './journal-entries/bulk-import-dialog.component';
 import { AdminPayrollRunsComponent } from './payroll/admin-payroll-runs.component';
 import { PayrollRunFormDialogComponent } from './payroll/payroll-run-form-dialog.component';
 import { PayrollRunDetailDialogComponent } from './payroll/payroll-run-detail-dialog.component';
@@ -138,6 +139,7 @@ import { CreateDeadlineDialogComponent } from './compliance/create-deadline-dial
     AdjustmentsComponent,
     AdminJournalEntriesComponent,
     JournalEntryFormDialogComponent,
+    BulkImportDialogComponent,
     AdminSalaryProfilesComponent,
     SalaryProfileFormDialogComponent,
     AdminPayrollRunsComponent,

@@ -4,10 +4,22 @@
       <h1>Journal Entries</h1>
       <p>Manage journal entries with debit and credit accounts for proper accounting.</p>
     </div>
-    <button mat-raised-button color="primary" (click)="openCreateDialog()">
-      <mat-icon>add</mat-icon>
-      Add Entry
-    </button>
+    <div class="header-actions">
+      <button
+        *ngIf="bulkImportEnabled$ | async"
+        mat-stroked-button
+        color="primary"
+        (click)="openBulkImportDialog()"
+        matTooltip="Import opening balances from Tally or Zoho"
+      >
+        <mat-icon>upload_file</mat-icon>
+        Bulk Import
+      </button>
+      <button mat-raised-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        Add Entry
+      </button>
+    </div>
   </header>
 
   <section class="filters-section">

@@ -43,6 +43,7 @@ export class OrganizationFormDialogComponent {
       address: [''],
       enablePayroll: [false],
       enableInventory: [false],
+      enableBulkJournalImport: [false],
     });
   }
 

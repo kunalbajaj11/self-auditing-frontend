@@ -174,5 +174,18 @@ export class LicenseService {
       }),
     );
   }
+
+  /**
+   * Check if bulk journal import (migration) feature is enabled for the current organization
+   */
+  isBulkJournalImportEnabled(): Observable<boolean> {
+    return this.organizationService.getMyOrganization().pipe(
+      map((org) => org.enableBulkJournalImport ?? false),
+      catchError((error) => {
+        console.error('[LicenseService] Error getting organization for bulk journal import check:', error);
+        return of(false);
+      }),
+    );
+  }
 }
 

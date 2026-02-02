@@ -224,11 +224,18 @@
   line-height: 1.5;
 }
 
-.onboarding-guide-link {
+.guide-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.onboarding-guide-link,
+.migration-guide-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: 12px;
   padding: 6px 12px;
   font-size: 0.8125rem;
   color: #0077c8;

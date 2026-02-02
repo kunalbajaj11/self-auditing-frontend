@@ -21,6 +21,7 @@ export interface LicenseKey {
   region?: Region | null;
   enablePayroll?: boolean;
   enableInventory?: boolean;
+  enableBulkJournalImport?: boolean;
   createdAt: string;
   updatedAt: string;
   organizationName?: string | null;

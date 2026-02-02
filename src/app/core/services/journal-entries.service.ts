@@ -203,6 +203,13 @@ export class JournalEntriesService {
     return this.api.post<JournalEntry>('/journal-entries', payload);
   }
 
+  /**
+   * Bulk create journal entries (e.g. for opening balance migration from Tally/Zoho).
+   */
+  bulkCreateEntries(entries: CreateJournalEntryPayload[]): Observable<{ created: JournalEntry[] }> {
+    return this.api.post<{ created: JournalEntry[] }>('/journal-entries/bulk', { entries });
+  }
+
   updateEntry(id: string, payload: UpdateJournalEntryPayload): Observable<JournalEntry> {
     return this.api.patch<JournalEntry>(`/journal-entries/${id}`, payload);
   }

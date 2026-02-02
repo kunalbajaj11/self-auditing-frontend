@@ -106,6 +106,13 @@
               >
                 Inventory
               </mat-checkbox>
+              <mat-checkbox
+                [checked]="org.enableBulkJournalImport ?? false"
+                (change)="toggleBulkJournalImport(org, $event.checked)"
+                [matTooltip]="org.enableBulkJournalImport ? 'Bulk journal import enabled' : 'Bulk journal import disabled'"
+              >
+                Migration
+              </mat-checkbox>
             </div>
           </td>
         </ng-container>

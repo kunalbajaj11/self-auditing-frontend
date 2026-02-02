@@ -37,6 +37,12 @@
     }
   }
 
+  .header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
   button {
     height: 40px;
     padding: 0 16px;

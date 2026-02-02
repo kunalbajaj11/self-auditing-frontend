@@ -474,5 +474,29 @@ export class SuperAdminOrganizationsComponent implements OnInit, AfterViewInit {
         },
       });
   }
+
+  toggleBulkJournalImport(org: OrganizationUsage, enabled: boolean): void {
+    this.organizationService
+      .updateOrganization(org.id, { enableBulkJournalImport: enabled })
+      .subscribe({
+        next: (updated) => {
+          org.enableBulkJournalImport = updated.enableBulkJournalImport ?? enabled;
+          this.snackBar.open(
+            `Bulk journal import (migration) ${org.enableBulkJournalImport ? 'enabled' : 'disabled'} for ${org.name}`,
+            'Close',
+            { duration: 3000 },
+          );
+          this.loadOrganizations();
+        },
+        error: () => {
+          this.snackBar.open(
+            'Failed to update bulk journal import setting. Please try again.',
+            'Close',
+            { duration: 4000, panelClass: ['snack-error'] },
+          );
+          org.enableBulkJournalImport = !enabled;
+        },
+      });
+  }
 }
 

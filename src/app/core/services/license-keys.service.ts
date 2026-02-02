@@ -28,6 +28,7 @@ export interface RenewLicenseKeyPayload {
 export interface UpdateLicenseFeaturesPayload {
   enablePayroll?: boolean;
   enableInventory?: boolean;
+  enableBulkJournalImport?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

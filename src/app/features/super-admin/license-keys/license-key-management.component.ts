@@ -333,5 +333,29 @@ export class LicenseKeyManagementComponent implements OnInit, AfterViewInit {
         },
       });
   }
+
+  toggleBulkJournalImportFeature(key: LicenseKey): void {
+    const currentValue = key.enableBulkJournalImport ?? false;
+    const newValue = !currentValue;
+    this.licenseKeysService
+      .updateFeatures(key.id, { enableBulkJournalImport: newValue })
+      .subscribe({
+        next: (updated) => {
+          key.enableBulkJournalImport = updated.enableBulkJournalImport ?? false;
+          this.snackBar.open(
+            `Bulk journal import (migration) ${newValue ? 'enabled' : 'disabled'}`,
+            'Close',
+            { duration: 3000 },
+          );
+        },
+        error: () => {
+          this.snackBar.open(
+            'Failed to update bulk journal import feature',
+            'Close',
+            { duration: 4000, panelClass: ['snack-error'] },
+          );
+        },
+      });
+  }
 }
 

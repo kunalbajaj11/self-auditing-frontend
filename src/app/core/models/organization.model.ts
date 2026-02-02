@@ -17,6 +17,7 @@ export interface Organization {
   region?: Region;
   enablePayroll?: boolean;
   enableInventory?: boolean;
+  enableBulkJournalImport?: boolean;
   bankAccountHolder?: string;
   bankName?: string;
   bankAccountNumber?: string;

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable, of } from 'rxjs';
 import { FormBuilder } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
@@ -14,7 +15,9 @@ import {
   LedgerAccountsService,
   LedgerAccount,
 } from '../../../core/services/ledger-accounts.service';
+import { LicenseService } from '../../../core/services/license.service';
 import { JournalEntryFormDialogComponent } from './journal-entry-form-dialog.component';
+import { BulkImportDialogComponent } from './bulk-import-dialog.component';
 
 @Component({
   selector: 'app-admin-journal-entries',
@@ -37,6 +40,7 @@ export class AdminJournalEntriesComponent implements OnInit {
   ] as const;
   readonly dataSource = new MatTableDataSource<JournalEntry>([]);
   loading = false;
+  bulkImportEnabled$: Observable<boolean> = of(false);
 
   readonly filters;
   readonly accountsByCategory = getAccountsByCategory();
@@ -50,6 +54,7 @@ export class AdminJournalEntriesComponent implements OnInit {
     private readonly fb: FormBuilder,
     private readonly journalEntriesService: JournalEntriesService,
     private readonly ledgerAccountsService: LedgerAccountsService,
+    private readonly licenseService: LicenseService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
   ) {
@@ -63,6 +68,7 @@ export class AdminJournalEntriesComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.bulkImportEnabled$ = this.licenseService.isBulkJournalImportEnabled();
     this.ledgerAccountsService.listLedgerAccounts().subscribe({
       next: (accounts) => {
         this.ledgerAccountsById.clear();
@@ -104,6 +110,18 @@ export class AdminJournalEntriesComponent implements OnInit {
           { duration: 4000, panelClass: ['snack-error'] },
         );
       },
+    });
+  }
+
+  openBulkImportDialog(): void {
+    const dialogRef = this.dialog.open(BulkImportDialogComponent, {
+      width: '720px',
+      maxWidth: '95vw',
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadJournalEntries();
+      }
     });
   }
 

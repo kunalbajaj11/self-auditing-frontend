@@ -1,0 +1,97 @@
+.bulk-import-content {
+  min-width: 600px;
+  max-width: 90vw;
+}
+
+h2 mat-icon {
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.intro {
+  margin-bottom: 16px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.format-section {
+  margin-bottom: 16px;
+
+  h3 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+  }
+
+  code {
+    display: block;
+    padding: 8px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .hint {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.6);
+    margin-bottom: 8px;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.parse-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #d32f2f;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.preview-section {
+  margin-top: 24px;
+
+  h3 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+  }
+}
+
+.preview-table-container {
+  max-height: 240px;
+  overflow: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+
+.preview-table {
+  width: 100%;
+
+  th,
+  td {
+    padding: 8px 12px;
+  }
+
+  .error-text {
+    font-size: 12px;
+    color: #d32f2f;
+  }
+
+  .ok-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+mat-dialog-actions {
+  padding: 16px 24px;
+}
+
+mat-spinner {
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}

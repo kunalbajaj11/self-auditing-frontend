@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Migration Guide — Tally & Zoho Books to SelfAccounting.AI</title>
+  <style>
+    :root {
+      --primary: #0077c8;
+      --primary-dark: #005fa3;
+      --secondary: #00bfa5;
+      --text: #333;
+      --text-muted: #666;
+      --bg: #f8fafc;
+      --card-bg: #fff;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+      margin: 0;
+      padding: 0 1rem 2rem;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 2rem;
+      margin: 0 -1rem 2rem;
+      border-radius: 0 0 12px 12px;
+    }
+    header h1 {
+      margin: 0 0 0.25rem;
+      font-size: 1.75rem;
+    }
+    header p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 0.95rem;
+    }
+    h2 {
+      color: var(--primary);
+      margin: 2rem 0 1rem;
+      font-size: 1.25rem;
+      border-bottom: 2px solid var(--secondary);
+      padding-bottom: 0.5rem;
+    }
+    h3 {
+      color: var(--text);
+      margin: 1.5rem 0 0.75rem;
+      font-size: 1.1rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border: 1px solid var(--border);
+    }
+    ul { padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 1rem 0;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+    }
+    th {
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+    }
+    tr:nth-child(even) { background: #f8fafc; }
+    .path {
+      font-family: ui-monospace, monospace;
+      font-size: 0.85rem;
+      background: #f1f5f9;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+    }
+    .muted { color: var(--text-muted); font-size: 0.9rem; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+    .footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    a:hover { text-decoration: underline; }
+    strong { color: var(--text); }
+    code {
+      background: #f1f5f9;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    .tip {
+      background: #ecfdf5;
+      border-left: 4px solid var(--secondary);
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Migration Guide — Tally & Zoho Books to SelfAccounting.AI</h1>
+    <p>How to migrate your opening balances when switching from Tally or Zoho Books</p>
+  </header>
+
+  <section class="card">
+    <h2>Overview</h2>
+    <p>If you are migrating from <strong>Tally</strong> or <strong>Zoho Books</strong>, you can bring your opening balances into SelfAccounting.AI using our Bulk Import feature. This guide walks you through the process.</p>
+    <p><strong>Approach:</strong> Export your closing trial balance from your current system, then import it as opening balance journal entries. This ensures your books continue seamlessly from your cutover date.</p>
+    <p><a href="onboarding-guide.html">← Back to Onboarding Guide</a></p>
+  </section>
+
+  <h2>Step 1: Choose Your Cutover Date</h2>
+  <section class="card">
+    <p>Pick a date from which you will start using SelfAccounting.AI—typically the first day of a month or fiscal year (e.g., 1 Jan 2025). All transactions before this date remain in your old system for reference.</p>
+  </section>
+
+  <h2>Step 2: Export Trial Balance from Tally or Zoho</h2>
+  <section class="card">
+    <h3>From Tally</h3>
+    <ol>
+      <li>Open Tally and go to <strong>Display → Trial Balance</strong></li>
+      <li>Set the period to end on the <strong>day before</strong> your cutover date</li>
+      <li>Export to Excel or CSV (usually via <strong>Export</strong> or right-click)</li>
+    </ol>
+
+    <h3>From Zoho Books</h3>
+    <ol>
+      <li>Log in to Zoho Books</li>
+      <li>Go to <strong>Reports → Trial Balance</strong></li>
+      <li>Select the date range ending the day before your cutover date</li>
+      <li>Click <strong>Export</strong> and choose CSV or Excel</li>
+    </ol>
+
+    <p class="muted">You need columns for: <strong>Account Name</strong>, <strong>Debit</strong>, and <strong>Credit</strong> (or Debit Balance / Credit Balance).</p>
+  </section>
+
+  <h2>Step 3: Complete SelfAccounting.AI Setup</h2>
+  <section class="card">
+    <p>Before importing, complete the basics:</p>
+    <ul>
+      <li><a href="onboarding-guide.html">Register and onboard</a> your organization (if not already done)</li>
+      <li>Ensure your <strong>Bulk Import</strong> feature is enabled (contact your account manager if you don't see the option)</li>
+      <li>Add any <strong>custom ledger accounts</strong> under <span class="path">Settings → Ledger Accounts</span> if your chart of accounts differs from the defaults</li>
+    </ul>
+  </section>
+
+  <h2>Step 4: Prepare Your CSV for Import</h2>
+  <section class="card">
+    <p>Convert your trial balance to our CSV format. Each line represents one journal entry:</p>
+    <p><code>debitAccount,creditAccount,amount,entryDate,description</code></p>
+
+    <h3>Account Code Mapping</h3>
+    <p>Map your Tally/Zoho account names to our codes:</p>
+    <table>
+      <thead>
+        <tr><th>Tally / Zoho Name</th><th>SelfAccounting.AI Code</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Cash, Cash in Hand</td><td><code>cash</code></td></tr>
+        <tr><td>Bank, Current Account</td><td><code>bank</code></td></tr>
+        <tr><td>Sundry Debtors, Accounts Receivable</td><td><code>accounts_receivable</code></td></tr>
+        <tr><td>VAT Input, Input VAT</td><td><code>vat_receivable</code></td></tr>
+        <tr><td>Prepaid Expenses</td><td><code>prepaid_expenses</code></td></tr>
+        <tr><td>Sundry Creditors, Accounts Payable</td><td><code>accounts_payable</code></td></tr>
+        <tr><td>VAT Output, Output VAT</td><td><code>vat_payable</code></td></tr>
+        <tr><td>Share Capital, Capital</td><td><code>share_capital</code></td></tr>
+        <tr><td>Owner's Capital, Drawings, Opening Balance Equity</td><td><code>owner_shareholder_account</code></td></tr>
+        <tr><td>Sales, Revenue</td><td><code>sales_revenue</code></td></tr>
+        <tr><td>Expenses</td><td><code>general_expense</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <strong>Tip:</strong> For opening balances, use <code>owner_shareholder_account</code> as the balancing account (the "Opening Balance Equity" equivalent). Do not use Retained Earnings—it is system-calculated.
+    </div>
+
+    <h3>Example CSV</h3>
+    <pre style="background:#f1f5f9;padding:1rem;border-radius:8px;overflow-x:auto;font-size:0.85rem;">debitAccount,creditAccount,amount,entryDate,description
+bank,owner_shareholder_account,100000,2025-01-01,Opening balance - Bank
+cash,owner_shareholder_account,5000,2025-01-01,Opening balance - Cash
+accounts_receivable,owner_shareholder_account,25000,2025-01-01,Opening balance - Sundry Debtors</pre>
+  </section>
+
+  <h2>Step 5: Import in SelfAccounting.AI</h2>
+  <section class="card">
+    <ol>
+      <li>Log in to SelfAccounting.AI</li>
+      <li>Go to <span class="path">Expenses → Journal Entries</span></li>
+      <li>Click <strong>Bulk Import</strong> (if the button is visible—your license must have this feature enabled)</li>
+      <li>Paste your CSV data or use the template</li>
+      <li>Review the preview—fix any errors shown</li>
+      <li>Click <strong>Import</strong> to create the journal entries</li>
+    </ol>
+  </section>
+
+  <h2>Step 6: Verify & Go Live</h2>
+  <section class="card">
+    <ul>
+      <li>Run a <strong>Trial Balance</strong> report in SelfAccounting.AI (<span class="path">Reports → Trial Balance</span>)</li>
+      <li>Compare it with your exported trial balance—totals should match</li>
+      <li>From your cutover date onward, record all new transactions in SelfAccounting.AI</li>
+    </ul>
+  </section>
+
+  <hr>
+  <section class="footer">
+    <p><strong>Support:</strong> For migration assistance, contact your account manager or <a href="mailto:support@selfaccounting.ai">support&#64;selfaccounting.ai</a>.</p>
+    <p><a href="onboarding-guide.html">View Onboarding Guide</a></p>
+    <p class="muted">Document version 1.0 • February 2025</p>
+  </section>
+</body>
+</html>

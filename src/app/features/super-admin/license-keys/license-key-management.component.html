@@ -133,6 +133,15 @@
               >
                 Inventory
               </mat-slide-toggle>
+              <mat-slide-toggle
+                [checked]="row.enableBulkJournalImport ?? false"
+                (change)="toggleBulkJournalImportFeature(row)"
+                [disabled]="row.status === 'revoked'"
+                color="primary"
+                [matTooltip]="row.enableBulkJournalImport ? 'Bulk journal import (migration) enabled' : 'Bulk journal import (migration) disabled'"
+              >
+                Migration
+              </mat-slide-toggle>
             </div>
           </td>
         </ng-container>
