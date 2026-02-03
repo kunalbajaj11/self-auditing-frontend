@@ -76,8 +76,12 @@ export class InvoiceFormDialogComponent implements OnInit {
     }, 0);
   }
 
+  get discountAmount(): number {
+    return parseFloat(this.form.get('discountAmount')?.value || '0');
+  }
+
   get totalAmount(): number {
-    return this.subtotal + this.totalVat;
+    return Math.max(0, this.subtotal - this.discountAmount + this.totalVat);
   }
 
   getStatusDisplayLabel(status: string): string {
@@ -98,7 +102,9 @@ export class InvoiceFormDialogComponent implements OnInit {
       customerName: [''],
       customerTrn: [''],
       invoiceDate: [new Date().toISOString().substring(0, 10), Validators.required],
+      supplyDate: [''], // Optional: date of supply (UAE VAT - if different from invoice date)
       dueDate: [''],
+      discountAmount: [0], // Optional: discount amount (UAE VAT)
       currency: ['AED'],
       status: ['proforma_invoice'],
       description: [''],
@@ -206,7 +212,9 @@ export class InvoiceFormDialogComponent implements OnInit {
 
     this.form.patchValue({
       invoiceDate: invoice.invoiceDate,
+      supplyDate: (invoice as any).supplyDate || '',
       dueDate: invoice.dueDate || '',
+      discountAmount: parseFloat((invoice as any).discountAmount || '0'),
       currency: invoice.currency || 'AED',
       status: invoice.status,
       description: invoice.description || '',
@@ -469,7 +477,9 @@ export class InvoiceFormDialogComponent implements OnInit {
       customerName: formValue.customerName || undefined,
       customerTrn: formValue.customerTrn || undefined,
       invoiceDate: formValue.invoiceDate,
+      supplyDate: formValue.supplyDate || undefined,
       dueDate: formValue.dueDate || undefined,
+      discountAmount: parseFloat(formValue.discountAmount || '0'),
       currency: formValue.currency || 'AED',
       status: formValue.status || 'proforma_invoice',
       description: formValue.description || undefined,

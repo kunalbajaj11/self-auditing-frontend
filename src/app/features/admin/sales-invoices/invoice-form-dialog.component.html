@@ -34,6 +34,14 @@
           <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
           <mat-datepicker #dueDatePicker></mat-datepicker>
         </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Supply Date (optional)</mat-label>
+          <input matInput [matDatepicker]="supplyDatePicker" formControlName="supplyDate" placeholder="If different from invoice date" />
+          <mat-datepicker-toggle matIconSuffix [for]="supplyDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #supplyDatePicker></mat-datepicker>
+          <mat-hint>UAE VAT: date of supply if different</mat-hint>
+        </mat-form-field>
       </div>
 
       <div class="form-row">
@@ -63,6 +71,12 @@
               {{ getStatusDisplayLabel(status) }}
             </mat-option>
           </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Discount (optional)</mat-label>
+          <input matInput type="number" formControlName="discountAmount" min="0" step="0.01" placeholder="0" />
+          <mat-hint>UAE VAT: if applicable</mat-hint>
         </mat-form-field>
       </div>
 
@@ -236,6 +250,10 @@
         <div class="totals-row">
           <span class="total-label">Subtotal:</span>
           <span class="total-value">{{ subtotal | number: '1.2-2' }} {{ form.get('currency')?.value }}</span>
+        </div>
+        <div class="totals-row" *ngIf="discountAmount > 0">
+          <span class="total-label">Discount:</span>
+          <span class="total-value">-{{ discountAmount | number: '1.2-2' }} {{ form.get('currency')?.value }}</span>
         </div>
         <div class="totals-row">
           <span class="total-label">Total VAT:</span>

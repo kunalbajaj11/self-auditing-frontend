@@ -86,7 +86,9 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
       customerName: [''],
       customerTrn: [''],
       invoiceDate: [new Date().toISOString().substring(0, 10), Validators.required],
+      supplyDate: [''],
       dueDate: [''],
+      discountAmount: [0],
       currency: ['AED'],
       status: ['proforma_invoice'], // Always proforma_invoice for this component
       description: [''],
@@ -194,7 +196,9 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
 
     this.form.patchValue({
       invoiceDate: invoice.invoiceDate,
+      supplyDate: (invoice as any).supplyDate || '',
       dueDate: invoice.dueDate || '',
+      discountAmount: parseFloat((invoice as any).discountAmount || '0'),
       currency: invoice.currency || 'AED',
       status: 'proforma_invoice', // Always set to proforma_invoice
       description: invoice.description || '',
@@ -457,7 +461,9 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
       customerName: formValue.customerName || undefined,
       customerTrn: formValue.customerTrn || undefined,
       invoiceDate: formValue.invoiceDate,
+      supplyDate: formValue.supplyDate || undefined,
       dueDate: formValue.dueDate || undefined,
+      discountAmount: parseFloat(formValue.discountAmount || '0'),
       currency: formValue.currency || 'AED',
       status: 'proforma_invoice', // Always proforma_invoice for this component
       description: formValue.description || undefined,

@@ -10,6 +10,14 @@
         <mat-icon>download</mat-icon>
         Download PDF
       </button>
+      <button mat-stroked-button (click)="exportEInvoice('xml')" matTooltip="Export as UBL 2.1 XML for e-invoicing">
+        <mat-icon>code</mat-icon>
+        Export XML
+      </button>
+      <button mat-stroked-button (click)="exportEInvoice('json')" matTooltip="Export as JSON for e-invoicing">
+        <mat-icon>data_object</mat-icon>
+        Export JSON
+      </button>
       <button mat-raised-button (click)="printInvoice()">
         <mat-icon>print</mat-icon>
         Print
@@ -125,6 +133,12 @@
               previewData.invoice.invoiceDate | date: 'mediumDate'
             }}</span>
           </div>
+          <div class="meta-row" *ngIf="previewData.invoice.supplyDate && previewData.invoice.supplyDate !== previewData.invoice.invoiceDate">
+            <span class="meta-label">Date of Supply:</span>
+            <span class="meta-value">{{
+              previewData.invoice.supplyDate | date: 'mediumDate'
+            }}</span>
+          </div>
           <div class="meta-row" *ngIf="previewData.invoice.dueDate">
             <span class="meta-label">Due Date:</span>
             <span class="meta-value">{{
@@ -222,6 +236,7 @@
               >
                 Unit Price
               </th>
+              <th>VAT %</th>
               <th
                 *ngIf="previewData?.templateSettings?.showItemTotal !== false"
               >
@@ -252,6 +267,7 @@
                 {{ item.unitPrice | number: '1.2-2' }}
                 {{ previewData.invoice?.currency || 'AED' }}
               </td>
+              <td>{{ (item.vatTaxType === 'ZERO_RATED' || item.vatTaxType === 'EXEMPT') ? '0' : (item.vatRate || 5) }}%</td>
               <td
                 *ngIf="previewData?.templateSettings?.showItemTotal !== false"
               >
@@ -263,6 +279,14 @@
         </table>
       </div>
 
+      <!-- Reverse charge statement (UAE VAT) -->
+      <div
+        class="reverse-charge-statement"
+        *ngIf="hasReverseChargeLine()"
+      >
+        <em>VAT is payable by the recipient under the reverse charge mechanism (UAE VAT Law).</em>
+      </div>
+
       <!-- Totals -->
       <div class="totals-section">
         <div class="totals-row">
@@ -272,8 +296,15 @@
             {{ previewData.invoice?.currency || 'AED' }}
           </span>
         </div>
+        <div class="totals-row" *ngIf="getDiscountAmount() > 0">
+          <span class="totals-label">Discount:</span>
+          <span class="totals-value">
+            -{{ getDiscountAmount() | number: '1.2-2' }}
+            {{ previewData.invoice?.currency || 'AED' }}
+          </span>
+        </div>
         <div class="totals-row">
-          <span class="totals-label">VAT:</span>
+          <span class="totals-label">VAT &#64; 5%:</span>
           <span class="totals-value">
             {{ previewData.invoice.vatAmount | number: '1.2-2' }}
             {{ previewData.invoice?.currency || 'AED' }}

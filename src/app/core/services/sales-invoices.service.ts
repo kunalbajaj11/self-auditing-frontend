@@ -43,7 +43,9 @@ export interface SalesInvoice {
   // to pre-fill forms.
   customer?: Customer | null;
   invoiceDate: string;
+  supplyDate?: string | null;
   dueDate?: string | null;
+  discountAmount?: string | null;
   amount: string;
   vatAmount: string;
   totalAmount: string;
@@ -90,6 +92,8 @@ export interface CreateSalesInvoicePayload {
   despatchedThrough?: string;
   destination?: string;
   termsOfDelivery?: string;
+  supplyDate?: string;
+  discountAmount?: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -155,6 +159,16 @@ export class SalesInvoicesService {
 
   downloadInvoicePDF(invoiceId: string): Observable<Blob> {
     return this.api.download(`/sales-invoices/${invoiceId}/pdf`);
+  }
+
+  /** Export invoice as XML (UBL) or JSON for UAE e-invoicing */
+  exportEInvoice(
+    invoiceId: string,
+    format: 'xml' | 'json',
+  ): Observable<Blob> {
+    return this.api.download(
+      `/sales-invoices/${invoiceId}/export?format=${format}`,
+    );
   }
 
   getItemSuggestions(searchTerm?: string): Observable<Array<{

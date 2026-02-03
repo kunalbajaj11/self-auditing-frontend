@@ -34,6 +34,13 @@
           <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
           <mat-datepicker #dueDatePicker></mat-datepicker>
         </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Supply Date (optional)</mat-label>
+          <input matInput [matDatepicker]="supplyDatePicker" formControlName="supplyDate" placeholder="If different from invoice date" />
+          <mat-datepicker-toggle matIconSuffix [for]="supplyDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #supplyDatePicker></mat-datepicker>
+        </mat-form-field>
       </div>
 
       <div class="form-row">
@@ -54,6 +61,11 @@
               {{ curr }}
             </mat-option>
           </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Discount (optional)</mat-label>
+          <input matInput type="number" formControlName="discountAmount" min="0" step="0.01" placeholder="0" />
         </mat-form-field>
       </div>
 

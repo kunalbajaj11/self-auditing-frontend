@@ -145,8 +145,50 @@ export class InvoicePreviewComponent implements OnInit {
     window.print();
   }
 
+  exportEInvoice(format: 'xml' | 'json'): void {
+    if (!this.invoiceId) return;
+
+    this.invoicesService.exportEInvoice(this.invoiceId, format).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const ext = format === 'xml' ? 'xml' : 'json';
+        a.download = `invoice-${this.previewData?.invoice?.invoiceNumber || this.invoiceId}.${ext}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        this.snackBar.open(`Invoice exported as ${ext.toUpperCase()}`, 'Close', {
+          duration: 2000,
+          panelClass: ['snack-success'],
+        });
+      },
+      error: (err) => {
+        console.error('Export failed:', err);
+        this.snackBar.open('Failed to export invoice', 'Close', {
+          duration: 4000,
+          panelClass: ['snack-error'],
+        });
+      },
+    });
+  }
+
   goBack(): void {
     this.router.navigate(['/admin/sales-invoices']);
+  }
+
+  getDiscountAmount(): number {
+    return parseFloat(this.previewData?.invoice?.discountAmount ?? '0') || 0;
+  }
+
+  hasReverseChargeLine(): boolean {
+    const items = this.previewData?.invoice?.lineItems;
+    if (!items || !Array.isArray(items)) return false;
+    return items.some(
+      (item: any) =>
+        (item.vatTaxType || '').toLowerCase() === 'reverse_charge',
+    );
   }
 
   getColorScheme(): string {
@@ -173,8 +215,15 @@ export class InvoicePreviewComponent implements OnInit {
       return 'PROFORMA INVOICE';
     }
     
-    // For other statuses, use template title or default to TAX INVOICE
-    const baseTitle = this.previewData?.templateSettings?.title || 'TAX INVOICE';
+    // Simplified tax invoice (UAE: < AED 10,000 or non-VAT registered recipient)
+    const total = parseFloat(this.previewData?.invoice?.totalAmount || '0');
+    const customerTrn = this.previewData?.invoice?.customer?.customerTrn
+      || this.previewData?.invoice?.customerTrn;
+    const isSimplified = total < 10000 || !customerTrn;
+    
+    const baseTitle = isSimplified
+      ? 'SIMPLIFIED TAX INVOICE'
+      : (this.previewData?.templateSettings?.title || 'TAX INVOICE');
     
     if (!status) return baseTitle;
     
