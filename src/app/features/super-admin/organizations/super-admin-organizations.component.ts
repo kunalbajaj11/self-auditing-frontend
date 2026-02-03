@@ -49,10 +49,7 @@ export class SuperAdminOrganizationsComponent implements OnInit, AfterViewInit {
     'licenseExpires',
     'features',
     'userCount',
-    'expenseCount',
-    'accrualCount',
     'storage',
-    'createdAt',
     'actions',
   ] as const;
   readonly dataSource = new MatTableDataSource<OrganizationUsage>([]);
@@ -311,11 +308,10 @@ export class SuperAdminOrganizationsComponent implements OnInit, AfterViewInit {
       // Deactivate: simple status change
       this.organizationService.changeStatus(org.id, 'inactive').subscribe({
         next: () => {
-          org.status = 'inactive';
           this.snackBar.open('Organization deactivated', 'Close', {
             duration: 3000,
           });
-          this.dataSource.data = [...this.dataSource.data];
+          this.loadOrganizations();
         },
         error: () => {
           this.snackBar.open(
@@ -340,13 +336,12 @@ export class SuperAdminOrganizationsComponent implements OnInit, AfterViewInit {
         if (expiryDate) {
           this.organizationService.activateWithExpiry(org.id, expiryDate).subscribe({
             next: () => {
-              org.status = 'active';
               this.snackBar.open(
                 'Organization activated successfully',
                 'Close',
                 { duration: 3000 },
               );
-              this.dataSource.data = [...this.dataSource.data];
+              this.loadOrganizations();
             },
             error: () => {
               this.snackBar.open(
@@ -371,6 +366,10 @@ export class SuperAdminOrganizationsComponent implements OnInit, AfterViewInit {
     }
 
     const expiryDate = new Date(expiresAt);
+    if (Number.isNaN(expiryDate.getTime())) {
+      return { status: 'valid', color: 'primary', label: '—' };
+    }
+
     const now = new Date();
     const daysUntilExpiry = Math.ceil(
       (expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
@@ -391,10 +390,13 @@ export class SuperAdminOrganizationsComponent implements OnInit, AfterViewInit {
         label: `Expires in ${daysUntilExpiry} days`,
       };
     } else {
+      const dateLabel = new Date(expiresAt);
+      const label =
+        Number.isNaN(dateLabel.getTime()) ? '—' : dateLabel.toLocaleDateString();
       return {
         status: 'valid',
         color: 'primary',
-        label: expiresAt ? new Date(expiresAt).toLocaleDateString() : '—',
+        label,
       };
     }
   }

@@ -165,12 +165,15 @@
 .table-container {
   position: relative;
   overflow-x: auto;
+  overflow-y: visible;
   border-radius: 8px;
   min-height: 200px;
+  max-width: 100%;
 }
 
 .organizations-table {
   width: 100%;
+  max-width: 100%;
   background: transparent;
 
   .table-header {
@@ -184,6 +187,11 @@
       letter-spacing: 0.05em;
       padding: 16px;
       border-bottom: 2px solid rgba(15, 23, 42, 0.08);
+    }
+
+    th:last-child {
+      width: 56px;
+      box-sizing: border-box;
     }
   }
 
@@ -216,19 +224,8 @@
         padding: 4px 12px;
       }
 
-      .action-buttons {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-
-        button {
-          mat-icon {
-            font-size: 18px;
-            width: 18px;
-            height: 18px;
-            margin-right: 4px;
-          }
-        }
+      .muted {
+        color: #94a3b8;
       }
     }
   }

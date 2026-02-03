@@ -1,0 +1,246 @@
+{
+  "version": "1.0",
+  "generatedAt": "2025-02-03",
+  "sections": [
+    {
+      "title": "Getting Started",
+      "items": [
+        {
+          "id": "onboarding-guide",
+          "title": "Onboarding Checklist (Full)",
+          "description": "Complete first-time setup: registration, company profile, tax, invoice template, master data, and verification.",
+          "audience": ["admin", "all"],
+          "tags": ["onboarding", "setup", "registration", "checklist"],
+          "type": "html",
+          "path": "assets/onboarding-guide.html",
+          "updated": "2025-02-03"
+        },
+        {
+          "id": "migration-guide",
+          "title": "Migration Guide (Tally & Zoho)",
+          "description": "Step-by-step: export trial balance from Tally or Zoho, prepare CSV, and import opening balances.",
+          "audience": ["admin", "accountant"],
+          "tags": ["migration", "Tally", "Zoho", "opening balance", "trial balance"],
+          "type": "html",
+          "path": "assets/migration-guide.html",
+          "updated": "2025-02-03"
+        },
+        {
+          "id": "getting-started",
+          "title": "Getting Started & Quickstart",
+          "description": "Short guide: register with license key, complete company profile, and add your first expense.",
+          "audience": ["admin", "all"],
+          "tags": ["quickstart", "setup", "registration", "license"],
+          "type": "html",
+          "path": "assets/manuals/getting-started.html",
+          "updated": "2025-02-03"
+        },
+        {
+          "id": "user-manual-pdf",
+          "title": "User Manual (PDF)",
+          "description": "Full user manual in PDF format for download or print.",
+          "audience": ["all"],
+          "tags": ["manual", "pdf", "download"],
+          "type": "pdf",
+          "path": "assets/USER-MANUAL.pdf",
+          "updated": "2025-02-03"
+        }
+      ]
+    },
+    {
+      "title": "Roles & Access",
+      "items": [
+        {
+          "id": "user-roles-permissions",
+          "title": "User Roles & Permissions",
+          "description": "Admin, Accountant, Approver, Auditor, Employee: what each role can see and do.",
+          "audience": ["admin", "accountant", "all"],
+          "tags": ["roles", "permissions", "RBAC", "multi-user"],
+          "type": "html",
+          "path": "assets/manuals/user-roles-permissions.html",
+          "updated": "2025-02-03"
+        }
+      ]
+    },
+    {
+      "title": "Expenses & Payments",
+      "items": [
+        {
+          "id": "expense-management",
+          "title": "Expense Management Guide",
+          "description": "Create, edit, and manage expenses; categories; receipts; linking to vendors and POs.",
+          "audience": ["admin", "accountant", "employee"],
+          "tags": ["expenses", "categories", "vendors", "receipts"],
+          "type": "html",
+          "path": "assets/manuals/expense-management.html",
+          "updated": "2025-02-03"
+        },
+        {
+          "id": "approval-workflow",
+          "title": "Approval Workflow Guide",
+          "description": "How expense approval works, pending approvals, and approval actions.",
+          "audience": ["admin", "accountant"],
+          "tags": ["approval", "workflow", "pending"],
+          "type": "html",
+          "path": "assets/manuals/approval-workflow.html",
+          "updated": "2025-02-03"
+        },
+        {
+          "id": "receipt-ocr-guide",
+          "title": "Receipt & OCR Guide",
+          "description": "Upload receipts, supported formats, and getting the best results from OCR.",
+          "audience": ["admin", "accountant", "employee"],
+          "tags": ["OCR", "receipts", "upload", "scan"],
+          "type": "html",
+          "path": "assets/manuals/receipt-ocr-guide.html",
+          "updated": "2025-02-03"
+        }
+      ]
+    },
+    {
+      "title": "Banking & Reconciliation",
+      "items": [
+        {
+          "id": "bank-statement-reconciliation",
+          "title": "Bank Statement Import & Reconciliation",
+          "description": "Upload bank statements, match transactions, and reconcile accounts.",
+          "audience": ["admin", "accountant"],
+          "tags": ["bank", "reconciliation", "statement", "upload", "CSV"],
+          "type": "html",
+          "path": "assets/manuals/bank-statement-reconciliation.html",
+          "updated": "2025-02-03"
+        }
+      ]
+    },
+    {
+      "title": "Reports & Invoicing",
+      "items": [
+        {
+          "id": "reports-guide",
+          "title": "Reports Guide",
+          "description": "Trial Balance, Balance Sheet, P&L, General Ledger, Payables, Receivables, VAT, and more.",
+          "audience": ["admin", "accountant"],
+          "tags": ["reports", "trial balance", "P&L", "general ledger", "VAT"],
+          "type": "html",
+          "path": "assets/manuals/reports-guide.html",
+          "updated": "2025-02-03"
+        },
+        {
+          "id": "sales-invoices-guide",
+          "title": "Sales Invoices & Invoicing Guide",
+          "description": "Create and send sales invoices, proforma vs tax invoice, payments, and PDF.",
+          "audience": ["admin", "accountant"],
+          "tags": ["invoices", "sales", "VAT", "customers", "PDF"],
+          "type": "html",
+          "path": "assets/manuals/sales-invoices-guide.html",
+          "updated": "2025-02-03"
+        },
+        {
+          "id": "proforma-purchase-orders",
+          "title": "Proforma Invoices & Purchase Orders",
+          "description": "Proforma invoices, purchase orders workflow, and converting PO to expense.",
+          "audience": ["admin", "accountant"],
+          "tags": ["proforma", "purchase order", "PO", "vendor"],
+          "type": "html",
+          "path": "assets/manuals/proforma-purchase-orders.html",
+          "updated": "2025-02-03"
+        }
+      ]
+    },
+    {
+      "title": "Tax, Settings & Data",
+      "items": [
+        {
+          "id": "vat-tax-configuration",
+          "title": "VAT & Tax Configuration Guide",
+          "description": "Configure VAT rates, zero-rated and exempt rules, and tax settings for UAE.",
+          "audience": ["admin"],
+          "tags": ["VAT", "tax", "TRN", "UAE", "settings"],
+          "type": "html",
+          "path": "assets/manuals/vat-tax-configuration.html",
+          "updated": "2025-02-03"
+        },
+        {
+          "id": "data-import-templates",
+          "title": "Data Import Templates",
+          "description": "CSV formats for bulk import: opening balances, ledger accounts, and journal entries.",
+          "audience": ["admin", "accountant"],
+          "tags": ["import", "CSV", "bulk", "migration", "template"],
+          "type": "html",
+          "path": "assets/manuals/data-import-templates.html",
+          "updated": "2025-02-03"
+        },
+        {
+          "id": "migration-tally-zoho",
+          "title": "Migration: Tally & Zoho Books",
+          "description": "Move to SelfAccounting.AI from Tally or Zoho using opening balances and bulk import.",
+          "audience": ["admin", "accountant"],
+          "tags": ["migration", "Tally", "Zoho", "opening balance", "trial balance"],
+          "type": "html",
+          "path": "assets/manuals/migration-tally-zoho.html",
+          "updated": "2025-02-03"
+        }
+      ]
+    },
+    {
+      "title": "Notifications & Security",
+      "items": [
+        {
+          "id": "notifications-email",
+          "title": "Notifications & Email Settings",
+          "description": "Reminders, alerts, and email configuration in SelfAccounting.AI.",
+          "audience": ["admin"],
+          "tags": ["notifications", "email", "reminders", "alerts"],
+          "type": "html",
+          "path": "assets/manuals/notifications-email.html",
+          "updated": "2025-02-03"
+        },
+        {
+          "id": "account-security",
+          "title": "Account & Security Guide",
+          "description": "Passwords, forgot password, session safety, and best practices.",
+          "audience": ["all"],
+          "tags": ["security", "password", "login", "account"],
+          "type": "html",
+          "path": "assets/manuals/account-security.html",
+          "updated": "2025-02-03"
+        }
+      ]
+    },
+    {
+      "title": "Admin & Support",
+      "items": [
+        {
+          "id": "admin-operations",
+          "title": "Admin Operations Guide",
+          "description": "Organization settings, user management, numbering, ledger accounts, and daily admin tasks.",
+          "audience": ["admin"],
+          "tags": ["admin", "settings", "users", "organization"],
+          "type": "html",
+          "path": "assets/manuals/admin-operations.html",
+          "updated": "2025-02-03"
+        },
+        {
+          "id": "troubleshooting-faq",
+          "title": "Troubleshooting & FAQ",
+          "description": "Common issues, error messages, upload and login problems, and quick fixes.",
+          "audience": ["all"],
+          "tags": ["troubleshooting", "FAQ", "errors", "support"],
+          "type": "html",
+          "path": "assets/manuals/troubleshooting-faq.html",
+          "updated": "2025-02-03"
+        },
+        {
+          "id": "support-escalation",
+          "title": "Support & Escalation",
+          "description": "How to get help, contact support, and what to include when reporting an issue.",
+          "audience": ["all"],
+          "tags": ["support", "contact", "help", "escalation"],
+          "type": "html",
+          "path": "assets/manuals/support-escalation.html",
+          "updated": "2025-02-03"
+        }
+      ]
+    }
+  ]
+}

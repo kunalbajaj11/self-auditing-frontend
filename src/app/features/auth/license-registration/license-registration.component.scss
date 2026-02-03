@@ -698,6 +698,32 @@
   }
 }
 
+.help-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
+  margin-bottom: 8px;
+
+  .help-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 10px;
+    text-decoration: none;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
 .form-footer {
   margin-top: 32px;
   text-align: center;

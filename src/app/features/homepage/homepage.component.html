@@ -35,6 +35,10 @@
           </button>
         </div>
         <div class="hero-secondary-actions">
+          <a mat-stroked-button class="secondary-action-button download-manual-btn" routerLink="/help" aria-label="FAQ and manuals">
+            <mat-icon>help_outline</mat-icon>
+            <span>FAQ &amp; Manuals</span>
+          </a>
           <a mat-stroked-button class="secondary-action-button download-manual-btn" href="assets/USER-MANUAL.pdf" download="SelfAccounting-User-Manual.pdf" aria-label="Download user manual PDF">
             <mat-icon>download</mat-icon>
             <span>Download User Manual</span>
@@ -259,6 +263,7 @@
           <p class="footer-copy">&copy; {{ currentYear }} SelfAccounting.AI</p>
 
           <div class="footer-links">
+            <a routerLink="/help">FAQ &amp; Manuals</a>
             <a href="/auth/login">Sign In</a>
             <a href="/auth/register">Register</a>
           </div>

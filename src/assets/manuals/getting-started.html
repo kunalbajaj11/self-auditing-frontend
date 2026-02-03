@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting Started & Quickstart — SelfAccounting.AI</title>
+  <style>
+    :root { --primary: #0077c8; --primary-dark: #005fa3; --secondary: #00bfa5; --text: #333; --text-muted: #666; --bg: #f8fafc; --card-bg: #fff; --border: #e2e8f0; }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: var(--text); background: var(--bg); margin: 0; padding: 0 1rem 2rem; max-width: 900px; margin-left: auto; margin-right: auto; }
+    header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 2rem; margin: 0 -1rem 2rem; border-radius: 0 0 12px 12px; }
+    header h1 { margin: 0 0 0.25rem; font-size: 1.75rem; }
+    header p { margin: 0; opacity: 0.9; font-size: 0.95rem; }
+    h2 { color: var(--primary); margin: 2rem 0 1rem; font-size: 1.25rem; border-bottom: 2px solid var(--secondary); padding-bottom: 0.5rem; }
+    h3 { color: var(--text); margin: 1.5rem 0 0.75rem; font-size: 1.1rem; }
+    .card { background: var(--card-bg); border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid var(--border); }
+    ul { padding-left: 1.5rem; } li { margin-bottom: 0.5rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 1rem 0; }
+    th, td { border: 1px solid var(--border); padding: 0.6rem 0.75rem; text-align: left; }
+    th { background: var(--primary); color: white; font-weight: 600; }
+    tr:nth-child(even) { background: #f8fafc; }
+    .path { font-family: ui-monospace, monospace; font-size: 0.85rem; background: #f1f5f9; padding: 0.15rem 0.4rem; border-radius: 4px; }
+    .muted { color: var(--text-muted); font-size: 0.9rem; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+    .footer { margin-top: 2rem; padding-top: 1rem; font-size: 0.85rem; color: var(--text-muted); }
+    a { color: var(--primary); text-decoration: none; } a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Getting Started & Quickstart</h1>
+    <p>First-time setup: register, configure, and add your first expense • 30–60 min</p>
+  </header>
+
+  <section class="card">
+    <h2>Overview</h2>
+    <p>Welcome to SelfAccounting.AI. You will need: <strong>license key</strong>, company details (name, VAT, address), admin name/email/password, and bank details.</p>
+  </section>
+
+  <h2>1. Register with License Key</h2>
+  <section class="card">
+    <ol>
+      <li>Homepage → <strong>Get Started</strong> or Register with License.</li>
+      <li>Enter <strong>license key</strong> → Validate.</li>
+      <li>Fill form: Organization Name, VAT, Address, Currency (e.g. AED), Region, Admin Name, Email, Password (min 8 chars).</li>
+      <li>Click <strong>Register</strong>. You are logged in; welcome email sent. Organization and default categories are created.</li>
+    </ol>
+  </section>
+
+  <h2>2. Essential Configuration</h2>
+  <section class="card">
+    <p><span class="path">Settings → Organization Settings</span> — Company name, TRN, currency, contact, address, bank details.</p>
+    <p><span class="path">Settings → Tax Settings</span> — Add VAT rate (e.g. 5% UAE), zero-rated/exempt if needed.</p>
+    <p><span class="path">Settings → Invoice Template</span> — Logo, footer, branding.</p>
+    <p><span class="path">Settings → Numbering Sequences</span> — Invoice prefix (e.g. INV-2025-), expense reference.</p>
+  </section>
+
+  <h2>3. Master Data (Before First Expense)</h2>
+  <section class="card">
+    <p><span class="path">Settings → Expense Categories</span> — Review/add categories.</p>
+    <p><span class="path">Settings → Expense Types</span> — OPEX, CAPEX, link to ledger.</p>
+    <p><span class="path">Settings → Ledger Accounts</span> — Chart of accounts.</p>
+    <p><span class="path">Banking → Bank / Cash Accounts</span> — Add bank and petty cash.</p>
+    <p><span class="path">Contacts → Vendors</span> — Add vendors (expenses link to vendor).</p>
+    <p><span class="path">Contacts → Customers</span> — Add customers if you issue invoices.</p>
+  </section>
+
+  <h2>4. User Management</h2>
+  <section class="card">
+    <p><span class="path">Settings → User Management</span> — Invite team; assign Admin, Accountant, Employee. Standard plan = 5 users max.</p>
+  </section>
+
+  <h2>Quick Reference</h2>
+  <table>
+    <thead><tr><th>Task</th><th>Path</th></tr></thead>
+    <tbody>
+      <tr><td>Company Profile</td><td>Settings → Organization Settings</td></tr>
+      <tr><td>Tax</td><td>Settings → Tax Settings</td></tr>
+      <tr><td>Invoice Template</td><td>Settings → Invoice Template</td></tr>
+      <tr><td>Numbering</td><td>Settings → Numbering Sequences</td></tr>
+      <tr><td>Users</td><td>Settings → User Management</td></tr>
+      <tr><td>Categories</td><td>Settings → Expense Categories</td></tr>
+      <tr><td>Ledger Accounts</td><td>Settings → Ledger Accounts</td></tr>
+      <tr><td>Vendors</td><td>Contacts → Vendors</td></tr>
+      <tr><td>Bank Accounts</td><td>Banking → Bank Accounts</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+  <section class="footer">
+    <p><a href="../onboarding-guide.html">Full Onboarding Checklist</a> • <a href="migration-tally-zoho.html">Migration (Tally & Zoho)</a></p>
+    <p class="muted">February 2025</p>
+  </section>
+</body>
+</html>

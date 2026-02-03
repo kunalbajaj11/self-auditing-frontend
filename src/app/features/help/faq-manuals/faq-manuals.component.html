@@ -1,0 +1,71 @@
+<div class="help-page">
+  <!-- Hero -->
+  <header class="help-hero">
+    <div class="hero-bg">
+      <div class="hero-gradient"></div>
+      <div class="hero-pattern"></div>
+    </div>
+    <div class="hero-content">
+      <a routerLink="/" class="back-link" aria-label="Back to home">
+        <mat-icon>arrow_back</mat-icon>
+        <span>Back to home</span>
+      </a>
+      <h1 class="hero-title">FAQ &amp; Manuals</h1>
+      <p class="hero-subtitle">
+        SelfAccounting.AI help center — onboarding, workflows, tax, reports, troubleshooting, and migration.
+      </p>
+      <div class="search-wrap">
+        <mat-icon class="search-icon" aria-hidden="true">search</mat-icon>
+        <mat-form-field appearance="outline" class="search-field" aria-label="Search manuals">
+          <input matInput [formControl]="search" placeholder="e.g. VAT, bank reconciliation, invoices" />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            aria-label="Clear"
+            *ngIf="search.value"
+            (click)="search.setValue('')"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <div class="help-content">
+    <mat-accordion class="sections" multi>
+      <mat-expansion-panel *ngFor="let section of filteredSections(); let i = index" [expanded]="i === 0" class="section-panel">
+        <mat-expansion-panel-header class="section-header">
+          <mat-panel-title class="section-title">
+            <mat-icon class="section-icon">{{ getSectionIcon(section.title) }}</mat-icon>
+            <span>{{ section.title }}</span>
+          </mat-panel-title>
+          <mat-panel-description class="section-meta">{{ section.items.length }} doc{{ section.items.length !== 1 ? 's' : '' }}</mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div class="manuals-grid">
+          <mat-card class="manual-card" *ngFor="let item of section.items">
+            <mat-card-header>
+              <mat-card-title class="manual-title">{{ item.title }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="manual-desc" *ngIf="item.description">{{ item.description }}</p>
+              <div class="meta-row">
+                <span class="pill" [class]="item.type">{{ item.type | uppercase }}</span>
+                <span class="updated" *ngIf="item.updated">Updated {{ item.updated }}</span>
+              </div>
+            </mat-card-content>
+            <mat-card-actions align="end">
+              <a mat-raised-button color="primary" class="open-btn" [href]="item.path" target="_blank" rel="noopener noreferrer">
+                Open
+                <mat-icon>open_in_new</mat-icon>
+              </a>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+</div>

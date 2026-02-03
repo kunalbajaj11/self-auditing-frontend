@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { Title, Meta } from '@angular/platform-browser';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -19,6 +19,7 @@ import { ContactService } from '../../core/services/contact.service';
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,

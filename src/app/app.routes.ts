@@ -50,6 +50,11 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'help',
+    loadChildren: () =>
+      import('./features/help/help.routes').then((m) => m.helpRoutes),
+  },
+  {
     path: 'invoices/public/:token',
     loadComponent: () =>
       import('./features/public/public-invoice-view.component').then(

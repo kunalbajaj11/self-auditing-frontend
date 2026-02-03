@@ -139,7 +139,6 @@ import { CreateDeadlineDialogComponent } from './compliance/create-deadline-dial
     AdjustmentsComponent,
     AdminJournalEntriesComponent,
     JournalEntryFormDialogComponent,
-    BulkImportDialogComponent,
     AdminSalaryProfilesComponent,
     SalaryProfileFormDialogComponent,
     AdminPayrollRunsComponent,
@@ -157,7 +156,7 @@ import { CreateDeadlineDialogComponent } from './compliance/create-deadline-dial
     AdminComplianceComponent,
     CreateDeadlineDialogComponent,
   ],
-  imports: [SharedModule, AdminRoutingModule],
+  imports: [SharedModule, AdminRoutingModule, BulkImportDialogComponent],
 })
 export class AdminModule {
   // Component declarations ensure DebitNoteApplyDialogComponent has access to Material modules via SharedModule

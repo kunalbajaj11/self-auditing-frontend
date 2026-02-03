@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Roles & Permissions — SelfAccounting.AI</title>
+  <style>
+    :root { --primary: #0077c8; --primary-dark: #005fa3; --secondary: #00bfa5; --text: #333; --text-muted: #666; --bg: #f8fafc; --card-bg: #fff; --border: #e2e8f0; }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: var(--text); background: var(--bg); margin: 0; padding: 0 1rem 2rem; max-width: 900px; margin-left: auto; margin-right: auto; }
+    header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 2rem; margin: 0 -1rem 2rem; border-radius: 0 0 12px 12px; }
+    header h1 { margin: 0 0 0.25rem; font-size: 1.75rem; }
+    header p { margin: 0; opacity: 0.9; font-size: 0.95rem; }
+    h2 { color: var(--primary); margin: 2rem 0 1rem; font-size: 1.25rem; border-bottom: 2px solid var(--secondary); padding-bottom: 0.5rem; }
+    h3 { color: var(--text); margin: 1.5rem 0 0.75rem; font-size: 1.1rem; }
+    .card { background: var(--card-bg); border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid var(--border); }
+    ul { padding-left: 1.5rem; } li { margin-bottom: 0.5rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 1rem 0; }
+    th, td { border: 1px solid var(--border); padding: 0.6rem 0.75rem; text-align: left; }
+    th { background: var(--primary); color: white; font-weight: 600; }
+    tr:nth-child(even) { background: #f8fafc; }
+    .muted { color: var(--text-muted); font-size: 0.9rem; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+    .footer { margin-top: 2rem; padding-top: 1rem; font-size: 0.85rem; color: var(--text-muted); }
+    a { color: var(--primary); text-decoration: none; } a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>User Roles & Permissions</h1>
+    <p>Admin, Accountant, Approver, Auditor, Employee: what each role can see and do</p>
+  </header>
+
+  <section class="card">
+    <h2>Roles Overview</h2>
+    <table>
+      <thead><tr><th>Role</th><th>Who uses it</th><th>Main access</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Super Admin</strong></td><td>Platform operators</td><td>All organizations, license keys, plans</td></tr>
+        <tr><td><strong>Admin</strong></td><td>Org owner / finance lead</td><td>Full access inside the organization</td></tr>
+        <tr><td><strong>Accountant</strong></td><td>Bookkeepers</td><td>Expenses, reports, reconciliation; no user management</td></tr>
+        <tr><td><strong>Approver</strong></td><td>Managers</td><td>Approve/reject pending expenses; view reports</td></tr>
+        <tr><td><strong>Auditor</strong></td><td>Internal audit</td><td>Read-only: expenses, reports, audit logs</td></tr>
+        <tr><td><strong>Employee</strong></td><td>Staff</td><td>Own expenses only; upload receipts; no reports</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <h2>Admin</h2>
+  <section class="card">
+    <p>Full access within the organization: manage users, expenses, categories, expense types, ledger accounts, all reports, bank reconciliation, organization settings, sales invoices, customers, vendors, purchase orders, payments, journal entries.</p>
+  </section>
+
+  <h2>Accountant</h2>
+  <section class="card">
+    <p>View and manage all expenses, create/edit expenses, manage categories, run financial reports, bank reconciliation, accruals. <strong>Cannot</strong> manage users or organization settings.</p>
+  </section>
+
+  <h2>Approver</h2>
+  <section class="card">
+    <p>View expenses pending approval, approve or reject expenses, view reports. Cannot create expenses or manage categories/settings.</p>
+  </section>
+
+  <h2>Auditor</h2>
+  <section class="card">
+    <p>Read-only: view all expenses and reports, access audit logs, generate audit reports. Cannot create or edit data.</p>
+  </section>
+
+  <h2>Employee</h2>
+  <section class="card">
+    <p>Create and manage own expenses, upload receipts, view own expenses only. Cannot view others’ expenses or access reports.</p>
+  </section>
+
+  <h2>Plan Limits</h2>
+  <section class="card">
+    <p><strong>Standard:</strong> Up to 5 users. <strong>Premium / Enterprise:</strong> Unlimited users. When limit is reached, “Invite User” is disabled until upgrade.</p>
+  </section>
+
+  <hr>
+  <section class="footer">
+    <p><a href="getting-started.html">Getting Started</a> • Support: <a href="mailto:support@selfaccounting.ai">support&#64;selfaccounting.ai</a></p>
+    <p class="muted">February 2025</p>
+  </section>
+</body>
+</html>

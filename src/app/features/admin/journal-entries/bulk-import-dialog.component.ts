@@ -1,6 +1,14 @@
 import { Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatTableModule } from '@angular/material/table';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
 import {
   JournalEntriesService,
   CreateJournalEntryPayload,
@@ -41,6 +49,18 @@ interface ParsedRow {
 
 @Component({
   selector: 'app-bulk-import-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatDialogModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatTableModule,
+    MatProgressSpinnerModule,
+    MatButtonModule,
+  ],
   templateUrl: './bulk-import-dialog.component.html',
   styleUrls: ['./bulk-import-dialog.component.scss'],
 })

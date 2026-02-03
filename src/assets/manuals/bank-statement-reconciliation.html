@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bank Statement Import & Reconciliation — SelfAccounting.AI</title>
+  <style>
+    :root { --primary: #0077c8; --primary-dark: #005fa3; --secondary: #00bfa5; --text: #333; --text-muted: #666; --bg: #f8fafc; --card-bg: #fff; --border: #e2e8f0; }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: var(--text); background: var(--bg); margin: 0; padding: 0 1rem 2rem; max-width: 900px; margin-left: auto; margin-right: auto; }
+    header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 2rem; margin: 0 -1rem 2rem; border-radius: 0 0 12px 12px; }
+    header h1 { margin: 0 0 0.25rem; font-size: 1.75rem; }
+    header p { margin: 0; opacity: 0.9; font-size: 0.95rem; }
+    h2 { color: var(--primary); margin: 2rem 0 1rem; font-size: 1.25rem; border-bottom: 2px solid var(--secondary); padding-bottom: 0.5rem; }
+    .card { background: var(--card-bg); border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid var(--border); }
+    .path { font-family: ui-monospace, monospace; font-size: 0.85rem; background: #f1f5f9; padding: 0.15rem 0.4rem; border-radius: 4px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 1rem 0; }
+    th, td { border: 1px solid var(--border); padding: 0.6rem 0.75rem; text-align: left; }
+    th { background: var(--primary); color: white; font-weight: 600; }
+    .footer { margin-top: 2rem; padding-top: 1rem; font-size: 0.85rem; color: #666; }
+    .muted { color: var(--text-muted); font-size: 0.9rem; }
+    a { color: var(--primary); text-decoration: none; } a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Bank Statement Import & Reconciliation</h1>
+    <p>Upload bank statements and match transactions</p>
+  </header>
+
+  <section class="card">
+    <h2>Overview</h2>
+    <p>Upload a statement (e.g. CSV), then match each statement line to the correct transaction (payment, expense, journal entry) or mark as matched/unmatched.</p>
+  </section>
+
+  <section class="card">
+    <h2>Step 1: Add Bank Accounts</h2>
+    <p><span class="path">Banking → Bank Accounts</span> — Add each account (name, currency, optional opening balance).</p>
+  </section>
+
+  <section class="card">
+    <h2>Step 2: Upload Statement</h2>
+    <p><span class="path">Banking → Upload Bank Statement</span> — Select account, choose CSV (or supported format), upload. System parses and shows preview. Confirm column mapping if offered, then Import.</p>
+  </section>
+
+  <section class="card">
+    <h2>Step 3: Reconcile</h2>
+    <p><span class="path">Banking → Reconciliation</span> — Select account and statement. Match each statement line to a transaction or mark as matched. When debits/credits match statement total, reconciliation is complete.</p>
+  </section>
+
+  <section class="card">
+    <h2>Quick Reference</h2>
+    <table>
+      <thead><tr><th>Task</th><th>Path</th></tr></thead>
+      <tbody>
+        <tr><td>Add bank account</td><td>Banking → Bank Accounts</td></tr>
+        <tr><td>Upload statement</td><td>Banking → Upload Bank Statement</td></tr>
+        <tr><td>Reconcile</td><td>Banking → Reconciliation</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr>
+  <section class="footer">
+    <p><a href="getting-started.html">Getting Started</a> • <a href="admin-operations.html">Admin Operations</a></p>
+    <p class="muted">February 2025</p>
+  </section>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<div class="viewer">
+  <div class="top-row">
+    <a mat-button [routerLink]="backLink">
+      <mat-icon>arrow_back</mat-icon>
+      Back to FAQ &amp; Manuals
+    </a>
+  </div>
+
+  <mat-card class="doc-card" *ngIf="item(); else notFound">
+    <mat-card-title>{{ item()?.title }}</mat-card-title>
+    <mat-card-subtitle *ngIf="item()?.description">{{ item()?.description }}</mat-card-subtitle>
+
+    <mat-card-content>
+      <ng-container [ngSwitch]="item()?.type">
+        <div *ngSwitchCase="'markdown'" class="markdown" [innerHTML]="markdownHtml()"></div>
+
+        <div *ngSwitchCase="'html'" class="iframe-wrap">
+          <iframe class="doc-iframe" [src]="iframeUrl()"></iframe>
+        </div>
+
+        <div *ngSwitchCase="'pdf'" class="iframe-wrap">
+          <iframe class="doc-iframe" [src]="iframeUrl()"></iframe>
+        </div>
+
+        <div *ngSwitchCase="'external'" class="external">
+          <p>This document is hosted externally.</p>
+          <a mat-raised-button color="primary" [href]="externalUrl()" target="_blank" rel="noopener noreferrer">
+            Open document
+            <mat-icon>open_in_new</mat-icon>
+          </a>
+        </div>
+      </ng-container>
+    </mat-card-content>
+  </mat-card>
+
+  <ng-template #notFound>
+    <mat-card class="doc-card">
+      <mat-card-title>Manual not found</mat-card-title>
+      <mat-card-content>
+        <p>We couldn’t find this manual. Please go back and choose another.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <a mat-stroked-button color="primary" [routerLink]="backLink">Back</a>
+      </mat-card-actions>
+    </mat-card>
+  </ng-template>
+</div>
+
