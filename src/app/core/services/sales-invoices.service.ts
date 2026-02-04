@@ -66,6 +66,13 @@ export interface SalesInvoice {
   destination?: string | null;
   termsOfDelivery?: string | null;
   lineItems?: InvoiceLineItem[];
+  invoiceHash?: {
+    id?: string;
+    hash: string;
+    generatedAt: string;
+    createdAt?: string;
+    updatedAt?: string;
+  } | null;
   createdAt: string;
   updatedAt: string;
 }

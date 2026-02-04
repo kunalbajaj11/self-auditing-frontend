@@ -332,6 +332,27 @@
         </div>
       </div>
 
+      <!-- Integrity & Compliance -->
+      <div
+        class="integrity-section"
+        *ngIf="previewData?.invoice?.invoiceHash?.hash"
+      >
+        <h4>Integrity &amp; Compliance</h4>
+        <div class="integrity-grid">
+          <div class="integrity-label">Invoice Hash (SHA-256)</div>
+          <div class="integrity-value">
+            <code>{{ previewData.invoice.invoiceHash.hash }}</code>
+          </div>
+          <div class="integrity-label">Generated On</div>
+          <div class="integrity-value">
+            {{ previewData.invoice.invoiceHash.generatedAt | date: 'medium' }}
+          </div>
+        </div>
+        <p class="integrity-hint">
+          Use this hash to verify the invoice PDF or payload has not been altered.
+        </p>
+      </div>
+
       <!-- Default Notes -->
       <div
         class="notes-section"
