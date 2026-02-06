@@ -22,6 +22,8 @@ import { AdminProformaInvoicesComponent } from './proforma-invoices/admin-profor
 import { InvoicePreviewComponent } from './sales-invoices/invoice-preview.component';
 import { AdminCreditNotesComponent } from './credit-notes/admin-credit-notes.component';
 import { AdminDebitNotesComponent } from './debit-notes/admin-debit-notes.component';
+import { AdminSalesOrdersComponent } from './sales-orders/admin-sales-orders.component';
+import { AdminDeliveryChallansComponent } from './delivery-challans/admin-delivery-challans.component';
 import { AdminVendorsComponent } from './vendors/admin-vendors.component';
 import { InvoiceTemplateComponent } from './settings/invoice-template/invoice-template.component';
 import { TaxSettingsComponent } from './settings/tax-settings/tax-settings.component';
@@ -52,6 +54,8 @@ const routes: Routes = [
             icon: 'point_of_sale',
             children: [
               { label: 'Customers', route: '/admin/customers' },
+              { label: 'Sales Order', route: '/admin/sales-orders' },
+              { label: 'Delivery Challan', route: '/admin/delivery-challans' },
               { label: 'Invoices', route: '/admin/sales-invoices' },
               { label: 'Proforma Invoice', route: '/admin/proforma-invoices' },
               { label: 'Payments Received', route: '/admin/sales-invoices', queryParams: { filter: 'payments' } },
@@ -322,6 +326,16 @@ const routes: Routes = [
         path: 'sales-invoices',
         component: AdminSalesInvoicesComponent,
         data: { shell: { title: 'Sales Invoice Management' } },
+      },
+      {
+        path: 'sales-orders',
+        component: AdminSalesOrdersComponent,
+        data: { shell: { title: 'Sales Order Management' } },
+      },
+      {
+        path: 'delivery-challans',
+        component: AdminDeliveryChallansComponent,
+        data: { shell: { title: 'Delivery Challan Management' } },
       },
       {
         path: 'sales-invoices/:id/preview',

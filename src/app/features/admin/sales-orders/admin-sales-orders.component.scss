@@ -1,0 +1,30 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sub {
+  margin: 4px 0 0 0;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.card {
+  padding: 0;
+}
+
+.table-wrap {
+  overflow: auto;
+}
+
+.right {
+  text-align: right;
+}
+

@@ -1,0 +1,97 @@
+<h2 mat-dialog-title>
+  Delivery Challan
+  <span *ngIf="deliveryChallan">({{ deliveryChallan.challanNumber }})</span>
+</h2>
+
+<mat-dialog-content class="content">
+  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
+  <ng-container *ngIf="deliveryChallan as dc">
+    <div class="top">
+      <div class="meta">
+        <div><span class="label">Customer</span> {{ dc.customerName || dc.customer?.name || '-' }}</div>
+        <div><span class="label">TRN</span> {{ dc.customerTrn || dc.customer?.customerTrn || '-' }}</div>
+        <div><span class="label">Date</span> {{ dc.challanDate }}</div>
+        <div><span class="label">Sales Order</span> {{ dc.salesOrder?.soNumber || '-' }}</div>
+        <div>
+          <span class="label">Status</span>
+          <mat-chip [color]="getStatusColor(dc.status)" selected>{{ getStatusDisplayLabel(dc.status) }}</mat-chip>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button mat-stroked-button (click)="edit()">
+          <mat-icon>edit</mat-icon>
+          Edit
+        </button>
+        <button mat-stroked-button (click)="updateStatus('dispatched')" [disabled]="dc.status !== 'draft'">
+          <mat-icon>local_shipping</mat-icon>
+          Dispatch
+        </button>
+        <button mat-stroked-button (click)="updateStatus('delivered')" [disabled]="dc.status === 'cancelled'">
+          <mat-icon>task_alt</mat-icon>
+          Mark Delivered
+        </button>
+        <button mat-stroked-button color="warn" (click)="updateStatus('cancelled')" [disabled]="dc.status === 'cancelled'">
+          <mat-icon>cancel</mat-icon>
+          Cancel
+        </button>
+        <button mat-stroked-button (click)="downloadPDF()">
+          <mat-icon>picture_as_pdf</mat-icon>
+          PDF
+        </button>
+        <button mat-stroked-button (click)="sendEmail()">
+          <mat-icon>mail</mat-icon>
+          Email
+        </button>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <div class="section">
+      <h3>Delivery Details</h3>
+      <div class="meta2">
+        <div><span class="label">Address</span> {{ dc.deliveryAddress || '-' }}</div>
+        <div><span class="label">Vehicle</span> {{ dc.vehicleNumber || '-' }}</div>
+        <div><span class="label">Mode</span> {{ dc.transportMode || '-' }}</div>
+        <div><span class="label">LR No</span> {{ dc.lrNumber || '-' }}</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Line Items</h3>
+      <table class="items">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Item</th>
+            <th class="right">Qty</th>
+            <th class="right">UOM</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let li of dc.lineItems || []; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>
+              <div class="item-name">{{ li.itemName }}</div>
+              <div class="muted" *ngIf="li.description">{{ li.description }}</div>
+            </td>
+            <td class="right">{{ li.quantity }}</td>
+            <td class="right">{{ li.unitOfMeasure || 'unit' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section" *ngIf="dc.notes">
+      <h3>Notes</h3>
+      <div class="notes">{{ dc.notes }}</div>
+    </div>
+  </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="close()">Close</button>
+</mat-dialog-actions>
+

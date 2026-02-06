@@ -77,6 +77,14 @@ import { GenerateVATReturnDialogComponent } from './tax-forms/generate-vat-retur
 import { TaxFormDetailDialogComponent } from './tax-forms/tax-form-detail-dialog.component';
 import { AdminComplianceComponent } from './compliance/admin-compliance.component';
 import { CreateDeadlineDialogComponent } from './compliance/create-deadline-dialog.component';
+import { AdminSalesOrdersComponent } from './sales-orders/admin-sales-orders.component';
+import { SalesOrderFormDialogComponent } from './sales-orders/sales-order-form-dialog.component';
+import { SalesOrderDetailDialogComponent } from './sales-orders/sales-order-detail-dialog.component';
+import { SOEmailDialogComponent } from './sales-orders/so-email-dialog.component';
+import { AdminDeliveryChallansComponent } from './delivery-challans/admin-delivery-challans.component';
+import { DeliveryChallanFormDialogComponent } from './delivery-challans/delivery-challan-form-dialog.component';
+import { DeliveryChallanDetailDialogComponent } from './delivery-challans/delivery-challan-detail-dialog.component';
+import { DCEmailDialogComponent } from './delivery-challans/dc-email-dialog.component';
 
 @NgModule({
   declarations: [
@@ -155,6 +163,14 @@ import { CreateDeadlineDialogComponent } from './compliance/create-deadline-dial
     TaxFormDetailDialogComponent,
     AdminComplianceComponent,
     CreateDeadlineDialogComponent,
+    AdminSalesOrdersComponent,
+    SalesOrderFormDialogComponent,
+    SalesOrderDetailDialogComponent,
+    SOEmailDialogComponent,
+    AdminDeliveryChallansComponent,
+    DeliveryChallanFormDialogComponent,
+    DeliveryChallanDetailDialogComponent,
+    DCEmailDialogComponent,
   ],
   imports: [SharedModule, AdminRoutingModule, BulkImportDialogComponent],
 })

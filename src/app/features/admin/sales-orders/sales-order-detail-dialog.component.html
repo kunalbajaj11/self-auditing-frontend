@@ -1,0 +1,95 @@
+<h2 mat-dialog-title>
+  Sales Order
+  <span *ngIf="salesOrder">({{ salesOrder.soNumber }})</span>
+</h2>
+
+<mat-dialog-content class="content">
+  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
+  <ng-container *ngIf="salesOrder as so">
+    <div class="top">
+      <div class="meta">
+        <div><span class="label">Customer</span> {{ so.customerName || so.customer?.name || '-' }}</div>
+        <div><span class="label">TRN</span> {{ so.customerTrn || so.customer?.customerTrn || '-' }}</div>
+        <div><span class="label">Order Date</span> {{ so.orderDate }}</div>
+        <div><span class="label">Expected</span> {{ so.expectedDeliveryDate || '-' }}</div>
+        <div>
+          <span class="label">Status</span>
+          <mat-chip [color]="getStatusColor(so.status)" selected>{{ getStatusDisplayLabel(so.status) }}</mat-chip>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button mat-stroked-button (click)="edit()">
+          <mat-icon>edit</mat-icon>
+          Edit
+        </button>
+        <button mat-stroked-button (click)="sendToCustomer()" [disabled]="so.status !== 'draft'">
+          <mat-icon>send</mat-icon>
+          Mark Sent
+        </button>
+        <button mat-stroked-button (click)="createDeliveryChallan()">
+          <mat-icon>local_shipping</mat-icon>
+          Create Delivery Challan
+        </button>
+        <button mat-stroked-button (click)="downloadPDF()">
+          <mat-icon>picture_as_pdf</mat-icon>
+          PDF
+        </button>
+        <button mat-stroked-button (click)="sendEmail()">
+          <mat-icon>mail</mat-icon>
+          Email
+        </button>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <div class="section">
+      <h3>Line Items</h3>
+      <table class="items">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Item</th>
+            <th class="right">Qty</th>
+            <th class="right">Unit</th>
+            <th class="right">Unit Price</th>
+            <th class="right">VAT</th>
+            <th class="right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let li of so.lineItems || []; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>
+              <div class="item-name">{{ li.itemName }}</div>
+              <div class="muted" *ngIf="li.description">{{ li.description }}</div>
+            </td>
+            <td class="right">{{ li.orderedQuantity }}</td>
+            <td class="right">{{ li.unitOfMeasure || 'unit' }}</td>
+            <td class="right">{{ li.unitPrice }}</td>
+            <td class="right">{{ li.vatAmount }}</td>
+            <td class="right">{{ li.totalAmount }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="totals">
+        <div class="grand">
+          Total: {{ so.totalAmount }} {{ so.currency || 'AED' }}
+        </div>
+      </div>
+    </div>
+
+    <div class="section" *ngIf="so.notes">
+      <h3>Notes</h3>
+      <div class="notes">{{ so.notes }}</div>
+    </div>
+  </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="close()">Close</button>
+</mat-dialog-actions>
+

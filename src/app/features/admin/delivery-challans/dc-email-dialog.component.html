@@ -1,0 +1,28 @@
+<h2 mat-dialog-title>Send Delivery Challan Email</h2>
+
+<mat-dialog-content class="content">
+  <form [formGroup]="form" class="form">
+    <mat-form-field appearance="outline">
+      <mat-label>Recipient Email</mat-label>
+      <input matInput formControlName="recipientEmail" placeholder="customer@example.com" />
+      <mat-error *ngIf="form.get('recipientEmail')?.hasError('required')">Email is required</mat-error>
+      <mat-error *ngIf="form.get('recipientEmail')?.hasError('email')">Invalid email</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Subject</mat-label>
+      <input matInput formControlName="subject" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Message</mat-label>
+      <textarea matInput formControlName="message" rows="4"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+  <button mat-raised-button color="primary" (click)="send()" [disabled]="loading">Send</button>
+</mat-dialog-actions>
+
