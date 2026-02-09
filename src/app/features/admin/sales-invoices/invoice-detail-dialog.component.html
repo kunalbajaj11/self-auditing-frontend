@@ -149,7 +149,7 @@
       </div>
       <div class="totals-row total-line">
         <span class="label">Total Amount:</span>
-        <span class="value positive-amount">+{{ invoice.currency }} {{ invoice.totalAmount | number: '1.2-2' }}</span>
+        <span class="value positive-amount">+{{ invoice.currency }} {{ getDisplayTotalAmount() | number: '1.2-2' }}</span>
       </div>
       <div class="totals-row" *ngIf="getPaidAmount() > 0">
         <span class="label">Paid Amount:</span>

@@ -44,7 +44,7 @@ export class InvoiceDetailDialogComponent implements OnInit {
 
   calculateOutstanding(): void {
     if (!this.invoice) return;
-    const totalAmount = parseFloat(this.invoice.totalAmount || '0');
+    const totalAmount = this.getDisplayTotalAmount();
     const paidAmount = parseFloat(this.invoice.paidAmount || '0');
     this.outstandingAmount = Math.max(0, totalAmount - paidAmount);
   }
@@ -52,6 +52,19 @@ export class InvoiceDetailDialogComponent implements OnInit {
   getPaidAmount(): number {
     if (!this.invoice) return 0;
     return parseFloat(this.invoice.paidAmount || '0');
+  }
+
+  /** Total amount (amount + VAT). Uses totalAmount from API or computes from amount + vatAmount. */
+  getDisplayTotalAmount(): number {
+    if (!this.invoice) return 0;
+    const total = this.invoice.totalAmount;
+    if (total != null && total !== '') {
+      const n = parseFloat(total);
+      if (!isNaN(n)) return n;
+    }
+    const amount = parseFloat(this.invoice.amount || '0');
+    const vatAmount = parseFloat(this.invoice.vatAmount || '0');
+    return amount + vatAmount;
   }
 
   readonly statusDisplayMap: Record<string, string> = {
