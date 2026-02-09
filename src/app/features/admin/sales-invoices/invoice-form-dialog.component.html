@@ -179,6 +179,7 @@
             <tr>
               <th>Item Name *</th>
               <th>Description</th>
+              <th>Notes</th>
               <th>Qty</th>
               <th>Unit</th>
               <th>Unit Price *</th>
@@ -208,6 +209,9 @@
               </td>
               <td>
                 <input class="form-input" formControlName="description" placeholder="Description" />
+              </td>
+              <td>
+                <input class="form-input" formControlName="notes" placeholder="Optional notes" />
               </td>
               <td>
                 <input class="form-input" type="number" formControlName="quantity" step="0.001" min="0.001" style="width: 70px;" />

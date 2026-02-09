@@ -9,6 +9,7 @@ interface InvoicePreviewData {
   amountInWords?: string | null;
   templateSettings: {
     logoUrl?: string;
+    signatureUrl?: string;
     headerText?: string;
     colorScheme?: string;
     customColor?: string;
@@ -24,6 +25,8 @@ interface InvoicePreviewData {
     showItemTotal?: boolean;
     defaultPaymentTerms?: string;
     customPaymentTerms?: string;
+    /** Cash Received / Bank Received / Receivable (from invoice payment status) */
+    paymentTermsDisplay?: string;
     defaultNotes?: string;
     termsAndConditions?: string;
     footerText?: string;
@@ -42,6 +45,7 @@ export class InvoicePreviewComponent implements OnInit {
   loading = true;
   error: string | null = null;
   logoDataUrl: string | null = null;
+  signatureDataUrl: string | null = null;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -66,13 +70,17 @@ export class InvoicePreviewComponent implements OnInit {
 
     this.loading = true;
     this.error = null;
+    this.logoDataUrl = null;
+    this.signatureDataUrl = null;
 
     this.invoicesService.getInvoicePreview(this.invoiceId).subscribe({
       next: (data) => {
         this.previewData = data;
-        // Load logo with authentication if URL is present
         if (data.templateSettings?.logoUrl) {
           this.loadLogoWithAuth(data.templateSettings.logoUrl);
+        }
+        if (data.templateSettings?.signatureUrl) {
+          this.loadSignatureWithAuth(data.templateSettings.signatureUrl);
         }
         this.loading = false;
       },
@@ -109,10 +117,29 @@ export class InvoicePreviewComponent implements OnInit {
         };
         reader.readAsDataURL(blob);
       },
-      error: (err) => {
-        console.error('Error loading logo:', err);
-        // Silently fail - invoice will display without logo
+      error: () => {
         this.logoDataUrl = null;
+      },
+    });
+  }
+
+  private loadSignatureWithAuth(signatureUrl: string): void {
+    const endpoint = signatureUrl.startsWith('/api/')
+      ? signatureUrl.substring(4)
+      : signatureUrl.startsWith('/')
+        ? signatureUrl
+        : `/${signatureUrl}`;
+
+    this.apiService.download(endpoint).subscribe({
+      next: (blob) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          this.signatureDataUrl = reader.result as string;
+        };
+        reader.readAsDataURL(blob);
+      },
+      error: () => {
+        this.signatureDataUrl = null;
       },
     });
   }
@@ -207,39 +234,9 @@ export class InvoicePreviewComponent implements OnInit {
     return colorMap[scheme || 'blue'] || '#1976d2';
   }
 
+  /** Title from backend: "PROFORMA INVOICE" | "Tax Invoice" | "Invoice" (no status appended). */
   getInvoiceTitle(): string {
-    const status = this.previewData?.invoice?.status;
-    
-    // For proforma invoices, always show "PROFORMA INVOICE"
-    if (status?.toLowerCase() === 'proforma_invoice') {
-      return 'PROFORMA INVOICE';
-    }
-    
-    // Simplified tax invoice (UAE: < AED 10,000 or non-VAT registered recipient)
-    const total = parseFloat(this.previewData?.invoice?.totalAmount || '0');
-    const customerTrn = this.previewData?.invoice?.customer?.customerTrn
-      || this.previewData?.invoice?.customerTrn;
-    const isSimplified = total < 10000 || !customerTrn;
-    
-    const baseTitle = isSimplified
-      ? 'SIMPLIFIED TAX INVOICE'
-      : (this.previewData?.templateSettings?.title || 'TAX INVOICE');
-    
-    if (!status) return baseTitle;
-    
-    // Map status to display format
-    const statusMap: Record<string, string> = {
-      'tax_invoice_receivable': 'RECEIVABLE',
-      'tax_invoice_bank_received': 'BANK RECEIVED',
-      'tax_invoice_cash_received': 'CASH RECEIVED',
-    };
-    
-    const statusDisplay = statusMap[status.toLowerCase()];
-    if (statusDisplay) {
-      return `${baseTitle} - ${statusDisplay}`;
-    }
-    
-    return baseTitle;
+    return this.previewData?.templateSettings?.title ?? 'Invoice';
   }
 }
 

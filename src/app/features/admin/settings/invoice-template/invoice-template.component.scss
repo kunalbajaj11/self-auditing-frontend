@@ -33,6 +33,17 @@
       object-fit: contain;
       border-radius: 4px;
     }
+
+    .signature-preview {
+      max-height: 48px;
+      max-width: 220px;
+    }
+  }
+
+  .field-hint {
+    color: #64748b;
+    font-size: 0.75rem;
+    margin: 0 0 8px;
   }
 
   .logo-upload {

@@ -36,6 +36,25 @@
               </div>
             </div>
 
+            <div class="logo-upload-section full">
+              <label>Authorised Signatory Signature</label>
+              <p class="field-hint">Shown on invoice PDF and preview above the "Authorised Signatory" line.</p>
+              <div class="logo-preview" *ngIf="signatureDataUrl">
+                <img [src]="signatureDataUrl" alt="Current Signature" class="current-logo signature-preview" />
+                <button mat-icon-button color="warn" type="button" (click)="removeSignature()" matTooltip="Remove signature">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+              <div class="logo-upload">
+                <input type="file" accept="image/jpeg,image/jpg,image/png" (change)="uploadSignature($event)" style="display: none" #signatureInput>
+                <button mat-stroked-button type="button" (click)="signatureInput.click()">
+                  <mat-icon>draw</mat-icon>
+                  {{ signatureDataUrl ? 'Change Signature' : 'Upload Signature' }}
+                </button>
+                <span class="logo-hint">PNG or JPG (max 2MB)</span>
+              </div>
+            </div>
+
             <mat-form-field appearance="outline" class="full">
               <mat-label>Header Text</mat-label>
               <input matInput formControlName="headerText" placeholder="Company Name or Custom Header" />

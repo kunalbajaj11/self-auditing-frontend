@@ -8,6 +8,7 @@ export interface InvoiceLineItem {
   productId?: string;
   itemName: string;
   description?: string;
+  notes?: string;
   quantity: number;
   unitPrice: number;
   unitOfMeasure?: string;

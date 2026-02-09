@@ -4,6 +4,7 @@ import { ApiService } from './api.service';
 
 export interface InvoiceTemplateSettings {
   invoiceLogoUrl?: string | null;
+  invoiceSignatureUrl?: string | null;
   invoiceHeaderText?: string | null;
   invoiceColorScheme?: string | null;
   invoiceCustomColor?: string | null;
@@ -113,6 +114,10 @@ export class SettingsService {
 
   uploadInvoiceLogo(file: File): Observable<{ logoUrl: string }> {
     return this.api.uploadFile('/settings/invoice-template/upload-logo', file) as Observable<{ logoUrl: string }>;
+  }
+
+  uploadInvoiceSignature(file: File): Observable<{ signatureUrl: string }> {
+    return this.api.uploadFile('/settings/invoice-template/upload-signature', file) as Observable<{ signatureUrl: string }>;
   }
 
   getInvoicePreview(invoiceId: string): Observable<any> {

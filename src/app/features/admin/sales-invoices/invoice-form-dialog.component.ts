@@ -277,6 +277,7 @@ export class InvoiceFormDialogComponent implements OnInit {
       productId: [item?.productId || ''],
       itemName: [item?.itemName || '', Validators.required],
       description: [item?.description || ''],
+      notes: [item?.notes || ''],
       quantity: [item?.quantity || 1, [Validators.required, Validators.min(0.001)]],
       unitPrice: [item?.unitPrice || 0, [Validators.required, Validators.min(0)]],
       unitOfMeasure: [item?.unitOfMeasure || 'unit'],
@@ -460,6 +461,7 @@ export class InvoiceFormDialogComponent implements OnInit {
       return {
         itemName: value.itemName,
         description: value.description || undefined,
+        notes: value.notes || undefined,
         quantity: parseFloat(value.quantity),
         unitPrice: parseFloat(value.unitPrice),
         unitOfMeasure: value.unitOfMeasure || 'unit',

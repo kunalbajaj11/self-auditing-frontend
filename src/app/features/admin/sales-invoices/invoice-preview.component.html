@@ -147,14 +147,14 @@
           </div>
           <div
             class="meta-row"
-            *ngIf="
-              previewData.templateSettings.showPaymentTerms &&
-              (previewData.templateSettings.defaultPaymentTerms || previewData.templateSettings.customPaymentTerms)
-            "
+            *ngIf="previewData.templateSettings.showPaymentTerms"
           >
             <span class="meta-label">Payment Terms:</span>
             <span class="meta-value">{{
-              previewData.templateSettings.customPaymentTerms || previewData.templateSettings.defaultPaymentTerms
+              previewData.templateSettings.paymentTermsDisplay ||
+              previewData.templateSettings.customPaymentTerms ||
+              previewData.templateSettings.defaultPaymentTerms ||
+              'Receivable'
             }}</span>
           </div>
         </div>
@@ -246,7 +246,10 @@
           </thead>
           <tbody>
             <tr *ngFor="let item of previewData.invoice.lineItems">
-              <td>{{ item.itemName }}</td>
+              <td>
+                <div>{{ item.itemName }}</div>
+                <div class="line-item-notes" *ngIf="item.notes">{{ item.notes }}</div>
+              </td>
               <td
                 *ngIf="
                   previewData?.templateSettings?.showItemDescription !== false
@@ -413,6 +416,12 @@
           <div class="signatory-for">
             For {{ previewData.invoice.organization?.name || 'the Company' }}
           </div>
+          <img
+            *ngIf="signatureDataUrl"
+            [src]="signatureDataUrl"
+            alt="Signature"
+            class="signatory-signature"
+          />
           <div class="signatory-line"></div>
           <div class="signatory-label">Authorised Signatory</div>
         </div>

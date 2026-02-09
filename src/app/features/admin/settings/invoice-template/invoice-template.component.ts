@@ -14,6 +14,7 @@ export class InvoiceTemplateComponent implements OnInit {
   loading = false;
   saving = false;
   logoDataUrl: string | null = null;
+  signatureDataUrl: string | null = null;
 
   readonly form;
   readonly paymentTermOptions = [
@@ -45,6 +46,7 @@ export class InvoiceTemplateComponent implements OnInit {
     this.form = this.fb.group({
       // Branding
       logoUrl: [''],
+      signatureUrl: [''],
       headerText: [''],
       colorScheme: ['blue'],
       customColor: ['#1976d2'],
@@ -88,11 +90,13 @@ export class InvoiceTemplateComponent implements OnInit {
     this.loading = true;
     this.settingsService.getInvoiceTemplate().subscribe({
       next: (settings) => {
-        // Store the logo URL path for form value (used when saving)
+        // Store the logo and signature URL paths for form value (used when saving)
         const logoUrl = settings.invoiceLogoUrl || '';
-        
+        const signatureUrl = settings.invoiceSignatureUrl || '';
+
         this.form.patchValue({
           logoUrl,
+          signatureUrl,
           headerText: settings.invoiceHeaderText ?? '',
           colorScheme: settings.invoiceColorScheme ?? 'blue',
           customColor: settings.invoiceCustomColor ?? '#1976d2',
@@ -117,11 +121,14 @@ export class InvoiceTemplateComponent implements OnInit {
           emailMessage: settings.invoiceEmailMessage ?? 'Please find attached invoice {{invoiceNumber}} for {{totalAmount}} {{currency}}.',
         });
         
-        // Load logo with authentication if URL is present
+        // Load logo and signature with authentication if URLs are present
         if (logoUrl) {
           this.loadLogoWithAuth(logoUrl);
         }
-        
+        if (signatureUrl) {
+          this.loadSignatureWithAuth(signatureUrl);
+        }
+
         this.loading = false;
       },
       error: () => {
@@ -135,26 +142,43 @@ export class InvoiceTemplateComponent implements OnInit {
    * This is needed because <img> tags don't send auth headers
    */
   private loadLogoWithAuth(logoUrl: string): void {
-    // Convert relative URL to API endpoint path
-    const endpoint = logoUrl.startsWith('/api/') 
-      ? logoUrl.substring(4) // Remove '/api' prefix since apiService adds it
-      : logoUrl.startsWith('/') 
-        ? logoUrl 
+    const endpoint = logoUrl.startsWith('/api/')
+      ? logoUrl.substring(4)
+      : logoUrl.startsWith('/')
+        ? logoUrl
         : `/${logoUrl}`;
-    
+
     this.apiService.download(endpoint).subscribe({
       next: (blob) => {
-        // Convert blob to data URL for display in img tag
         const reader = new FileReader();
         reader.onloadend = () => {
           this.logoDataUrl = reader.result as string;
         };
         reader.readAsDataURL(blob);
       },
-      error: (err) => {
-        console.error('Error loading logo:', err);
-        // Silently fail - settings will show without logo preview
+      error: () => {
         this.logoDataUrl = null;
+      },
+    });
+  }
+
+  private loadSignatureWithAuth(signatureUrl: string): void {
+    const endpoint = signatureUrl.startsWith('/api/')
+      ? signatureUrl.substring(4)
+      : signatureUrl.startsWith('/')
+        ? signatureUrl
+        : `/${signatureUrl}`;
+
+    this.apiService.download(endpoint).subscribe({
+      next: (blob) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          this.signatureDataUrl = reader.result as string;
+        };
+        reader.readAsDataURL(blob);
+      },
+      error: () => {
+        this.signatureDataUrl = null;
       },
     });
   }
@@ -167,6 +191,7 @@ export class InvoiceTemplateComponent implements OnInit {
     this.saving = true;
     const payload: Partial<InvoiceTemplateSettings> = {
       invoiceLogoUrl: this.form.get('logoUrl')?.value || null,
+      invoiceSignatureUrl: this.form.get('signatureUrl')?.value || null,
       invoiceHeaderText: this.form.get('headerText')?.value || null,
       invoiceColorScheme: this.form.get('colorScheme')?.value,
       invoiceCustomColor: this.showCustomColor ? this.form.get('customColor')?.value : null,
@@ -271,6 +296,56 @@ export class InvoiceTemplateComponent implements OnInit {
     this.form.patchValue({ logoUrl: '' });
     this.logoDataUrl = null;
     this.snackBar.open('Logo removed. Click Save to apply changes.', 'Close', {
+      duration: 3000,
+    });
+  }
+
+  uploadSignature(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        this.snackBar.open('Invalid file type. Only JPEG and PNG are allowed for signature.', 'Close', {
+          duration: 4000,
+          panelClass: ['snack-error'],
+        });
+        return;
+      }
+      const maxSize = 2 * 1024 * 1024; // 2MB
+      if (file.size > maxSize) {
+        this.snackBar.open('Signature file size exceeds 2MB limit.', 'Close', {
+          duration: 4000,
+          panelClass: ['snack-error'],
+        });
+        return;
+      }
+      this.saving = true;
+      this.settingsService.uploadInvoiceSignature(file).subscribe({
+        next: (result) => {
+          this.form.patchValue({ signatureUrl: result.signatureUrl });
+          this.loadSignatureWithAuth(result.signatureUrl);
+          this.saving = false;
+          this.snackBar.open('Signature uploaded successfully', 'Close', {
+            duration: 3000,
+          });
+        },
+        error: (error) => {
+          this.saving = false;
+          const msg = error?.error?.message || 'Failed to upload signature';
+          this.snackBar.open(msg, 'Close', {
+            duration: 4000,
+            panelClass: ['snack-error'],
+          });
+        },
+      });
+    }
+  }
+
+  removeSignature(): void {
+    this.form.patchValue({ signatureUrl: '' });
+    this.signatureDataUrl = null;
+    this.snackBar.open('Signature removed. Click Save to apply changes.', 'Close', {
       duration: 3000,
     });
   }

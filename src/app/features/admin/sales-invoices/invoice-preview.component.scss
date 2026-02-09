@@ -402,6 +402,13 @@
                   font-weight: 600;
                 }
 
+                .line-item-notes {
+                  font-size: 0.85rem;
+                  color: #64748b;
+                  font-weight: 400;
+                  margin-top: 4px;
+                }
+
                 &:last-child {
                   padding-right: 20px;
                   text-align: right;
@@ -452,7 +459,17 @@
             font-size: 11px;
             font-weight: 600;
             color: #0f172a;
-            margin-bottom: 24px;
+            margin-bottom: 8px;
+          }
+
+          .signatory-signature {
+            display: block;
+            max-height: 32px;
+            width: auto;
+            max-width: 100%;
+            margin-bottom: 8px;
+            object-fit: contain;
+            object-position: right top;
           }
 
           .signatory-line {
