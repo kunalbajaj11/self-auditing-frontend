@@ -1,12 +1,96 @@
-.content {
+.delivery-challan-form-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.dialog-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+  background: linear-gradient(to bottom, #fafbfc 0%, #fff 100%);
+
+  .header-text {
+    h2[mat-dialog-title] {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: #1a1a2e;
+
+      mat-icon {
+        color: #0077c8;
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+      }
+    }
+    .dialog-subtitle {
+      margin: 6px 0 0 38px;
+      font-size: 0.875rem;
+      color: rgba(0, 0, 0, 0.6);
+      line-height: 1.4;
+    }
+  }
+}
+
+mat-dialog-content.content {
+  padding: 24px;
   min-width: 760px;
+  overflow-y: auto;
+  max-height: calc(90vh - 180px);
+  flex: 1 1 auto;
+}
+
+.dialog-actions {
+  padding: 14px 24px 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  gap: 12px;
+  background: #fafbfc;
+
+  button {
+    text-transform: none;
+    font-weight: 500;
+    border-radius: 8px;
+  }
+  .submit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.form-section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #0077c8;
+    opacity: 0.9;
+  }
 }
 
 .form {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-top: 12px;
+  padding-top: 0;
 }
 
 .grid {

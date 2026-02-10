@@ -1,117 +1,149 @@
-<h2 mat-dialog-title>
-  {{ data ? 'Edit Vendor' : 'Add Vendor' }}
-</h2>
-
-<mat-dialog-content>
-  <form [formGroup]="form" style="margin-top: 16px;">
-    <div class="form-row">
-      <mat-form-field appearance="outline">
-        <mat-label>Vendor Name *</mat-label>
-        <input matInput formControlName="name" required />
-        <mat-error *ngIf="form.get('name')?.hasError('required')">
-          Name is required
-        </mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Display Name</mat-label>
-        <input matInput formControlName="displayName" />
-      </mat-form-field>
+<div class="vendor-form-dialog">
+  <header class="dialog-header">
+    <div class="header-text">
+      <h2 mat-dialog-title>
+        <mat-icon>business</mat-icon>
+        {{ data ? 'Edit Vendor' : 'Add Vendor' }}
+      </h2>
+      <p class="dialog-subtitle">
+        {{ data ? 'Update vendor details' : 'Enter vendor information for purchase orders and expenses.' }}
+      </p>
     </div>
+  </header>
 
-    <div class="form-row">
-      <mat-form-field appearance="outline">
-        <mat-label>TRN</mat-label>
-        <input matInput formControlName="vendorTrn" />
-      </mat-form-field>
+  <mat-dialog-content>
+    <form [formGroup]="form" class="dialog-form">
+      <section class="form-section">
+        <h3 class="section-title">
+          <mat-icon>badge</mat-icon>
+          Basic information
+        </h3>
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Vendor Name</mat-label>
+            <input matInput formControlName="name" required placeholder="Legal or trading name" />
+            <mat-error *ngIf="form.get('name')?.hasError('required')">
+              Name is required
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Display Name</mat-label>
+            <input matInput formControlName="displayName" placeholder="Name shown on documents" />
+          </mat-form-field>
+        </div>
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>TRN</mat-label>
+            <input matInput formControlName="vendorTrn" placeholder="Tax Registration Number" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Category</mat-label>
+            <input matInput formControlName="category" placeholder="e.g. Supplies, Services" />
+          </mat-form-field>
+        </div>
+      </section>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Category</mat-label>
-        <input matInput formControlName="category" />
-      </mat-form-field>
-    </div>
+      <section class="form-section">
+        <h3 class="section-title">
+          <mat-icon>contact_phone</mat-icon>
+          Contact
+        </h3>
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="email" placeholder="email@example.com" />
+            <mat-error *ngIf="form.get('email')?.hasError('email')">
+              Invalid email format
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Phone</mat-label>
+            <input matInput formControlName="phone" placeholder="+971 50 123 4567" />
+          </mat-form-field>
+        </div>
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Website</mat-label>
+            <input matInput formControlName="website" placeholder="https://..." />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Contact Person</mat-label>
+            <input matInput formControlName="contactPerson" placeholder="Primary contact name" />
+          </mat-form-field>
+        </div>
+      </section>
 
-    <div class="form-row">
-      <mat-form-field appearance="outline">
-        <mat-label>Email</mat-label>
-        <input matInput type="email" formControlName="email" />
-        <mat-error *ngIf="form.get('email')?.hasError('email')">
-          Invalid email format
-        </mat-error>
-      </mat-form-field>
+      <section class="form-section">
+        <h3 class="section-title">
+          <mat-icon>location_on</mat-icon>
+          Address
+        </h3>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Address</mat-label>
+          <textarea matInput formControlName="address" rows="2" placeholder="Street, building, area"></textarea>
+        </mat-form-field>
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>City</mat-label>
+            <input matInput formControlName="city" placeholder="City" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Country</mat-label>
+            <input matInput formControlName="country" placeholder="Country" />
+          </mat-form-field>
+        </div>
+      </section>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Phone</mat-label>
-        <input matInput formControlName="phone" />
-      </mat-form-field>
-    </div>
+      <section class="form-section">
+        <h3 class="section-title">
+          <mat-icon>payments</mat-icon>
+          Billing & terms
+        </h3>
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Preferred Currency</mat-label>
+            <mat-select formControlName="preferredCurrency">
+              <mat-option *ngFor="let curr of currencies" [value]="curr">
+                {{ curr }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Payment Terms (Days)</mat-label>
+            <input matInput type="number" formControlName="paymentTerms" placeholder="30" />
+            <mat-hint>e.g., 30, 60, 90</mat-hint>
+            <mat-error *ngIf="form.get('paymentTerms')?.hasError('invalidNumber')">
+              Must be between 0 and 365
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </section>
 
-    <div class="form-row">
-      <mat-form-field appearance="outline">
-        <mat-label>Website</mat-label>
-        <input matInput formControlName="website" />
-      </mat-form-field>
+      <section class="form-section form-section-last">
+        <h3 class="section-title">
+          <mat-icon>notes</mat-icon>
+          Additional
+        </h3>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Notes</mat-label>
+          <textarea matInput formControlName="notes" rows="3" placeholder="Internal notes"></textarea>
+        </mat-form-field>
+      </section>
+    </form>
+  </mat-dialog-content>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Contact Person</mat-label>
-        <input matInput formControlName="contactPerson" />
-      </mat-form-field>
-    </div>
-
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Address</mat-label>
-      <textarea matInput formControlName="address" rows="2"></textarea>
-    </mat-form-field>
-
-    <div class="form-row">
-      <mat-form-field appearance="outline">
-        <mat-label>City</mat-label>
-        <input matInput formControlName="city" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Country</mat-label>
-        <input matInput formControlName="country" />
-      </mat-form-field>
-    </div>
-
-    <div class="form-row">
-      <mat-form-field appearance="outline">
-        <mat-label>Preferred Currency</mat-label>
-        <mat-select formControlName="preferredCurrency">
-          <mat-option *ngFor="let curr of currencies" [value]="curr">
-            {{ curr }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Payment Terms (Days)</mat-label>
-        <input matInput type="number" formControlName="paymentTerms" />
-        <mat-hint>e.g., 30, 60, 90</mat-hint>
-        <mat-error *ngIf="form.get('paymentTerms')?.hasError('invalidNumber')">
-          Must be between 0 and 365
-        </mat-error>
-      </mat-form-field>
-    </div>
-
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Notes</mat-label>
-      <textarea matInput formControlName="notes" rows="3"></textarea>
-    </mat-form-field>
-  </form>
-</mat-dialog-content>
-
-<mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
-  <button
-    mat-raised-button
-    color="primary"
-    (click)="save()"
-    [disabled]="form.invalid || loading"
-  >
-    <mat-progress-spinner *ngIf="loading" diameter="20" class="inline-spinner" mode="indeterminate"></mat-progress-spinner>
-    <span *ngIf="!loading">{{ data ? 'Update' : 'Create' }}</span>
-  </button>
-</mat-dialog-actions>
-
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="save()"
+      [disabled]="form.invalid || loading"
+      class="submit-btn"
+    >
+      <mat-progress-spinner *ngIf="loading" diameter="20" class="inline-spinner" mode="indeterminate"></mat-progress-spinner>
+      <mat-icon *ngIf="!loading">{{ data ? 'save' : 'add_circle' }}</mat-icon>
+      <span *ngIf="!loading">{{ data ? 'Update' : 'Create' }}</span>
+    </button>
+  </mat-dialog-actions>
+</div>

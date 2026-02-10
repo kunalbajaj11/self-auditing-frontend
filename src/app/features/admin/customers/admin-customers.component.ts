@@ -67,7 +67,7 @@ export class AdminCustomersComponent implements OnInit {
 
   openDialog(customer?: Customer): void {
     const dialogRef = this.dialog.open(CustomerFormDialogComponent, {
-      width: '600px',
+      width: '640px',
       data: customer ?? null,
     });
     dialogRef.afterClosed().subscribe((result) => {

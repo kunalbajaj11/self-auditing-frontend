@@ -1,10 +1,26 @@
-<h2 mat-dialog-title>{{ data ? 'Edit Delivery Challan' : 'New Delivery Challan' }}</h2>
+<div class="delivery-challan-form-dialog">
+  <header class="dialog-header">
+    <div class="header-text">
+      <h2 mat-dialog-title>
+        <mat-icon>local_shipping</mat-icon>
+        {{ data ? 'Edit Delivery Challan' : 'New Delivery Challan' }}
+      </h2>
+      <p class="dialog-subtitle">
+        {{ data ? 'Update delivery details.' : 'Create a delivery challan linked to a sales order or customer.' }}
+      </p>
+    </div>
+  </header>
 
-<mat-dialog-content class="content">
-  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+  <mat-dialog-content class="content">
+    <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
 
-  <form [formGroup]="form" class="form">
-    <div class="grid">
+    <form [formGroup]="form" class="form">
+      <section class="form-section">
+        <h3 class="section-title">
+          <mat-icon>receipt_long</mat-icon>
+          Challan details
+        </h3>
+        <div class="grid">
       <mat-form-field appearance="outline">
         <mat-label>Sales Order (optional)</mat-label>
         <mat-select formControlName="salesOrderId" (selectionChange)="onSalesOrderSelected($event.value)">
@@ -53,21 +69,25 @@
         <mat-label>LR No</mat-label>
         <input matInput formControlName="lrNumber" />
       </mat-form-field>
-    </div>
+        </div>
 
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>Delivery Address</mat-label>
-      <textarea matInput formControlName="deliveryAddress" rows="2"></textarea>
-    </mat-form-field>
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Delivery Address</mat-label>
+          <textarea matInput formControlName="deliveryAddress" rows="2"></textarea>
+        </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>Notes</mat-label>
-      <textarea matInput formControlName="notes" rows="2"></textarea>
-    </mat-form-field>
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Notes</mat-label>
+          <textarea matInput formControlName="notes" rows="2"></textarea>
+        </mat-form-field>
+      </section>
 
-    <div class="line-items" *ngIf="data || !form.get('salesOrderId')?.value">
-      <div class="line-items-header">
-        <h3>Line Items</h3>
+      <section class="form-section line-items" *ngIf="data || !form.get('salesOrderId')?.value">
+        <div class="line-items-header">
+          <h3 class="section-title">
+            <mat-icon>list_alt</mat-icon>
+            Line Items
+          </h3>
         <button mat-stroked-button type="button" (click)="addLineItem()">
           <mat-icon>add</mat-icon>
           Add item
@@ -110,12 +130,16 @@
           </div>
         </div>
       </div>
-    </div>
-  </form>
-</mat-dialog-content>
+      </section>
+    </form>
+  </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
-  <button mat-raised-button color="primary" (click)="save()" [disabled]="loading">Save</button>
-</mat-dialog-actions>
+  <mat-dialog-actions class="dialog-actions" align="end">
+    <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+    <button mat-raised-button color="primary" (click)="save()" [disabled]="loading" class="submit-btn">
+      <mat-icon>save</mat-icon>
+      Save
+    </button>
+  </mat-dialog-actions>
+</div>
 

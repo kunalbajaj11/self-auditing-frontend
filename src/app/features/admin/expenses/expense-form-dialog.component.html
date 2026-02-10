@@ -1,13 +1,27 @@
-<mat-dialog-content class="expense-form-content">
-  <form [formGroup]="form" class="expense-form">
-    <div class="form-section">
-      <h2 class="form-heading">
+<div class="expense-form-dialog">
+  <header class="dialog-header">
+    <div class="header-text">
+      <h2 mat-dialog-title>
+        <mat-icon>payments</mat-icon>
         {{ isEditMode() ? 'Edit Expense' : 'Record Expense' }}
         <span *ngIf="ocrResult" class="ocr-badge">
           <mat-icon>auto_awesome</mat-icon>
           OCR Detected
         </span>
       </h2>
+      <p class="dialog-subtitle">
+        {{ isEditMode() ? 'Update expense details.' : 'Add a manual expense entry (single amount or item-wise).' }}
+      </p>
+    </div>
+  </header>
+
+  <mat-dialog-content class="expense-form-content">
+    <form [formGroup]="form" class="expense-form">
+      <div class="form-section">
+        <h3 class="section-title">
+          <mat-icon>tune</mat-icon>
+          Entry type
+        </h3>
       <div *ngIf="attachment" class="attachment-info">
         <mat-icon>attach_file</mat-icon>
         <span>{{ attachment.fileName }}</span>
@@ -47,10 +61,12 @@
         </mat-card>
       </div>
 
-      <!-- Item-wise Entry Mode -->
       <div *ngIf="entryMode === 'itemwise'" class="line-items-section">
         <div class="line-items-header">
-          <h3>Line Items</h3>
+          <h3 class="section-title">
+            <mat-icon>list_alt</mat-icon>
+            Line Items
+          </h3>
           <button mat-icon-button type="button" (click)="addLineItem()" color="primary" matTooltip="Add Line Item">
             <mat-icon>add</mat-icon>
           </button>
@@ -294,20 +310,19 @@
   </form>
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
-  <button
-    mat-flat-button
-    color="primary"
-    (click)="submit()"
-    [disabled]="loading"
-  >
-    <mat-progress-spinner
-      *ngIf="loading"
-      [diameter]="20"
-      mode="indeterminate"
-    ></mat-progress-spinner>
-    <span *ngIf="!loading">{{ isEditMode() ? 'Save' : 'Create' }}</span>
-  </button>
-</mat-dialog-actions>
+  <mat-dialog-actions class="dialog-actions" align="end">
+    <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="submit()"
+      [disabled]="loading"
+      class="submit-btn"
+    >
+      <mat-progress-spinner *ngIf="loading" [diameter]="20" mode="indeterminate"></mat-progress-spinner>
+      <mat-icon *ngIf="!loading">{{ isEditMode() ? 'save' : 'add_circle' }}</mat-icon>
+      <span *ngIf="!loading">{{ isEditMode() ? 'Save' : 'Create' }}</span>
+    </button>
+  </mat-dialog-actions>
+</div>
 

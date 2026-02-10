@@ -15,97 +15,99 @@
           <small class="brand-subtitle">Powered by <a href="https://stryvon.ai" target="_blank" rel="noopener noreferrer">Stryvon.AI</a></small>
         </div>
       </div>
-      <mat-nav-list #sideNavList>
-        <ng-container *ngFor="let item of navItems">
-          <ng-container *ngIf="item.children?.length; else singleLink">
-            <div class="nav-group">
-              <div 
-                class="nav-group-header" 
-                (click)="toggleNavGroup(item.label)"
-                [class.expanded]="isNavGroupExpanded(item.label)"
-              >
-                <mat-icon class="nav-group-icon">{{ item.icon || 'folder' }}</mat-icon>
-                <span>{{ item.label }}</span>
-                <span class="badge" *ngIf="item.badgeCount$ | async as count">
-                  {{ count }}
-                </span>
-                <mat-icon class="nav-group-chevron">
-                  {{ isNavGroupExpanded(item.label) ? 'expand_less' : 'expand_more' }}
-                </mat-icon>
-              </div>
-              <div 
-                class="nav-group-children"
-                [class.expanded]="isNavGroupExpanded(item.label)"
-              >
-                <ng-container *ngFor="let child of item.children">
-                  <a
-                    *ngIf="!isNavItemDisabled(child); else disabledChildLink"
-                    mat-list-item
-                    class="nav-child"
-                    [routerLink]="child.route"
-                    [queryParams]="child.queryParams"
-                    routerLinkActive="active-child"
-                    [routerLinkActiveOptions]="{ exact: true }"
-                    (click)="closeDrawerIfHandset(drawer)"
-                  >
-                    <span>{{ child.label }}</span>
-                    <span class="badge" *ngIf="child.badgeCount$ | async as count">
-                      {{ count }}
-                    </span>
-                  </a>
-                  <ng-template #disabledChildLink>
-                    <div
+      <div class="side-nav-scroll" #sideNavScroll>
+        <mat-nav-list>
+          <ng-container *ngFor="let item of navItems">
+            <ng-container *ngIf="item.children?.length; else singleLink">
+              <div class="nav-group">
+                <div 
+                  class="nav-group-header" 
+                  (click)="toggleNavGroup(item.label)"
+                  [class.expanded]="isNavGroupExpanded(item.label)"
+                >
+                  <mat-icon class="nav-group-icon">{{ item.icon || 'folder' }}</mat-icon>
+                  <span>{{ item.label }}</span>
+                  <span class="badge" *ngIf="item.badgeCount$ | async as count">
+                    {{ count }}
+                  </span>
+                  <mat-icon class="nav-group-chevron">
+                    {{ isNavGroupExpanded(item.label) ? 'expand_less' : 'expand_more' }}
+                  </mat-icon>
+                </div>
+                <div 
+                  class="nav-group-children"
+                  [class.expanded]="isNavGroupExpanded(item.label)"
+                >
+                  <ng-container *ngFor="let child of item.children">
+                    <a
+                      *ngIf="!isNavItemDisabled(child); else disabledChildLink"
                       mat-list-item
-                      class="nav-child nav-disabled"
-                      [matTooltip]="child.disabledReason || 'Locked'"
+                      class="nav-child"
+                      [routerLink]="child.route"
+                      [queryParams]="child.queryParams"
+                      routerLinkActive="active-child"
+                      [routerLinkActiveOptions]="{ exact: true }"
+                      (click)="saveSidebarScrollBeforeNav(); closeDrawerIfHandset(drawer)"
                     >
                       <span>{{ child.label }}</span>
                       <span class="badge" *ngIf="child.badgeCount$ | async as count">
                         {{ count }}
                       </span>
-                      <mat-icon class="lock-icon">lock</mat-icon>
-                    </div>
-                  </ng-template>
-                </ng-container>
+                    </a>
+                    <ng-template #disabledChildLink>
+                      <div
+                        mat-list-item
+                        class="nav-child nav-disabled"
+                        [matTooltip]="child.disabledReason || 'Locked'"
+                      >
+                        <span>{{ child.label }}</span>
+                        <span class="badge" *ngIf="child.badgeCount$ | async as count">
+                          {{ count }}
+                        </span>
+                        <mat-icon class="lock-icon">lock</mat-icon>
+                      </div>
+                    </ng-template>
+                  </ng-container>
+                </div>
               </div>
-            </div>
-          </ng-container>
-          <ng-template #singleLink>
-            <ng-container *ngIf="item.route">
-              <a
-                *ngIf="!isNavItemDisabled(item); else disabledSingleLink"
-                mat-list-item
-                class="nav-link"
-                [routerLink]="item.route"
-                [queryParams]="item.queryParams"
-                routerLinkActive="active"
-                [routerLinkActiveOptions]="{ exact: true }"
-                (click)="closeDrawerIfHandset(drawer)"
-              >
-                <mat-icon matListIcon>{{ item.icon || 'chevron_right' }}</mat-icon>
-                <span matLine>{{ item.label }}</span>
-                <span class="badge" *ngIf="item.badgeCount$ | async as count">
-                  {{ count }}
-                </span>
-              </a>
-              <ng-template #disabledSingleLink>
-                <div
+            </ng-container>
+            <ng-template #singleLink>
+              <ng-container *ngIf="item.route">
+                <a
+                  *ngIf="!isNavItemDisabled(item); else disabledSingleLink"
                   mat-list-item
-                  class="nav-link nav-disabled"
-                  [matTooltip]="item.disabledReason || 'Locked'"
+                  class="nav-link"
+                  [routerLink]="item.route"
+                  [queryParams]="item.queryParams"
+                  routerLinkActive="active"
+                  [routerLinkActiveOptions]="{ exact: true }"
+                  (click)="saveSidebarScrollBeforeNav(); closeDrawerIfHandset(drawer)"
                 >
                   <mat-icon matListIcon>{{ item.icon || 'chevron_right' }}</mat-icon>
                   <span matLine>{{ item.label }}</span>
                   <span class="badge" *ngIf="item.badgeCount$ | async as count">
                     {{ count }}
                   </span>
-                  <mat-icon class="lock-icon">lock</mat-icon>
-                </div>
-              </ng-template>
-            </ng-container>
-          </ng-template>
-        </ng-container>
-      </mat-nav-list>
+                </a>
+                <ng-template #disabledSingleLink>
+                  <div
+                    mat-list-item
+                    class="nav-link nav-disabled"
+                    [matTooltip]="item.disabledReason || 'Locked'"
+                  >
+                    <mat-icon matListIcon>{{ item.icon || 'chevron_right' }}</mat-icon>
+                    <span matLine>{{ item.label }}</span>
+                    <span class="badge" *ngIf="item.badgeCount$ | async as count">
+                      {{ count }}
+                    </span>
+                    <mat-icon class="lock-icon">lock</mat-icon>
+                  </div>
+                </ng-template>
+              </ng-container>
+            </ng-template>
+          </ng-container>
+        </mat-nav-list>
+      </div>
       <div class="side-footer">
         <div class="contact-info">
           <mat-icon>phone</mat-icon>

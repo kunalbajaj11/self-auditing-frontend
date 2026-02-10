@@ -1,12 +1,23 @@
-<h2 mat-dialog-title>
-  {{ data ? 'Edit Proforma Invoice' : 'Create Proforma Invoice' }}
-</h2>
+<div class="proforma-invoice-form-dialog">
+  <header class="dialog-header">
+    <div class="header-text">
+      <h2 mat-dialog-title>
+        <mat-icon>request_quote</mat-icon>
+        {{ data ? 'Edit Proforma Invoice' : 'Create Proforma Invoice' }}
+      </h2>
+      <p class="dialog-subtitle">
+        {{ data ? 'Update proforma details.' : 'Create a proforma invoice for your customer.' }}
+      </p>
+    </div>
+  </header>
 
-<mat-dialog-content class="invoice-form-content">
-  <form [formGroup]="form">
-    <!-- Header Section -->
-    <div class="form-section">
-      <h3>Proforma Invoice Details</h3>
+  <mat-dialog-content class="invoice-form-content">
+    <form [formGroup]="form">
+      <div class="form-section">
+        <h3 class="section-title">
+          <mat-icon>description</mat-icon>
+          Proforma Invoice Details
+        </h3>
       <div class="form-row">
         <mat-form-field appearance="outline" class="flex-2">
           <mat-label>Customer</mat-label>
@@ -75,9 +86,11 @@
       </mat-form-field>
     </div>
 
-    <!-- Commercial Details Section -->
     <div class="form-section">
-      <h3>Commercial Details</h3>
+      <h3 class="section-title">
+        <mat-icon>business_center</mat-icon>
+        Commercial Details
+      </h3>
       <div class="form-row">
         <mat-form-field appearance="outline" class="flex-1">
           <mat-label>Delivery Note</mat-label>
@@ -132,10 +145,12 @@
       </div>
     </div>
 
-    <!-- Line Items Section -->
     <div class="form-section">
       <div class="section-header">
-        <h3>Line Items</h3>
+        <h3 class="section-title">
+          <mat-icon>list_alt</mat-icon>
+          Line Items
+        </h3>
         <button mat-button type="button" color="primary" (click)="addLineItem()">
           <mat-icon>add</mat-icon>
           Add Item
@@ -251,8 +266,11 @@
       </div>
     </div>
 
-    <!-- Notes Section -->
     <div class="form-section">
+      <h3 class="section-title">
+        <mat-icon>notes</mat-icon>
+        Notes
+      </h3>
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Notes</mat-label>
         <textarea matInput formControlName="notes" rows="3"></textarea>
@@ -261,15 +279,18 @@
   </form>
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
-  <button
-    mat-raised-button
-    color="primary"
-    (click)="save()"
-    [disabled]="form.invalid || loading || lineItems.length === 0"
-  >
-    <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
-    <span *ngIf="!loading">{{ data ? 'Update' : 'Create' }}</span>
-  </button>
-</mat-dialog-actions>
+  <mat-dialog-actions class="dialog-actions" align="end">
+    <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="save()"
+      [disabled]="form.invalid || loading || lineItems.length === 0"
+      class="submit-btn"
+    >
+      <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
+      <mat-icon *ngIf="!loading">{{ data ? 'save' : 'add_circle' }}</mat-icon>
+      <span *ngIf="!loading">{{ data ? 'Update' : 'Create' }}</span>
+    </button>
+  </mat-dialog-actions>
+</div>

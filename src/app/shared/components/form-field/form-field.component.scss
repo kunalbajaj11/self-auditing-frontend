@@ -1,0 +1,38 @@
+// Style projected input/textarea so they fill the wrapper and match design
+:host ::ng-deep .form-field-input-wrap input,
+:host ::ng-deep .form-field-input-wrap textarea {
+  @apply w-full border-0 bg-transparent py-2 px-3 text-sm text-gray-900 placeholder-gray-400 focus:ring-0 focus:outline-none min-h-[38px];
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .form-field-input-wrap textarea {
+  @apply resize-y min-h-[60px] py-2;
+}
+
+// Prefix/suffix spacing
+:host ::ng-deep [prefix],
+:host ::ng-deep [suffix] {
+  @apply flex items-center flex-shrink-0;
+}
+
+:host ::ng-deep [prefix] {
+  @apply pl-3;
+}
+
+:host ::ng-deep [suffix] {
+  @apply pr-2;
+}
+
+// Datepicker toggle in suffix: minimal button style
+:host ::ng-deep .mat-mdc-datepicker-toggle {
+  .mat-mdc-icon-button {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+  }
+  .mat-icon {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+  }
+}

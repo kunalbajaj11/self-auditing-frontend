@@ -1,9 +1,94 @@
+.debit-note-form-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.dialog-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+  background: linear-gradient(to bottom, #fafbfc 0%, #fff 100%);
+
+  .header-text {
+    h2[mat-dialog-title] {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: #1a1a2e;
+
+      mat-icon {
+        color: #0077c8;
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+      }
+    }
+    .dialog-subtitle {
+      margin: 6px 0 0 38px;
+      font-size: 0.875rem;
+      color: rgba(0, 0, 0, 0.6);
+      line-height: 1.4;
+    }
+  }
+}
+
+.dialog-actions {
+  padding: 14px 24px 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  gap: 12px;
+  min-height: 60px;
+  flex-shrink: 0;
+  background: #fafbfc;
+
+  button {
+    text-transform: none;
+    font-weight: 500;
+    border-radius: 8px;
+  }
+  .submit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #0077c8;
+    opacity: 0.9;
+  }
+}
+
 mat-dialog-content {
   min-width: 800px;
   max-width: 1000px;
   padding: 0 !important;
   max-height: 90vh;
   overflow-y: auto;
+  flex: 1 1 auto;
 }
 
 .debit-note-form-content {
@@ -21,20 +106,6 @@ mat-dialog-content {
 
   &:last-child {
     margin-bottom: 0;
-  }
-
-  .form-heading {
-    margin: 0 0 32px 0;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #0f172a;
-    letter-spacing: -0.02em;
-    padding: 0;
-    border: none;
-    
-    &::after {
-      display: none;
-    }
   }
 }
 

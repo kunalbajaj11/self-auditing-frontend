@@ -1,9 +1,17 @@
-<h2 mat-dialog-title>
-  {{ isEditMode ? 'Edit Journal Entry' : 'Add Journal Entry' }}
-</h2>
+<div class="journal-entry-form-dialog">
+  <header class="dialog-header">
+    <div class="header-text">
+      <h2 mat-dialog-title>
+        <mat-icon>menu_book</mat-icon>
+        {{ isEditMode ? 'Edit Journal Entry' : 'Add Journal Entry' }}
+      </h2>
+      <p class="dialog-subtitle">
+        {{ isEditMode ? 'Update journal entry.' : 'Record a manual journal entry (debit and credit).' }}
+      </p>
+    </div>
+  </header>
 
-<form mat-dialog-content [formGroup]="form" class="form">
-  <!-- Entry Style Selection (for future multi-line support) -->
+  <form mat-dialog-content [formGroup]="form" class="form">
   <mat-form-field appearance="outline" *ngIf="false">
     <mat-label>Entry Style</mat-label>
     <mat-select formControlName="entryStyle">
@@ -12,9 +20,11 @@
     </mat-select>
   </mat-form-field>
 
-  <!-- Templates Section -->
   <div class="templates-section" *ngIf="!isEditMode">
-    <h3>Quick Templates</h3>
+    <h3 class="section-title">
+      <mat-icon>description</mat-icon>
+      Quick Templates
+    </h3>
     <div class="template-buttons">
       <button
         mat-stroked-button
@@ -521,15 +531,18 @@
   </div>
 </form>
 
-<mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
-  <button
-    mat-raised-button
-    color="primary"
-    (click)="save()"
-    [disabled]="form.invalid || loading || !isBalanced"
-  >
-    <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
-    <span *ngIf="!loading">{{ isEditMode ? 'Update' : 'Create' }} Entry</span>
-  </button>
-</mat-dialog-actions>
+  <mat-dialog-actions class="dialog-actions" align="end">
+    <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="save()"
+      [disabled]="form.invalid || loading || !isBalanced"
+      class="submit-btn"
+    >
+      <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
+      <mat-icon *ngIf="!loading">{{ isEditMode ? 'save' : 'add_circle' }}</mat-icon>
+      <span *ngIf="!loading">{{ isEditMode ? 'Update' : 'Create' }} Entry</span>
+    </button>
+  </mat-dialog-actions>
+</div>

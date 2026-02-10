@@ -1,8 +1,23 @@
-<mat-dialog-content class="credit-note-form-content">
-  <form [formGroup]="form" class="credit-note-form">
-    <!-- Header Section -->
-    <div class="form-section">
-      <h2 class="form-heading">{{ data ? 'Edit Credit Note' : 'Create Credit Note' }}</h2>
+<div class="credit-note-form-dialog">
+  <header class="dialog-header">
+    <div class="header-text">
+      <h2 mat-dialog-title>
+        <mat-icon>undo</mat-icon>
+        {{ data ? 'Edit Credit Note' : 'Create Credit Note' }}
+      </h2>
+      <p class="dialog-subtitle">
+        {{ data ? 'Update credit note details.' : 'Issue a credit note for a customer (e.g. return or discount).' }}
+      </p>
+    </div>
+  </header>
+
+  <mat-dialog-content class="credit-note-form-content">
+    <form [formGroup]="form" class="credit-note-form">
+      <div class="form-section">
+        <h3 class="section-title">
+          <mat-icon>receipt_long</mat-icon>
+          Credit note details
+        </h3>
       <div class="form-row">
         <mat-form-field appearance="outline" class="flex-2 related-invoice-field">
           <mat-label>Related Invoice (Optional)</mat-label>
@@ -111,8 +126,11 @@
       </mat-form-field>
     </div>
 
-    <!-- Notes Section -->
     <div class="form-section">
+      <h3 class="section-title">
+        <mat-icon>notes</mat-icon>
+        Notes
+      </h3>
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Notes</mat-label>
         <textarea matInput formControlName="notes" rows="3"></textarea>
@@ -121,16 +139,19 @@
   </form>
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
-  <button
-    mat-raised-button
-    color="primary"
-    (click)="save()"
-    [disabled]="form.invalid || loading"
-  >
-    <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
-    <span *ngIf="!loading">{{ data ? 'Update' : 'Create' }}</span>
-  </button>
-</mat-dialog-actions>
+  <mat-dialog-actions class="dialog-actions" align="end">
+    <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="save()"
+      [disabled]="form.invalid || loading"
+      class="submit-btn"
+    >
+      <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
+      <mat-icon *ngIf="!loading">{{ data ? 'save' : 'add_circle' }}</mat-icon>
+      <span *ngIf="!loading">{{ data ? 'Update' : 'Create' }}</span>
+    </button>
+  </mat-dialog-actions>
+</div>
 

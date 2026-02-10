@@ -48,7 +48,7 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
   isInventoryEnabled = false;
   expandedGroups = new Set<string>(); // Track expanded nav groups
 
-  @ViewChild('sideNavList', { static: false }) sideNavList?: ElementRef<HTMLElement>;
+  @ViewChild('sideNavScroll', { static: false }) sideNavScroll?: ElementRef<HTMLElement>;
 
   private sidebarScrollPosition = 0;
   private readonly destroy$ = new Subject<void>();
@@ -125,62 +125,38 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     // Save scroll position when sidebar is scrolled
-    // Use a small delay to ensure the element is available
     setTimeout(() => {
       this.attachScrollListener();
     }, 200);
   }
 
-  private attachScrollListener(): void {
-    if (this.sideNavList) {
-      const element = this.sideNavList.nativeElement;
-      // Find the actual scrollable container - could be the element itself or a parent
-      const scrollableElement = this.findScrollableElement(element);
-      
-      if (scrollableElement) {
-        scrollableElement.addEventListener('scroll', () => {
-          this.sidebarScrollPosition = scrollableElement.scrollTop;
-        }, { passive: true });
-      }
+  /** Call from template when a nav link is clicked so we save scroll before navigation. */
+  saveSidebarScrollBeforeNav(): void {
+    if (this.sideNavScroll) {
+      this.sidebarScrollPosition = this.sideNavScroll.nativeElement.scrollTop;
     }
   }
 
-  private findScrollableElement(element: HTMLElement): HTMLElement | null {
-    // Check if element itself is scrollable
-    const style = getComputedStyle(element);
-    if ((style.overflow === 'auto' || style.overflowY === 'auto' || style.overflow === 'scroll' || style.overflowY === 'scroll') &&
-        element.scrollHeight > element.clientHeight) {
-      return element;
+  private attachScrollListener(): void {
+    if (this.sideNavScroll) {
+      const el = this.sideNavScroll.nativeElement;
+      el.addEventListener('scroll', () => {
+        this.sidebarScrollPosition = el.scrollTop;
+      }, { passive: true });
     }
-    
-    // Check parent elements
-    let parent = element.parentElement;
-    while (parent && parent !== document.body) {
-      const parentStyle = getComputedStyle(parent);
-      if ((parentStyle.overflow === 'auto' || parentStyle.overflowY === 'auto' || 
-           parentStyle.overflow === 'scroll' || parentStyle.overflowY === 'scroll') &&
-          parent.scrollHeight > parent.clientHeight) {
-        return parent;
-      }
-      parent = parent.parentElement;
-    }
-    
-    // Fallback: return the element itself
-    return element;
   }
 
   private restoreSidebarScroll(): void {
-    // Use setTimeout to ensure DOM is updated after navigation
-    setTimeout(() => {
-      if (this.sideNavList && this.sidebarScrollPosition > 0) {
-        const element = this.sideNavList.nativeElement;
-        const scrollableElement = this.findScrollableElement(element);
-        
-        if (scrollableElement) {
-          scrollableElement.scrollTop = this.sidebarScrollPosition;
-        }
-      }
-    }, 100);
+    const savedPosition = this.sidebarScrollPosition;
+    if (savedPosition <= 0 || !this.sideNavScroll) return;
+    const el = this.sideNavScroll.nativeElement;
+    const restore = () => {
+      el.scrollTop = savedPosition;
+    };
+    requestAnimationFrame(restore);
+    setTimeout(restore, 50);
+    setTimeout(restore, 150);
+    setTimeout(restore, 350);
   }
 
   ngOnDestroy(): void {

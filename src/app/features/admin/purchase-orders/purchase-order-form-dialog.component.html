@@ -1,12 +1,23 @@
-<h2 mat-dialog-title>
-  {{ data ? 'Edit Purchase Order' : 'Create Purchase Order' }}
-</h2>
+<div class="purchase-order-form-dialog">
+  <header class="dialog-header">
+    <div class="header-text">
+      <h2 mat-dialog-title>
+        <mat-icon>shopping_bag</mat-icon>
+        {{ data ? 'Edit Purchase Order' : 'Create Purchase Order' }}
+      </h2>
+      <p class="dialog-subtitle">
+        {{ data ? 'Update purchase order details.' : 'Create a purchase order for your vendor.' }}
+      </p>
+    </div>
+  </header>
 
-<mat-dialog-content class="invoice-form-content">
-  <form [formGroup]="form">
-    <!-- Header Section -->
-    <div class="form-section">
-      <h3>Purchase Order Details</h3>
+  <mat-dialog-content class="invoice-form-content">
+    <form [formGroup]="form">
+      <div class="form-section">
+        <h3 class="section-title">
+          <mat-icon>receipt_long</mat-icon>
+          Purchase Order Details
+        </h3>
       <div class="form-row">
         <mat-form-field appearance="outline" class="flex-2">
           <mat-label>Vendor</mat-label>
@@ -77,10 +88,12 @@
       </div>
     </div>
 
-    <!-- Line Items Section -->
     <div class="form-section">
       <div class="section-header">
-        <h3>Line Items</h3>
+        <h3 class="section-title">
+          <mat-icon>list_alt</mat-icon>
+          Line Items
+        </h3>
         <button mat-button type="button" color="primary" (click)="addLineItem()">
           <mat-icon>add</mat-icon>
           Add Item
@@ -196,8 +209,11 @@
       </div>
     </div>
 
-    <!-- Notes Section -->
     <div class="form-section">
+      <h3 class="section-title">
+        <mat-icon>notes</mat-icon>
+        Notes
+      </h3>
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Notes</mat-label>
         <textarea matInput formControlName="notes" rows="3"></textarea>
@@ -206,15 +222,18 @@
   </form>
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
-  <button
-    mat-raised-button
-    color="primary"
-    (click)="save()"
-    [disabled]="form.invalid || loading || lineItems.length === 0"
-  >
-    <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
-    <span *ngIf="!loading">{{ data ? 'Update' : 'Create' }}</span>
-  </button>
-</mat-dialog-actions>
+  <mat-dialog-actions class="dialog-actions" align="end">
+    <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="save()"
+      [disabled]="form.invalid || loading || lineItems.length === 0"
+      class="submit-btn"
+    >
+      <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
+      <mat-icon *ngIf="!loading">{{ data ? 'save' : 'add_circle' }}</mat-icon>
+      <span *ngIf="!loading">{{ data ? 'Update' : 'Create' }}</span>
+    </button>
+  </mat-dialog-actions>
+</div>
