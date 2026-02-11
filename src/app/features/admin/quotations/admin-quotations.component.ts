@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -23,12 +24,14 @@ export class AdminQuotationsComponent implements OnInit {
   ] as const;
   readonly dataSource = new MatTableDataSource<SalesInvoice>([]);
   loading = false;
+  convertingId: string | null = null;
 
   constructor(
     private readonly invoicesService: SalesInvoicesService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
     private readonly cdr: ChangeDetectorRef,
+    private readonly router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -102,36 +105,7 @@ export class AdminQuotationsComponent implements OnInit {
     });
   }
 
-  convertToInvoice(invoice: SalesInvoice): void {
-    if (
-      !confirm(
-        `Convert quotation ${invoice.invoiceNumber} to tax invoice? This action cannot be undone.`,
-      )
-    ) {
-      return;
-    }
-
-    this.invoicesService.updateInvoiceStatus(invoice.id, 'tax_invoice_receivable').subscribe({
-      next: () => {
-        this.snackBar.open(
-          'Quotation converted to Tax Invoice successfully',
-          'Close',
-          {
-            duration: 3000,
-          },
-        );
-        this.loadQuotations();
-      },
-      error: (error) => {
-        this.snackBar.open(
-          error?.error?.message || 'Failed to convert quotation to invoice',
-          'Close',
-          { duration: 4000, panelClass: ['snack-error'] },
-        );
-      },
-    });
-  }
-
+  /** Convert Quotation → Proforma Invoice (workflow: Quotation → Proforma → Tax Invoice) */
   convertToProforma(invoice: SalesInvoice): void {
     if (
       !confirm(
@@ -141,23 +115,30 @@ export class AdminQuotationsComponent implements OnInit {
       return;
     }
 
+    this.convertingId = invoice.id;
+    this.cdr.detectChanges();
     this.invoicesService.updateInvoiceStatus(invoice.id, 'proforma_invoice').subscribe({
       next: () => {
-        this.snackBar.open(
-          'Quotation converted to Proforma Invoice successfully',
-          'Close',
-          {
-            duration: 3000,
-          },
-        );
+        this.convertingId = null;
+        this.cdr.detectChanges();
         this.loadQuotations();
+        const ref = this.snackBar.open(
+          'Quotation converted to Proforma Invoice successfully.',
+          'View in Proforma Invoices',
+          { duration: 5000 },
+        );
+        ref.onAction().subscribe(() => {
+          this.router.navigate(['/admin/proforma-invoices']);
+        });
       },
       error: (error) => {
-        this.snackBar.open(
-          error?.error?.message || 'Failed to convert quotation to proforma invoice',
-          'Close',
-          { duration: 4000, panelClass: ['snack-error'] },
-        );
+        this.convertingId = null;
+        this.cdr.detectChanges();
+        const msg =
+          typeof error?.error?.message === 'string'
+            ? error.error.message
+            : error?.error?.error ?? 'Failed to convert quotation to proforma invoice';
+        this.snackBar.open(msg, 'Close', { duration: 4000, panelClass: ['snack-error'] });
       },
     });
   }

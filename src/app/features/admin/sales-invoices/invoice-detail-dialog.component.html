@@ -1,10 +1,18 @@
 <div class="invoice-detail">
-  <div class="header" *ngIf="invoice">
-    <h2 mat-dialog-title>Invoice Details - {{ invoice.invoiceNumber }}</h2>
+  <div class="header" *ngIf="invoice || loadError">
+    <h2 mat-dialog-title>{{ invoice ? getDialogTitle() : 'Invoice Details' }}</h2>
     <button mat-icon-button (click)="close()">
       <mat-icon>close</mat-icon>
     </button>
   </div>
+
+  <mat-dialog-content *ngIf="loadError && !loading">
+    <div class="loading">
+      <mat-icon color="warn" style="font-size: 48px; width: 48px; height: 48px;">error</mat-icon>
+      <p>{{ loadError }}</p>
+      <button mat-raised-button (click)="close()">Close</button>
+    </div>
+  </mat-dialog-content>
 
   <mat-dialog-content *ngIf="loading">
     <div class="loading">
@@ -18,11 +26,11 @@
     <div class="invoice-header">
       <div class="invoice-info">
         <div class="info-row">
-          <span class="label">Invoice Number:</span>
+          <span class="label">{{ getDocumentNumberLabel() }}:</span>
           <span class="value">{{ invoice.invoiceNumber }}</span>
         </div>
         <div class="info-row">
-          <span class="label">Invoice Date:</span>
+          <span class="label">{{ getDocumentDateLabel() }}:</span>
           <span class="value">{{ invoice.invoiceDate | date: 'mediumDate' }}</span>
         </div>
         <div class="info-row" *ngIf="invoice.dueDate">
@@ -191,7 +199,7 @@
       mat-raised-button
       color="primary"
       (click)="openPaymentDialog()"
-      *ngIf="outstandingAmount > 0 && invoice.paymentStatus !== 'paid'"
+      *ngIf="outstandingAmount > 0 && invoice.paymentStatus !== 'paid' && isTaxInvoice()"
     >
       <mat-icon>payment</mat-icon>
       Record Payment

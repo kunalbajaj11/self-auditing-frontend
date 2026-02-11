@@ -1,6 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales-invoices.service';
 import { InvoicePaymentDialogComponent } from './invoice-payment-dialog.component';
@@ -14,12 +15,14 @@ import { InvoiceEmailDialogComponent } from './invoice-email-dialog.component';
 export class InvoiceDetailDialogComponent implements OnInit {
   invoice: SalesInvoice | null = null;
   loading = false;
+  loadError: string | null = null;
   outstandingAmount = 0;
 
   constructor(
     private readonly dialogRef: MatDialogRef<InvoiceDetailDialogComponent>,
     private readonly invoicesService: SalesInvoicesService,
     private readonly dialog: MatDialog,
+    private readonly snackBar: MatSnackBar,
     private readonly router: Router,
     @Inject(MAT_DIALOG_DATA) public data: { invoiceId: string },
   ) {}
@@ -30,14 +33,19 @@ export class InvoiceDetailDialogComponent implements OnInit {
 
   loadInvoice(): void {
     this.loading = true;
+    this.loadError = null;
     this.invoicesService.getInvoice(this.data.invoiceId).subscribe({
       next: (invoice) => {
         this.loading = false;
         this.invoice = invoice;
         this.calculateOutstanding();
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
+        this.loadError =
+          typeof err?.error?.message === 'string'
+            ? err.error.message
+            : 'Failed to load invoice. It may have been deleted.';
       },
     });
   }
@@ -68,7 +76,8 @@ export class InvoiceDetailDialogComponent implements OnInit {
   }
 
   readonly statusDisplayMap: Record<string, string> = {
-    'proforma_invoice': 'Performa Invoice',
+    'proforma_invoice': 'Proforma Invoice',
+    'quotation': 'Quotation',
     'tax_invoice_receivable': 'Tax Invoice - Receivable',
     'tax_invoice_bank_received': 'Tax Invoice - Bank Received',
     'tax_invoice_cash_received': 'Tax Invoice - Cash received',
@@ -84,6 +93,47 @@ export class InvoiceDetailDialogComponent implements OnInit {
     return this.statusDisplayMap[status?.toLowerCase()] || status || 'Unknown';
   }
 
+  /** Dialog header: "Proforma Invoice Details" / "Quotation Details" / "Invoice Details" + number */
+  getDialogTitle(): string {
+    if (!this.invoice) return 'Invoice Details';
+    const status = (this.invoice.status ?? '').toLowerCase();
+    const prefix =
+      status === 'proforma_invoice'
+        ? 'Proforma Invoice Details'
+        : status === 'quotation'
+          ? 'Quotation Details'
+          : 'Invoice Details';
+    return `${prefix} - ${this.invoice.invoiceNumber}`;
+  }
+
+  /** Label for document number by type */
+  getDocumentNumberLabel(): string {
+    const status = (this.invoice?.status ?? '').toLowerCase();
+    if (status === 'quotation') return 'Quotation Number';
+    if (status === 'proforma_invoice') return 'Proforma Invoice Number';
+    return 'Invoice Number';
+  }
+
+  /** Label for document date by type */
+  getDocumentDateLabel(): string {
+    const status = (this.invoice?.status ?? '').toLowerCase();
+    if (status === 'quotation') return 'Quotation Date';
+    if (status === 'proforma_invoice') return 'Proforma Invoice Date';
+    return 'Invoice Date';
+  }
+
+  /** True when document is a tax invoice (payments apply). */
+  isTaxInvoice(): boolean {
+    const status = (this.invoice?.status ?? '').toLowerCase();
+    return (
+      status === 'tax_invoice_receivable' ||
+      status === 'tax_invoice_bank_received' ||
+      status === 'tax_invoice_cash_received' ||
+      status === 'paid' ||
+      status === 'sent'
+    );
+  }
+
   getStatusColor(status: string): 'primary' | 'accent' | 'warn' {
     switch (status?.toLowerCase()) {
       case 'tax_invoice_bank_received':
@@ -91,6 +141,7 @@ export class InvoiceDetailDialogComponent implements OnInit {
       case 'paid':
       case 'sent':
         return 'primary';
+      case 'quotation':
       case 'proforma_invoice':
       case 'tax_invoice_receivable':
       case 'draft':
@@ -165,8 +216,13 @@ export class InvoiceDetailDialogComponent implements OnInit {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
+        const msg =
+          typeof err?.error?.message === 'string'
+            ? err.error.message
+            : 'Failed to download PDF';
+        this.snackBar.open(msg, 'Close', { duration: 4000, panelClass: ['snack-error'] });
       },
     });
   }

@@ -223,6 +223,13 @@
           <div *ngIf="lineItems.length === 0" class="empty-line-items">
             <p>No line items. Click "Add new line" below to add items.</p>
           </div>
+
+          <div class="line-items-actions">
+            <button mat-raised-button color="primary" type="button" (click)="addLineItem()">
+              <mat-icon>add</mat-icon>
+              Add new line
+            </button>
+          </div>
           </div>
 
           <!-- Totals sidebar -->
@@ -251,13 +258,6 @@
             <p class="total-words-value">{{ totalInWords }}</p>
           </div>
           </div>
-        </div>
-
-        <div class="line-items-actions">
-          <button mat-raised-button color="primary" type="button" (click)="addLineItem()">
-            <mat-icon>add</mat-icon>
-            Add new line
-          </button>
         </div>
       </div>
 

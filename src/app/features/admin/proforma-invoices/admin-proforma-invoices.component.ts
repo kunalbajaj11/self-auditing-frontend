@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -23,12 +24,14 @@ export class AdminProformaInvoicesComponent implements OnInit {
   ] as const;
   readonly dataSource = new MatTableDataSource<SalesInvoice>([]);
   loading = false;
+  convertingId: string | null = null;
 
   constructor(
     private readonly invoicesService: SalesInvoicesService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
     private readonly cdr: ChangeDetectorRef,
+    private readonly router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -115,23 +118,30 @@ export class AdminProformaInvoicesComponent implements OnInit {
       return;
     }
 
+    this.convertingId = invoice.id;
+    this.cdr.detectChanges();
     this.invoicesService.convertProformaToInvoice(invoice.id).subscribe({
       next: () => {
-        this.snackBar.open(
-          'Proforma Invoice converted to Tax Invoice successfully',
-          'Close',
-          {
-            duration: 3000,
-          },
-        );
+        this.convertingId = null;
+        this.cdr.detectChanges();
         this.loadProformaInvoices();
+        const ref = this.snackBar.open(
+          'Proforma Invoice converted to Tax Invoice successfully.',
+          'View in Invoices',
+          { duration: 5000 },
+        );
+        ref.onAction().subscribe(() => {
+          this.router.navigate(['/admin/sales-invoices']);
+        });
       },
       error: (error) => {
-        this.snackBar.open(
-          error?.error?.message || 'Failed to convert proforma invoice',
-          'Close',
-          { duration: 4000, panelClass: ['snack-error'] },
-        );
+        this.convertingId = null;
+        this.cdr.detectChanges();
+        const msg =
+          typeof error?.error?.message === 'string'
+            ? error.error.message
+            : error?.error?.error ?? 'Failed to convert proforma invoice to tax invoice';
+        this.snackBar.open(msg, 'Close', { duration: 4000, panelClass: ['snack-error'] });
       },
     });
   }

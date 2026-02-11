@@ -137,8 +137,9 @@ export class SalesInvoicesService {
     return this.api.delete<void>(`/sales-invoices/${id}`);
   }
 
-  getNextInvoiceNumber(): Observable<{ invoiceNumber: string }> {
-    return this.api.get<{ invoiceNumber: string }>('/sales-invoices/next-invoice-number');
+  getNextInvoiceNumber(type?: 'invoice' | 'proforma' | 'quotation'): Observable<{ invoiceNumber: string }> {
+    const params = type ? { type } : {};
+    return this.api.get<{ invoiceNumber: string }>('/sales-invoices/next-invoice-number', params);
   }
 
   listAllPayments(paymentMethod?: string): Observable<InvoicePayment[]> {

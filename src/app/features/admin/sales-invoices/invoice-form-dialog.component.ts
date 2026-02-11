@@ -273,7 +273,7 @@ export class InvoiceFormDialogComponent implements OnInit {
     forkJoin({
       org: this.organizationService.getMyOrganization(),
       template: this.settingsService.getInvoiceTemplate(),
-      nextNumber: this.invoicesService.getNextInvoiceNumber(),
+      nextNumber: this.invoicesService.getNextInvoiceNumber(this.documentType),
       numbering: this.settingsService.getNumberingSettings(),
     }).subscribe({
       next: (result) => {

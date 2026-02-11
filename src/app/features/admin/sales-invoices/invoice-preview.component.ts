@@ -201,8 +201,21 @@ export class InvoicePreviewComponent implements OnInit {
     });
   }
 
+  /** Back route and label by document type: Proforma → proforma-invoices, Quotation → quotations, else sales-invoices */
+  getBackRoute(): { url: string[]; label: string } {
+    const status = (this.previewData?.invoice?.status ?? '').toLowerCase();
+    if (status === 'proforma_invoice') {
+      return { url: ['/admin/proforma-invoices'], label: 'Back to Proforma Invoices' };
+    }
+    if (status === 'quotation') {
+      return { url: ['/admin/quotations'], label: 'Back to Quotations' };
+    }
+    return { url: ['/admin/sales-invoices'], label: 'Back to Invoices' };
+  }
+
   goBack(): void {
-    this.router.navigate(['/admin/sales-invoices']);
+    const { url } = this.getBackRoute();
+    this.router.navigate(url);
   }
 
   getDiscountAmount(): number {

@@ -73,22 +73,14 @@
                   <button mat-button (click)="viewInvoice(invoice)">View</button>
                   <button mat-button (click)="editInvoice(invoice)">Edit</button>
                   <button
-                    mat-stroked-button
-                    color="primary"
-                    (click)="convertToProforma(invoice)"
-                    matTooltip="Convert to Proforma Invoice"
-                  >
-                    <mat-icon>description</mat-icon>
-                    To Proforma
-                  </button>
-                  <button
                     mat-raised-button
                     color="primary"
-                    (click)="convertToInvoice(invoice)"
-                    matTooltip="Convert to Tax Invoice"
+                    (click)="convertToProforma(invoice)"
+                    [disabled]="convertingId === invoice.id"
+                    matTooltip="Convert to Proforma Invoice (next step: convert Proforma to Tax Invoice)"
                   >
-                    <mat-icon>transform</mat-icon>
-                    To Invoice
+                    <mat-icon>description</mat-icon>
+                    {{ convertingId === invoice.id ? 'Converting…' : 'Convert to Proforma Invoice' }}
                   </button>
                   <button mat-button color="warn" (click)="deleteInvoice(invoice)">
                     Delete
