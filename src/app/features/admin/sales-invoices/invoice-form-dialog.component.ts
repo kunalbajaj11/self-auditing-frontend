@@ -614,14 +614,19 @@ export class InvoiceFormDialogComponent implements OnInit {
   }
 
   save(asDraft = false): void {
-    if (!asDraft && (this.form.invalid || this.lineItems.length === 0)) {
+    if (this.lineItems.length === 0) {
+      this.snackBar.open('Please add at least one line item', 'Close', {
+        duration: 3000,
+        panelClass: ['snack-error'],
+      });
+      return;
+    }
+    if (!asDraft && this.form.invalid) {
       this.form.markAllAsTouched();
-      if (this.lineItems.length === 0) {
-        this.snackBar.open('Please add at least one line item', 'Close', {
-          duration: 3000,
-          panelClass: ['snack-error'],
-        });
-      }
+      this.snackBar.open('Please fill in required fields (e.g. item name for each line, invoice date).', 'Close', {
+        duration: 4000,
+        panelClass: ['snack-error'],
+      });
       return;
     }
 
