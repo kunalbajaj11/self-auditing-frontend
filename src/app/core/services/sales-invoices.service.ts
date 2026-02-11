@@ -67,6 +67,7 @@ export interface SalesInvoice {
   destination?: string | null;
   termsOfDelivery?: string | null;
   lineItems?: InvoiceLineItem[];
+  displayOptions?: Record<string, unknown> | null;
   invoiceHash?: {
     id?: string;
     hash: string;
@@ -102,6 +103,8 @@ export interface CreateSalesInvoicePayload {
   termsOfDelivery?: string;
   supplyDate?: string;
   discountAmount?: number;
+  invoiceNumber?: string;
+  displayOptions?: Record<string, unknown> | null;
 }
 
 @Injectable({ providedIn: 'root' })

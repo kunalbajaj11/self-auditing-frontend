@@ -3,15 +3,18 @@ import {
   FormBuilder,
   FormGroup,
   FormArray,
+  FormControl,
   Validators,
-  AbstractControl,
 } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SalesInvoicesService, SalesInvoice, InvoiceLineItem } from '../../../core/services/sales-invoices.service';
 import { CustomersService, Customer } from '../../../core/services/customers.service';
-import { SettingsService, TaxRate } from '../../../core/services/settings.service';
-import { Observable, of } from 'rxjs';
+import { SettingsService, TaxRate, InvoiceTemplateSettings } from '../../../core/services/settings.service';
+import { OrganizationService } from '../../../core/services/organization.service';
+import { ApiService } from '../../../core/services/api.service';
+import { Organization } from '../../../core/models/organization.model';
+import { Observable, of, forkJoin } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 @Component({
@@ -36,6 +39,15 @@ export class InvoiceFormDialogComponent implements OnInit {
     'tax_invoice_cash_received': 'Tax Invoice - Cash received',
   };
   readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
+
+  organization: Organization | null = null;
+  nextInvoiceNumber = '';
+  allowManualInvoiceNumber = false;
+  templateDefaults: InvoiceTemplateSettings | null = null;
+  logoDataUrl: string | null = null;
+  signatureDataUrl: string | null = null;
+  /** Advanced options panel starts collapsed; user expands to see header/footer/display checkboxes */
+  advancedOptionsExpanded = false;
 
   // Item suggestions autocomplete
   itemSuggestionsMap = new Map<number, Observable<Array<{
@@ -84,6 +96,27 @@ export class InvoiceFormDialogComponent implements OnInit {
     return Math.max(0, this.subtotal - this.discountAmount + this.totalVat);
   }
 
+  get totalInWords(): string {
+    const n = Math.floor(this.totalAmount);
+    const curr = this.form.get('currency')?.value || 'AED';
+    const suffix = curr === 'AED' ? 'Dirham Only' : curr + ' Only';
+    if (n === 0) return 'Zero ' + suffix;
+    if (n > 999999) return this.totalAmount.toFixed(2) + ' ' + curr;
+    return this.numberToWords(n) + ' ' + suffix;
+  }
+
+  private numberToWords(n: number): string {
+    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    if (n < 10) return ones[n];
+    if (n < 20) return teens[n - 10];
+    if (n < 100) return (tens[Math.floor(n / 10)] + ' ' + ones[n % 10]).trim();
+    if (n < 1000) return (ones[Math.floor(n / 100)] + ' Hundred ' + (n % 100 ? this.numberToWords(n % 100) : '')).trim();
+    if (n < 1000000) return (this.numberToWords(Math.floor(n / 1000)) + ' Thousand ' + (n % 1000 ? this.numberToWords(n % 1000) : '')).trim();
+    return (this.numberToWords(Math.floor(n / 1000000)) + ' Million ' + (n % 1000000 ? this.numberToWords(n % 1000000) : '')).trim();
+  }
+
   getStatusDisplayLabel(status: string): string {
     return this.statusDisplayMap[status] || status;
   }
@@ -94,17 +127,20 @@ export class InvoiceFormDialogComponent implements OnInit {
     private readonly invoicesService: SalesInvoicesService,
     private readonly customersService: CustomersService,
     private readonly settingsService: SettingsService,
+    private readonly organizationService: OrganizationService,
+    private readonly api: ApiService,
     private readonly snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) public data: SalesInvoice | null,
   ) {
     this.form = this.fb.group({
+      invoiceNumber: [''],
       customerId: [''],
       customerName: [''],
       customerTrn: [''],
       invoiceDate: [new Date().toISOString().substring(0, 10), Validators.required],
-      supplyDate: [''], // Optional: date of supply (UAE VAT - if different from invoice date)
+      supplyDate: [''],
       dueDate: [''],
-      discountAmount: [0], // Optional: discount amount (UAE VAT)
+      discountAmount: [0],
       currency: ['AED'],
       status: ['proforma_invoice'],
       description: [''],
@@ -118,7 +154,36 @@ export class InvoiceFormDialogComponent implements OnInit {
       destination: [''],
       termsOfDelivery: [''],
       lineItems: this.fb.array([]),
+      // Per-invoice display/template overrides (defaults loaded from template)
+      displayOptions: this.fb.group({
+        invoiceTitle: [''],
+        invoiceHeaderText: [''],
+        invoiceShowCompanyDetails: [true],
+        invoiceShowVatDetails: [true],
+        invoiceShowPaymentTerms: [true],
+        invoiceShowPaymentMethods: [true],
+        invoiceShowBankDetails: [false],
+        invoiceShowTermsConditions: [true],
+        invoiceDefaultPaymentTerms: ['Net 30'],
+        invoiceCustomPaymentTerms: [''],
+        invoiceDefaultNotes: [''],
+        invoiceTermsConditions: [''],
+        invoiceFooterText: [''],
+        invoiceShowFooter: [true],
+        invoiceShowItemDescription: [true],
+        invoiceShowItemQuantity: [true],
+        invoiceShowItemUnitPrice: [true],
+        invoiceShowItemTotal: [true],
+      }),
     });
+  }
+
+  get displayOptions(): FormGroup {
+    return this.form.get('displayOptions') as FormGroup;
+  }
+
+  get invoiceTitleControl(): FormControl {
+    return this.displayOptions.get('invoiceTitle') as FormControl;
   }
 
   ngOnInit(): void {
@@ -127,11 +192,81 @@ export class InvoiceFormDialogComponent implements OnInit {
     if (this.data) {
       this.loadInvoiceData();
     } else {
-      // Add one empty line item for new invoice
+      this.loadTemplateOrgAndNextNumber();
       this.addLineItem();
     }
-    // Initialize filteredItems$ with empty suggestions
     this.filteredItems$ = this.invoicesService.getItemSuggestions();
+  }
+
+  loadTemplateOrgAndNextNumber(): void {
+    forkJoin({
+      org: this.organizationService.getMyOrganization(),
+      template: this.settingsService.getInvoiceTemplate(),
+      nextNumber: this.invoicesService.getNextInvoiceNumber(),
+      numbering: this.settingsService.getNumberingSettings(),
+    }).subscribe({
+      next: (result) => {
+        this.organization = result.org;
+        this.templateDefaults = result.template;
+        this.nextInvoiceNumber = result.nextNumber?.invoiceNumber ?? '';
+        this.allowManualInvoiceNumber = result.numbering?.settings?.numberingAllowManual ?? false;
+        this.form.patchValue({
+          invoiceNumber: this.allowManualInvoiceNumber ? this.nextInvoiceNumber : '',
+        });
+        if (result.template) {
+          this.displayOptions.patchValue({
+            invoiceTitle: result.template.invoiceTitle ?? 'TAX INVOICE',
+            invoiceHeaderText: result.template.invoiceHeaderText ?? '',
+            invoiceShowCompanyDetails: result.template.invoiceShowCompanyDetails ?? true,
+            invoiceShowVatDetails: result.template.invoiceShowVatDetails ?? true,
+            invoiceShowPaymentTerms: result.template.invoiceShowPaymentTerms ?? true,
+            invoiceShowPaymentMethods: result.template.invoiceShowPaymentMethods ?? true,
+            invoiceShowBankDetails: result.template.invoiceShowBankDetails ?? false,
+            invoiceShowTermsConditions: result.template.invoiceShowTermsConditions ?? true,
+            invoiceDefaultPaymentTerms: result.template.invoiceDefaultPaymentTerms ?? 'Net 30',
+            invoiceCustomPaymentTerms: result.template.invoiceCustomPaymentTerms ?? '',
+            invoiceDefaultNotes: result.template.invoiceDefaultNotes ?? '',
+            invoiceTermsConditions: result.template.invoiceTermsConditions ?? '',
+            invoiceFooterText: result.template.invoiceFooterText ?? '',
+            invoiceShowFooter: result.template.invoiceShowFooter ?? true,
+            invoiceShowItemDescription: result.template.invoiceShowItemDescription ?? true,
+            invoiceShowItemQuantity: result.template.invoiceShowItemQuantity ?? true,
+            invoiceShowItemUnitPrice: result.template.invoiceShowItemUnitPrice ?? true,
+            invoiceShowItemTotal: result.template.invoiceShowItemTotal ?? true,
+          });
+        }
+        this.loadLogoFromSettings();
+        this.loadSignatureFromSettings();
+      },
+    });
+  }
+
+  /** Load logo image from settings (invoice template). Call whenever org/template is available. */
+  loadLogoFromSettings(): void {
+    this.api.download('/settings/invoice-template/logo').subscribe({
+      next: (blob) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          this.logoDataUrl = reader.result as string;
+        };
+        reader.readAsDataURL(blob);
+      },
+      error: () => {},
+    });
+  }
+
+  /** Load signature image from settings (invoice template). */
+  loadSignatureFromSettings(): void {
+    this.api.download('/settings/invoice-template/signature').subscribe({
+      next: (blob) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          this.signatureDataUrl = reader.result as string;
+        };
+        reader.readAsDataURL(blob);
+      },
+      error: () => {},
+    });
   }
 
   loadTaxSettings(): void {
@@ -181,6 +316,19 @@ export class InvoiceFormDialogComponent implements OnInit {
     if (!this.data) return;
 
     const invoice = this.data;
+
+    this.organizationService.getMyOrganization().subscribe({
+      next: (org) => {
+        this.organization = org;
+      },
+    });
+    this.settingsService.getInvoiceTemplate().subscribe({
+      next: (t) => {
+        this.templateDefaults = t;
+        this.loadLogoFromSettings();
+        this.loadSignatureFromSettings();
+      },
+    });
     
     // Resolve customerId from either flat field or nested relation
     const customerId = invoice.customerId || invoice.customer?.id;
@@ -211,6 +359,7 @@ export class InvoiceFormDialogComponent implements OnInit {
     }
 
     this.form.patchValue({
+      invoiceNumber: invoice.invoiceNumber || '',
       invoiceDate: invoice.invoiceDate,
       supplyDate: (invoice as any).supplyDate || '',
       dueDate: invoice.dueDate || '',
@@ -228,6 +377,30 @@ export class InvoiceFormDialogComponent implements OnInit {
       destination: (invoice as any).destination || '',
       termsOfDelivery: (invoice as any).termsOfDelivery || '',
     });
+
+    const opts = (invoice as any).displayOptions;
+    if (opts && typeof opts === 'object') {
+      this.displayOptions.patchValue({
+        invoiceTitle: opts.invoiceTitle ?? '',
+        invoiceHeaderText: opts.invoiceHeaderText ?? '',
+        invoiceShowCompanyDetails: opts.invoiceShowCompanyDetails ?? true,
+        invoiceShowVatDetails: opts.invoiceShowVatDetails ?? true,
+        invoiceShowPaymentTerms: opts.invoiceShowPaymentTerms ?? true,
+        invoiceShowPaymentMethods: opts.invoiceShowPaymentMethods ?? true,
+        invoiceShowBankDetails: opts.invoiceShowBankDetails ?? false,
+        invoiceShowTermsConditions: opts.invoiceShowTermsConditions ?? true,
+        invoiceDefaultPaymentTerms: opts.invoiceDefaultPaymentTerms ?? 'Net 30',
+        invoiceCustomPaymentTerms: opts.invoiceCustomPaymentTerms ?? '',
+        invoiceDefaultNotes: opts.invoiceDefaultNotes ?? '',
+        invoiceTermsConditions: opts.invoiceTermsConditions ?? '',
+        invoiceFooterText: opts.invoiceFooterText ?? '',
+        invoiceShowFooter: opts.invoiceShowFooter ?? true,
+        invoiceShowItemDescription: opts.invoiceShowItemDescription ?? true,
+        invoiceShowItemQuantity: opts.invoiceShowItemQuantity ?? true,
+        invoiceShowItemUnitPrice: opts.invoiceShowItemUnitPrice ?? true,
+        invoiceShowItemTotal: opts.invoiceShowItemTotal ?? true,
+      });
+    }
 
     // Load line items
     if (invoice.lineItems && invoice.lineItems.length > 0) {
@@ -440,8 +613,8 @@ export class InvoiceFormDialogComponent implements OnInit {
     }, { emitEvent: false });
   }
 
-  save(): void {
-    if (this.form.invalid || this.lineItems.length === 0) {
+  save(asDraft = false): void {
+    if (!asDraft && (this.form.invalid || this.lineItems.length === 0)) {
       this.form.markAllAsTouched();
       if (this.lineItems.length === 0) {
         this.snackBar.open('Please add at least one line item', 'Close', {
@@ -455,7 +628,6 @@ export class InvoiceFormDialogComponent implements OnInit {
     this.loading = true;
     const formValue = this.form.getRawValue();
 
-    // Prepare line items
     const lineItems = this.lineItems.controls.map((control) => {
       const value = control.getRawValue();
       return {
@@ -474,6 +646,22 @@ export class InvoiceFormDialogComponent implements OnInit {
       };
     });
 
+    const status = asDraft ? 'draft' : (formValue.status || 'proforma_invoice');
+    const displayOpts = formValue.displayOptions || {};
+    const displayOptionsPayload: Record<string, unknown> = {};
+    const keys = [
+      'invoiceTitle', 'invoiceHeaderText', 'invoiceShowCompanyDetails', 'invoiceShowVatDetails',
+      'invoiceShowPaymentTerms', 'invoiceShowPaymentMethods', 'invoiceShowBankDetails',
+      'invoiceShowTermsConditions', 'invoiceDefaultPaymentTerms', 'invoiceCustomPaymentTerms',
+      'invoiceDefaultNotes', 'invoiceTermsConditions', 'invoiceFooterText', 'invoiceShowFooter',
+      'invoiceShowItemDescription', 'invoiceShowItemQuantity', 'invoiceShowItemUnitPrice', 'invoiceShowItemTotal',
+    ];
+    keys.forEach((k) => {
+      if (displayOpts[k] !== undefined && displayOpts[k] !== null && displayOpts[k] !== '') {
+        displayOptionsPayload[k] = displayOpts[k];
+      }
+    });
+
     const payload: any = {
       customerId: formValue.customerId || undefined,
       customerName: formValue.customerName || undefined,
@@ -483,10 +671,9 @@ export class InvoiceFormDialogComponent implements OnInit {
       dueDate: formValue.dueDate || undefined,
       discountAmount: parseFloat(formValue.discountAmount || '0'),
       currency: formValue.currency || 'AED',
-      status: formValue.status || 'proforma_invoice',
+      status,
       description: formValue.description || undefined,
       notes: formValue.notes || undefined,
-      // Commercial header fields
       deliveryNote: formValue.deliveryNote || undefined,
       suppliersRef: formValue.suppliersRef || undefined,
       otherReference: formValue.otherReference || undefined,
@@ -495,10 +682,14 @@ export class InvoiceFormDialogComponent implements OnInit {
       despatchedThrough: formValue.despatchedThrough || undefined,
       destination: formValue.destination || undefined,
       termsOfDelivery: formValue.termsOfDelivery || undefined,
-      lineItems: lineItems,
+      lineItems,
+      displayOptions: Object.keys(displayOptionsPayload).length > 0 ? displayOptionsPayload : undefined,
     };
 
-    // Clean up empty strings
+    if (!this.data && formValue.invoiceNumber?.trim()) {
+      payload.invoiceNumber = formValue.invoiceNumber.trim();
+    }
+
     Object.keys(payload).forEach((key) => {
       if (payload[key] === '') {
         payload[key] = undefined;
@@ -522,6 +713,25 @@ export class InvoiceFormDialogComponent implements OnInit {
           { duration: 4000, panelClass: ['snack-error'] },
         );
       },
+    });
+  }
+
+  duplicateLineItem(index: number): void {
+    const control = this.lineItems.at(index);
+    if (!control) return;
+    const value = control.getRawValue();
+    this.addLineItem({
+      itemName: value.itemName,
+      description: value.description,
+      notes: value.notes,
+      quantity: value.quantity,
+      unitPrice: value.unitPrice,
+      unitOfMeasure: value.unitOfMeasure,
+      vatRate: value.vatRate,
+      vatTaxType: value.vatTaxType,
+      amount: value.amount,
+      vatAmount: value.vatAmount,
+      totalAmount: value.totalAmount,
     });
   }
 

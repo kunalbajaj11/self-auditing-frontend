@@ -13,69 +13,110 @@
 
   <mat-dialog-content class="invoice-form-content">
     <form [formGroup]="form">
-      <div class="form-section">
-        <h3 class="section-title">
-          <mat-icon>description</mat-icon>
-          Invoice Details
-        </h3>
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="flex-2">
-          <mat-label>Customer</mat-label>
-          <mat-select formControlName="customerId" (selectionChange)="onCustomerChange($event.value)">
-            <mat-option [value]="null">Select Customer</mat-option>
-            <mat-option *ngFor="let customer of customers" [value]="customer.id">
-              {{ customer.name }} {{ customer.customerTrn ? '(' + customer.customerTrn + ')' : '' }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Invoice Date *</mat-label>
-          <input matInput [matDatepicker]="invoiceDatePicker" formControlName="invoiceDate" placeholder="Select invoice date" required />
-          <mat-datepicker-toggle matIconSuffix [for]="invoiceDatePicker"></mat-datepicker-toggle>
-          <mat-datepicker #invoiceDatePicker></mat-datepicker>
-          <mat-error *ngIf="form.get('invoiceDate')?.hasError('required')">
-            Invoice date is required
-          </mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Due Date</mat-label>
-          <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" placeholder="Select due date" />
-          <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
-          <mat-datepicker #dueDatePicker></mat-datepicker>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Supply Date (optional)</mat-label>
-          <input matInput [matDatepicker]="supplyDatePicker" formControlName="supplyDate" placeholder="If different from invoice date" />
-          <mat-datepicker-toggle matIconSuffix [for]="supplyDatePicker"></mat-datepicker-toggle>
-          <mat-datepicker #supplyDatePicker></mat-datepicker>
-          <mat-hint>UAE VAT: date of supply if different</mat-hint>
-        </mat-form-field>
+      <!-- Header: Title + Logo (reference chunk 1) -->
+      <div class="form-section header-section">
+        <div class="title-row">
+          <mat-form-field appearance="outline" class="invoice-title-field">
+            <mat-label>Invoice title</mat-label>
+            <input matInput [formControl]="invoiceTitleControl" placeholder="Tax Invoice" />
+          </mat-form-field>
+          <div class="logo-block" *ngIf="organization || logoDataUrl">
+            <div class="logo-preview" *ngIf="logoDataUrl">
+              <img [src]="logoDataUrl" alt="Logo" class="company-logo" />
+            </div>
+            <div class="logo-placeholder" *ngIf="!logoDataUrl && organization">
+              <mat-icon>business</mat-icon>
+              <span>Logo from settings</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Customer Name</mat-label>
-          <input matInput formControlName="customerName" placeholder="Or enter manually" />
-        </mat-form-field>
+      <!-- Invoice details: No, Date, Due (reference chunk 1) -->
+      <div class="form-section invoice-details-section">
+        <h3 class="section-title">Invoice details</h3>
+        <div class="form-row details-row">
+          <mat-form-field appearance="outline" class="invoice-no-field">
+            <mat-label>Invoice No</mat-label>
+            <input
+              matInput
+              formControlName="invoiceNumber"
+              [readonly]="!!data && !allowManualInvoiceNumber"
+              [placeholder]="!data && nextInvoiceNumber ? nextInvoiceNumber : ''"
+            />
+            <mat-hint *ngIf="!data && nextInvoiceNumber">Next: {{ nextInvoiceNumber }}</mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="date-field">
+            <mat-label>Invoice Date *</mat-label>
+            <input matInput [matDatepicker]="invoiceDatePicker" formControlName="invoiceDate" required />
+            <mat-datepicker-toggle matIconSuffix [for]="invoiceDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker #invoiceDatePicker></mat-datepicker>
+            <mat-error *ngIf="form.get('invoiceDate')?.hasError('required')">Invoice date is required</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="date-field">
+            <mat-label>Due date</mat-label>
+            <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" />
+            <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker #dueDatePicker></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="date-field">
+            <mat-label>Supply date (optional)</mat-label>
+            <input matInput [matDatepicker]="supplyDatePicker" formControlName="supplyDate" />
+            <mat-datepicker-toggle matIconSuffix [for]="supplyDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker #supplyDatePicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
 
-        <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Customer TRN</mat-label>
-          <input matInput formControlName="customerTrn" />
-        </mat-form-field>
+      <!-- Billed By / Billed To cards (reference chunk 1) -->
+      <div class="form-section billed-section">
+        <div class="billed-cards">
+          <div class="billed-card">
+            <h4 class="billed-title">Billed by <span class="muted">Your details</span></h4>
+            <div class="billed-content" *ngIf="organization">
+              <p class="business-name">{{ organization.name }}</p>
+              <p *ngIf="organization.address">{{ organization.address }}</p>
+              <p *ngIf="organization.vatNumber"><strong>VAT (TRN):</strong> {{ organization.vatNumber }}</p>
+              <p *ngIf="organization.contactEmail">{{ organization.contactEmail }}</p>
+              <p *ngIf="organization.contactPerson">{{ organization.contactPerson }}</p>
+            </div>
+            <div class="billed-content" *ngIf="!organization">
+              <p class="muted">Loading…</p>
+            </div>
+          </div>
+          <div class="billed-card">
+            <h4 class="billed-title">Billed to <span class="muted">Client's details</span></h4>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Select a client</mat-label>
+              <mat-select formControlName="customerId" (selectionChange)="onCustomerChange($event.value)">
+                <mat-option [value]="null">Select a client</mat-option>
+                <mat-option *ngFor="let customer of customers" [value]="customer.id">
+                  {{ customer.name }} {{ customer.customerTrn ? '(' + customer.customerTrn + ')' : '' }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <p class="hint">Select client from the list</p>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Customer name</mat-label>
+              <input matInput formControlName="customerName" placeholder="Or enter manually" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Customer TRN</mat-label>
+              <input matInput formControlName="customerTrn" />
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
 
-        <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Currency</mat-label>
+      <!-- Currency + Status only (Configure VAT / display options moved to Advanced below) -->
+      <div class="form-section settings-row">
+        <mat-form-field appearance="outline" class="currency-field">
+          <mat-label>Currency *</mat-label>
           <mat-select formControlName="currency">
-            <mat-option *ngFor="let curr of currencies" [value]="curr">
-              {{ curr }}
-            </mat-option>
+            <mat-option *ngFor="let curr of currencies" [value]="curr">{{ curr }}</mat-option>
           </mat-select>
         </mat-form-field>
-
-        <mat-form-field appearance="outline" class="flex-1">
+        <mat-form-field appearance="outline" class="status-field">
           <mat-label>Status</mat-label>
           <mat-select formControlName="status">
             <mat-option *ngFor="let status of invoiceStatuses" [value]="status">
@@ -83,234 +124,285 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-
-        <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Discount (optional)</mat-label>
-          <input matInput type="number" formControlName="discountAmount" min="0" step="0.01" placeholder="0" />
-          <mat-hint>UAE VAT: if applicable</mat-hint>
-        </mat-form-field>
       </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Description</mat-label>
-        <textarea matInput formControlName="description" rows="2"></textarea>
-      </mat-form-field>
-    </div>
+      <!-- Line items: title row, then table + totals row, then Add button below -->
+      <div class="form-section line-items-section">
+        <h3 class="section-title">Line items</h3>
 
-    <div class="form-section">
-      <h3 class="section-title">
-        <mat-icon>business_center</mat-icon>
-        Commercial Details
-      </h3>
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Delivery Note</mat-label>
-          <input matInput formControlName="deliveryNote" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Supplier's Ref</mat-label>
-          <input matInput formControlName="suppliersRef" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Other Reference</mat-label>
-          <input matInput formControlName="otherReference" />
-        </mat-form-field>
-      </div>
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Buyer Order No.</mat-label>
-          <input matInput formControlName="buyerOrderNo" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Dated</mat-label>
-          <input
-            matInput
-            [matDatepicker]="buyerOrderDatePicker"
-            formControlName="buyerOrderDate"
-            placeholder="Select date"
-          />
-          <mat-datepicker-toggle
-            matIconSuffix
-            [for]="buyerOrderDatePicker"
-          ></mat-datepicker-toggle>
-          <mat-datepicker #buyerOrderDatePicker></mat-datepicker>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Despatched Through</mat-label>
-          <input matInput formControlName="despatchedThrough" />
-        </mat-form-field>
-      </div>
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Destination</mat-label>
-          <input matInput formControlName="destination" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="flex-1 full-width">
-          <mat-label>Terms of Delivery</mat-label>
-          <textarea
-            matInput
-            formControlName="termsOfDelivery"
-            rows="2"
-          ></textarea>
-        </mat-form-field>
-      </div>
-    </div>
+        <div class="line-items-and-totals-row">
+          <div class="line-items-container" formArrayName="lineItems">
+          <mat-autocomplete
+            #itemAuto="matAutocomplete"
+            [displayWith]="displayItemName"
+            (optionSelected)="onItemSelected(activeItemIndex !== null ? activeItemIndex : 0, $event.option.value)"
+            [panelWidth]="'auto'"
+          >
+            <mat-option *ngFor="let suggestion of filteredItems$ | async" [value]="suggestion">
+              <div class="item-suggestion">
+                <span class="item-name">{{ suggestion.itemName }}</span>
+                <span class="item-details">
+                  {{ form.get('currency')?.value || 'AED' }} {{ suggestion.unitPrice | number:'1.2-2' }} · VAT: {{ suggestion.vatRate }}%
+                </span>
+              </div>
+            </mat-option>
+          </mat-autocomplete>
 
-    <div class="form-section">
-      <div class="section-header">
-        <h3 class="section-title">
-          <mat-icon>list_alt</mat-icon>
-          Line Items
-        </h3>
-        <button mat-button type="button" color="primary" (click)="addLineItem()">
-          <mat-icon>add</mat-icon>
-          Add Item
-        </button>
-      </div>
+          <table class="line-items-table" *ngIf="lineItems.length > 0">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>VAT rate</th>
+                <th>Quantity</th>
+                <th>Rate</th>
+                <th>Amount</th>
+                <th>VAT</th>
+                <th>Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let lineItem of lineItems.controls; let i = index" [formGroupName]="i" class="line-item-row">
+                <td>
+                  <div class="item-name-cell">
+                    <input
+                      class="form-input"
+                      formControlName="itemName"
+                      placeholder="Item name / SKU"
+                      [matAutocomplete]="itemAuto"
+                      (focus)="onItemNameFocus(i)"
+                    />
+                    <small class="error-text" *ngIf="lineItem.get('itemName')?.hasError('required') && lineItem.get('itemName')?.touched">Required</small>
+                  </div>
+                  <input class="form-input desc-input" formControlName="description" placeholder="Description" />
+                  <select class="form-select unit-select" formControlName="unitOfMeasure">
+                    <option value="unit">Unit</option>
+                    <option value="kg">kg</option>
+                    <option value="hour">hour</option>
+                    <option value="day">day</option>
+                    <option value="m2">m²</option>
+                  </select>
+                </td>
+                <td class="vat-rate-cell">
+                  <span class="vat-rate-input-wrap">
+                    <input class="form-input num" type="number" formControlName="vatRate" step="0.01" min="0" max="100" />
+                    <span class="vat-rate-suffix">%</span>
+                  </span>
+                </td>
+                <td><input class="form-input num" type="number" formControlName="quantity" step="0.001" min="0.001" /></td>
+                <td><input class="form-input num" type="number" formControlName="unitPrice" step="0.01" min="0" /></td>
+                <td class="readonly">{{ lineItem.get('amount')?.value | number:'1.2-2' }}</td>
+                <td class="readonly">{{ lineItem.get('vatAmount')?.value | number:'1.2-2' }}</td>
+                <td class="readonly total-cell">{{ lineItem.get('totalAmount')?.value | number:'1.2-2' }}</td>
+                <td class="actions-cell">
+                  <button mat-icon-button type="button" (click)="duplicateLineItem(i)" matTooltip="Duplicate">
+                    <mat-icon>content_copy</mat-icon>
+                  </button>
+                  <button mat-icon-button type="button" color="warn" (click)="removeLineItem(i)" matTooltip="Remove">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
-      <div class="line-items-container" formArrayName="lineItems">
-        <!-- Shared autocomplete panel -->
-        <mat-autocomplete
-          #itemAuto="matAutocomplete"
-          [displayWith]="displayItemName"
-          (optionSelected)="onItemSelected(activeItemIndex !== null ? activeItemIndex : 0, $event.option.value)"
-          [panelWidth]="'auto'"
-        >
-          <mat-option *ngFor="let suggestion of filteredItems$ | async" [value]="suggestion">
-            <div class="item-suggestion">
-              <span class="item-name">{{ suggestion.itemName }}</span>
-              <span *ngIf="suggestion.description" class="item-description">{{ suggestion.description }}</span>
-              <span class="item-details">
-                {{ form.get('currency')?.value || 'AED' }} {{ suggestion.unitPrice | number: '1.2-2' }} 
-                · VAT: {{ suggestion.vatRate }}% 
-                · Used {{ suggestion.usageCount }} time{{ suggestion.usageCount !== 1 ? 's' : '' }}
-              </span>
+          <div *ngIf="lineItems.length === 0" class="empty-line-items">
+            <p>No line items. Click "Add new line" below to add items.</p>
+          </div>
+          </div>
+
+          <!-- Totals sidebar -->
+          <div class="totals-sidebar" *ngIf="lineItems.length > 0">
+          <div class="totals-card">
+            <h4 class="totals-card-title">Show total in PDF</h4>
+            <div class="totals-row">
+              <span class="total-label">Amount</span>
+              <span class="total-value">{{ subtotal | number:'1.2-2' }} {{ form.get('currency')?.value }}</span>
             </div>
-          </mat-option>
-        </mat-autocomplete>
+            <div class="totals-row">
+              <span class="total-label">VAT</span>
+              <span class="total-value">{{ totalVat | number:'1.2-2' }} {{ form.get('currency')?.value }}</span>
+            </div>
+            <mat-form-field appearance="outline" class="discount-field">
+              <mat-label>Discount</mat-label>
+              <input matInput type="number" formControlName="discountAmount" min="0" step="0.01" />
+            </mat-form-field>
+            <div class="totals-row total-amount">
+              <span class="total-label">Total ({{ form.get('currency')?.value }})</span>
+              <span class="total-value">{{ totalAmount | number:'1.2-2' }}</span>
+            </div>
+          </div>
+          <div class="totals-card total-words">
+            <h4 class="totals-card-title">Total in words</h4>
+            <p class="total-words-value">{{ totalInWords }}</p>
+          </div>
+          </div>
+        </div>
 
-        <table class="line-items-table" *ngIf="lineItems.length > 0">
-          <thead>
-            <tr>
-              <th>Item Name *</th>
-              <th>Description</th>
-              <th>Notes</th>
-              <th>Qty</th>
-              <th>Unit</th>
-              <th>Unit Price *</th>
-              <th>VAT Rate</th>
-              <th>VAT Type</th>
-              <th>Amount</th>
-              <th>VAT</th>
-              <th>Total</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let lineItem of lineItems.controls; let i = index" [formGroupName]="i">
-              <td>
-                <div class="item-name-autocomplete">
-                  <input
-                    class="form-input"
-                    formControlName="itemName"
-                    placeholder="Item name"
-                    [matAutocomplete]="itemAuto"
-                    (focus)="onItemNameFocus(i)"
-                  />
+        <div class="line-items-actions">
+          <button mat-raised-button color="primary" type="button" (click)="addLineItem()">
+            <mat-icon>add</mat-icon>
+            Add new line
+          </button>
+        </div>
+      </div>
+
+      <!-- Commercial details (existing) -->
+      <div class="form-section">
+        <h3 class="section-title">Commercial details</h3>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="flex-1">
+            <mat-label>Delivery note</mat-label>
+            <input matInput formControlName="deliveryNote" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="flex-1">
+            <mat-label>Supplier's ref</mat-label>
+            <input matInput formControlName="suppliersRef" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="flex-1">
+            <mat-label>Other reference</mat-label>
+            <input matInput formControlName="otherReference" />
+          </mat-form-field>
+        </div>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="flex-1">
+            <mat-label>Buyer order no.</mat-label>
+            <input matInput formControlName="buyerOrderNo" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="flex-1">
+            <mat-label>Dated</mat-label>
+            <input matInput [matDatepicker]="buyerOrderDatePicker" formControlName="buyerOrderDate" />
+            <mat-datepicker-toggle matIconSuffix [for]="buyerOrderDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker #buyerOrderDatePicker></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="flex-1">
+            <mat-label>Despatched through</mat-label>
+            <input matInput formControlName="despatchedThrough" />
+          </mat-form-field>
+        </div>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="flex-1">
+            <mat-label>Destination</mat-label>
+            <input matInput formControlName="destination" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="flex-2">
+            <mat-label>Terms of delivery</mat-label>
+            <textarea matInput formControlName="termsOfDelivery" rows="2"></textarea>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Notes & description -->
+      <div class="form-section">
+        <h3 class="section-title">Notes</h3>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="2"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Notes</mat-label>
+          <textarea matInput formControlName="notes" rows="3"></textarea>
+        </mat-form-field>
+      </div>
+
+      <!-- Advanced options: header, footer, Configure VAT (display checkboxes), payment & terms -->
+      <div class="form-section advanced-section">
+        <h3 class="section-title">Advanced options</h3>
+        <p class="section-hint">Header, footer, and what to show on the invoice. Override template defaults for this invoice only.</p>
+
+        <mat-expansion-panel class="advanced-panel" [expanded]="advancedOptionsExpanded">
+          <mat-expansion-panel-header>
+            <mat-panel-title>Header, footer &amp; display options</mat-panel-title>
+            <mat-panel-description>Invoice title, header text, footer, and show/hide checkboxes</mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="advanced-content" formGroupName="displayOptions">
+            <div class="advanced-subsection">
+              <h4 class="subsection-title">Header (customisable)</h4>
+              <div class="advanced-fields">
+                <mat-form-field appearance="outline">
+                  <mat-label>Invoice title</mat-label>
+                  <input matInput formControlName="invoiceTitle" placeholder="e.g. TAX INVOICE" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="header-text-field">
+                  <mat-label>Header text</mat-label>
+                  <input matInput formControlName="invoiceHeaderText" placeholder="Company name or custom header" />
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="advanced-subsection">
+              <h4 class="subsection-title">What to show on invoice</h4>
+              <div class="checkbox-row">
+                <mat-checkbox formControlName="invoiceShowCompanyDetails">Show company details</mat-checkbox>
+                <mat-checkbox formControlName="invoiceShowVatDetails">Show VAT details</mat-checkbox>
+                <mat-checkbox formControlName="invoiceShowBankDetails">Show bank details</mat-checkbox>
+                <mat-checkbox formControlName="invoiceShowPaymentTerms">Show payment terms</mat-checkbox>
+                <mat-checkbox formControlName="invoiceShowPaymentMethods">Show payment methods</mat-checkbox>
+                <mat-checkbox formControlName="invoiceShowTermsConditions">Show terms &amp; conditions</mat-checkbox>
+                <mat-checkbox formControlName="invoiceShowFooter">Show footer</mat-checkbox>
+              </div>
+              <div class="checkbox-row">
+                <mat-checkbox formControlName="invoiceShowItemDescription">Show item description</mat-checkbox>
+                <mat-checkbox formControlName="invoiceShowItemQuantity">Show item quantity</mat-checkbox>
+                <mat-checkbox formControlName="invoiceShowItemUnitPrice">Show unit price</mat-checkbox>
+                <mat-checkbox formControlName="invoiceShowItemTotal">Show item total</mat-checkbox>
+              </div>
+            </div>
+
+            <div class="advanced-subsection">
+              <h4 class="subsection-title">Footer &amp; terms (customisable)</h4>
+              <div class="advanced-fields">
+                <mat-form-field appearance="outline">
+                  <mat-label>Default payment terms</mat-label>
+                  <input matInput formControlName="invoiceDefaultPaymentTerms" placeholder="e.g. Net 30" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Terms &amp; conditions</mat-label>
+                  <textarea matInput formControlName="invoiceTermsConditions" rows="3" placeholder="Optional terms for this invoice"></textarea>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Footer text</mat-label>
+                  <textarea matInput formControlName="invoiceFooterText" rows="2" placeholder="Text shown at bottom of invoice"></textarea>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="advanced-subsection signature-subsection">
+              <h4 class="subsection-title">Signature</h4>
+              <p class="section-hint">Signature from settings (shown on PDF). Upload in Settings → Invoice template.</p>
+              <div class="signature-block" *ngIf="organization || signatureDataUrl">
+                <div class="signature-preview" *ngIf="signatureDataUrl">
+                  <img [src]="signatureDataUrl" alt="Signature" class="signature-image" />
                 </div>
-                <small class="error-text" *ngIf="lineItem.get('itemName')?.hasError('required') && lineItem.get('itemName')?.touched">
-                  Required
-                </small>
-              </td>
-              <td>
-                <input class="form-input" formControlName="description" placeholder="Description" />
-              </td>
-              <td>
-                <input class="form-input" formControlName="notes" placeholder="Optional notes" />
-              </td>
-              <td>
-                <input class="form-input" type="number" formControlName="quantity" step="0.001" min="0.001" style="width: 70px;" />
-              </td>
-              <td>
-                <input class="form-input" formControlName="unitOfMeasure" placeholder="unit" style="width: 70px;" />
-              </td>
-              <td>
-                <input class="form-input" type="number" formControlName="unitPrice" step="0.01" min="0" style="width: 100px;" />
-              </td>
-              <td>
-                <input class="form-input" type="number" formControlName="vatRate" step="0.01" min="0" max="100" style="width: 70px;" />
-              </td>
-              <td>
-                <select class="form-select" formControlName="vatTaxType" style="width: 120px;">
-                  <option *ngFor="let type of vatTaxTypes" [value]="type">
-                    {{ type }}
-                  </option>
-                </select>
-              </td>
-              <td class="readonly">{{ lineItem.get('amount')?.value | number: '1.2-2' }}</td>
-              <td class="readonly">{{ lineItem.get('vatAmount')?.value | number: '1.2-2' }}</td>
-              <td class="readonly">{{ lineItem.get('totalAmount')?.value | number: '1.2-2' }}</td>
-              <td>
-                <button mat-icon-button type="button" color="warn" (click)="removeLineItem(i)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div *ngIf="lineItems.length === 0" class="empty-line-items">
-          <p>No line items. Click "Add Item" to add items to this invoice.</p>
-        </div>
+                <div class="signature-placeholder" *ngIf="!signatureDataUrl && organization">
+                  <mat-icon>draw</mat-icon>
+                  <span>Signature from settings</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-expansion-panel>
       </div>
-
-      <!-- Totals -->
-      <div class="totals-section" *ngIf="lineItems.length > 0">
-        <div class="totals-row">
-          <span class="total-label">Subtotal:</span>
-          <span class="total-value">{{ subtotal | number: '1.2-2' }} {{ form.get('currency')?.value }}</span>
-        </div>
-        <div class="totals-row" *ngIf="discountAmount > 0">
-          <span class="total-label">Discount:</span>
-          <span class="total-value">-{{ discountAmount | number: '1.2-2' }} {{ form.get('currency')?.value }}</span>
-        </div>
-        <div class="totals-row">
-          <span class="total-label">Total VAT:</span>
-          <span class="total-value">{{ totalVat | number: '1.2-2' }} {{ form.get('currency')?.value }}</span>
-        </div>
-        <div class="totals-row total-amount">
-          <span class="total-label">Total Amount:</span>
-          <span class="total-value">{{ totalAmount | number: '1.2-2' }} {{ form.get('currency')?.value }}</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-section">
-      <h3 class="section-title">
-        <mat-icon>notes</mat-icon>
-        Notes
-      </h3>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Notes</mat-label>
-        <textarea matInput formControlName="notes" rows="3"></textarea>
-      </mat-form-field>
-    </div>
-  </form>
-</mat-dialog-content>
+    </form>
+  </mat-dialog-content>
 
   <mat-dialog-actions class="dialog-actions" align="end">
     <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+    <button mat-button (click)="save(true)" [disabled]="loading || lineItems.length === 0" type="button">
+      Save as draft
+    </button>
     <button
       mat-raised-button
       color="primary"
-      (click)="save()"
+      (click)="save(false)"
       [disabled]="form.invalid || loading || lineItems.length === 0"
       class="submit-btn"
+      type="button"
     >
       <mat-spinner *ngIf="loading" diameter="20" class="inline-spinner"></mat-spinner>
       <mat-icon *ngIf="!loading">{{ data ? 'save' : 'add_circle' }}</mat-icon>
-      <span *ngIf="!loading">{{ data ? 'Update' : 'Create' }}</span>
+      <span *ngIf="!loading">{{ data ? 'Update' : 'Save & continue' }}</span>
     </button>
   </mat-dialog-actions>
 </div>
-
