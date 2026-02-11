@@ -31,13 +31,21 @@ export class InvoiceFormDialogComponent implements OnInit {
   defaultTaxRate = 5; // Fallback default
 
   readonly vatTaxTypes = ['STANDARD', 'ZERO_RATED', 'EXEMPT', 'REVERSE_CHARGE'];
-  readonly invoiceStatuses = ['proforma_invoice', 'tax_invoice_receivable', 'tax_invoice_cash_received'];
+  /** Status options for Tax Invoice screen only (Receivable, Bank Received, Cash Received). */
+  readonly invoiceStatuses = [
+    'tax_invoice_receivable',
+    'tax_invoice_bank_received',
+    'tax_invoice_cash_received',
+  ];
   readonly statusDisplayMap: Record<string, string> = {
-    'proforma_invoice': 'Performa Invoice',
-    'tax_invoice_receivable': 'Tax Invoice - Receivable',
-    'tax_invoice_bank_received': 'Tax Invoice - Bank Received', // Kept for backward compatibility
-    'tax_invoice_cash_received': 'Tax Invoice - Cash received',
+    'proforma_invoice': 'Proforma Invoice',
+    'quotation': 'Quotation',
+    'tax_invoice_receivable': 'Receivable',
+    'tax_invoice_bank_received': 'Bank Received',
+    'tax_invoice_cash_received': 'Cash Received',
   };
+  /** When opened from Proforma or Quotation screen, status is fixed; no dropdown. */
+  documentType: 'invoice' | 'proforma' | 'quotation' = 'invoice';
   readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
 
   organization: Organization | null = null;
@@ -81,11 +89,18 @@ export class InvoiceFormDialogComponent implements OnInit {
     }, 0);
   }
 
+  /** Sum of line-item VAT amounts (before discount scaling). */
   get totalVat(): number {
-    return this.lineItems.controls.reduce((sum, control) => {
+    const lineVatSum = this.lineItems.controls.reduce((sum, control) => {
       const vatAmount = parseFloat(control.get('vatAmount')?.value || '0');
       return sum + vatAmount;
     }, 0);
+    // VAT is calculated on (amount - discount): scale VAT by taxable base / subtotal
+    const sub = this.subtotal;
+    const discount = this.discountAmount;
+    if (sub <= 0) return 0;
+    const taxableBase = Math.max(0, sub - discount);
+    return lineVatSum * (taxableBase / sub);
   }
 
   get discountAmount(): number {
@@ -121,6 +136,58 @@ export class InvoiceFormDialogComponent implements OnInit {
     return this.statusDisplayMap[status] || status;
   }
 
+  /** Labels and placeholders by document type (Invoice, Proforma Invoice, Quotation). */
+  get documentTitleLabel(): string {
+    return this.documentType === 'proforma' ? 'Proforma Invoice' : this.documentType === 'quotation' ? 'Quotation' : 'Invoice';
+  }
+  get documentNumberLabel(): string {
+    return this.documentType === 'proforma' ? 'Proforma invoice No' : this.documentType === 'quotation' ? 'Quotation No' : 'Invoice No';
+  }
+  get documentDetailsSectionLabel(): string {
+    return this.documentType === 'proforma' ? 'Proforma invoice details' : this.documentType === 'quotation' ? 'Quotation details' : 'Invoice details';
+  }
+  get documentTitleFieldLabel(): string {
+    return this.documentType === 'proforma' ? 'Proforma invoice title' : this.documentType === 'quotation' ? 'Quotation title' : 'Invoice title';
+  }
+  get documentTitlePlaceholder(): string {
+    return this.documentType === 'proforma' ? 'Proforma Invoice' : this.documentType === 'quotation' ? 'Quotation' : 'Tax Invoice';
+  }
+  get documentTitlePlaceholderShort(): string {
+    return this.documentType === 'proforma' ? 'e.g. Proforma Invoice' : this.documentType === 'quotation' ? 'e.g. Quotation' : 'e.g. TAX INVOICE';
+  }
+  get nextNumberHintLabel(): string {
+    return this.documentType === 'proforma' ? 'Next proforma invoice no:' : this.documentType === 'quotation' ? 'Next quotation no:' : 'Next:';
+  }
+  get documentWord(): string {
+    return this.documentType === 'proforma' ? 'proforma invoice' : this.documentType === 'quotation' ? 'quotation' : 'invoice';
+  }
+  get dateRequiredError(): string {
+    return this.documentType === 'invoice' ? 'Invoice date is required' : 'Date is required';
+  }
+  get dueDateLabel(): string {
+    return this.documentType === 'quotation' ? 'Valid until' : 'Due date';
+  }
+
+  /** Resolve document type from dialog data (invoice = tax invoice screen, proforma, quotation). */
+  private resolveDocumentType(
+    data: (SalesInvoice & { documentType?: 'proforma' | 'quotation' }) | { documentType: 'proforma' | 'quotation' } | null,
+  ): 'invoice' | 'proforma' | 'quotation' {
+    if (!data) return 'invoice';
+    const docType = (data as { documentType?: 'proforma' | 'quotation' }).documentType;
+    if (docType === 'proforma' || docType === 'quotation') return docType;
+    const status = (data as SalesInvoice).status;
+    if (status === 'quotation') return 'quotation';
+    if (status === 'proforma_invoice') return 'proforma';
+    return 'invoice';
+  }
+
+  /** Invoice entity when editing (data may be wrapped with documentType). */
+  get invoice(): SalesInvoice | null {
+    const d = this.data;
+    if (!d || typeof (d as any).id !== 'string') return null;
+    return d as SalesInvoice;
+  }
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly dialogRef: MatDialogRef<InvoiceFormDialogComponent>,
@@ -130,8 +197,10 @@ export class InvoiceFormDialogComponent implements OnInit {
     private readonly organizationService: OrganizationService,
     private readonly api: ApiService,
     private readonly snackBar: MatSnackBar,
-    @Inject(MAT_DIALOG_DATA) public data: SalesInvoice | null,
+    @Inject(MAT_DIALOG_DATA) public data: (SalesInvoice & { documentType?: 'proforma' | 'quotation' }) | { documentType: 'proforma' | 'quotation' } | null,
   ) {
+    this.documentType = this.resolveDocumentType(data);
+    const defaultStatus = this.documentType === 'quotation' ? 'quotation' : this.documentType === 'proforma' ? 'proforma_invoice' : 'tax_invoice_receivable';
     this.form = this.fb.group({
       invoiceNumber: [''],
       customerId: [''],
@@ -142,7 +211,7 @@ export class InvoiceFormDialogComponent implements OnInit {
       dueDate: [''],
       discountAmount: [0],
       currency: ['AED'],
-      status: ['proforma_invoice'],
+      status: [defaultStatus],
       description: [''],
       notes: [''],
       deliveryNote: [''],
@@ -189,7 +258,7 @@ export class InvoiceFormDialogComponent implements OnInit {
   ngOnInit(): void {
     this.loadCustomers();
     this.loadTaxSettings();
-    if (this.data) {
+    if (this.invoice) {
       this.loadInvoiceData();
     } else {
       this.loadTemplateOrgAndNextNumber();
@@ -214,8 +283,14 @@ export class InvoiceFormDialogComponent implements OnInit {
           invoiceNumber: this.allowManualInvoiceNumber ? this.nextInvoiceNumber : '',
         });
         if (result.template) {
+          const defaultTitle =
+            this.documentType === 'proforma'
+              ? 'Proforma Invoice'
+              : this.documentType === 'quotation'
+                ? 'Quotation'
+                : (result.template.invoiceTitle ?? 'TAX INVOICE');
           this.displayOptions.patchValue({
-            invoiceTitle: result.template.invoiceTitle ?? 'TAX INVOICE',
+            invoiceTitle: defaultTitle,
             invoiceHeaderText: result.template.invoiceHeaderText ?? '',
             invoiceShowCompanyDetails: result.template.invoiceShowCompanyDetails ?? true,
             invoiceShowVatDetails: result.template.invoiceShowVatDetails ?? true,
@@ -234,6 +309,13 @@ export class InvoiceFormDialogComponent implements OnInit {
             invoiceShowItemUnitPrice: result.template.invoiceShowItemUnitPrice ?? true,
             invoiceShowItemTotal: result.template.invoiceShowItemTotal ?? true,
           });
+        } else {
+          // No template: set default title by document type for new proforma/quotation
+          if (this.documentType === 'proforma') {
+            this.displayOptions.patchValue({ invoiceTitle: 'Proforma Invoice' });
+          } else if (this.documentType === 'quotation') {
+            this.displayOptions.patchValue({ invoiceTitle: 'Quotation' });
+          }
         }
         this.loadLogoFromSettings();
         this.loadSignatureFromSettings();
@@ -313,9 +395,8 @@ export class InvoiceFormDialogComponent implements OnInit {
   }
 
   loadInvoiceData(): void {
-    if (!this.data) return;
-
-    const invoice = this.data;
+    const invoice = this.invoice;
+    if (!invoice) return;
 
     this.organizationService.getMyOrganization().subscribe({
       next: (org) => {
@@ -651,7 +732,13 @@ export class InvoiceFormDialogComponent implements OnInit {
       };
     });
 
-    const status = asDraft ? 'draft' : (formValue.status || 'proforma_invoice');
+    const status = asDraft
+      ? 'draft'
+      : this.documentType === 'proforma'
+        ? 'proforma_invoice'
+        : this.documentType === 'quotation'
+          ? 'quotation'
+          : (formValue.status || 'tax_invoice_receivable');
     const displayOpts = formValue.displayOptions || {};
     const displayOptionsPayload: Record<string, unknown> = {};
     const keys = [
@@ -691,7 +778,7 @@ export class InvoiceFormDialogComponent implements OnInit {
       displayOptions: Object.keys(displayOptionsPayload).length > 0 ? displayOptionsPayload : undefined,
     };
 
-    if (!this.data && formValue.invoiceNumber?.trim()) {
+    if (!this.invoice && formValue.invoiceNumber?.trim()) {
       payload.invoiceNumber = formValue.invoiceNumber.trim();
     }
 
@@ -701,8 +788,8 @@ export class InvoiceFormDialogComponent implements OnInit {
       }
     });
 
-    const operation = this.data
-      ? this.invoicesService.updateInvoice(this.data.id, payload)
+    const operation = this.invoice
+      ? this.invoicesService.updateInvoice(this.invoice.id, payload)
       : this.invoicesService.createInvoice(payload);
 
     operation.subscribe({

@@ -58,6 +58,7 @@ const routes: Routes = [
               { label: 'Sales Order', route: '/admin/sales-orders' },
               { label: 'Delivery Challan', route: '/admin/delivery-challans' },
               { label: 'Invoices', route: '/admin/sales-invoices' },
+              { label: 'Proforma Invoice', route: '/admin/proforma-invoices' },
               { label: 'Quotations', route: '/admin/quotations' },
               { label: 'Payments Received', route: '/admin/sales-invoices', queryParams: { filter: 'payments' } },
               { label: 'Credit Notes', route: '/admin/credit-notes' },

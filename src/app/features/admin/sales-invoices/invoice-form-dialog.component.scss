@@ -459,9 +459,32 @@ mat-dialog-content {
   .actions-cell {
     white-space: nowrap;
     vertical-align: middle !important;
+    min-width: 100px;
+    width: 100px;
+    text-align: center;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
 
     button {
       margin: 0 2px;
+      flex-shrink: 0;
+
+      mat-icon {
+        font-size: 22px !important;
+        width: 22px !important;
+        height: 22px !important;
+      }
+
+      // Remove button: ensure warn/red icon is visible
+      &[color='warn'] mat-icon,
+      &.mat-warn mat-icon {
+        color: #d32f2f !important;
+      }
+
+      // Duplicate button: ensure icon is visible (neutral dark)
+      &:not([color='warn']):not(.mat-warn) mat-icon {
+        color: #546e7a !important;
+      }
     }
   }
 }
@@ -516,6 +539,37 @@ mat-dialog-content {
   margin-bottom: 16px;
 }
 
+// Resizable textareas – allow vertical resize (e.g. for long terms & conditions)
+// Fix Material wrapper/infix so the native resize handle stays attached and works
+.invoice-form-dialog {
+  textarea {
+    resize: vertical !important;
+    min-height: 4.5rem;
+    max-height: 40rem;
+    display: block !important;
+    width: 100% !important;
+  }
+  .terms-conditions-textarea {
+    min-height: 12rem; // ~10 lines for 10 points, user can resize further
+  }
+
+  // Form fields containing textarea: let wrapper and infix grow so resize handle stays at bottom-right
+  ::ng-deep .mat-mdc-form-field:has(textarea) {
+    .mat-mdc-text-field-wrapper {
+      max-height: none !important;
+      overflow: visible !important;
+    }
+    .mat-mdc-form-field-infix {
+      min-height: auto !important;
+      align-items: flex-start !important;
+      padding-bottom: 8px !important;
+    }
+    textarea {
+      flex: 1 1 auto !important;
+    }
+  }
+}
+
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -534,6 +588,7 @@ mat-dialog-content {
 
 .line-items-table {
   width: 100%;
+  min-width: 720px; // Prevent table from shrinking so much that actions column is clipped
   table-layout: fixed;
   border-collapse: collapse;
   font-size: 0.75rem;
@@ -563,7 +618,8 @@ mat-dialog-content {
     th:nth-child(5),
     th:nth-child(6),
     th:nth-child(7) { width: 12%; min-width: 88px; text-align: right; }
-    th:nth-child(8) { width: 8%; min-width: 72px; }
+    // Fixed width so delete/duplicate icons are never clipped
+    th:nth-child(8) { width: 100px; min-width: 100px; max-width: 100px; text-align: center; box-sizing: border-box; }
   }
 
   tbody {
@@ -581,6 +637,14 @@ mat-dialog-content {
         &:nth-child(3),
         &:nth-child(4) {
           text-align: right;
+        }
+
+        &:nth-child(8) {
+          width: 100px;
+          min-width: 100px;
+          max-width: 100px;
+          overflow: visible;
+          box-sizing: border-box;
         }
 
         .form-input,
@@ -669,7 +733,8 @@ mat-dialog-content {
 
 .totals-row {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: baseline;
   gap: 16px;
   margin-bottom: 8px;
 
@@ -678,15 +743,16 @@ mat-dialog-content {
   }
 
   .total-label {
+    font-size: 0.75rem;
     font-weight: 500;
     color: $text-secondary;
-    min-width: 120px;
+    flex-shrink: 0;
   }
 
   .total-value {
+    font-size: 0.8125rem;
     font-weight: 600;
     color: $text-primary;
-    min-width: 120px;
     text-align: right;
   }
 
@@ -697,7 +763,7 @@ mat-dialog-content {
 
     .total-label,
     .total-value {
-      font-size: 1.1rem;
+      font-size: 0.875rem;
       font-weight: 700;
     }
   }

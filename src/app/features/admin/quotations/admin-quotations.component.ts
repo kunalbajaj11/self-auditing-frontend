@@ -3,7 +3,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales-invoices.service';
-import { QuotationFormDialogComponent } from './quotation-form-dialog.component';
+import { InvoiceFormDialogComponent } from '../sales-invoices/invoice-form-dialog.component';
 import { InvoiceDetailDialogComponent } from '../sales-invoices/invoice-detail-dialog.component';
 
 @Component({
@@ -58,11 +58,11 @@ export class AdminQuotationsComponent implements OnInit {
   }
 
   openCreateDialog(): void {
-    const dialogRef = this.dialog.open(QuotationFormDialogComponent, {
-      width: '900px',
+    const dialogRef = this.dialog.open(InvoiceFormDialogComponent, {
+      width: '1200px',
       maxWidth: '95vw',
       maxHeight: '90vh',
-      data: null,
+      data: { documentType: 'quotation' as const },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
@@ -85,11 +85,11 @@ export class AdminQuotationsComponent implements OnInit {
   }
 
   editInvoice(invoice: SalesInvoice): void {
-    const dialogRef = this.dialog.open(QuotationFormDialogComponent, {
-      width: '900px',
+    const dialogRef = this.dialog.open(InvoiceFormDialogComponent, {
+      width: '1200px',
       maxWidth: '95vw',
       maxHeight: '90vh',
-      data: invoice,
+      data: { ...invoice, documentType: 'quotation' as const },
     });
 
     dialogRef.afterClosed().subscribe((result) => {

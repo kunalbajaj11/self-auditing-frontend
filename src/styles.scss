@@ -790,9 +790,9 @@ textarea.mat-mdc-input-element {
     line-height: 1.5 !important;
     display: inline-block !important;
   }
-  
-  // Ensure text field wrapper has proper height
-  .mat-mdc-text-field-wrapper {
+
+  // Only apply fixed height to single-line inputs; textarea form fields must be allowed to grow
+  &:not(:has(textarea)) .mat-mdc-text-field-wrapper {
     max-height: 40px !important;
   }
 }

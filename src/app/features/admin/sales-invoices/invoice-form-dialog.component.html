@@ -3,10 +3,18 @@
     <div class="header-text">
       <h2 mat-dialog-title>
         <mat-icon>receipt</mat-icon>
-        {{ data ? 'Edit Invoice' : 'Create Invoice' }}
+        {{ (documentType === 'proforma' ? (invoice ? 'Edit Proforma Invoice' : 'Create Proforma Invoice') : documentType === 'quotation' ? (invoice ? 'Edit Quotation' : 'Create Quotation') : (invoice ? 'Edit Invoice' : 'Create Invoice')) }}
       </h2>
       <p class="dialog-subtitle">
-        {{ data ? 'Update invoice details and line items.' : 'Create a new sales invoice for your customer.' }}
+        <ng-container *ngIf="documentType === 'proforma'">
+          {{ invoice ? 'Update proforma invoice details and line items.' : 'Create a proforma invoice for your customer.' }}
+        </ng-container>
+        <ng-container *ngIf="documentType === 'quotation'">
+          {{ invoice ? 'Update quotation details and line items.' : 'Create a quotation for your customer.' }}
+        </ng-container>
+        <ng-container *ngIf="documentType === 'invoice'">
+          {{ invoice ? 'Update invoice details and line items.' : 'Create a new sales invoice for your customer.' }}
+        </ng-container>
       </p>
     </div>
   </header>
@@ -17,8 +25,8 @@
       <div class="form-section header-section">
         <div class="title-row">
           <mat-form-field appearance="outline" class="invoice-title-field">
-            <mat-label>Invoice title</mat-label>
-            <input matInput [formControl]="invoiceTitleControl" placeholder="Tax Invoice" />
+            <mat-label>{{ documentTitleFieldLabel }}</mat-label>
+            <input matInput [formControl]="invoiceTitleControl" [placeholder]="documentTitlePlaceholder" />
           </mat-form-field>
           <div class="logo-block" *ngIf="organization || logoDataUrl">
             <div class="logo-preview" *ngIf="logoDataUrl">
@@ -32,29 +40,29 @@
         </div>
       </div>
 
-      <!-- Invoice details: No, Date, Due (reference chunk 1) -->
+      <!-- Document details: No, Date, Due (reference chunk 1) -->
       <div class="form-section invoice-details-section">
-        <h3 class="section-title">Invoice details</h3>
+        <h3 class="section-title">{{ documentDetailsSectionLabel }}</h3>
         <div class="form-row details-row">
           <mat-form-field appearance="outline" class="invoice-no-field">
-            <mat-label>Invoice No</mat-label>
+            <mat-label>{{ documentNumberLabel }}</mat-label>
             <input
               matInput
               formControlName="invoiceNumber"
               [readonly]="!!data && !allowManualInvoiceNumber"
               [placeholder]="!data && nextInvoiceNumber ? nextInvoiceNumber : ''"
             />
-            <mat-hint *ngIf="!data && nextInvoiceNumber">Next: {{ nextInvoiceNumber }}</mat-hint>
+            <mat-hint *ngIf="!data && nextInvoiceNumber">{{ nextNumberHintLabel }} {{ nextInvoiceNumber }}</mat-hint>
           </mat-form-field>
           <mat-form-field appearance="outline" class="date-field">
-            <mat-label>Invoice Date *</mat-label>
+            <mat-label>{{ documentType === 'invoice' ? 'Invoice Date *' : 'Date *' }}</mat-label>
             <input matInput [matDatepicker]="invoiceDatePicker" formControlName="invoiceDate" required />
             <mat-datepicker-toggle matIconSuffix [for]="invoiceDatePicker"></mat-datepicker-toggle>
             <mat-datepicker #invoiceDatePicker></mat-datepicker>
-            <mat-error *ngIf="form.get('invoiceDate')?.hasError('required')">Invoice date is required</mat-error>
+            <mat-error *ngIf="form.get('invoiceDate')?.hasError('required')">{{ dateRequiredError }}</mat-error>
           </mat-form-field>
           <mat-form-field appearance="outline" class="date-field">
-            <mat-label>Due date</mat-label>
+            <mat-label>{{ dueDateLabel }}</mat-label>
             <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" />
             <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
             <mat-datepicker #dueDatePicker></mat-datepicker>
@@ -116,7 +124,7 @@
             <mat-option *ngFor="let curr of currencies" [value]="curr">{{ curr }}</mat-option>
           </mat-select>
         </mat-form-field>
-        <mat-form-field appearance="outline" class="status-field">
+        <mat-form-field appearance="outline" class="status-field" *ngIf="documentType === 'invoice'">
           <mat-label>Status</mat-label>
           <mat-select formControlName="status">
             <mat-option *ngFor="let status of invoiceStatuses" [value]="status">
@@ -287,7 +295,7 @@
           </mat-form-field>
           <mat-form-field appearance="outline" class="flex-2">
             <mat-label>Terms of delivery</mat-label>
-            <textarea matInput formControlName="termsOfDelivery" rows="2"></textarea>
+            <textarea matInput formControlName="termsOfDelivery" rows="3"></textarea>
           </mat-form-field>
         </div>
       </div>
@@ -297,23 +305,23 @@
         <h3 class="section-title">Notes</h3>
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Description</mat-label>
-          <textarea matInput formControlName="description" rows="2"></textarea>
+          <textarea matInput formControlName="description" rows="3"></textarea>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Notes</mat-label>
-          <textarea matInput formControlName="notes" rows="3"></textarea>
+          <textarea matInput formControlName="notes" rows="4"></textarea>
         </mat-form-field>
       </div>
 
       <!-- Advanced options: header, footer, Configure VAT (display checkboxes), payment & terms -->
       <div class="form-section advanced-section">
         <h3 class="section-title">Advanced options</h3>
-        <p class="section-hint">Header, footer, and what to show on the invoice. Override template defaults for this invoice only.</p>
+        <p class="section-hint">Header, footer, and what to show on the {{ documentWord }}. Override template defaults for this {{ documentWord }} only.</p>
 
         <mat-expansion-panel class="advanced-panel" [expanded]="advancedOptionsExpanded">
           <mat-expansion-panel-header>
             <mat-panel-title>Header, footer &amp; display options</mat-panel-title>
-            <mat-panel-description>Invoice title, header text, footer, and show/hide checkboxes</mat-panel-description>
+            <mat-panel-description>{{ documentTitleFieldLabel }}, header text, footer, and show/hide checkboxes</mat-panel-description>
           </mat-expansion-panel-header>
 
           <div class="advanced-content" formGroupName="displayOptions">
@@ -321,8 +329,8 @@
               <h4 class="subsection-title">Header (customisable)</h4>
               <div class="advanced-fields">
                 <mat-form-field appearance="outline">
-                  <mat-label>Invoice title</mat-label>
-                  <input matInput formControlName="invoiceTitle" placeholder="e.g. TAX INVOICE" />
+                  <mat-label>{{ documentTitleFieldLabel }}</mat-label>
+                  <input matInput formControlName="invoiceTitle" [placeholder]="documentTitlePlaceholderShort" />
                 </mat-form-field>
                 <mat-form-field appearance="outline" class="header-text-field">
                   <mat-label>Header text</mat-label>
@@ -332,7 +340,7 @@
             </div>
 
             <div class="advanced-subsection">
-              <h4 class="subsection-title">What to show on invoice</h4>
+              <h4 class="subsection-title">What to show on {{ documentWord }}</h4>
               <div class="checkbox-row">
                 <mat-checkbox formControlName="invoiceShowCompanyDetails">Show company details</mat-checkbox>
                 <mat-checkbox formControlName="invoiceShowVatDetails">Show VAT details</mat-checkbox>
@@ -357,13 +365,13 @@
                   <mat-label>Default payment terms</mat-label>
                   <input matInput formControlName="invoiceDefaultPaymentTerms" placeholder="e.g. Net 30" />
                 </mat-form-field>
-                <mat-form-field appearance="outline" class="full-width">
+                <mat-form-field appearance="outline" class="full-width terms-conditions-field">
                   <mat-label>Terms &amp; conditions</mat-label>
-                  <textarea matInput formControlName="invoiceTermsConditions" rows="3" placeholder="Optional terms for this invoice"></textarea>
+                  <textarea matInput formControlName="invoiceTermsConditions" class="terms-conditions-textarea" rows="6" [placeholder]="'Optional terms for this ' + documentWord"></textarea>
                 </mat-form-field>
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Footer text</mat-label>
-                  <textarea matInput formControlName="invoiceFooterText" rows="2" placeholder="Text shown at bottom of invoice"></textarea>
+                  <textarea matInput formControlName="invoiceFooterText" rows="3" [placeholder]="'Text shown at bottom of ' + documentWord"></textarea>
                 </mat-form-field>
               </div>
             </div>
