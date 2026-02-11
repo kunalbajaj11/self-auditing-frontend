@@ -88,9 +88,9 @@ export class CustomerFormDialogComponent implements OnInit {
       : this.customersService.createCustomer(payload);
 
     operation.subscribe({
-      next: () => {
+      next: (customer) => {
         this.loading = false;
-        this.dialogRef.close(true);
+        this.dialogRef.close(customer);
       },
       error: () => {
         this.loading = false;

@@ -49,10 +49,10 @@
             <input
               matInput
               formControlName="invoiceNumber"
-              [readonly]="!!data && !allowManualInvoiceNumber"
-              [placeholder]="!data && nextInvoiceNumber ? nextInvoiceNumber : ''"
+              [readonly]="!!invoice && !allowManualInvoiceNumber"
+              [placeholder]="!invoice && nextInvoiceNumber ? nextInvoiceNumber : ''"
             />
-            <mat-hint *ngIf="!data && nextInvoiceNumber">{{ nextNumberHintLabel }} {{ nextInvoiceNumber }}</mat-hint>
+            <mat-hint *ngIf="!invoice && nextInvoiceNumber">{{ nextNumberHintLabel }} {{ nextInvoiceNumber }}</mat-hint>
           </mat-form-field>
           <mat-form-field appearance="outline" class="date-field">
             <mat-label>{{ documentType === 'invoice' ? 'Invoice Date *' : 'Date *' }}</mat-label>
@@ -103,7 +103,13 @@
                 </mat-option>
               </mat-select>
             </mat-form-field>
-            <p class="hint">Select client from the list</p>
+            <p class="hint">
+              Select client from the list
+              <button type="button" mat-button color="primary" class="add-customer-link" (click)="openAddCustomerDialog()">
+                <mat-icon>add</mat-icon>
+                Add customer
+              </button>
+            </p>
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Customer name</mat-label>
               <input matInput formControlName="customerName" placeholder="Or enter manually" />

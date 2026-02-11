@@ -6,7 +6,7 @@ import {
   FormControl,
   Validators,
 } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SalesInvoicesService, SalesInvoice, InvoiceLineItem } from '../../../core/services/sales-invoices.service';
 import { CustomersService, Customer } from '../../../core/services/customers.service';
@@ -14,6 +14,7 @@ import { SettingsService, TaxRate, InvoiceTemplateSettings } from '../../../core
 import { OrganizationService } from '../../../core/services/organization.service';
 import { ApiService } from '../../../core/services/api.service';
 import { Organization } from '../../../core/models/organization.model';
+import { CustomerFormDialogComponent } from '../customers/customer-form-dialog.component';
 import { Observable, of, forkJoin } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
@@ -191,6 +192,7 @@ export class InvoiceFormDialogComponent implements OnInit {
   constructor(
     private readonly fb: FormBuilder,
     private readonly dialogRef: MatDialogRef<InvoiceFormDialogComponent>,
+    private readonly dialog: MatDialog,
     private readonly invoicesService: SalesInvoicesService,
     private readonly customersService: CustomersService,
     private readonly settingsService: SettingsService,
@@ -391,6 +393,32 @@ export class InvoiceFormDialogComponent implements OnInit {
       error: () => {
         this.loadingCustomers = false;
       },
+    });
+  }
+
+  /** Open the same Add/Edit customer modal used on the Customers page. On create, reload list and select the new customer. */
+  openAddCustomerDialog(): void {
+    const dialogRef = this.dialog.open(CustomerFormDialogComponent, {
+      width: '640px',
+      data: null,
+    });
+    dialogRef.afterClosed().subscribe((created: Customer | false | undefined) => {
+      if (created && typeof created === 'object' && created.id) {
+        this.loadCustomers();
+        this.form.patchValue({
+          customerId: created.id,
+          customerName: created.name,
+          customerTrn: created.customerTrn || '',
+          currency: created.preferredCurrency || this.form.get('currency')?.value || 'AED',
+        });
+        if (created.paymentTerms != null) {
+          const invoiceDate = new Date(this.form.get('invoiceDate')?.value || new Date());
+          const dueDate = new Date(invoiceDate);
+          dueDate.setDate(dueDate.getDate() + created.paymentTerms);
+          this.form.patchValue({ dueDate: dueDate.toISOString().substring(0, 10) });
+        }
+        this.snackBar.open('Customer added. You can now continue with the invoice.', 'Close', { duration: 3000 });
+      }
     });
   }
 
