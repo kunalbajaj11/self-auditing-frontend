@@ -19,6 +19,7 @@ import { UploadBankStatementComponent } from './bank-reconciliation/upload-bank-
 import { AdminCustomersComponent } from './customers/admin-customers.component';
 import { AdminSalesInvoicesComponent } from './sales-invoices/admin-sales-invoices.component';
 import { AdminProformaInvoicesComponent } from './proforma-invoices/admin-proforma-invoices.component';
+import { AdminQuotationsComponent } from './quotations/admin-quotations.component';
 import { InvoicePreviewComponent } from './sales-invoices/invoice-preview.component';
 import { AdminCreditNotesComponent } from './credit-notes/admin-credit-notes.component';
 import { AdminDebitNotesComponent } from './debit-notes/admin-debit-notes.component';
@@ -57,7 +58,7 @@ const routes: Routes = [
               { label: 'Sales Order', route: '/admin/sales-orders' },
               { label: 'Delivery Challan', route: '/admin/delivery-challans' },
               { label: 'Invoices', route: '/admin/sales-invoices' },
-              { label: 'Proforma Invoice', route: '/admin/proforma-invoices' },
+              { label: 'Quotations', route: '/admin/quotations' },
               { label: 'Payments Received', route: '/admin/sales-invoices', queryParams: { filter: 'payments' } },
               { label: 'Credit Notes', route: '/admin/credit-notes' },
             ],
@@ -326,6 +327,11 @@ const routes: Routes = [
         path: 'sales-invoices',
         component: AdminSalesInvoicesComponent,
         data: { shell: { title: 'Sales Invoice Management' } },
+      },
+      {
+        path: 'quotations',
+        component: AdminQuotationsComponent,
+        data: { shell: { title: 'Quotation Management' } },
       },
       {
         path: 'sales-orders',

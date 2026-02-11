@@ -203,5 +203,11 @@ export class SalesInvoicesService {
   convertProformaToInvoice(id: string): Observable<SalesInvoice> {
     return this.api.post<SalesInvoice>(`/sales-invoices/${id}/convert`, {});
   }
+
+  updateInvoiceStatus(id: string, status: string): Observable<SalesInvoice> {
+    return this.api.patch<SalesInvoice>(`/sales-invoices/${id}/status`, {
+      status,
+    });
+  }
 }
 

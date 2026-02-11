@@ -7,18 +7,34 @@ import {
 } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { SalesInvoicesService, SalesInvoice, InvoiceLineItem } from '../../../core/services/sales-invoices.service';
-import { CustomersService, Customer } from '../../../core/services/customers.service';
-import { SettingsService, TaxRate } from '../../../core/services/settings.service';
+import {
+  SalesInvoicesService,
+  SalesInvoice,
+  InvoiceLineItem,
+} from '../../../core/services/sales-invoices.service';
+import {
+  CustomersService,
+  Customer,
+} from '../../../core/services/customers.service';
+import {
+  SettingsService,
+  TaxRate,
+} from '../../../core/services/settings.service';
 import { Observable, of } from 'rxjs';
-import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import {
+  map,
+  startWith,
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+} from 'rxjs/operators';
 
 @Component({
-  selector: 'app-proforma-invoice-form-dialog',
-  templateUrl: './proforma-invoice-form-dialog.component.html',
-  styleUrls: ['./proforma-invoice-form-dialog.component.scss'],
+  selector: 'app-quotation-form-dialog',
+  templateUrl: './quotation-form-dialog.component.html',
+  styleUrls: ['./quotation-form-dialog.component.scss'],
 })
-export class ProformaInvoiceFormDialogComponent implements OnInit {
+export class QuotationFormDialogComponent implements OnInit {
   form: FormGroup;
   loading = false;
   customers: Customer[] = [];
@@ -30,25 +46,32 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
   readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
 
   // Item suggestions autocomplete
-  itemSuggestionsMap = new Map<number, Observable<Array<{
-    itemName: string;
-    description?: string;
-    unitPrice: number;
-    vatRate: number;
-    vatTaxType: string;
-    unitOfMeasure?: string;
-    usageCount: number;
-  }>>>();
+  itemSuggestionsMap = new Map<
+    number,
+    Observable<
+      Array<{
+        itemName: string;
+        description?: string;
+        unitPrice: number;
+        vatRate: number;
+        vatTaxType: string;
+        unitOfMeasure?: string;
+        usageCount: number;
+      }>
+    >
+  >();
   activeItemIndex: number | null = null;
-  filteredItems$: Observable<Array<{
-    itemName: string;
-    description?: string;
-    unitPrice: number;
-    vatRate: number;
-    vatTaxType: string;
-    unitOfMeasure?: string;
-    usageCount: number;
-  }>> = of([]);
+  filteredItems$: Observable<
+    Array<{
+      itemName: string;
+      description?: string;
+      unitPrice: number;
+      vatRate: number;
+      vatTaxType: string;
+      unitOfMeasure?: string;
+      usageCount: number;
+    }>
+  > = of([]);
 
   get lineItems(): FormArray {
     return this.form.get('lineItems') as FormArray;
@@ -74,7 +97,7 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
 
   constructor(
     private readonly fb: FormBuilder,
-    private readonly dialogRef: MatDialogRef<ProformaInvoiceFormDialogComponent>,
+    private readonly dialogRef: MatDialogRef<QuotationFormDialogComponent>,
     private readonly invoicesService: SalesInvoicesService,
     private readonly customersService: CustomersService,
     private readonly settingsService: SettingsService,
@@ -85,12 +108,15 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
       customerId: [''],
       customerName: [''],
       customerTrn: [''],
-      invoiceDate: [new Date().toISOString().substring(0, 10), Validators.required],
+      invoiceDate: [
+        new Date().toISOString().substring(0, 10),
+        Validators.required,
+      ],
       supplyDate: [''],
       dueDate: [''],
       discountAmount: [0],
       currency: ['AED'],
-      status: ['proforma_invoice'], // Always proforma_invoice for this component
+      status: ['quotation'], // Always quotation for this component
       description: [''],
       notes: [''],
       deliveryNote: [''],
@@ -111,7 +137,7 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
     if (this.data) {
       this.loadInvoiceData();
     } else {
-      // Add one empty line item for new proforma invoice
+      // Add one empty line item for new quotation
       this.addLineItem();
     }
     // Initialize filteredItems$ with empty suggestions
@@ -165,7 +191,7 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
     if (!this.data) return;
 
     const invoice = this.data;
-    
+
     // Resolve customerId from either flat field or nested relation
     const customerId = invoice.customerId || invoice.customer?.id;
     if (customerId) {
@@ -182,7 +208,8 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
           this.form.patchValue({
             customerId: customerId,
             customerName: invoice.customerName || invoice.customer?.name || '',
-            customerTrn: invoice.customerTrn || invoice.customer?.customerTrn || '',
+            customerTrn:
+              invoice.customerTrn || invoice.customer?.customerTrn || '',
           });
         },
       });
@@ -200,7 +227,7 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
       dueDate: invoice.dueDate || '',
       discountAmount: parseFloat((invoice as any).discountAmount || '0'),
       currency: invoice.currency || 'AED',
-      status: 'proforma_invoice', // Always set to proforma_invoice
+      status: 'quotation', // Always set to quotation
       description: invoice.description || '',
       notes: invoice.notes || '',
       deliveryNote: (invoice as any).deliveryNote || '',
@@ -225,7 +252,8 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
           itemName: invoice.description || 'Quotation Item',
           quantity: 1,
           unitPrice: parseFloat(invoice.amount),
-          vatRate: parseFloat(invoice.vatAmount || '0') > 0 ? this.defaultTaxRate : 0,
+          vatRate:
+            parseFloat(invoice.vatAmount || '0') > 0 ? this.defaultTaxRate : 0,
           vatTaxType: 'STANDARD',
           amount: parseFloat(invoice.amount),
           vatAmount: parseFloat(invoice.vatAmount || '0'),
@@ -246,7 +274,9 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
 
       // Auto-set due date based on payment terms
       if (customer.paymentTerms) {
-        const invoiceDate = new Date(this.form.get('invoiceDate')?.value || new Date());
+        const invoiceDate = new Date(
+          this.form.get('invoiceDate')?.value || new Date(),
+        );
         const dueDate = new Date(invoiceDate);
         dueDate.setDate(dueDate.getDate() + customer.paymentTerms);
         this.form.patchValue({
@@ -261,24 +291,48 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
       productId: [item?.productId || ''],
       itemName: [item?.itemName || '', Validators.required],
       description: [item?.description || ''],
-      quantity: [item?.quantity || 1, [Validators.required, Validators.min(0.001)]],
-      unitPrice: [item?.unitPrice || 0, [Validators.required, Validators.min(0)]],
+      quantity: [
+        item?.quantity || 1,
+        [Validators.required, Validators.min(0.001)],
+      ],
+      unitPrice: [
+        item?.unitPrice || 0,
+        [Validators.required, Validators.min(0)],
+      ],
       unitOfMeasure: [item?.unitOfMeasure || 'unit'],
-      vatRate: [item?.vatRate || this.defaultTaxRate, [Validators.min(0), Validators.max(100)]],
+      vatRate: [
+        item?.vatRate || this.defaultTaxRate,
+        [Validators.min(0), Validators.max(100)],
+      ],
       vatTaxType: [item?.vatTaxType || 'STANDARD'],
-      amount: [{ value: item?.amount || (item?.quantity || 1) * (item?.unitPrice || 0), disabled: true }],
+      amount: [
+        {
+          value:
+            item?.amount || (item?.quantity || 1) * (item?.unitPrice || 0),
+          disabled: true,
+        },
+      ],
       vatAmount: [{ value: item?.vatAmount || 0, disabled: true }],
       totalAmount: [{ value: item?.totalAmount || 0, disabled: true }],
     });
 
     // Auto-calculate when quantity, unitPrice, vatRate, or vatTaxType changes
-    lineItemGroup.get('quantity')?.valueChanges.subscribe(() => this.calculateLineItem(lineItemGroup));
-    lineItemGroup.get('unitPrice')?.valueChanges.subscribe(() => this.calculateLineItem(lineItemGroup));
-    lineItemGroup.get('vatRate')?.valueChanges.subscribe(() => this.calculateLineItem(lineItemGroup));
+    lineItemGroup
+      .get('quantity')
+      ?.valueChanges.subscribe(() => this.calculateLineItem(lineItemGroup));
+    lineItemGroup
+      .get('unitPrice')
+      ?.valueChanges.subscribe(() => this.calculateLineItem(lineItemGroup));
+    lineItemGroup
+      .get('vatRate')
+      ?.valueChanges.subscribe(() => this.calculateLineItem(lineItemGroup));
     lineItemGroup.get('vatTaxType')?.valueChanges.subscribe((taxType) => {
       // Auto-set VAT rate based on tax type if rate is default
       const vatRateValue = lineItemGroup.get('vatRate')?.value;
-      const currentRate = typeof vatRateValue === 'number' ? vatRateValue : parseFloat(String(vatRateValue || '0'));
+      const currentRate =
+        typeof vatRateValue === 'number'
+          ? vatRateValue
+          : parseFloat(String(vatRateValue || '0'));
       if (currentRate === this.defaultTaxRate || currentRate === 0) {
         const rateForType = this.getTaxRateForType(taxType || 'STANDARD');
         lineItemGroup.patchValue({ vatRate: rateForType }, { emitEvent: false });
@@ -341,38 +395,58 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
     }
   }
 
-  getItemSuggestions(index: number): Observable<Array<{
-    itemName: string;
-    description?: string;
-    unitPrice: number;
-    vatRate: number;
-    vatTaxType: string;
-    unitOfMeasure?: string;
-    usageCount: number;
-  }>> {
+  getItemSuggestions(
+    index: number,
+  ): Observable<
+    Array<{
+      itemName: string;
+      description?: string;
+      unitPrice: number;
+      vatRate: number;
+      vatTaxType: string;
+      unitOfMeasure?: string;
+      usageCount: number;
+    }>
+  > {
     return this.itemSuggestionsMap.get(index) || of([]);
   }
 
-  onItemSelected(index: number, selectedItem: {
-    itemName: string;
-    description?: string;
-    unitPrice: number;
-    vatRate: number;
-    vatTaxType: string;
-    unitOfMeasure?: string;
-  }): void {
+  onItemSelected(
+    index: number,
+    selectedItem: {
+      itemName: string;
+      description?: string;
+      unitPrice: number;
+      vatRate: number;
+      vatTaxType: string;
+      unitOfMeasure?: string;
+      usageCount?: number;
+    },
+  ): void {
     const lineItemGroup = this.lineItems.at(index) as FormGroup;
     if (!lineItemGroup) return;
 
     // Auto-fill fields from selected suggestion
-    lineItemGroup.patchValue({
-      itemName: selectedItem.itemName,
-      description: selectedItem.description || lineItemGroup.get('description')?.value || '',
-      unitPrice: selectedItem.unitPrice || lineItemGroup.get('unitPrice')?.value || 0,
-      vatRate: selectedItem.vatRate || this.defaultTaxRate,
-      vatTaxType: selectedItem.vatTaxType || 'STANDARD',
-      unitOfMeasure: selectedItem.unitOfMeasure || lineItemGroup.get('unitOfMeasure')?.value || 'unit',
-    }, { emitEvent: true }); // Emit events to trigger calculations
+    lineItemGroup.patchValue(
+      {
+        itemName: selectedItem.itemName,
+        description:
+          selectedItem.description ||
+          lineItemGroup.get('description')?.value ||
+          '',
+        unitPrice:
+          selectedItem.unitPrice ||
+          lineItemGroup.get('unitPrice')?.value ||
+          0,
+        vatRate: selectedItem.vatRate || this.defaultTaxRate,
+        vatTaxType: selectedItem.vatTaxType || 'STANDARD',
+        unitOfMeasure:
+          selectedItem.unitOfMeasure ||
+          lineItemGroup.get('unitOfMeasure')?.value ||
+          'unit',
+      },
+      { emitEvent: true }, // Emit events to trigger calculations
+    );
 
     // Recalculate line item
     this.calculateLineItem(lineItemGroup);
@@ -398,29 +472,42 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
     const quantityValue = lineItemGroup.get('quantity')?.value;
     const unitPriceValue = lineItemGroup.get('unitPrice')?.value;
     const vatRateValue = lineItemGroup.get('vatRate')?.value;
-    const quantity = typeof quantityValue === 'number' ? quantityValue : parseFloat(String(quantityValue || '0'));
-    const unitPrice = typeof unitPriceValue === 'number' ? unitPriceValue : parseFloat(String(unitPriceValue || '0'));
-    const vatRate = typeof vatRateValue === 'number' ? vatRateValue : parseFloat(String(vatRateValue || '0'));
+    const quantity =
+      typeof quantityValue === 'number'
+        ? quantityValue
+        : parseFloat(String(quantityValue || '0'));
+    const unitPrice =
+      typeof unitPriceValue === 'number'
+        ? unitPriceValue
+        : parseFloat(String(unitPriceValue || '0'));
+    const vatRate =
+      typeof vatRateValue === 'number'
+        ? vatRateValue
+        : parseFloat(String(vatRateValue || '0'));
     const vatTaxType = lineItemGroup.get('vatTaxType')?.value || 'STANDARD';
 
     const amount = quantity * unitPrice;
-    
+
     // Calculate VAT based on tax type
     let vatAmount = 0;
     if (vatTaxType === 'STANDARD' && vatRate > 0) {
       vatAmount = amount * (vatRate / 100);
     } else if (vatTaxType === 'REVERSE_CHARGE' && vatRate > 0) {
-      vatAmount = amount * (vatRate / 100); // For reverse charge, VAT is still calculated but handled differently
+      vatAmount =
+        amount * (vatRate / 100); // For reverse charge, VAT is still calculated but handled differently
     }
     // ZERO_RATED and EXEMPT have vatAmount = 0
 
     const totalAmount = amount + vatAmount;
 
-    lineItemGroup.patchValue({
-      amount: amount.toFixed(2),
-      vatAmount: vatAmount.toFixed(2),
-      totalAmount: totalAmount.toFixed(2),
-    }, { emitEvent: false });
+    lineItemGroup.patchValue(
+      {
+        amount: amount.toFixed(2),
+        vatAmount: vatAmount.toFixed(2),
+        totalAmount: totalAmount.toFixed(2),
+      },
+      { emitEvent: false },
+    );
   }
 
   save(): void {
@@ -465,7 +552,7 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
       dueDate: formValue.dueDate || undefined,
       discountAmount: parseFloat(formValue.discountAmount || '0'),
       currency: formValue.currency || 'AED',
-      status: 'proforma_invoice', // Always proforma_invoice for this component
+      status: 'quotation', // Always quotation for this component
       description: formValue.description || undefined,
       notes: formValue.notes || undefined,
       // Commercial header fields
@@ -499,7 +586,7 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
       error: (error) => {
         this.loading = false;
         this.snackBar.open(
-          error?.error?.message || 'Failed to save proforma invoice',
+          error?.error?.message || 'Failed to save quotation',
           'Close',
           { duration: 4000, panelClass: ['snack-error'] },
         );
@@ -511,3 +598,4 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
     this.dialogRef.close(false);
   }
 }
+

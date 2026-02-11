@@ -3,15 +3,15 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales-invoices.service';
-import { ProformaInvoiceFormDialogComponent } from './proforma-invoice-form-dialog.component';
+import { QuotationFormDialogComponent } from './quotation-form-dialog.component';
 import { InvoiceDetailDialogComponent } from '../sales-invoices/invoice-detail-dialog.component';
 
 @Component({
-  selector: 'app-admin-proforma-invoices',
-  templateUrl: './admin-proforma-invoices.component.html',
-  styleUrls: ['./admin-proforma-invoices.component.scss'],
+  selector: 'app-admin-quotations',
+  templateUrl: './admin-quotations.component.html',
+  styleUrls: ['./admin-quotations.component.scss'],
 })
-export class AdminProformaInvoicesComponent implements OnInit {
+export class AdminQuotationsComponent implements OnInit {
   readonly columns = [
     'invoiceNumber',
     'customerName',
@@ -32,28 +32,24 @@ export class AdminProformaInvoicesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadProformaInvoices();
+    this.loadQuotations();
   }
 
-  loadProformaInvoices(): void {
+  loadQuotations(): void {
     this.loading = true;
     const filters: any = {
-      status: 'proforma_invoice', // Filter for proforma invoices only
+      status: 'quotation',
     };
 
     this.invoicesService.listInvoices(filters).subscribe({
       next: (invoices) => {
         this.loading = false;
-        // Filter to ensure only proforma invoices are shown
-        const proformaInvoices = invoices.filter(
-          (inv) => inv.status === 'proforma_invoice',
-        );
-        this.dataSource.data = proformaInvoices;
+        this.dataSource.data = invoices;
         this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;
-        this.snackBar.open('Unable to load proforma invoices', 'Close', {
+        this.snackBar.open('Unable to load quotations', 'Close', {
           duration: 4000,
           panelClass: ['snack-error'],
         });
@@ -62,7 +58,7 @@ export class AdminProformaInvoicesComponent implements OnInit {
   }
 
   openCreateDialog(): void {
-    const dialogRef = this.dialog.open(ProformaInvoiceFormDialogComponent, {
+    const dialogRef = this.dialog.open(QuotationFormDialogComponent, {
       width: '900px',
       maxWidth: '95vw',
       maxHeight: '90vh',
@@ -71,10 +67,10 @@ export class AdminProformaInvoicesComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.snackBar.open('Proforma Invoice created successfully', 'Close', {
+        this.snackBar.open('Quotation created successfully', 'Close', {
           duration: 3000,
         });
-        this.loadProformaInvoices();
+        this.loadQuotations();
       }
     });
   }
@@ -89,7 +85,7 @@ export class AdminProformaInvoicesComponent implements OnInit {
   }
 
   editInvoice(invoice: SalesInvoice): void {
-    const dialogRef = this.dialog.open(ProformaInvoiceFormDialogComponent, {
+    const dialogRef = this.dialog.open(QuotationFormDialogComponent, {
       width: '900px',
       maxWidth: '95vw',
       maxHeight: '90vh',
@@ -98,10 +94,10 @@ export class AdminProformaInvoicesComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.snackBar.open('Proforma Invoice updated successfully', 'Close', {
+        this.snackBar.open('Quotation updated successfully', 'Close', {
           duration: 3000,
         });
-        this.loadProformaInvoices();
+        this.loadQuotations();
       }
     });
   }
@@ -109,26 +105,56 @@ export class AdminProformaInvoicesComponent implements OnInit {
   convertToInvoice(invoice: SalesInvoice): void {
     if (
       !confirm(
-        `Convert proforma invoice ${invoice.invoiceNumber} to tax invoice? This action cannot be undone.`,
+        `Convert quotation ${invoice.invoiceNumber} to tax invoice? This action cannot be undone.`,
       )
     ) {
       return;
     }
 
-    this.invoicesService.convertProformaToInvoice(invoice.id).subscribe({
+    this.invoicesService.updateInvoiceStatus(invoice.id, 'tax_invoice_receivable').subscribe({
       next: () => {
         this.snackBar.open(
-          'Proforma Invoice converted to Tax Invoice successfully',
+          'Quotation converted to Tax Invoice successfully',
           'Close',
           {
             duration: 3000,
           },
         );
-        this.loadProformaInvoices();
+        this.loadQuotations();
       },
       error: (error) => {
         this.snackBar.open(
-          error?.error?.message || 'Failed to convert proforma invoice',
+          error?.error?.message || 'Failed to convert quotation to invoice',
+          'Close',
+          { duration: 4000, panelClass: ['snack-error'] },
+        );
+      },
+    });
+  }
+
+  convertToProforma(invoice: SalesInvoice): void {
+    if (
+      !confirm(
+        `Convert quotation ${invoice.invoiceNumber} to proforma invoice? This action cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    this.invoicesService.updateInvoiceStatus(invoice.id, 'proforma_invoice').subscribe({
+      next: () => {
+        this.snackBar.open(
+          'Quotation converted to Proforma Invoice successfully',
+          'Close',
+          {
+            duration: 3000,
+          },
+        );
+        this.loadQuotations();
+      },
+      error: (error) => {
+        this.snackBar.open(
+          error?.error?.message || 'Failed to convert quotation to proforma invoice',
           'Close',
           { duration: 4000, panelClass: ['snack-error'] },
         );
@@ -139,7 +165,7 @@ export class AdminProformaInvoicesComponent implements OnInit {
   deleteInvoice(invoice: SalesInvoice): void {
     if (
       !confirm(
-        `Are you sure you want to delete proforma invoice ${invoice.invoiceNumber}?`,
+        `Are you sure you want to delete quotation ${invoice.invoiceNumber}?`,
       )
     ) {
       return;
@@ -147,14 +173,14 @@ export class AdminProformaInvoicesComponent implements OnInit {
 
     this.invoicesService.deleteInvoice(invoice.id).subscribe({
       next: () => {
-        this.snackBar.open('Proforma Invoice deleted successfully', 'Close', {
+        this.snackBar.open('Quotation deleted successfully', 'Close', {
           duration: 3000,
         });
-        this.loadProformaInvoices();
+        this.loadQuotations();
       },
       error: (error) => {
         this.snackBar.open(
-          error?.error?.message || 'Failed to delete proforma invoice',
+          error?.error?.message || 'Failed to delete quotation',
           'Close',
           { duration: 4000, panelClass: ['snack-error'] },
         );
@@ -164,16 +190,23 @@ export class AdminProformaInvoicesComponent implements OnInit {
 
   getStatusDisplayLabel(status: string): string {
     const statusMap: Record<string, string> = {
-      'proforma_invoice': 'Proforma Invoice',
-      'tax_invoice_receivable': 'Tax Invoice - Receivable',
-      'tax_invoice_cash_received': 'Tax Invoice - Cash received',
+      quotation: 'Quotation',
+      proforma_invoice: 'Proforma Invoice',
+      tax_invoice_receivable: 'Tax Invoice - Receivable',
+      tax_invoice_cash_received: 'Tax Invoice - Cash received',
+      tax_invoice_bank_received: 'Tax Invoice - Bank Received',
     };
     return statusMap[status] || status;
   }
 
   getStatusColor(status: string): string {
+    if (status === 'quotation') return 'accent';
     if (status === 'proforma_invoice') return 'primary';
     if (status === 'tax_invoice_receivable') return 'accent';
+    if (status === 'tax_invoice_cash_received' || status === 'tax_invoice_bank_received') {
+      return 'primary';
+    }
     return 'primary';
   }
 }
+

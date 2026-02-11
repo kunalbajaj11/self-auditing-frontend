@@ -1,4 +1,4 @@
-<div class="proforma-invoice-form-dialog">
+<div class="quotation-form-dialog">
   <header class="dialog-header">
     <div class="header-text">
       <h2 mat-dialog-title>
@@ -6,7 +6,7 @@
         {{ data ? 'Edit Quotation' : 'Create Quotation' }}
       </h2>
       <p class="dialog-subtitle">
-        {{ data ? 'Update quotation details.' : 'Create a quotation (proforma invoice) for your customer.' }}
+        {{ data ? 'Update quotation details.' : 'Create a quotation for your customer.' }}
       </p>
     </div>
   </header>
@@ -30,25 +30,25 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Invoice Date *</mat-label>
-          <input matInput [matDatepicker]="invoiceDatePicker" formControlName="invoiceDate" placeholder="Select invoice date" required />
+          <mat-label>Quotation Date *</mat-label>
+          <input matInput [matDatepicker]="invoiceDatePicker" formControlName="invoiceDate" placeholder="Select date" required />
           <mat-datepicker-toggle matIconSuffix [for]="invoiceDatePicker"></mat-datepicker-toggle>
           <mat-datepicker #invoiceDatePicker></mat-datepicker>
           <mat-error *ngIf="form.get('invoiceDate')?.hasError('required')">
-            Invoice date is required
+            Quotation date is required
           </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Due Date</mat-label>
-          <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" placeholder="Select due date" />
+          <mat-label>Valid Until</mat-label>
+          <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" placeholder="Select validity date" />
           <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
           <mat-datepicker #dueDatePicker></mat-datepicker>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="flex-1">
           <mat-label>Supply Date (optional)</mat-label>
-          <input matInput [matDatepicker]="supplyDatePicker" formControlName="supplyDate" placeholder="If different from invoice date" />
+          <input matInput [matDatepicker]="supplyDatePicker" formControlName="supplyDate" placeholder="If different from quotation date" />
           <mat-datepicker-toggle matIconSuffix [for]="supplyDatePicker"></mat-datepicker-toggle>
           <mat-datepicker #supplyDatePicker></mat-datepicker>
         </mat-form-field>
@@ -170,8 +170,8 @@
               <span class="item-name">{{ suggestion.itemName }}</span>
               <span *ngIf="suggestion.description" class="item-description">{{ suggestion.description }}</span>
               <span class="item-details">
-                {{ form.get('currency')?.value || 'AED' }} {{ suggestion.unitPrice | number: '1.2-2' }} 
-                · VAT: {{ suggestion.vatRate }}% 
+                {{ form.get('currency')?.value || 'AED' }} {{ suggestion.unitPrice | number: '1.2-2' }}
+                · VAT: {{ suggestion.vatRate }}%
                 · Used {{ suggestion.usageCount }} time{{ suggestion.usageCount !== 1 ? 's' : '' }}
               </span>
             </div>

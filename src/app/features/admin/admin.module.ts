@@ -33,6 +33,8 @@ import { AdminSalesInvoicesComponent } from './sales-invoices/admin-sales-invoic
 import { InvoiceFormDialogComponent } from './sales-invoices/invoice-form-dialog.component';
 import { AdminProformaInvoicesComponent } from './proforma-invoices/admin-proforma-invoices.component';
 import { ProformaInvoiceFormDialogComponent } from './proforma-invoices/proforma-invoice-form-dialog.component';
+import { AdminQuotationsComponent } from './quotations/admin-quotations.component';
+import { QuotationFormDialogComponent } from './quotations/quotation-form-dialog.component';
 import { InvoiceDetailDialogComponent } from './sales-invoices/invoice-detail-dialog.component';
 import { InvoicePreviewComponent } from './sales-invoices/invoice-preview.component';
 import { InvoicePaymentDialogComponent } from './sales-invoices/invoice-payment-dialog.component';
@@ -120,6 +122,8 @@ import { DCEmailDialogComponent } from './delivery-challans/dc-email-dialog.comp
     InvoiceFormDialogComponent,
     AdminProformaInvoicesComponent,
     ProformaInvoiceFormDialogComponent,
+    AdminQuotationsComponent,
+    QuotationFormDialogComponent,
     InvoiceDetailDialogComponent,
     InvoicePreviewComponent,
     InvoicePaymentDialogComponent,
