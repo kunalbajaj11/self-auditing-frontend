@@ -782,6 +782,9 @@ export class InvoiceFormDialogComponent implements OnInit {
       }
     });
 
+    const sumAmount = lineItems.reduce((s, i) => s + (Number(i.amount) || 0), 0);
+    const sumVatAmount = lineItems.reduce((s, i) => s + (Number(i.vatAmount) || 0), 0);
+
     const payload: any = {
       customerId: formValue.customerId || undefined,
       customerName: formValue.customerName || undefined,
@@ -803,6 +806,8 @@ export class InvoiceFormDialogComponent implements OnInit {
       destination: formValue.destination || undefined,
       termsOfDelivery: formValue.termsOfDelivery || undefined,
       lineItems,
+      amount: sumAmount,
+      vatAmount: sumVatAmount,
       displayOptions: Object.keys(displayOptionsPayload).length > 0 ? displayOptionsPayload : undefined,
     };
 
