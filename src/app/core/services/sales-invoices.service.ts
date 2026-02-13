@@ -204,6 +204,11 @@ export class SalesInvoicesService {
     }>>('/sales-invoices/item-suggestions', params);
   }
 
+  /** Convert quotation to proforma invoice (creates new proforma, marks quotation as converted) */
+  convertQuotationToProforma(id: string): Observable<SalesInvoice> {
+    return this.api.post<SalesInvoice>(`/sales-invoices/${id}/convert-to-proforma`, {});
+  }
+
   convertProformaToInvoice(id: string): Observable<SalesInvoice> {
     return this.api.post<SalesInvoice>(`/sales-invoices/${id}/convert`, {});
   }

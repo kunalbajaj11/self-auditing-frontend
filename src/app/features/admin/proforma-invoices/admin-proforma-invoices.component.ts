@@ -47,11 +47,8 @@ export class AdminProformaInvoicesComponent implements OnInit {
     this.invoicesService.listInvoices(filters).subscribe({
       next: (invoices) => {
         this.loading = false;
-        // Filter to ensure only proforma invoices are shown
-        const proformaInvoices = invoices.filter(
-          (inv) => inv.status === 'proforma_invoice',
-        );
-        this.dataSource.data = proformaInvoices;
+        // Backend returns proforma_invoice and proforma_converted_to_invoice for this filter
+        this.dataSource.data = invoices;
         this.cdr.detectChanges();
       },
       error: () => {
@@ -110,9 +107,12 @@ export class AdminProformaInvoicesComponent implements OnInit {
   }
 
   convertToInvoice(invoice: SalesInvoice): void {
+    if (!this.canConvertToInvoice(invoice)) {
+      return;
+    }
     if (
       !confirm(
-        `Convert proforma invoice ${invoice.invoiceNumber} to tax invoice? This action cannot be undone.`,
+        `Convert proforma invoice ${invoice.invoiceNumber} to tax invoice? A new tax invoice will be created and this proforma will be marked as "Converted to Invoice".`,
       )
     ) {
       return;
@@ -174,16 +174,23 @@ export class AdminProformaInvoicesComponent implements OnInit {
 
   getStatusDisplayLabel(status: string): string {
     const statusMap: Record<string, string> = {
-      'proforma_invoice': 'Proforma Invoice',
-      'tax_invoice_receivable': 'Tax Invoice - Receivable',
-      'tax_invoice_cash_received': 'Tax Invoice - Cash received',
+      proforma_invoice: 'Proforma Invoice',
+      proforma_converted_to_invoice: 'Converted to Invoice',
+      tax_invoice_receivable: 'Tax Invoice - Receivable',
+      tax_invoice_cash_received: 'Tax Invoice - Cash received',
     };
     return statusMap[status] || status;
   }
 
   getStatusColor(status: string): string {
     if (status === 'proforma_invoice') return 'primary';
+    if (status === 'proforma_converted_to_invoice') return 'accent';
     if (status === 'tax_invoice_receivable') return 'accent';
     return 'primary';
+  }
+
+  /** True when proforma can be converted to tax invoice (not already converted) */
+  canConvertToInvoice(invoice: SalesInvoice): boolean {
+    return invoice.status === 'proforma_invoice';
   }
 }

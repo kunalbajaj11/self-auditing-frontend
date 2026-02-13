@@ -107,9 +107,12 @@ export class AdminQuotationsComponent implements OnInit {
 
   /** Convert Quotation → Proforma Invoice (workflow: Quotation → Proforma → Tax Invoice) */
   convertToProforma(invoice: SalesInvoice): void {
+    if (!this.canConvertToProforma(invoice)) {
+      return;
+    }
     if (
       !confirm(
-        `Convert quotation ${invoice.invoiceNumber} to proforma invoice? This action cannot be undone.`,
+        `Convert quotation ${invoice.invoiceNumber} to proforma invoice? A new proforma will be created and this quotation will be marked as "Converted to Proforma Invoice".`,
       )
     ) {
       return;
@@ -117,7 +120,7 @@ export class AdminQuotationsComponent implements OnInit {
 
     this.convertingId = invoice.id;
     this.cdr.detectChanges();
-    this.invoicesService.updateInvoiceStatus(invoice.id, 'proforma_invoice').subscribe({
+    this.invoicesService.convertQuotationToProforma(invoice.id).subscribe({
       next: () => {
         this.convertingId = null;
         this.cdr.detectChanges();
@@ -172,6 +175,7 @@ export class AdminQuotationsComponent implements OnInit {
   getStatusDisplayLabel(status: string): string {
     const statusMap: Record<string, string> = {
       quotation: 'Quotation',
+      quotation_converted_to_proforma: 'Converted to Proforma Invoice',
       proforma_invoice: 'Proforma Invoice',
       tax_invoice_receivable: 'Tax Invoice - Receivable',
       tax_invoice_cash_received: 'Tax Invoice - Cash received',
@@ -182,12 +186,18 @@ export class AdminQuotationsComponent implements OnInit {
 
   getStatusColor(status: string): string {
     if (status === 'quotation') return 'accent';
+    if (status === 'quotation_converted_to_proforma') return 'primary';
     if (status === 'proforma_invoice') return 'primary';
     if (status === 'tax_invoice_receivable') return 'accent';
     if (status === 'tax_invoice_cash_received' || status === 'tax_invoice_bank_received') {
       return 'primary';
     }
     return 'primary';
+  }
+
+  /** True when quotation can be converted to proforma (not already converted) */
+  canConvertToProforma(invoice: SalesInvoice): boolean {
+    return invoice.status === 'quotation';
   }
 }
 
