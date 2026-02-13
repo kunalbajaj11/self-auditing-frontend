@@ -22,6 +22,7 @@ export class AdminSalesInvoicesComponent implements OnInit {
     'totalAmount',
     'status',
     'paymentStatus',
+    'createdAt',
     'actions',
   ] as const;
   readonly dataSource = new MatTableDataSource<SalesInvoice>([]);

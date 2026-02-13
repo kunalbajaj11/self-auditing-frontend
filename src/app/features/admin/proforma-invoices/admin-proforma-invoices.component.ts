@@ -20,6 +20,7 @@ export class AdminProformaInvoicesComponent implements OnInit {
     'dueDate',
     'totalAmount',
     'status',
+    'createdAt',
     'actions',
   ] as const;
   readonly dataSource = new MatTableDataSource<SalesInvoice>([]);
