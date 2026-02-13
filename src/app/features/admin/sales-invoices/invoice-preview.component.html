@@ -101,6 +101,9 @@
           <p class="customer-name">
             {{ previewData.invoice.customer?.name || previewData.invoice.customerName || '—' }}
           </p>
+          <p *ngIf="previewData.invoice.customer?.customerNumber" class="customer-id">
+            Customer ID: {{ previewData.invoice.customer.customerNumber }}
+          </p>
           <p *ngIf="previewData.invoice.customer?.address">
             {{ previewData.invoice.customer.address }}
           </p>
@@ -167,7 +170,7 @@
             </span>
           </div>
           <div class="meta-row" *ngIf="previewData.invoice.suppliersRef">
-            <span class="meta-label">Supplier's Ref</span>
+            <span class="meta-label">Customer Ref number</span>
             <span class="meta-value">
               {{ previewData.invoice.suppliersRef }}
             </span>
@@ -307,7 +310,7 @@
           </span>
         </div>
         <div class="totals-row">
-          <span class="totals-label">VAT &#64; 5%:</span>
+          <span class="totals-label">VAT &#64; {{ getEffectiveVatRate() }}%:</span>
           <span class="totals-value">
             {{ previewData.invoice.vatAmount | number: '1.2-2' }}
             {{ previewData.invoice?.currency || 'AED' }}

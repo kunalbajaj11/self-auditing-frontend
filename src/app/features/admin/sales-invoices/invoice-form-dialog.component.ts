@@ -208,6 +208,8 @@ export class InvoiceFormDialogComponent implements OnInit {
       customerId: [''],
       customerName: [''],
       customerTrn: [''],
+      customerAddress: [''],
+      customerPhone: [''],
       invoiceDate: [new Date().toISOString().substring(0, 10), Validators.required],
       supplyDate: [''],
       dueDate: [''],
@@ -409,6 +411,8 @@ export class InvoiceFormDialogComponent implements OnInit {
           customerId: created.id,
           customerName: created.name,
           customerTrn: created.customerTrn || '',
+          customerAddress: created.address || '',
+          customerPhone: created.phone || '',
           currency: created.preferredCurrency || this.form.get('currency')?.value || 'AED',
         });
         if (created.paymentTerms != null) {
@@ -448,6 +452,8 @@ export class InvoiceFormDialogComponent implements OnInit {
             customerId: customer.id,
             customerName: customer.name,
             customerTrn: customer.customerTrn || '',
+            customerAddress: customer.address || '',
+            customerPhone: customer.phone || '',
           });
         },
         error: () => {
@@ -456,6 +462,8 @@ export class InvoiceFormDialogComponent implements OnInit {
             customerId: customerId,
             customerName: invoice.customerName || invoice.customer?.name || '',
             customerTrn: invoice.customerTrn || invoice.customer?.customerTrn || '',
+            customerAddress: (invoice as any).customerAddress || invoice.customer?.address || '',
+            customerPhone: (invoice as any).customerPhone || invoice.customer?.phone || '',
           });
         },
       });
@@ -464,6 +472,8 @@ export class InvoiceFormDialogComponent implements OnInit {
       this.form.patchValue({
         customerName: invoice.customerName || '',
         customerTrn: invoice.customerTrn || '',
+        customerAddress: (invoice as any).customerAddress || '',
+        customerPhone: (invoice as any).customerPhone || '',
       });
     }
 
@@ -539,6 +549,8 @@ export class InvoiceFormDialogComponent implements OnInit {
       this.form.patchValue({
         customerName: customer.name,
         customerTrn: customer.customerTrn || '',
+        customerAddress: customer.address || '',
+        customerPhone: customer.phone || '',
         currency: customer.preferredCurrency || 'AED',
       });
 
@@ -789,6 +801,8 @@ export class InvoiceFormDialogComponent implements OnInit {
       customerId: formValue.customerId || undefined,
       customerName: formValue.customerName || undefined,
       customerTrn: formValue.customerTrn || undefined,
+      customerAddress: formValue.customerAddress || undefined,
+      customerPhone: formValue.customerPhone || undefined,
       invoiceDate: formValue.invoiceDate,
       supplyDate: formValue.supplyDate || undefined,
       dueDate: formValue.dueDate || undefined,

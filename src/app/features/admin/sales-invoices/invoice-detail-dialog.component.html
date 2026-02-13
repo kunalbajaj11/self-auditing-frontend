@@ -57,6 +57,10 @@
           <span class="label">Name:</span>
           <span class="value">{{ invoice.customer?.name || invoice.customerName || '—' }}</span>
         </div>
+        <div class="info-row" *ngIf="invoice.customer?.customerNumber">
+          <span class="label">Customer ID:</span>
+          <span class="value">{{ invoice.customer?.customerNumber }}</span>
+        </div>
         <div class="info-row" *ngIf="invoice.customer?.address">
           <span class="label">Address:</span>
           <span class="value">{{ invoice.customer?.address }}</span>
@@ -82,7 +86,7 @@
           <span class="value">{{ invoice.deliveryNote }}</span>
         </div>
         <div class="info-row" *ngIf="invoice.suppliersRef">
-          <span class="label">Supplier's Ref:</span>
+          <span class="label">Customer Ref number:</span>
           <span class="value">{{ invoice.suppliersRef }}</span>
         </div>
         <div class="info-row" *ngIf="invoice.otherReference">

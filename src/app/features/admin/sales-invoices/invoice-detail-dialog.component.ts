@@ -210,7 +210,8 @@ export class InvoiceDetailDialogComponent implements OnInit {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `invoice-${this.invoice?.invoiceNumber || 'invoice'}.pdf`;
+        const prefix = this.invoicesService.getPdfFilenamePrefix(this.invoice?.status);
+        link.download = `${prefix}${this.invoice?.invoiceNumber || 'invoice'}.pdf`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

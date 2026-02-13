@@ -152,7 +152,8 @@ export class InvoicePreviewComponent implements OnInit {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `invoice-${this.previewData?.invoice?.invoiceNumber || this.invoiceId}.pdf`;
+        const prefix = this.invoicesService.getPdfFilenamePrefix(this.previewData?.invoice?.status);
+        a.download = `${prefix}${this.previewData?.invoice?.invoiceNumber || this.invoiceId}.pdf`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -181,7 +182,8 @@ export class InvoicePreviewComponent implements OnInit {
         const a = document.createElement('a');
         a.href = url;
         const ext = format === 'xml' ? 'xml' : 'json';
-        a.download = `invoice-${this.previewData?.invoice?.invoiceNumber || this.invoiceId}.${ext}`;
+        const prefix = this.invoicesService.getPdfFilenamePrefix(this.previewData?.invoice?.status);
+        a.download = `${prefix}${this.previewData?.invoice?.invoiceNumber || this.invoiceId}.${ext}`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -220,6 +222,29 @@ export class InvoicePreviewComponent implements OnInit {
 
   getDiscountAmount(): number {
     return parseFloat(this.previewData?.invoice?.discountAmount ?? '0') || 0;
+  }
+
+  /** Effective VAT % for summary label: from line items if single rate, else derived from amounts */
+  getEffectiveVatRate(): string {
+    const invoice = this.previewData?.invoice;
+    if (!invoice?.lineItems?.length) return '5';
+    const taxableRates = (invoice.lineItems as any[])
+      .filter(
+        (li: any) =>
+          (li.vatTaxType || '').toLowerCase() !== 'zero_rated' &&
+          (li.vatTaxType || '').toLowerCase() !== 'exempt',
+      )
+      .map((li: any) => parseFloat(li.vatRate || '0'))
+      .filter((r) => !Number.isNaN(r) && r >= 0);
+    const unique = [...new Set(taxableRates.map((r) => r.toFixed(1)))];
+    if (unique.length === 1) return unique[0];
+    const subtotal = parseFloat(invoice.amount || '0') || 0;
+    const discount = this.getDiscountAmount();
+    const totalVat = parseFloat(invoice.vatAmount || '0') || 0;
+    const taxBase = subtotal - discount;
+    if (taxBase > 0 && totalVat >= 0)
+      return ((totalVat / taxBase) * 100).toFixed(1);
+    return '5';
   }
 
   hasReverseChargeLine(): boolean {

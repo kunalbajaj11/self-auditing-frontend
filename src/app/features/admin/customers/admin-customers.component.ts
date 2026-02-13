@@ -14,6 +14,7 @@ import { ActivatedRoute } from '@angular/router';
 export class AdminCustomersComponent implements OnInit {
   readonly columns = [
     'name',
+    'customerNumber',
     'customerTrn',
     'email',
     'phone',

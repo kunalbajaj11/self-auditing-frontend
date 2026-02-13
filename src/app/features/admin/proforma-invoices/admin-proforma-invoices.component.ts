@@ -189,8 +189,13 @@ export class AdminProformaInvoicesComponent implements OnInit {
     return 'primary';
   }
 
-  /** True when proforma can be converted to tax invoice (not already converted) */
+  /** True when proforma has a customer selected from the list (required for conversion) */
+  hasCustomerFromList(invoice: SalesInvoice): boolean {
+    return !!(invoice.customerId ?? invoice.customer?.id);
+  }
+
+  /** True when proforma can be converted to tax invoice (not already converted, and customer from list) */
   canConvertToInvoice(invoice: SalesInvoice): boolean {
-    return invoice.status === 'proforma_invoice';
+    return invoice.status === 'proforma_invoice' && this.hasCustomerFromList(invoice);
   }
 }

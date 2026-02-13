@@ -4,6 +4,7 @@ import { ApiService } from './api.service';
 
 export interface Customer {
   id: string;
+  customerNumber?: string | null;
   name: string;
   displayName?: string | null;
   customerTrn?: string | null;
@@ -25,6 +26,7 @@ export interface Customer {
 
 export interface CreateCustomerPayload {
   name: string;
+  customerNumber?: string;
   displayName?: string;
   customerTrn?: string;
   address?: string;

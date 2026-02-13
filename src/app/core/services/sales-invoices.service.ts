@@ -39,6 +39,8 @@ export interface SalesInvoice {
   customerId?: string | null;
   customerName?: string | null;
   customerTrn?: string | null;
+  customerAddress?: string | null;
+  customerPhone?: string | null;
   // When fetched via /sales-invoices/:id the backend also returns related entities.
   // Keep them optional so existing code continues to work, but we can use them
   // to pre-fill forms.
@@ -83,6 +85,8 @@ export interface CreateSalesInvoicePayload {
   customerId?: string;
   customerName?: string;
   customerTrn?: string;
+  customerAddress?: string;
+  customerPhone?: string;
   invoiceDate: string;
   dueDate?: string;
   amount?: number;
@@ -171,6 +175,14 @@ export class SalesInvoicesService {
 
   downloadInvoicePDF(invoiceId: string): Observable<Blob> {
     return this.api.download(`/sales-invoices/${invoiceId}/pdf`);
+  }
+
+  /** Filename prefix for PDF/download by document type (quotation-, proforma-invoice-, invoice-). */
+  getPdfFilenamePrefix(status?: string): string {
+    if (!status) return 'invoice-';
+    if (status === 'quotation' || status === 'quotation_converted_to_proforma') return 'quotation-';
+    if (status === 'proforma_invoice' || status === 'proforma_converted_to_invoice') return 'proforma-invoice-';
+    return 'invoice-';
   }
 
   /** Export invoice as XML (UBL) or JSON for UAE e-invoicing */

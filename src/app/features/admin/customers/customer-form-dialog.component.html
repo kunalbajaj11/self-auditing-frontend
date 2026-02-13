@@ -18,6 +18,13 @@
           <mat-icon>badge</mat-icon>
           Basic information
         </h3>
+        <div class="form-row" *ngIf="data?.customerNumber">
+          <mat-form-field appearance="outline" class="customer-id-field">
+            <mat-label>Customer ID</mat-label>
+            <input matInput [value]="data?.customerNumber ?? ''" readonly />
+            <mat-hint>Shown on invoices and PDFs</mat-hint>
+          </mat-form-field>
+        </div>
         <div class="form-row">
           <mat-form-field appearance="outline">
             <mat-label>Customer Name</mat-label>

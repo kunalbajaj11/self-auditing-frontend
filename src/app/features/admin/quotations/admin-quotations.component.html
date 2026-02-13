@@ -71,19 +71,24 @@
                 <th mat-header-cell *matHeaderCellDef>Actions</th>
                 <td mat-cell *matCellDef="let invoice">
                   <button mat-button (click)="viewInvoice(invoice)">View</button>
-                  <button mat-button (click)="editInvoice(invoice)" *ngIf="canConvertToProforma(invoice)">Edit</button>
-                  <button
-                    *ngIf="canConvertToProforma(invoice)"
-                    mat-raised-button
-                    color="primary"
-                    (click)="convertToProforma(invoice)"
-                    [disabled]="convertingId === invoice.id"
-                    matTooltip="Convert to Proforma Invoice (next step: convert Proforma to Tax Invoice)"
+                  <button mat-button (click)="editInvoice(invoice)">Edit</button>
+                  <span
+                    *ngIf="invoice.status === 'quotation'"
+                    [matTooltip]="hasCustomerFromList(invoice)
+                      ? 'Convert to Proforma Invoice (next step: convert Proforma to Tax Invoice)'
+                      : 'Select a customer from the list to convert. Add the customer first if needed.'"
                   >
-                    <mat-icon>description</mat-icon>
-                    {{ convertingId === invoice.id ? 'Converting…' : 'Convert to Proforma Invoice' }}
-                  </button>
-                  <button mat-button color="warn" (click)="deleteInvoice(invoice)" *ngIf="canConvertToProforma(invoice)">
+                    <button
+                      mat-raised-button
+                      color="primary"
+                      (click)="convertToProforma(invoice)"
+                      [disabled]="convertingId === invoice.id || !hasCustomerFromList(invoice)"
+                    >
+                      <mat-icon>description</mat-icon>
+                      {{ convertingId === invoice.id ? 'Converting…' : 'Convert to Proforma Invoice' }}
+                    </button>
+                  </span>
+                  <button mat-button color="warn" (click)="deleteInvoice(invoice)" *ngIf="invoice.status === 'quotation'">
                     Delete
                   </button>
                 </td>

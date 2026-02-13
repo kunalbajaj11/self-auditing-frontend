@@ -53,6 +53,13 @@
               </td>
             </ng-container>
 
+            <ng-container matColumnDef="customerNumber">
+              <th mat-header-cell *matHeaderCellDef>Customer ID</th>
+              <td mat-cell *matCellDef="let customer">
+                {{ customer.customerNumber || '—' }}
+              </td>
+            </ng-container>
+
             <ng-container matColumnDef="customerTrn">
               <th mat-header-cell *matHeaderCellDef>TRN</th>
               <td mat-cell *matCellDef="let customer">

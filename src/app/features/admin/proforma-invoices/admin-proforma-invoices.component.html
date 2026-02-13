@@ -71,19 +71,24 @@
                 <th mat-header-cell *matHeaderCellDef>Actions</th>
                 <td mat-cell *matCellDef="let invoice">
                   <button mat-button (click)="viewInvoice(invoice)">View</button>
-                  <button mat-button (click)="editInvoice(invoice)" *ngIf="canConvertToInvoice(invoice)">Edit</button>
-                  <button
-                    *ngIf="canConvertToInvoice(invoice)"
-                    mat-raised-button
-                    color="primary"
-                    (click)="convertToInvoice(invoice)"
-                    [disabled]="convertingId === invoice.id"
-                    matTooltip="Convert to Tax Invoice"
+                  <button mat-button (click)="editInvoice(invoice)">Edit</button>
+                  <span
+                    *ngIf="invoice.status === 'proforma_invoice'"
+                    [matTooltip]="hasCustomerFromList(invoice)
+                      ? 'Convert to Tax Invoice'
+                      : 'Select a customer from the list to convert. Add the customer first if needed.'"
                   >
-                    <mat-icon>transform</mat-icon>
-                    {{ convertingId === invoice.id ? 'Converting…' : 'Convert to Tax Invoice' }}
-                  </button>
-                  <button mat-button color="warn" (click)="deleteInvoice(invoice)" *ngIf="canConvertToInvoice(invoice)">
+                    <button
+                      mat-raised-button
+                      color="primary"
+                      (click)="convertToInvoice(invoice)"
+                      [disabled]="convertingId === invoice.id || !hasCustomerFromList(invoice)"
+                    >
+                      <mat-icon>transform</mat-icon>
+                      {{ convertingId === invoice.id ? 'Converting…' : 'Convert to Tax Invoice' }}
+                    </button>
+                  </span>
+                  <button mat-button color="warn" (click)="deleteInvoice(invoice)" *ngIf="invoice.status === 'proforma_invoice'">
                     Delete
                   </button>
                 </td>

@@ -195,9 +195,14 @@ export class AdminQuotationsComponent implements OnInit {
     return 'primary';
   }
 
-  /** True when quotation can be converted to proforma (not already converted) */
+  /** True when quotation has a customer selected from the list (required for conversion) */
+  hasCustomerFromList(invoice: SalesInvoice): boolean {
+    return !!(invoice.customerId ?? invoice.customer?.id);
+  }
+
+  /** True when quotation can be converted to proforma (not already converted, and customer from list) */
   canConvertToProforma(invoice: SalesInvoice): boolean {
-    return invoice.status === 'quotation';
+    return invoice.status === 'quotation' && this.hasCustomerFromList(invoice);
   }
 }
 

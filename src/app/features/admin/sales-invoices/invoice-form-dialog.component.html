@@ -110,14 +110,26 @@
                 Add customer
               </button>
             </p>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Customer name</mat-label>
-              <input matInput formControlName="customerName" placeholder="Or enter manually" />
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Customer TRN</mat-label>
-              <input matInput formControlName="customerTrn" />
-            </mat-form-field>
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="flex-1">
+                <mat-label>Customer name</mat-label>
+                <input matInput formControlName="customerName" placeholder="Or enter manually" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="flex-1">
+                <mat-label>Customer TRN</mat-label>
+                <input matInput formControlName="customerTrn" />
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="flex-1">
+                <mat-label>Address</mat-label>
+                <input matInput formControlName="customerAddress" placeholder="Customer address" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="flex-1">
+                <mat-label>Phone number</mat-label>
+                <input matInput formControlName="customerPhone" placeholder="Customer phone" />
+              </mat-form-field>
+            </div>
           </div>
         </div>
       </div>
@@ -270,7 +282,7 @@
             <input matInput formControlName="deliveryNote" />
           </mat-form-field>
           <mat-form-field appearance="outline" class="flex-1">
-            <mat-label>Supplier's ref</mat-label>
+            <mat-label>Customer Ref number</mat-label>
             <input matInput formControlName="suppliersRef" />
           </mat-form-field>
           <mat-form-field appearance="outline" class="flex-1">
@@ -282,12 +294,6 @@
           <mat-form-field appearance="outline" class="flex-1">
             <mat-label>Buyer order no.</mat-label>
             <input matInput formControlName="buyerOrderNo" />
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="flex-1">
-            <mat-label>Dated</mat-label>
-            <input matInput [matDatepicker]="buyerOrderDatePicker" formControlName="buyerOrderDate" />
-            <mat-datepicker-toggle matIconSuffix [for]="buyerOrderDatePicker"></mat-datepicker-toggle>
-            <mat-datepicker #buyerOrderDatePicker></mat-datepicker>
           </mat-form-field>
           <mat-form-field appearance="outline" class="flex-1">
             <mat-label>Despatched through</mat-label>

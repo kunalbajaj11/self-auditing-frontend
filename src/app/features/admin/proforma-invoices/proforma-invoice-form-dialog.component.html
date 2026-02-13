@@ -97,7 +97,7 @@
           <input matInput formControlName="deliveryNote" />
         </mat-form-field>
         <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Supplier's Ref</mat-label>
+          <mat-label>Customer Ref number</mat-label>
           <input matInput formControlName="suppliersRef" />
         </mat-form-field>
         <mat-form-field appearance="outline" class="flex-1">
@@ -109,20 +109,6 @@
         <mat-form-field appearance="outline" class="flex-1">
           <mat-label>Buyer Order No.</mat-label>
           <input matInput formControlName="buyerOrderNo" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="flex-1">
-          <mat-label>Dated</mat-label>
-          <input
-            matInput
-            [matDatepicker]="buyerOrderDatePicker"
-            formControlName="buyerOrderDate"
-            placeholder="Select date"
-          />
-          <mat-datepicker-toggle
-            matIconSuffix
-            [for]="buyerOrderDatePicker"
-          ></mat-datepicker-toggle>
-          <mat-datepicker #buyerOrderDatePicker></mat-datepicker>
         </mat-form-field>
         <mat-form-field appearance="outline" class="flex-1">
           <mat-label>Despatched Through</mat-label>

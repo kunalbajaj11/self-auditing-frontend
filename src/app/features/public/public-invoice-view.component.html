@@ -38,8 +38,9 @@
     <!-- Customer Information -->
     <div class="customer-section">
       <h3>Bill To:</h3>
-      <p class="customer-name">{{ invoice.customerName || '—' }}</p>
-      <p *ngIf="invoice.customerTrn" class="customer-trn">TRN: {{ invoice.customerTrn }}</p>
+      <p class="customer-name">{{ invoice.customer?.name || invoice.customerName || '—' }}</p>
+      <p *ngIf="invoice.customer?.customerNumber" class="customer-id">Customer ID: {{ invoice.customer?.customerNumber }}</p>
+      <p *ngIf="invoice.customerTrn || invoice.customer?.customerTrn" class="customer-trn">TRN: {{ invoice.customer?.customerTrn || invoice.customerTrn }}</p>
     </div>
 
     <!-- Line Items -->
