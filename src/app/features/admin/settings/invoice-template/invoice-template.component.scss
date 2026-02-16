@@ -91,3 +91,39 @@
   }
 }
 
+.terms-conditions-list {
+  margin: 16px 0;
+
+  label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+    color: #0f172a;
+  }
+
+  .field-hint {
+    color: #64748b;
+    font-size: 0.75rem;
+    margin: 0 0 12px;
+  }
+
+  .terms-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .terms-item {
+    .terms-input {
+      width: 100%;
+    }
+  }
+
+  .add-tc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+

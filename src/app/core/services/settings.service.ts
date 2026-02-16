@@ -19,6 +19,8 @@ export interface InvoiceTemplateSettings {
   invoiceCustomPaymentTerms?: string | null;
   invoiceDefaultNotes?: string | null;
   invoiceTermsConditions?: string | null;
+  /** Terms & conditions as array of items (each item one condition). Preferred over single text. */
+  invoiceTermsConditionsList?: string[] | null;
   invoiceFooterText?: string | null;
   invoiceShowFooter?: boolean | null;
   invoiceShowItemDescription?: boolean | null;

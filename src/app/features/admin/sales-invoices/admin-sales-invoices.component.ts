@@ -173,9 +173,13 @@ export class AdminSalesInvoicesComponent implements OnInit {
         this.snackBar.open('Invoice deleted', 'Close', { duration: 3000 });
         this.loadInvoices();
       },
-      error: () => {
-        this.snackBar.open('Failed to delete invoice', 'Close', {
-          duration: 4000,
+      error: (err) => {
+        const msg =
+          err?.error?.message ||
+          err?.message ||
+          'Failed to delete invoice';
+        this.snackBar.open(msg, 'Close', {
+          duration: 5000,
           panelClass: ['snack-error'],
         });
       },

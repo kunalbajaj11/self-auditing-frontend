@@ -29,6 +29,7 @@ interface InvoicePreviewData {
     paymentTermsDisplay?: string;
     defaultNotes?: string;
     termsAndConditions?: string;
+    termsAndConditionsList?: string[];
     footerText?: string;
     showFooter?: boolean;
   };

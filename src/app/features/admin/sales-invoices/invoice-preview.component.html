@@ -373,12 +373,19 @@
         class="terms-section"
         *ngIf="
           previewData.templateSettings.showTermsAndConditions &&
-          previewData.templateSettings.termsAndConditions &&
-          previewData.templateSettings.termsAndConditions.trim().length > 0
+          (
+            (previewData.templateSettings.termsAndConditionsList && previewData.templateSettings.termsAndConditionsList.length > 0) ||
+            (previewData.templateSettings.termsAndConditions && previewData.templateSettings.termsAndConditions.trim().length > 0)
+          )
         "
       >
         <h4>Terms & Conditions</h4>
-        <p>{{ previewData.templateSettings.termsAndConditions }}</p>
+        <ng-container *ngIf="previewData.templateSettings.termsAndConditionsList?.length">
+          <p *ngFor="let line of previewData.templateSettings.termsAndConditionsList">{{ line }}</p>
+        </ng-container>
+        <p *ngIf="!previewData.templateSettings.termsAndConditionsList?.length && previewData.templateSettings.termsAndConditions">
+          {{ previewData.templateSettings.termsAndConditions }}
+        </p>
       </div>
 
       <!-- Bank Details - move below terms & conditions -->

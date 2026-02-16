@@ -240,7 +240,8 @@ export class InvoiceFormDialogComponent implements OnInit {
         invoiceDefaultPaymentTerms: ['Net 30'],
         invoiceCustomPaymentTerms: [''],
         invoiceDefaultNotes: [''],
-        invoiceTermsConditions: [''],
+        invoiceTermsConditionsSelected: this.fb.control([] as number[]),
+        invoiceTermsConditionsCustom: this.fb.array([]),
         invoiceFooterText: [''],
         invoiceShowFooter: [true],
         invoiceShowItemDescription: [true],
@@ -257,6 +258,42 @@ export class InvoiceFormDialogComponent implements OnInit {
 
   get invoiceTitleControl(): FormControl {
     return this.displayOptions.get('invoiceTitle') as FormControl;
+  }
+
+  /** Org T&C list from template (for checkboxes). */
+  get termsConditionsList(): string[] {
+    return this.templateDefaults?.invoiceTermsConditionsList ?? [];
+  }
+
+  /** Selected T&C indices (which org T&C items to include on this invoice). */
+  get termsConditionsSelected(): number[] {
+    const v = this.displayOptions.get('invoiceTermsConditionsSelected')?.value;
+    return Array.isArray(v) ? v : [];
+  }
+
+  get termsConditionsCustom(): FormArray {
+    return this.displayOptions.get('invoiceTermsConditionsCustom') as FormArray;
+  }
+
+  isTermsConditionSelected(index: number): boolean {
+    return this.termsConditionsSelected.indexOf(index) >= 0;
+  }
+
+  toggleTermsConditionSelected(index: number): void {
+    const selected = [...this.termsConditionsSelected];
+    const i = selected.indexOf(index);
+    if (i >= 0) selected.splice(i, 1);
+    else selected.push(index);
+    selected.sort((a, b) => a - b);
+    this.displayOptions.patchValue({ invoiceTermsConditionsSelected: selected });
+  }
+
+  addCustomTermsCondition(): void {
+    this.termsConditionsCustom.push(this.fb.control(''));
+  }
+
+  removeCustomTermsCondition(idx: number): void {
+    this.termsConditionsCustom.removeAt(idx);
   }
 
   ngOnInit(): void {
@@ -305,7 +342,6 @@ export class InvoiceFormDialogComponent implements OnInit {
             invoiceDefaultPaymentTerms: result.template.invoiceDefaultPaymentTerms ?? 'Net 30',
             invoiceCustomPaymentTerms: result.template.invoiceCustomPaymentTerms ?? '',
             invoiceDefaultNotes: result.template.invoiceDefaultNotes ?? '',
-            invoiceTermsConditions: result.template.invoiceTermsConditions ?? '',
             invoiceFooterText: result.template.invoiceFooterText ?? '',
             invoiceShowFooter: result.template.invoiceShowFooter ?? true,
             invoiceShowItemDescription: result.template.invoiceShowItemDescription ?? true,
@@ -313,6 +349,14 @@ export class InvoiceFormDialogComponent implements OnInit {
             invoiceShowItemUnitPrice: result.template.invoiceShowItemUnitPrice ?? true,
             invoiceShowItemTotal: result.template.invoiceShowItemTotal ?? true,
           });
+          const tcList = result.template.invoiceTermsConditionsList ?? [];
+          if (Array.isArray(tcList) && tcList.length > 0) {
+            this.displayOptions.patchValue({
+              invoiceTermsConditionsSelected: tcList.map((_, i) => i),
+            });
+            const customArr = this.displayOptions.get('invoiceTermsConditionsCustom') as FormArray;
+            customArr.clear();
+          }
         } else {
           // No template: set default title by document type for new proforma/quotation
           if (this.documentType === 'proforma') {
@@ -511,7 +555,6 @@ export class InvoiceFormDialogComponent implements OnInit {
         invoiceDefaultPaymentTerms: opts.invoiceDefaultPaymentTerms ?? 'Net 30',
         invoiceCustomPaymentTerms: opts.invoiceCustomPaymentTerms ?? '',
         invoiceDefaultNotes: opts.invoiceDefaultNotes ?? '',
-        invoiceTermsConditions: opts.invoiceTermsConditions ?? '',
         invoiceFooterText: opts.invoiceFooterText ?? '',
         invoiceShowFooter: opts.invoiceShowFooter ?? true,
         invoiceShowItemDescription: opts.invoiceShowItemDescription ?? true,
@@ -519,6 +562,23 @@ export class InvoiceFormDialogComponent implements OnInit {
         invoiceShowItemUnitPrice: opts.invoiceShowItemUnitPrice ?? true,
         invoiceShowItemTotal: opts.invoiceShowItemTotal ?? true,
       });
+      if (Array.isArray(opts.invoiceTermsConditionsSelected)) {
+        this.displayOptions.patchValue({
+          invoiceTermsConditionsSelected: opts.invoiceTermsConditionsSelected,
+        });
+      }
+      if (Array.isArray(opts.invoiceTermsConditionsCustom)) {
+        const customArr = this.displayOptions.get('invoiceTermsConditionsCustom') as FormArray;
+        customArr.clear();
+        opts.invoiceTermsConditionsCustom.forEach((s: string) =>
+          customArr.push(this.fb.control(s ?? '')),
+        );
+      } else if (opts.invoiceTermsConditions != null && String(opts.invoiceTermsConditions).trim()) {
+        this.displayOptions.patchValue({ invoiceTermsConditionsSelected: [] });
+        const customArr = this.displayOptions.get('invoiceTermsConditionsCustom') as FormArray;
+        customArr.clear();
+        customArr.push(this.fb.control(String(opts.invoiceTermsConditions)));
+      }
     }
 
     // Load line items
@@ -785,13 +845,18 @@ export class InvoiceFormDialogComponent implements OnInit {
       'invoiceTitle', 'invoiceHeaderText', 'invoiceShowCompanyDetails', 'invoiceShowVatDetails',
       'invoiceShowPaymentTerms', 'invoiceShowPaymentMethods', 'invoiceShowBankDetails',
       'invoiceShowTermsConditions', 'invoiceDefaultPaymentTerms', 'invoiceCustomPaymentTerms',
-      'invoiceDefaultNotes', 'invoiceTermsConditions', 'invoiceFooterText', 'invoiceShowFooter',
+      'invoiceDefaultNotes', 'invoiceTermsConditionsSelected', 'invoiceTermsConditionsCustom',
+      'invoiceFooterText', 'invoiceShowFooter',
       'invoiceShowItemDescription', 'invoiceShowItemQuantity', 'invoiceShowItemUnitPrice', 'invoiceShowItemTotal',
     ];
     keys.forEach((k) => {
-      if (displayOpts[k] !== undefined && displayOpts[k] !== null && displayOpts[k] !== '') {
-        displayOptionsPayload[k] = displayOpts[k];
+      const v = displayOpts[k];
+      if (v === undefined) return;
+      if (k === 'invoiceTermsConditionsSelected' || k === 'invoiceTermsConditionsCustom') {
+        displayOptionsPayload[k] = Array.isArray(v) ? v : [];
+        return;
       }
+      if (v !== null && v !== '') displayOptionsPayload[k] = v;
     });
 
     const sumAmount = lineItems.reduce((s, i) => s + (Number(i.amount) || 0), 0);

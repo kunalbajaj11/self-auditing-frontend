@@ -377,10 +377,33 @@
                   <mat-label>Default payment terms</mat-label>
                   <input matInput formControlName="invoiceDefaultPaymentTerms" placeholder="e.g. Net 30" />
                 </mat-form-field>
-                <mat-form-field appearance="outline" class="full-width terms-conditions-field">
-                  <mat-label>Terms &amp; conditions</mat-label>
-                  <textarea matInput formControlName="invoiceTermsConditions" class="terms-conditions-textarea" rows="6" [placeholder]="'Optional terms for this ' + documentWord"></textarea>
-                </mat-form-field>
+                <div class="full-width terms-conditions-subsection" *ngIf="displayOptions.get('invoiceShowTermsConditions')?.value">
+                  <h4 class="terms-conditions-heading">Terms &amp; conditions</h4>
+                  <p class="terms-conditions-hint">Select which T&amp;C from settings to include, and add any custom lines for this {{ documentWord }}.</p>
+                  <div class="tc-checkboxes" *ngIf="termsConditionsList.length > 0">
+                    <mat-checkbox
+                      *ngFor="let item of termsConditionsList; let i = index"
+                      [checked]="isTermsConditionSelected(i)"
+                      (change)="toggleTermsConditionSelected(i)">
+                      {{ item }}
+                    </mat-checkbox>
+                  </div>
+                  <div class="tc-custom-list" formArrayName="invoiceTermsConditionsCustom">
+                    <div *ngFor="let ctrl of termsConditionsCustom.controls; let j = index" class="tc-custom-item">
+                      <mat-form-field appearance="outline" class="tc-custom-input">
+                        <mat-label>Custom T&amp;C {{ j + 1 }}</mat-label>
+                        <input matInput [formControlName]="j" [placeholder]="'Custom condition for this ' + documentWord" />
+                        <button mat-icon-button matSuffix type="button" (click)="removeCustomTermsCondition(j)" matTooltip="Remove">
+                          <mat-icon>close</mat-icon>
+                        </button>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <button mat-stroked-button type="button" (click)="addCustomTermsCondition()" class="add-custom-tc-btn">
+                    <mat-icon>add</mat-icon>
+                    Add custom T&amp;C for this {{ documentWord }}
+                  </button>
+                </div>
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Footer text</mat-label>
                   <textarea matInput formControlName="invoiceFooterText" rows="3" [placeholder]="'Text shown at bottom of ' + documentWord"></textarea>

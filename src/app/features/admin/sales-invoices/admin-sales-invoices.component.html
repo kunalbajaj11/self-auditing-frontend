@@ -103,7 +103,8 @@
 
         <div class="empty" *ngIf="!loading && dataSource.data.length === 0">
           <mat-icon>description</mat-icon>
-          <p>No invoices yet. Create your first invoice to get started.</p>
+          <p *ngIf="currentFilter !== 'payments'">No invoices yet. Create your first invoice to get started.</p>
+          <p *ngIf="currentFilter === 'payments'">No payments received yet. Use <strong>Add Receipt</strong> to record a payment against an outstanding invoice; it will appear here and under Bank or Cash in the Trial Balance.</p>
         </div>
       </mat-card-content>
     </mat-card>

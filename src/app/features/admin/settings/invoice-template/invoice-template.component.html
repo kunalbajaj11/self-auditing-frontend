@@ -151,10 +151,25 @@
               <textarea matInput rows="3" formControlName="defaultNotes" placeholder="Additional notes to appear on invoices"></textarea>
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="full" *ngIf="form.get('showTermsAndConditions')?.value">
-              <mat-label>Terms & Conditions</mat-label>
-              <textarea matInput rows="4" formControlName="termsAndConditions" placeholder="Standard terms and conditions"></textarea>
-            </mat-form-field>
+            <div class="terms-conditions-list full" *ngIf="form.get('showTermsAndConditions')?.value">
+              <label>Terms &amp; Conditions</label>
+              <p class="field-hint">Add one condition per line. These can be selected per invoice when creating or editing.</p>
+              <div formArrayName="termsConditionsList" class="terms-list">
+                <div *ngFor="let ctrl of termsConditionsList.controls; let i = index" class="terms-item">
+                  <mat-form-field appearance="outline" class="terms-input">
+                    <mat-label>Condition {{ i + 1 }}</mat-label>
+                    <input matInput [formControlName]="i" placeholder="e.g. Payment due within 30 days" />
+                    <button mat-icon-button matSuffix type="button" (click)="removeTermsCondition(i)" matTooltip="Remove">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </mat-form-field>
+                </div>
+              </div>
+              <button mat-stroked-button type="button" (click)="addTermsCondition()" class="add-tc-btn">
+                <mat-icon>add</mat-icon>
+                Add T&amp;C
+              </button>
+            </div>
 
             <mat-form-field appearance="outline" class="full" *ngIf="form.get('showFooter')?.value">
               <mat-label>Footer Text</mat-label>

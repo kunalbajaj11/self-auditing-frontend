@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { OrganizationService } from '../../../../core/services/organization.service';
 import { SettingsService, InvoiceTemplateSettings } from '../../../../core/services/settings.service';
@@ -63,8 +63,8 @@ export class InvoiceTemplateComponent implements OnInit {
       defaultPaymentTerms: ['Net 30'],
       customPaymentTerms: [''],
       defaultNotes: [''],
-      termsAndConditions: [''],
-      
+      termsConditionsList: this.fb.array([]),
+
       // Layout
       invoiceTitle: ['TAX INVOICE'],
       showItemDescription: [true],
@@ -110,7 +110,6 @@ export class InvoiceTemplateComponent implements OnInit {
           defaultPaymentTerms: settings.invoiceDefaultPaymentTerms ?? 'Net 30',
           customPaymentTerms: settings.invoiceCustomPaymentTerms ?? '',
           defaultNotes: settings.invoiceDefaultNotes ?? '',
-          termsAndConditions: settings.invoiceTermsConditions ?? '',
           footerText: settings.invoiceFooterText ?? '',
           showFooter: settings.invoiceShowFooter ?? true,
           showItemDescription: settings.invoiceShowItemDescription ?? true,
@@ -127,6 +126,19 @@ export class InvoiceTemplateComponent implements OnInit {
         }
         if (signatureUrl) {
           this.loadSignatureWithAuth(signatureUrl);
+        }
+
+        const list = settings.invoiceTermsConditionsList;
+        const termsArray = this.form.get('termsConditionsList') as FormArray;
+        termsArray.clear();
+        if (Array.isArray(list) && list.length > 0) {
+          list.forEach((item) => termsArray.push(this.fb.control(item ?? '')));
+        } else if (settings.invoiceTermsConditions?.trim()) {
+          settings.invoiceTermsConditions
+            .split(/\r?\n/)
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .forEach((item) => termsArray.push(this.fb.control(item)));
         }
 
         this.loading = false;
@@ -205,7 +217,9 @@ export class InvoiceTemplateComponent implements OnInit {
       invoiceDefaultPaymentTerms: this.form.get('defaultPaymentTerms')?.value,
       invoiceCustomPaymentTerms: this.showCustomPaymentTerms ? this.form.get('customPaymentTerms')?.value : null,
       invoiceDefaultNotes: this.form.get('defaultNotes')?.value?.trim() || null,
-      invoiceTermsConditions: this.form.get('termsAndConditions')?.value?.trim() || null,
+      invoiceTermsConditionsList: (this.form.get('termsConditionsList') as FormArray)?.value
+        ?.map((s: string) => (s != null ? String(s).trim() : ''))
+        .filter((s: string) => s.length > 0) ?? [],
       invoiceFooterText: this.form.get('footerText')?.value?.trim() || null,
       invoiceShowFooter: this.form.get('showFooter')?.value,
       invoiceShowItemDescription: this.form.get('showItemDescription')?.value,
@@ -362,6 +376,18 @@ export class InvoiceTemplateComponent implements OnInit {
 
   get showCustomColor(): boolean {
     return this.form.get('colorScheme')?.value === 'custom';
+  }
+
+  get termsConditionsList(): FormArray {
+    return this.form.get('termsConditionsList') as FormArray;
+  }
+
+  addTermsCondition(): void {
+    this.termsConditionsList.push(this.fb.control(''));
+  }
+
+  removeTermsCondition(index: number): void {
+    this.termsConditionsList.removeAt(index);
   }
 }
 
