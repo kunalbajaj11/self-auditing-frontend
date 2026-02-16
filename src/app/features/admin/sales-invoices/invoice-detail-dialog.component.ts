@@ -24,7 +24,7 @@ export class InvoiceDetailDialogComponent implements OnInit {
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
     private readonly router: Router,
-    @Inject(MAT_DIALOG_DATA) public data: { invoiceId: string },
+    @Inject(MAT_DIALOG_DATA) public data: { invoiceId: string; returnFilter?: string },
   ) {}
 
   ngOnInit(): void {
@@ -231,7 +231,13 @@ export class InvoiceDetailDialogComponent implements OnInit {
   previewInvoice(): void {
     if (!this.invoice) return;
     this.dialogRef.close();
-    this.router.navigate(['/admin/sales-invoices', this.invoice.id, 'preview']);
+    const queryParams = this.data.returnFilter
+      ? { returnTo: this.data.returnFilter }
+      : undefined;
+    this.router.navigate(
+      ['/admin/sales-invoices', this.invoice.id, 'preview'],
+      queryParams ? { queryParams } : {},
+    );
   }
 
   close(): void {

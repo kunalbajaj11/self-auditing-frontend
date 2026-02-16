@@ -160,7 +160,7 @@ export class AdminSalesInvoicesComponent implements OnInit {
       width: '900px',
       maxWidth: '95vw',
       maxHeight: '90vh',
-      data: { invoiceId: invoice.id },
+      data: { invoiceId: invoice.id, returnFilter: this.currentFilter },
     });
   }
 

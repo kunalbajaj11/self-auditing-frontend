@@ -56,8 +56,13 @@ export class InvoicePreviewComponent implements OnInit {
     private readonly apiService: ApiService,
   ) {}
 
+  /** When set (e.g. 'payments'), back link returns to that filter on sales-invoices. */
+  returnTo: string | null = null;
+
   ngOnInit(): void {
     this.invoiceId = this.route.snapshot.paramMap.get('id');
+    this.returnTo =
+      this.route.snapshot.queryParamMap.get('returnTo') ?? null;
     if (this.invoiceId) {
       this.loadPreview();
     } else {
@@ -204,8 +209,19 @@ export class InvoicePreviewComponent implements OnInit {
     });
   }
 
-  /** Back route and label by document type: Proforma → proforma-invoices, Quotation → quotations, else sales-invoices */
-  getBackRoute(): { url: string[]; label: string } {
+  /** Back route and label by document type or returnTo (e.g. from Payments Received). */
+  getBackRoute(): {
+    url: string[];
+    label: string;
+    queryParams?: { filter: string };
+  } {
+    if (this.returnTo === 'payments') {
+      return {
+        url: ['/admin/sales-invoices'],
+        queryParams: { filter: 'payments' },
+        label: 'Back to Payments Received',
+      };
+    }
     const status = (this.previewData?.invoice?.status ?? '').toLowerCase();
     if (status === 'proforma_invoice') {
       return { url: ['/admin/proforma-invoices'], label: 'Back to Proforma Invoices' };
@@ -217,8 +233,12 @@ export class InvoicePreviewComponent implements OnInit {
   }
 
   goBack(): void {
-    const { url } = this.getBackRoute();
-    this.router.navigate(url);
+    const route = this.getBackRoute();
+    if (route.queryParams) {
+      this.router.navigate(route.url, { queryParams: route.queryParams });
+    } else {
+      this.router.navigate(route.url);
+    }
   }
 
   getDiscountAmount(): number {

@@ -72,6 +72,10 @@ export class CreditNotesService {
     return this.api.get<CreditNote>(`/credit-notes/${id}`);
   }
 
+  downloadCreditNotePDF(id: string): Observable<Blob> {
+    return this.api.download(`/credit-notes/${id}/pdf`);
+  }
+
   createCreditNote(payload: CreateCreditNotePayload): Observable<CreditNote> {
     return this.api.post<CreditNote>('/credit-notes', payload);
   }

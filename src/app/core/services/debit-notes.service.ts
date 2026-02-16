@@ -95,6 +95,10 @@ export class DebitNotesService {
     return this.api.get<DebitNote>(`/debit-notes/${id}`);
   }
 
+  downloadDebitNotePDF(id: string): Observable<Blob> {
+    return this.api.download(`/debit-notes/${id}/pdf`);
+  }
+
   createDebitNote(payload: CreateDebitNotePayload): Observable<DebitNote> {
     return this.api.post<DebitNote>('/debit-notes', payload);
   }

@@ -1,6 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CreditNotesService, CreditNote } from '../../../core/services/credit-notes.service';
 import { CreditNoteApplyDialogComponent } from './credit-note-apply-dialog.component';
 
@@ -18,6 +19,7 @@ export class CreditNoteDetailDialogComponent implements OnInit {
     private readonly dialogRef: MatDialogRef<CreditNoteDetailDialogComponent>,
     private readonly creditNotesService: CreditNotesService,
     private readonly dialog: MatDialog,
+    private readonly snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) public data: { creditNoteId: string },
   ) {}
 
@@ -76,6 +78,33 @@ export class CreditNoteDetailDialogComponent implements OnInit {
       if (result) {
         this.loadCreditNote(); // Reload to get updated applied amount
       }
+    });
+  }
+
+  downloadPDF(): void {
+    const creditNote = this.creditNote;
+    if (!creditNote) return;
+    this.creditNotesService.downloadCreditNotePDF(creditNote.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `credit-note-${creditNote.creditNoteNumber ?? creditNote.id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        this.snackBar.open('Credit note PDF downloaded', 'Close', {
+          duration: 2000,
+        });
+      },
+      error: (err) => {
+        this.snackBar.open(
+          err?.error?.message || 'Failed to download credit note PDF',
+          'Close',
+          { duration: 4000, panelClass: ['snack-error'] },
+        );
+      },
     });
   }
 

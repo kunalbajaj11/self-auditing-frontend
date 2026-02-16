@@ -1,6 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { DebitNotesService, DebitNote } from '../../../core/services/debit-notes.service';
 import { DebitNoteApplyDialogComponent } from './debit-note-apply-dialog.component';
 import { DebitNoteApplyToExpenseDialogComponent } from './debit-note-apply-to-expense-dialog.component';
@@ -19,6 +20,7 @@ export class DebitNoteDetailDialogComponent implements OnInit {
     private readonly dialogRef: MatDialogRef<DebitNoteDetailDialogComponent>,
     private readonly debitNotesService: DebitNotesService,
     private readonly dialog: MatDialog,
+    private readonly snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) public data: { debitNoteId: string },
   ) {}
 
@@ -107,6 +109,33 @@ export class DebitNoteDetailDialogComponent implements OnInit {
       this.debitNote.status?.toLowerCase() === 'issued' &&
       this.remainingAmount > 0
     );
+  }
+
+  downloadPDF(): void {
+    const debitNote = this.debitNote;
+    if (!debitNote) return;
+    this.debitNotesService.downloadDebitNotePDF(debitNote.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `debit-note-${debitNote.debitNoteNumber ?? debitNote.id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        this.snackBar.open('Debit note PDF downloaded', 'Close', {
+          duration: 2000,
+        });
+      },
+      error: (err) => {
+        this.snackBar.open(
+          err?.error?.message || 'Failed to download debit note PDF',
+          'Close',
+          { duration: 4000, panelClass: ['snack-error'] },
+        );
+      },
+    });
   }
 
   close(): void {

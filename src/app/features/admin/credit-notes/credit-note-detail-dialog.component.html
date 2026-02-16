@@ -88,6 +88,10 @@
 
   <mat-dialog-actions align="end" *ngIf="!loading && creditNote">
     <button mat-button (click)="close()">Close</button>
+    <button mat-button (click)="downloadPDF()" [disabled]="loading">
+      <mat-icon>download</mat-icon>
+      Download PDF
+    </button>
     <button
       mat-raised-button
       color="primary"
