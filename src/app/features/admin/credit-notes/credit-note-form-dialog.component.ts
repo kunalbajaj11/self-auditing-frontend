@@ -1,21 +1,22 @@
-import { Component, Inject, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
+  FormArray,
   Validators,
 } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CreditNotesService, CreditNote } from '../../../core/services/credit-notes.service';
+import { CreditNotesService, CreditNote, CreditNoteLineItem } from '../../../core/services/credit-notes.service';
 import { CustomersService, Customer } from '../../../core/services/customers.service';
-import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales-invoices.service';
+import { SalesInvoicesService, SalesInvoice, InvoiceLineItem } from '../../../core/services/sales-invoices.service';
 
 @Component({
   selector: 'app-credit-note-form-dialog',
   templateUrl: './credit-note-form-dialog.component.html',
   styleUrls: ['./credit-note-form-dialog.component.scss'],
 })
-export class CreditNoteFormDialogComponent implements OnInit, AfterViewInit {
+export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   form: FormGroup;
   loading = false;
   customers: Customer[] = [];
@@ -23,6 +24,7 @@ export class CreditNoteFormDialogComponent implements OnInit, AfterViewInit {
   loadingCustomers = false;
   loadingInvoices = false;
   selectedInvoice: SalesInvoice | null = null;
+  private amountSubscription: any;
 
   readonly creditNoteReasons = [
     { value: 'return', label: 'Return' },
@@ -34,11 +36,25 @@ export class CreditNoteFormDialogComponent implements OnInit, AfterViewInit {
 
   readonly creditNoteStatuses = ['draft', 'issued', 'cancelled'];
   readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
+  defaultVatRate = 5;
+
+  get lineItems(): FormArray {
+    return this.form.get('lineItems')! as FormArray;
+  }
 
   get totalAmount(): number {
+    if (this.lineItems?.length > 0) {
+      const sub = this.lineItems.controls.reduce((sum, c) => sum + parseFloat(c.get('amount')?.value || '0'), 0);
+      const vat = this.lineItems.controls.reduce((sum, c) => sum + parseFloat(c.get('vatAmount')?.value || '0'), 0);
+      return sub + vat;
+    }
     const amount = parseFloat(this.form.get('amount')?.value || '0');
     const vatAmount = parseFloat(this.form.get('vatAmount')?.value || '0');
     return amount + vatAmount;
+  }
+
+  get useLineItems(): boolean {
+    return this.lineItems?.length > 0;
   }
 
   constructor(
@@ -57,22 +73,74 @@ export class CreditNoteFormDialogComponent implements OnInit, AfterViewInit {
       customerTrn: [''],
       creditNoteDate: [new Date().toISOString().substring(0, 10), Validators.required],
       reason: ['return', Validators.required],
-      amount: [0, [Validators.required, Validators.min(0.01)]],
+      amount: [0, [Validators.required, Validators.min(0)]],
       vatAmount: [0, [Validators.min(0)]],
       currency: ['AED'],
       status: ['draft'],
       description: [''],
       notes: [''],
+      lineItems: this.fb.array([]),
     });
+  }
+
+  private createLineItemGroup(li: Partial<CreditNoteLineItem> = {}): FormGroup {
+    const qty = parseFloat(String(li.quantity ?? 1));
+    const unitPrice = parseFloat(String(li.unitPrice ?? 0));
+    const vatRate = parseFloat(String(li.vatRate ?? this.defaultVatRate));
+    const amount = li.amount != null ? parseFloat(String(li.amount)) : qty * unitPrice;
+    const vatAmount = li.vatAmount != null ? parseFloat(String(li.vatAmount)) : amount * (vatRate / 100);
+    return this.fb.group({
+      itemName: [li.itemName ?? '', Validators.required],
+      quantity: [qty, [Validators.required, Validators.min(0.001)]],
+      unitPrice: [unitPrice, [Validators.required, Validators.min(0)]],
+      vatRate: [vatRate, [Validators.min(0)]],
+      amount: [amount],
+      vatAmount: [vatAmount],
+    });
+  }
+
+  addLineItem(): void {
+    this.lineItems.push(this.createLineItemGroup({ itemName: '', quantity: 1, unitPrice: 0 }));
+  }
+
+  removeLineItem(index: number): void {
+    this.lineItems.removeAt(index);
+    this.syncAmountAndVatFromLines();
+  }
+
+  onLineItemChange(index: number): void {
+    const g = this.lineItems.at(index);
+    const qty = parseFloat(g.get('quantity')?.value || '0');
+    const unitPrice = parseFloat(g.get('unitPrice')?.value || '0');
+    const vatRate = parseFloat(g.get('vatRate')?.value || String(this.defaultVatRate));
+    const amount = qty * unitPrice;
+    const vatAmount = amount * (vatRate / 100);
+    g.patchValue({ amount, vatAmount }, { emitEvent: false });
+    this.syncAmountAndVatFromLines();
+  }
+
+  syncAmountAndVatFromLines(): void {
+    if (this.lineItems.length === 0) return;
+    const amount = this.lineItems.controls.reduce((sum, c) => sum + parseFloat(c.get('amount')?.value || '0'), 0);
+    const vatAmount = this.lineItems.controls.reduce((sum, c) => sum + parseFloat(c.get('vatAmount')?.value || '0'), 0);
+    this.form.patchValue({ amount, vatAmount }, { emitEvent: false });
   }
 
   ngOnInit(): void {
     this.loadCustomers();
     this.loadInvoices();
-    
     if (this.data) {
       this.loadCreditNoteData();
+    } else {
+      // When creating, auto-recalculate VAT when amount changes (e.g. 5% of 2500 = 125)
+      this.amountSubscription = this.form.get('amount')?.valueChanges?.subscribe(() => {
+        this.calculateVat();
+      });
     }
+  }
+
+  ngOnDestroy(): void {
+    this.amountSubscription?.unsubscribe();
   }
 
   ngAfterViewInit(): void {
@@ -190,33 +258,72 @@ export class CreditNoteFormDialogComponent implements OnInit, AfterViewInit {
       description: creditNote.description || '',
       notes: creditNote.notes || '',
     });
+    if (creditNote.lineItems && creditNote.lineItems.length > 0) {
+      this.lineItems.clear();
+      creditNote.lineItems.forEach((li: CreditNoteLineItem) => {
+        this.lineItems.push(this.createLineItemGroup(li));
+      });
+      this.syncAmountAndVatFromLines();
+    }
   }
 
   onInvoiceChange(invoiceId: string): void {
     const invoice = this.invoices.find((inv) => inv.id === invoiceId);
-    if (invoice) {
-      this.selectedInvoice = invoice;
-      
-      // Parse invoice amounts (they come as strings)
-      const invoiceAmount = parseFloat(invoice.amount || '0');
-      const invoiceVatAmount = parseFloat(invoice.vatAmount || '0');
-      
-      // Only populate if creating a new credit note (not editing)
-      const isNewCreditNote = !this.data;
-      
-      this.form.patchValue({
-        customerId: invoice.customerId || '',
-        customerName: invoice.customerName || '',
-        customerTrn: invoice.customerTrn || '',
-        currency: invoice.currency || 'AED',
-        // Populate amount and VAT if creating new credit note
-        ...(isNewCreditNote && {
+    if (!invoice) return;
+    this.selectedInvoice = invoice;
+    const isNewCreditNote = !this.data;
+    this.form.patchValue({
+      customerId: invoice.customerId || '',
+      customerName: invoice.customerName || '',
+      customerTrn: invoice.customerTrn || '',
+      currency: invoice.currency || 'AED',
+    });
+    if (!isNewCreditNote) return;
+    // Load full invoice to get line items (product name, rate) for credit note
+    this.invoicesService.getInvoice(invoice.id).subscribe({
+      next: (fullInvoice) => {
+        if (fullInvoice.lineItems && fullInvoice.lineItems.length > 0) {
+          this.lineItems.clear();
+          fullInvoice.lineItems.forEach((li: InvoiceLineItem, idx: number) => {
+            this.lineItems.push(
+              this.createLineItemGroup({
+                itemName: li.itemName,
+                quantity: li.quantity,
+                unitPrice: li.unitPrice,
+                vatRate: li.vatRate ?? this.defaultVatRate,
+                amount: li.amount,
+                vatAmount: li.vatAmount,
+                lineNumber: idx + 1,
+              }),
+            );
+          });
+          this.syncAmountAndVatFromLines();
+        } else {
+          this.lineItems.clear();
+          const invoiceAmount = parseFloat(fullInvoice.amount || '0');
+          const calculatedVat = invoiceAmount > 0 ? invoiceAmount * (this.getDefaultVatRate() / 100) : 0;
+          this.form.patchValue({
+            amount: invoiceAmount > 0 ? invoiceAmount : 0,
+            vatAmount: calculatedVat,
+            description: fullInvoice.description || '',
+          });
+        }
+      },
+      error: () => {
+        const invoiceAmount = parseFloat(invoice.amount || '0');
+        const calculatedVat = invoiceAmount > 0 ? invoiceAmount * (this.getDefaultVatRate() / 100) : 0;
+        this.form.patchValue({
           amount: invoiceAmount > 0 ? invoiceAmount : 0,
-          vatAmount: invoiceVatAmount > 0 ? invoiceVatAmount : 0,
+          vatAmount: calculatedVat,
           description: invoice.description || '',
-        }),
-      });
-    }
+        });
+      },
+    });
+  }
+
+  /** Default VAT rate (e.g. UAE 5%). Used to recalc VAT from credit note amount. */
+  private getDefaultVatRate(): number {
+    return 5;
   }
 
   onCustomerChange(customerId: string): void {
@@ -230,18 +337,13 @@ export class CreditNoteFormDialogComponent implements OnInit, AfterViewInit {
     }
   }
 
+  /** Recalculate VAT from amount using default rate (e.g. 5%). Call when amount changes or user clicks calculate. */
   calculateVat(): void {
     const amount = parseFloat(this.form.get('amount')?.value || '0');
-    const currency = this.form.get('currency')?.value || 'AED';
-    
-    // Default VAT calculation (5% for UAE standard rate)
-    // User can override manually
-    if (currency === 'AED' && parseFloat(this.form.get('vatAmount')?.value || '0') === 0 && amount > 0) {
-      const defaultVat = amount * 0.05;
-      this.form.patchValue({
-        vatAmount: defaultVat.toFixed(2),
-      });
-    }
+    if (amount <= 0) return;
+    const rate = this.getDefaultVatRate();
+    const vat = amount * (rate / 100);
+    this.form.patchValue({ vatAmount: Number(vat.toFixed(2)) });
   }
 
   save(): void {
@@ -252,6 +354,8 @@ export class CreditNoteFormDialogComponent implements OnInit, AfterViewInit {
 
     this.loading = true;
     const formValue = this.form.getRawValue();
+    const lines = formValue.lineItems || [];
+    const hasLineItems = Array.isArray(lines) && lines.length > 0;
 
     const payload: any = {
       invoiceId: formValue.invoiceId || undefined,
@@ -260,12 +364,27 @@ export class CreditNoteFormDialogComponent implements OnInit, AfterViewInit {
       customerTrn: formValue.customerTrn || undefined,
       creditNoteDate: formValue.creditNoteDate,
       reason: formValue.reason,
-      amount: parseFloat(formValue.amount),
-      vatAmount: parseFloat(formValue.vatAmount || '0'),
+      amount: hasLineItems
+        ? lines.reduce((s: number, li: any) => s + parseFloat(li.amount || '0'), 0)
+        : parseFloat(formValue.amount),
+      vatAmount: hasLineItems
+        ? lines.reduce((s: number, li: any) => s + parseFloat(li.vatAmount || '0'), 0)
+        : parseFloat(formValue.vatAmount || '0'),
       currency: formValue.currency || 'AED',
       description: formValue.description || undefined,
       notes: formValue.notes || undefined,
     };
+    if (hasLineItems) {
+      payload.lineItems = lines.map((li: any, idx: number) => ({
+        itemName: li.itemName,
+        quantity: parseFloat(li.quantity),
+        unitPrice: parseFloat(li.unitPrice),
+        vatRate: parseFloat(li.vatRate ?? this.defaultVatRate),
+        amount: parseFloat(li.amount),
+        vatAmount: parseFloat(li.vatAmount || '0'),
+        lineNumber: idx + 1,
+      }));
+    }
 
     // Clean up empty strings
     Object.keys(payload).forEach((key) => {

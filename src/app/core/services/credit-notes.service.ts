@@ -2,14 +2,22 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 
+export interface CreditNoteLineItem {
+  id?: string;
+  itemName: string;
+  quantity: number | string;
+  unitPrice: number | string;
+  vatRate?: number | string;
+  amount: number | string;
+  vatAmount: number | string;
+  lineNumber?: number;
+}
+
 export interface CreditNote {
   id: string;
   creditNoteNumber: string;
   invoiceId?: string | null;
   customerId?: string | null;
-  // When fetched via /credit-notes/:id the backend also returns related entities.
-  // Keep them optional so existing code continues to work, but we can use them
-  // to pre-fill forms.
   invoice?: {
     id: string;
     customerId?: string | null;
@@ -35,6 +43,7 @@ export interface CreditNote {
   remainingAmount: string;
   description?: string | null;
   notes?: string | null;
+  lineItems?: CreditNoteLineItem[];
   createdAt: string;
   updatedAt: string;
 }
@@ -52,6 +61,7 @@ export interface CreateCreditNotePayload {
   description?: string;
   notes?: string;
   status?: string;
+  lineItems?: CreditNoteLineItem[];
 }
 
 @Injectable({ providedIn: 'root' })

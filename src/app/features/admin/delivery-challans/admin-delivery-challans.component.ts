@@ -79,6 +79,27 @@ export class AdminDeliveryChallansComponent implements OnInit {
     dialogRef.afterClosed().subscribe(() => this.loadDeliveryChallans());
   }
 
+  downloadPDF(dc: DeliveryChallan): void {
+    this.deliveryChallansService.downloadDCPDF(dc.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `delivery-challan-${dc.challanNumber}.pdf`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.snackBar.open('PDF downloaded successfully', 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        this.snackBar.open(
+          error?.error?.message || 'Failed to download PDF',
+          'Close',
+          { duration: 4000, panelClass: ['snack-error'] },
+        );
+      },
+    });
+  }
+
   edit(dc: DeliveryChallan): void {
     const dialogRef = this.dialog.open(DeliveryChallanFormDialogComponent, {
       width: '900px',

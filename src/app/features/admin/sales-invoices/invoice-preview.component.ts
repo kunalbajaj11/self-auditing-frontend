@@ -175,6 +175,47 @@ export class InvoicePreviewComponent implements OnInit {
     });
   }
 
+  getPaidAmount(): number {
+    const inv = this.previewData?.invoice;
+    if (!inv) return 0;
+    const paid = parseFloat(inv.paidAmount ?? '0');
+    return Number.isNaN(paid) ? 0 : paid;
+  }
+
+  isTaxInvoice(): boolean {
+    const status = (this.previewData?.invoice?.status ?? '').toLowerCase();
+    return (
+      status === 'tax_invoice_receivable' ||
+      status === 'tax_invoice_bank_received' ||
+      status === 'tax_invoice_cash_received' ||
+      status === 'overdue'
+    );
+  }
+
+  downloadPaymentReceiptPDF(): void {
+    if (!this.invoiceId) return;
+
+    this.invoicesService.downloadPaymentReceiptPDF(this.invoiceId).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `payment-receipt-${this.previewData?.invoice?.invoiceNumber || this.invoiceId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Error downloading payment receipt PDF:', err);
+        this.snackBar.open('Failed to download payment receipt PDF', 'Close', {
+          duration: 4000,
+          panelClass: ['snack-error'],
+        });
+      },
+    });
+  }
+
   printInvoice(): void {
     window.print();
   }

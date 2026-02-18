@@ -194,6 +194,11 @@
       padding: 8px 10px;
       border-bottom: 2px solid rgba(15, 23, 42, 0.08);
       line-height: 1.4;
+
+      &.amount-cell {
+        white-space: nowrap;
+        min-width: 120px;
+      }
     }
   }
 
@@ -222,6 +227,11 @@
       &.text-right {
         text-align: right;
         font-family: 'SF Mono', 'Monaco', monospace;
+      }
+
+      &.amount-cell {
+        white-space: nowrap;
+        min-width: 120px;
       }
 
       strong {

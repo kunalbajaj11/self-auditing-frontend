@@ -29,7 +29,7 @@
             {{ so.soNumber }} — {{ so.customerName || so.customer?.name || 'Customer' }}
           </mat-option>
         </mat-select>
-        <mat-hint *ngIf="!data && form.get('salesOrderId')?.value">Creation will use Sales Order items.</mat-hint>
+        <mat-hint *ngIf="!data && form.get('salesOrderId')?.value">Items and quantities will load from the Sales Order below.</mat-hint>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
@@ -82,54 +82,54 @@
         </mat-form-field>
       </section>
 
-      <section class="form-section line-items" *ngIf="data || !form.get('salesOrderId')?.value">
+      <section class="form-section line-items">
         <div class="line-items-header">
           <h3 class="section-title">
             <mat-icon>list_alt</mat-icon>
-            Line Items
+            {{ form.get('salesOrderId')?.value && !data ? 'Goods to deliver (from Sales Order)' : 'Line Items' }}
           </h3>
-        <button mat-stroked-button type="button" (click)="addLineItem()">
-          <mat-icon>add</mat-icon>
-          Add item
-        </button>
-      </div>
+          <button mat-stroked-button type="button" (click)="addLineItem()" *ngIf="!form.get('salesOrderId')?.value || data">
+            <mat-icon>add</mat-icon>
+            Add item
+          </button>
+        </div>
 
-      <div class="items" formArrayName="lineItems">
-        <div class="item" *ngFor="let item of lineItems.controls; let i = index" [formGroupName]="i">
-          <div class="item-grid">
-            <mat-form-field appearance="outline">
-              <mat-label>Product</mat-label>
-              <mat-select formControlName="productId" (selectionChange)="onProductSelected(i)">
-                <mat-option value="">Manual</mat-option>
-                <mat-option *ngFor="let p of products" [value]="p.id">
-                  {{ p.name }} <span *ngIf="p.sku">({{ p.sku }})</span>
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+        <div class="items" formArrayName="lineItems">
+          <div class="item" *ngFor="let item of lineItems.controls; let i = index" [formGroupName]="i">
+            <div class="item-grid">
+              <mat-form-field appearance="outline" *ngIf="!item.get('soLineItemId')?.value">
+                <mat-label>Product</mat-label>
+                <mat-select formControlName="productId" (selectionChange)="onProductSelected(i)">
+                  <mat-option value="">Manual</mat-option>
+                  <mat-option *ngFor="let p of products" [value]="p.id">
+                    {{ p.name }} <span *ngIf="p.sku">({{ p.sku }})</span>
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Item</mat-label>
-              <input matInput formControlName="itemName" />
-            </mat-form-field>
+              <mat-form-field appearance="outline" class="item-name-full" [class.full-width]="item.get('soLineItemId')?.value">
+                <mat-label>Item</mat-label>
+                <input matInput formControlName="itemName" [readonly]="!!item.get('soLineItemId')?.value" />
+              </mat-form-field>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Qty</mat-label>
-              <input matInput type="number" formControlName="quantity" />
-            </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>{{ form.get('salesOrderId')?.value && !data ? 'Qty to deliver' : 'Qty' }}</mat-label>
+                <input matInput type="number" formControlName="quantity" min="0" step="0.001" />
+              </mat-form-field>
 
-            <mat-form-field appearance="outline">
-              <mat-label>UOM</mat-label>
-              <input matInput formControlName="unitOfMeasure" />
-            </mat-form-field>
-          </div>
+              <mat-form-field appearance="outline">
+                <mat-label>UOM</mat-label>
+                <input matInput formControlName="unitOfMeasure" [readonly]="!!item.get('soLineItemId')?.value" />
+              </mat-form-field>
+            </div>
 
-          <div class="item-actions">
-            <button mat-button color="warn" type="button" (click)="removeLineItem(i)" [disabled]="lineItems.length <= 1">
-              Remove
-            </button>
+            <div class="item-actions">
+              <button mat-button color="warn" type="button" (click)="removeLineItem(i)" [disabled]="lineItems.length <= 1" *ngIf="!form.get('salesOrderId')?.value || data">
+                Remove
+              </button>
+            </div>
           </div>
         </div>
-      </div>
       </section>
     </form>
   </mat-dialog-content>

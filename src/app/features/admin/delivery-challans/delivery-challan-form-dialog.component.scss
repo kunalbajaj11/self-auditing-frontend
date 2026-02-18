@@ -126,6 +126,10 @@ mat-dialog-content.content {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
+
+  .item-name-full.full-width {
+    grid-column: span 2;
+  }
 }
 
 .item-actions {

@@ -139,6 +139,64 @@ mat-dialog-content {
   margin-bottom: 16px;
 }
 
+.line-totals {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  font-size: 0.938rem;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.line-items-section {
+  margin-top: 16px;
+
+  .line-items-table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 12px;
+  }
+
+  .line-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+
+    th, td {
+      padding: 8px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.7);
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    td {
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .short .mat-mdc-form-field {
+      width: 90px;
+    }
+
+    .full-width-inline .mat-mdc-form-field {
+      min-width: 140px;
+    }
+
+    .line-amount {
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .line-items-hint {
+    margin-top: 8px;
+    font-size: 0.8125rem;
+    color: rgba(0, 0, 0, 0.55);
+  }
+}
+
 .totals-row {
   display: flex;
   justify-content: space-between;

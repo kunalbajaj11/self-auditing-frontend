@@ -20,6 +20,7 @@ export class AdminSalesInvoicesComponent implements OnInit {
     'invoiceDate',
     'dueDate',
     'totalAmount',
+    'paidAmount',
     'status',
     'paymentStatus',
     'createdAt',
@@ -241,6 +242,12 @@ export class AdminSalesInvoicesComponent implements OnInit {
       default:
         return 'accent';
     }
+  }
+
+  /** Payment received so far (for partial/paid). Used in Payment Received column. */
+  getPaidAmount(invoice: SalesInvoice): number {
+    const paid = parseFloat(invoice.paidAmount ?? '0');
+    return Number.isNaN(paid) ? 0 : paid;
   }
 
   get pageTitle(): string {

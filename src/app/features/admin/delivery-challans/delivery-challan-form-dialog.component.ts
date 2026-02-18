@@ -5,7 +5,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { forkJoin } from 'rxjs';
 import { CustomersService, Customer } from '../../../core/services/customers.service';
 import { ProductsService, Product } from '../../../core/services/products.service';
-import { SalesOrdersService, SalesOrder } from '../../../core/services/sales-orders.service';
+import { SalesOrdersService, SalesOrder, SalesOrderLineItem } from '../../../core/services/sales-orders.service';
 import {
   DeliveryChallansService,
   DeliveryChallan,
@@ -108,6 +108,46 @@ export class DeliveryChallanFormDialogComponent implements OnInit {
       customerName: so.customerName || so.customer?.name || '',
       customerTrn: so.customerTrn || so.customer?.customerTrn || '',
     });
+    if (!soId) {
+      this.lineItems.clear();
+      this.addLineItem();
+      return;
+    }
+    // Load full SO with line items and show quantities to deliver
+    this.loading = true;
+    this.salesOrdersService.getSalesOrder(soId).subscribe({
+      next: (fullSo) => {
+        this.loading = false;
+        this.lineItems.clear();
+        const items = fullSo.lineItems || [];
+        if (items.length === 0) {
+          this.addLineItem();
+          this.snackBar.open('This Sales Order has no line items.', 'Close', {
+            duration: 4000,
+            panelClass: ['snack-error'],
+          });
+          return;
+        }
+        items.forEach((li: SalesOrderLineItem) => {
+          this.addLineItem({
+            soLineItemId: li.id,
+            itemName: li.itemName,
+            description: li.description,
+            quantity: typeof li.orderedQuantity === 'number' ? li.orderedQuantity : parseFloat(String(li.orderedQuantity || '0')),
+            unitOfMeasure: li.unitOfMeasure || 'unit',
+          });
+        });
+      },
+      error: () => {
+        this.loading = false;
+        this.lineItems.clear();
+        this.addLineItem();
+        this.snackBar.open('Failed to load Sales Order items', 'Close', {
+          duration: 4000,
+          panelClass: ['snack-error'],
+        });
+      },
+    });
   }
 
   onCustomerSelected(customerId: string): void {
@@ -119,8 +159,10 @@ export class DeliveryChallanFormDialogComponent implements OnInit {
     });
   }
 
-  addLineItem(item?: Partial<DeliveryChallanLineItem>): void {
+  /** Optional: set when line item comes from a Sales Order (for createFromSalesOrder payload). */
+  addLineItem(item?: Partial<DeliveryChallanLineItem> & { soLineItemId?: string }): void {
     const group = this.fb.group({
+      soLineItemId: [item?.soLineItemId ?? null],
       productId: [item?.productId || ''],
       itemName: [item?.itemName || '', Validators.required],
       description: [item?.description || ''],
@@ -155,8 +197,22 @@ export class DeliveryChallanFormDialogComponent implements OnInit {
     this.loading = true;
     const value = this.form.getRawValue();
 
-    // If creating and a Sales Order is selected, use createFromSalesOrder
+    // If creating and a Sales Order is selected, use createFromSalesOrder (send line items with quantities)
     if (!this.data && value.salesOrderId) {
+      const soLineItems = (value.lineItems || [])
+        .filter((li: any) => li.soLineItemId && Number(li.quantity) > 0)
+        .map((li: any) => ({
+          salesOrderLineItemId: li.soLineItemId,
+          quantity: parseFloat(li.quantity),
+        }));
+      if (soLineItems.length === 0) {
+        this.snackBar.open(
+          'Enter at least one quantity to deliver for the selected Sales Order items.',
+          'Close',
+          { duration: 4000, panelClass: ['snack-error'] },
+        );
+        return;
+      }
       this.deliveryChallansService
         .createFromSalesOrder(value.salesOrderId, {
           challanDate: value.challanDate,
@@ -165,6 +221,7 @@ export class DeliveryChallanFormDialogComponent implements OnInit {
           vehicleNumber: value.vehicleNumber || undefined,
           transportMode: value.transportMode || undefined,
           lrNumber: value.lrNumber || undefined,
+          lineItems: soLineItems.length > 0 ? soLineItems : undefined,
         })
         .subscribe({
           next: (dc) => {

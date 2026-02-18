@@ -74,7 +74,7 @@
         </mat-form-field>
       </div>
 
-      <div class="form-row">
+      <div class="form-row" *ngIf="!useLineItems">
         <mat-form-field appearance="outline" class="flex-1">
           <mat-label>Amount *</mat-label>
           <input matInput type="number" formControlName="amount" step="0.01" min="0.01" required />
@@ -95,7 +95,81 @@
             <mat-icon>calculate</mat-icon>
           </button>
         </mat-form-field>
+      </div>
 
+      <div class="form-row" *ngIf="useLineItems">
+        <div class="line-totals">
+          <span>Amount: {{ form.get('amount')?.value | number: '1.2-2' }} {{ form.get('currency')?.value ?? 'AED' }}</span>
+          <span>VAT: {{ form.get('vatAmount')?.value | number: '1.2-2' }} {{ form.get('currency')?.value ?? 'AED' }}</span>
+        </div>
+      </div>
+
+      <div class="form-section line-items-section" *ngIf="lineItems && lineItems.length > 0">
+        <h3 class="section-title">
+          <mat-icon>list</mat-icon>
+          Line items (product name & rate)
+        </h3>
+        <div class="line-items-table-wrapper">
+          <table class="line-items-table">
+            <thead>
+              <tr>
+                <th>Product / Description</th>
+                <th>Rate</th>
+                <th>Qty</th>
+                <th>Amount</th>
+                <th>VAT</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody formArrayName="lineItems">
+              <tr *ngFor="let line of lineItems.controls; let i = index" [formGroupName]="i">
+                <td>
+                  <mat-form-field appearance="outline" class="full-width-inline">
+                    <input matInput formControlName="itemName" placeholder="Product name" />
+                  </mat-form-field>
+                </td>
+                <td>
+                  <mat-form-field appearance="outline" class="short">
+                    <input matInput type="number" formControlName="unitPrice" step="0.01" min="0" (change)="onLineItemChange(i)" placeholder="Rate" />
+                  </mat-form-field>
+                </td>
+                <td>
+                  <mat-form-field appearance="outline" class="short">
+                    <input matInput type="number" formControlName="quantity" step="0.001" min="0" (change)="onLineItemChange(i)" placeholder="Qty" />
+                  </mat-form-field>
+                </td>
+                <td>
+                  <span class="line-amount">{{ (line.get('amount')?.value ?? 0) | number: '1.2-2' }} {{ form.get('currency')?.value ?? 'AED' }}</span>
+                </td>
+                <td>
+                  <span class="line-amount">{{ (line.get('vatAmount')?.value ?? 0) | number: '1.2-2' }} {{ form.get('currency')?.value ?? 'AED' }}</span>
+                </td>
+                <td>
+                  <button mat-icon-button type="button" (click)="removeLineItem(i)" matTooltip="Remove line">
+                    <mat-icon>remove_circle_outline</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <button mat-stroked-button type="button" (click)="addLineItem()">
+          <mat-icon>add</mat-icon>
+          Add line
+        </button>
+        <p class="line-items-hint" *ngIf="!selectedInvoice && lineItems && lineItems.length > 0">
+          Select a related invoice above to prefill product name and rate from that invoice.
+        </p>
+      </div>
+
+      <div class="form-row" *ngIf="(!lineItems || lineItems.length === 0) && !data">
+        <button mat-stroked-button type="button" (click)="addLineItem()">
+          <mat-icon>list</mat-icon>
+          Add line items (product name & rate)
+        </button>
+      </div>
+
+      <div class="form-row">
         <mat-form-field appearance="outline" class="flex-1">
           <mat-label>Currency</mat-label>
           <mat-select formControlName="currency">
@@ -105,26 +179,27 @@
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="flex-1">
+        <mat-form-field appearance="outline" class="flex-1" *ngIf="data">
           <mat-label>Status</mat-label>
           <mat-select formControlName="status">
             <mat-option *ngFor="let status of creditNoteStatuses" [value]="status">
               {{ status | titlecase }}
             </mat-option>
           </mat-select>
+          <mat-hint>Issued credit notes can be applied to invoices.</mat-hint>
         </mat-form-field>
       </div>
 
       <div class="totals-row">
         <span class="total-label">Total Amount:</span>
-        <span class="total-value">{{ totalAmount | number: '1.2-2' }} {{ form.get('currency')?.value }}</span>
+        <span class="total-value">{{ totalAmount | number: '1.2-2' }} {{ form.get('currency')?.value ?? 'AED' }}</span>
       </div>
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Description</mat-label>
         <textarea matInput formControlName="description" rows="2"></textarea>
       </mat-form-field>
-    </div>
+      </div>
 
     <div class="form-section">
       <h3 class="section-title">

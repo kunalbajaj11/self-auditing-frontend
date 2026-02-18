@@ -192,8 +192,17 @@
       Send Email
     </button>
     <button mat-button (click)="downloadPDF()" [disabled]="loading">
-      <mat-icon>download</mat-icon>
-      Download PDF
+      <mat-icon>description</mat-icon>
+      Download Invoice PDF
+    </button>
+    <button
+      mat-button
+      (click)="downloadPaymentReceiptPDF()"
+      [disabled]="loading"
+      *ngIf="getPaidAmount() > 0 && isTaxInvoice()"
+    >
+      <mat-icon>receipt</mat-icon>
+      Download Payment Receipt
     </button>
     <button mat-raised-button color="primary" (click)="previewInvoice()">
       <mat-icon>visibility</mat-icon>

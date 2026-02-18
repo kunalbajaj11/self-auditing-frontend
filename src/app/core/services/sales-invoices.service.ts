@@ -177,6 +177,15 @@ export class SalesInvoicesService {
     return this.api.download(`/sales-invoices/${invoiceId}/pdf`);
   }
 
+  /** Download payment receipt PDF (for a payment received against this invoice). Uses latest payment if paymentId omitted. */
+  downloadPaymentReceiptPDF(invoiceId: string, paymentId?: string): Observable<Blob> {
+    const params = paymentId ? { paymentId } : {};
+    return this.api.download(
+      `/sales-invoices/${invoiceId}/payment-receipt/pdf`,
+      params,
+    );
+  }
+
   /** Filename prefix for PDF/download by document type (quotation-, proforma-invoice-, invoice-). */
   getPdfFilenamePrefix(status?: string): string {
     if (!status) return 'invoice-';

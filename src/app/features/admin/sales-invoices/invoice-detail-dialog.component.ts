@@ -228,6 +228,34 @@ export class InvoiceDetailDialogComponent implements OnInit {
     });
   }
 
+  /** Download payment receipt PDF (amount received, date, method) – for the latest payment when partial/paid. */
+  downloadPaymentReceiptPDF(): void {
+    if (!this.invoice) return;
+
+    this.loading = true;
+    this.invoicesService.downloadPaymentReceiptPDF(this.invoice.id).subscribe({
+      next: (blob) => {
+        this.loading = false;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `payment-receipt-${this.invoice?.invoiceNumber || 'receipt'}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        this.loading = false;
+        const msg =
+          typeof err?.error?.message === 'string'
+            ? err.error.message
+            : 'Failed to download payment receipt PDF';
+        this.snackBar.open(msg, 'Close', { duration: 4000, panelClass: ['snack-error'] });
+      },
+    });
+  }
+
   previewInvoice(): void {
     if (!this.invoice) return;
     this.dialogRef.close();

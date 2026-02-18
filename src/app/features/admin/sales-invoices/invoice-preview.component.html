@@ -7,8 +7,16 @@
     </button>
     <div class="actions">
       <button mat-raised-button color="primary" (click)="downloadPDF()">
-        <mat-icon>download</mat-icon>
-        Download PDF
+        <mat-icon>description</mat-icon>
+        Download Invoice PDF
+      </button>
+      <button
+        mat-raised-button
+        (click)="downloadPaymentReceiptPDF()"
+        *ngIf="getPaidAmount() > 0 && isTaxInvoice()"
+      >
+        <mat-icon>receipt</mat-icon>
+        Download Payment Receipt
       </button>
       <button mat-stroked-button (click)="exportEInvoice('xml')" matTooltip="Export as UBL 2.1 XML for e-invoicing">
         <mat-icon>code</mat-icon>
