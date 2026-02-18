@@ -117,13 +117,23 @@ export class InvoicePaymentDialogComponent implements OnInit {
     }
   }
 
+  /** Statuses that are not tax invoices – payments can only be recorded against tax invoices. */
+  private static readonly NON_TAX_STATUSES = [
+    'proforma_invoice',
+    'quotation',
+    'quotation_converted_to_proforma',
+    'proforma_converted_to_invoice',
+  ];
+
   private processInvoices(
     invoices: SalesInvoice[],
     preSelectedInvoice: SalesInvoice | null,
     preSelectInvoiceId?: string,
   ): void {
-    // Exclude proforma invoices – payments are recorded against tax invoices only
-    const taxInvoices = invoices.filter((inv) => inv.status !== 'proforma_invoice');
+    // Only show actual tax invoices; exclude proforma, quotation, and converted records
+    const taxInvoices = invoices.filter(
+      (inv) => !InvoicePaymentDialogComponent.NON_TAX_STATUSES.includes(inv.status),
+    );
     // Filter invoices with outstanding balance > 0
     // Calculate outstanding: totalAmount - paidAmount - appliedCreditNoteAmount
     const invoicesWithOutstanding: InvoiceWithOutstanding[] = taxInvoices
@@ -152,8 +162,11 @@ export class InvoicePaymentDialogComponent implements OnInit {
     
     console.log(`Found ${invoicesWithOutstanding.length} invoices with outstanding balance out of ${taxInvoices.length} total tax invoices`);
     
-    // If we have a pre-selected invoice, calculate its outstanding balance correctly
-    if (preSelectedInvoice) {
+    // If we have a pre-selected invoice, calculate its outstanding balance correctly (only if it's a tax invoice)
+    if (
+      preSelectedInvoice &&
+      !InvoicePaymentDialogComponent.NON_TAX_STATUSES.includes(preSelectedInvoice.status)
+    ) {
       const totalAmount = parseFloat(preSelectedInvoice.totalAmount || '0');
       const paidAmount = parseFloat(preSelectedInvoice.paidAmount || '0');
       
