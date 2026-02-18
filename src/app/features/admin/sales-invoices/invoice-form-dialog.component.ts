@@ -498,6 +498,7 @@ export class InvoiceFormDialogComponent implements OnInit {
             customerTrn: customer.customerTrn || '',
             customerAddress: customer.address || '',
             customerPhone: customer.phone || '',
+            suppliersRef: (invoice as any).suppliersRef ?? customer.customerNumber ?? '', // Customer Ref from customer if not set
           });
         },
         error: () => {
@@ -612,6 +613,7 @@ export class InvoiceFormDialogComponent implements OnInit {
         customerAddress: customer.address || '',
         customerPhone: customer.phone || '',
         currency: customer.preferredCurrency || 'AED',
+        suppliersRef: customer.customerNumber || '', // Customer Ref number (Commercial Details)
       });
 
       // Auto-set due date based on payment terms
@@ -832,13 +834,16 @@ export class InvoiceFormDialogComponent implements OnInit {
       };
     });
 
-    const status = asDraft
-      ? 'draft'
-      : this.documentType === 'proforma'
-        ? 'proforma_invoice'
-        : this.documentType === 'quotation'
-          ? 'quotation'
-          : (formValue.status || 'tax_invoice_receivable');
+    // Quotation and proforma must never be saved as 'draft' — they must stay quotation/proforma_invoice
+    // so they have no impact on Trial Balance. Only tax-invoice flow can use 'draft'.
+    const status =
+      this.documentType === 'quotation'
+        ? 'quotation'
+        : this.documentType === 'proforma'
+          ? 'proforma_invoice'
+          : asDraft
+            ? 'draft'
+            : (formValue.status || 'tax_invoice_receivable');
     const displayOpts = formValue.displayOptions || {};
     const displayOptionsPayload: Record<string, unknown> = {};
     const keys = [

@@ -175,6 +175,7 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
             customerId: customer.id,
             customerName: customer.name,
             customerTrn: customer.customerTrn || '',
+            suppliersRef: (invoice as any).suppliersRef ?? customer.customerNumber ?? '', // Customer Ref from customer if not set
           });
         },
         error: () => {
@@ -242,6 +243,7 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
         customerName: customer.name,
         customerTrn: customer.customerTrn || '',
         currency: customer.preferredCurrency || 'AED',
+        suppliersRef: customer.customerNumber || '', // Customer Ref number (Commercial Details)
       });
 
       // Auto-set due date based on payment terms

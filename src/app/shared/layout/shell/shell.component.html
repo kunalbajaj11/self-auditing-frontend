@@ -179,6 +179,20 @@
         </span>
 
         <span class="spacer"></span>
+        <div class="theme-selector">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Theme</mat-label>
+            <mat-select
+              [value]="currentThemeId"
+              (selectionChange)="onThemeChange($event.value)"
+              aria-label="Select color theme"
+            >
+              <mat-option *ngFor="let theme of themeOptions" [value]="theme.id">
+                {{ theme.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
         <button mat-icon-button aria-label="Notifications">
           <mat-icon>notifications</mat-icon>
         </button>

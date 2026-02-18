@@ -1,5 +1,12 @@
 @use '@angular/material' as mat;
 
+// Theme CSS variables (default = current blue). ThemeService overwrites these at runtime.
+:root {
+  --app-theme-primary: #0077c8;
+  --app-theme-primary-hover: #005fa3;
+  --app-theme-primary-light: rgba(0, 119, 200, 0.12);
+}
+
 // Custom palette maps
 $brand-primary-map: (
   50: #e5f3fb,
@@ -243,12 +250,12 @@ body {
 }
 
 a {
-  color: #0077c8;
+  color: var(--app-theme-primary);
   text-decoration: none;
   transition: color 120ms ease-in-out;
 
   &:hover {
-    color: #005fa3;
+    color: var(--app-theme-primary-hover);
   }
 }
 
@@ -266,20 +273,20 @@ button.mat-mdc-outlined-button {
 
 .mat-mdc-raised-button.mat-primary,
 .mat-mdc-unelevated-button.mat-primary {
-  background: #0077c8 !important;
+  background: var(--app-theme-primary) !important;
   color: #ffffff !important;
 
   &:hover {
-    background: #005fa3 !important;
+    background: var(--app-theme-primary-hover) !important;
   }
 }
 
 .mat-mdc-stroked-button.mat-primary {
-  border-color: #0077c8 !important;
-  color: #0077c8 !important;
+  border-color: var(--app-theme-primary) !important;
+  color: var(--app-theme-primary) !important;
 
   &:hover {
-    background: rgba(0, 119, 200, 0.08) !important;
+    background: var(--app-theme-primary-light) !important;
   }
 }
 
@@ -350,7 +357,7 @@ table {
     padding-bottom: 0 !important;
 
     &.mdc-text-field--focused {
-      border-color: #0077c8 !important;
+      border-color: var(--app-theme-primary) !important;
       box-shadow: 0 0 0 2px rgba(0, 119, 200, 0.2) !important;
     }
   }

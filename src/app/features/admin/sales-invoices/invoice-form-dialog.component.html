@@ -433,7 +433,7 @@
   <mat-dialog-actions class="dialog-actions" align="end">
     <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
     <button mat-button (click)="save(true)" [disabled]="loading || lineItems.length === 0" type="button">
-      Save as draft
+      {{ documentType === 'quotation' ? 'Save quotation' : documentType === 'proforma' ? 'Save proforma' : 'Save as draft' }}
     </button>
     <button
       mat-raised-button

@@ -30,7 +30,7 @@
     padding: 4px;
 
     mat-icon {
-      color: #0077c8;
+      color: var(--app-theme-primary);
     }
 
     .logo-image {
@@ -49,7 +49,7 @@
   .brand-title {
     font-size: 0.800rem;
     font-weight: 600;
-    color: #0077c8;
+    color: var(--app-theme-primary);
     line-height: 1.2;
   }
 
@@ -113,19 +113,19 @@
     &.active,
     &.active-child,
     &:hover {
-      background: rgba(0, 119, 200, 0.12);
-      color: #0077c8;
+      background: var(--app-theme-primary-light);
+      color: var(--app-theme-primary);
 
       .mat-mdc-list-item-icon,
       mat-icon {
-        color: #0077c8;
+        color: var(--app-theme-primary);
       }
     }
 
     .badge {
       margin-left: auto;
-      background: rgba(0, 191, 165, 0.15);
-      color: #0077c8;
+      background: var(--app-theme-primary-light);
+      color: var(--app-theme-primary);
       font-size: 10px;
       padding: 2px 6px;
       border-radius: 999px;
@@ -172,12 +172,12 @@
     transition: background 150ms ease, color 150ms ease;
 
     &:hover {
-      background: rgba(0, 119, 200, 0.08);
-      color: #0077c8;
+      background: var(--app-theme-primary-light);
+      color: var(--app-theme-primary);
     }
 
     &.expanded {
-      color: #0077c8;
+      color: var(--app-theme-primary);
     }
 
     .nav-group-icon {
@@ -190,8 +190,8 @@
 
     .badge {
       margin-left: 6px;
-      background: rgba(0, 191, 165, 0.15);
-      color: #0077c8;
+      background: var(--app-theme-primary-light);
+      color: var(--app-theme-primary);
       font-size: 10px;
       padding: 2px 6px;
       border-radius: 999px;
@@ -241,7 +241,7 @@
       align-items: center;
       gap: 8px;
       padding: 8px;
-      background: rgba(0, 119, 200, 0.05);
+      background: var(--app-theme-primary-light);
       border-radius: 6px;
       font-size: 0.75rem;
       color: #666666;
@@ -250,12 +250,12 @@
         font-size: 16px;
         width: 16px;
         height: 16px;
-        color: #0077c8;
+        color: var(--app-theme-primary);
       }
 
       .contact-number {
         font-weight: 500;
-        color: #0077c8;
+        color: var(--app-theme-primary);
         text-decoration: none;
 
         &:hover {
@@ -270,7 +270,7 @@
       justify-content: center;
       gap: 12px;
       padding: 8px;
-      background: rgba(0, 119, 200, 0.05);
+      background: var(--app-theme-primary-light);
       border-radius: 6px;
 
       .social-link {
@@ -280,8 +280,8 @@
         width: 32px;
         height: 32px;
         border-radius: 50%;
-        background: rgba(0, 119, 200, 0.1);
-        color: #0077c8;
+        background: var(--app-theme-primary-light);
+        color: var(--app-theme-primary);
         text-decoration: none;
         transition: all 150ms ease;
 
@@ -289,11 +289,11 @@
           width: 18px;
           height: 18px;
           display: block;
-          color: #0077c8;
+          color: var(--app-theme-primary);
         }
 
         &:hover {
-          background: rgba(0, 119, 200, 0.2);
+          background: var(--app-theme-primary-light);
           transform: scale(1.1);
         }
 
@@ -307,8 +307,8 @@
       width: 100%;
       height: 36px;
       font-size: 0.8rem;
-      color: #0077c8;
-      border-color: rgba(0, 119, 200, 0.4);
+      color: var(--app-theme-primary);
+      border-color: var(--app-theme-primary-light);
 
       mat-icon {
         font-size: 16px;
@@ -334,7 +334,7 @@
 
   .menu-button {
     margin-right: 6px;
-    color: #0077c8;
+    color: var(--app-theme-primary);
   }
 
   .page-title {
@@ -347,6 +347,30 @@
 
 .spacer {
   flex: 1 1 auto;
+}
+
+.theme-selector {
+  margin-right: 8px;
+
+  .mat-mdc-form-field {
+    width: 120px;
+    font-size: 0.8rem;
+
+    .mat-mdc-form-field-infix {
+      padding-top: 8px !important;
+      padding-bottom: 8px !important;
+      min-height: 36px !important;
+    }
+
+    .mat-mdc-text-field-wrapper {
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+
+    .mat-mdc-select-value {
+      font-size: 0.8rem;
+    }
+  }
 }
 
 .content-area {
@@ -391,6 +415,10 @@
       overflow: hidden;
       text-overflow: ellipsis;
       max-width: 180px;
+    }
+
+    .theme-selector {
+      display: none; // Hide on small screens to save space
     }
 
     .user-chip {
@@ -510,7 +538,7 @@
     width: 28px;
     height: 28px;
     border-radius: 8px;
-    background: #0077c8;
+    background: var(--app-theme-primary);
     color: #ffffff;
     display: flex;
     align-items: center;

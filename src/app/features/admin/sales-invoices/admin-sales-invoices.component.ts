@@ -69,9 +69,16 @@ export class AdminSalesInvoicesComponent implements OnInit {
     this.invoicesService.listInvoices(filters).subscribe({
       next: (invoices) => {
         this.loading = false;
-        // Exclude proforma and quotation – they appear only on their own pages
+        // Only show actual tax invoices. Exclude proforma, quotation, and converted records
+        // (converted proformas stay in Proforma list; converted quotations stay in Quotations list).
+        const nonTaxStatuses = [
+          'proforma_invoice',
+          'quotation',
+          'quotation_converted_to_proforma',
+          'proforma_converted_to_invoice',
+        ];
         const taxInvoices = invoices.filter(
-          (inv) => inv.status !== 'proforma_invoice' && inv.status !== 'quotation',
+          (inv) => !nonTaxStatuses.includes(inv.status),
         );
         this.dataSource.data = taxInvoices;
       },

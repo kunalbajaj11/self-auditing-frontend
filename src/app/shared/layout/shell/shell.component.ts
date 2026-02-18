@@ -8,6 +8,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ExpensesService } from '../../../core/services/expenses.service';
 import { NotificationsService } from '../../../core/services/notifications.service';
 import { LicenseService } from '../../../core/services/license.service';
+import { ThemeService, ThemeOption } from '../../../core/services/theme.service';
 import { AuthUser } from '../../../core/models/user.model';
 import { PlanType } from '../../../core/models/plan.model';
 
@@ -48,6 +49,9 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
   isInventoryEnabled = false;
   expandedGroups = new Set<string>(); // Track expanded nav groups
 
+  themeOptions: ThemeOption[] = [];
+  currentThemeId = 'default';
+
   @ViewChild('sideNavScroll', { static: false }) sideNavScroll?: ElementRef<HTMLElement>;
 
   private sidebarScrollPosition = 0;
@@ -61,6 +65,7 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly expensesService: ExpensesService,
     private readonly notificationsService: NotificationsService,
     private readonly licenseService: LicenseService,
+    private readonly themeService: ThemeService,
   ) {
     this.user$ = this.authService.currentUser$;
     this.isHandset$ = this.breakpointObserver
@@ -69,9 +74,14 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
         map((result) => result.matches),
         shareReplay({ bufferSize: 1, refCount: true }),
       );
+    this.themeOptions = this.themeService.getThemes();
+    this.currentThemeId = this.themeService.getCurrentTheme();
   }
 
   ngOnInit(): void {
+    this.themeService.currentTheme$.pipe(takeUntil(this.destroy$)).subscribe((id) => {
+      this.currentThemeId = id;
+    });
     // Load license info once on init
     this.loadLicenseInfo();
 
@@ -169,6 +179,10 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
       next: () => this.router.navigateByUrl('/auth/login'),
       error: () => this.router.navigateByUrl('/auth/login'),
     });
+  }
+
+  onThemeChange(themeId: string): void {
+    this.themeService.setTheme(themeId);
   }
 
   closeDrawerIfHandset(drawer: MatSidenav): void {
