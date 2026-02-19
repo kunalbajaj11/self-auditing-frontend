@@ -281,6 +281,30 @@
   }
 }
 
+// Balance Sheet equation warning (Assets = Liabilities + Equity)
+.balance-sheet-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  background: #fff8e1;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  color: #5d4037;
+
+  mat-icon {
+    color: #f57c00;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  div {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+}
+
 // Report Summary Cards
 .report-summary {
   display: grid;

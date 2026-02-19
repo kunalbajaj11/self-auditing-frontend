@@ -84,10 +84,13 @@
               </td>
             </ng-container>
 
-            <ng-container matColumnDef="createdAt">
-              <th mat-header-cell *matHeaderCellDef>Created</th>
-              <td mat-cell *matCellDef="let invoice">
-                {{ invoice.createdAt ? (invoice.createdAt | date: 'shortDate') : '—' }}
+            <ng-container matColumnDef="outstandingAmount">
+              <th mat-header-cell *matHeaderCellDef class="text-right amount-cell">Outstanding</th>
+              <td mat-cell *matCellDef="let invoice" class="text-right amount-cell">
+                <ng-container *ngIf="getOutstandingAmount(invoice) > 0">
+                  {{ invoice.currency }} {{ getOutstandingAmount(invoice) | number: '1.2-2' }}
+                </ng-container>
+                <ng-container *ngIf="getOutstandingAmount(invoice) === 0">—</ng-container>
               </td>
             </ng-container>
 

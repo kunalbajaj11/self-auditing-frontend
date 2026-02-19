@@ -1,4 +1,12 @@
-<mat-card class="summary-card" [ngClass]="accent">
+<mat-card
+  class="summary-card"
+  [ngClass]="accent"
+  [class.clickable]="clickable"
+  [attr.role]="clickable ? 'button' : null"
+  [attr.tabindex]="clickable ? 0 : null"
+  (click)="clickable && cardClick.emit()"
+  (keydown.enter)="clickable && cardClick.emit()"
+  (keydown.space)="clickable && cardClick.emit(); $event.preventDefault()">
   <div class="icon">
     <mat-icon>{{ icon }}</mat-icon>
   </div>

@@ -15,6 +15,10 @@
     transform: translateY(-1px);
   }
 
+  &.clickable {
+    cursor: pointer;
+  }
+
   &::before {
     content: '';
     position: absolute;

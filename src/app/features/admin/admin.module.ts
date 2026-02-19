@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { SharedModule } from '../../shared/shared.module';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AdminDashboardComponent } from './dashboard/admin-dashboard.component';
+import { DashboardInvoicesDialogComponent } from './dashboard/dashboard-invoices-dialog.component';
+import { DashboardExpensesDialogComponent } from './dashboard/dashboard-expenses-dialog.component';
 import { AdminCompanyComponent } from './company/admin-company.component';
 import { AdminUsersComponent } from './users/admin-users.component';
 import { AdminCategoriesComponent } from './categories/admin-categories.component';
@@ -91,6 +93,8 @@ import { DCEmailDialogComponent } from './delivery-challans/dc-email-dialog.comp
 @NgModule({
   declarations: [
     AdminDashboardComponent,
+    DashboardInvoicesDialogComponent,
+    DashboardExpensesDialogComponent,
     AdminCompanyComponent,
     AdminUsersComponent,
     AdminCategoriesComponent,

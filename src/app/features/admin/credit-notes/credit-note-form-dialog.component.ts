@@ -67,7 +67,7 @@ export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterVi
     @Inject(MAT_DIALOG_DATA) public data: CreditNote | null,
   ) {
     this.form = this.fb.group({
-      invoiceId: [null],
+      invoiceId: [null, Validators.required],
       customerId: [''],
       customerName: [''],
       customerTrn: [''],
@@ -169,12 +169,22 @@ export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterVi
     });
   }
 
+  /** Tax invoice statuses only (exclude proforma and quotation). */
+  private readonly taxInvoiceStatuses = [
+    'tax_invoice_receivable',
+    'tax_invoice_bank_received',
+    'tax_invoice_cash_received',
+  ];
+
   loadInvoices(): void {
     this.loadingInvoices = true;
     this.invoicesService.listInvoices().subscribe({
       next: (invoices) => {
         this.loadingInvoices = false;
-        this.invoices = invoices;
+        // Only show tax invoices in dropdown (exclude proforma and quotation)
+        this.invoices = (invoices || []).filter((inv) =>
+          this.taxInvoiceStatuses.includes((inv.status || '').toLowerCase()),
+        );
       },
       error: () => {
         this.loadingInvoices = false;

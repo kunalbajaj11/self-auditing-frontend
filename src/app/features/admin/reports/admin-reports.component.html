@@ -398,6 +398,19 @@
               </div>
             </div>
           </div>
+
+          <!-- Balance Sheet equation check: Assets = Liabilities + Equity -->
+          <div *ngIf="generatedReport.data.summary && isBalanceSheetOutOfBalance(generatedReport)" class="balance-sheet-warning" role="alert">
+            <mat-icon>warning</mat-icon>
+            <div>
+              <strong>Balance sheet does not balance.</strong>
+              Assets ({{ formatCurrency(generatedReport.data.summary.closingAssets ?? generatedReport.data.summary.totalAssets ?? 0, true) }})
+              ≠ Liabilities ({{ formatCurrency(generatedReport.data.summary.closingLiabilities ?? generatedReport.data.summary.totalLiabilities ?? 0, true) }})
+              + Equity ({{ formatCurrency(generatedReport.data.summary.closingEquity ?? generatedReport.data.summary.totalEquity ?? 0, true) }}).
+              Difference: {{ formatCurrency(getBalanceSheetDiscrepancy(generatedReport), true) }}.
+              Check that revenue/expense and asset/liability sources are aligned (e.g. invoice vs journal entries, VAT).
+            </div>
+          </div>
           
           <div class="report-summary" *ngIf="generatedReport.data.summary">
             <div class="summary-card">

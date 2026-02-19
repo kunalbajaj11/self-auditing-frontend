@@ -13,20 +13,23 @@
 
   <mat-dialog-content class="credit-note-form-content">
     <form [formGroup]="form" class="credit-note-form">
-      <div class="form-section">
+      <section class="form-section section-card">
         <h3 class="section-title">
           <mat-icon>receipt_long</mat-icon>
           Credit note details
         </h3>
-      <div class="form-row">
+      <div class="form-row form-row--main">
         <mat-form-field appearance="outline" class="flex-2 related-invoice-field">
-          <mat-label>Related Invoice (Optional)</mat-label>
-          <mat-select formControlName="invoiceId" (selectionChange)="onInvoiceChange($event.value)" [disableOptionCentering]="true">
-            <mat-option [value]="null">No Invoice</mat-option>
+          <mat-label>Related Invoice *</mat-label>
+          <mat-select formControlName="invoiceId" (selectionChange)="onInvoiceChange($event.value)" [disableOptionCentering]="true" required>
+            <mat-option [value]="null">Select Invoice</mat-option>
             <mat-option *ngFor="let invoice of invoices" [value]="invoice.id">
               {{ invoice.invoiceNumber }} - {{ invoice.customerName || 'N/A' }} ({{ invoice.totalAmount | number: '1.2-2' }} {{ invoice.currency }})
             </mat-option>
           </mat-select>
+          <mat-error *ngIf="form.get('invoiceId')?.hasError('required')">
+            Related invoice is required
+          </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="flex-1">
@@ -104,10 +107,10 @@
         </div>
       </div>
 
-      <div class="form-section line-items-section" *ngIf="lineItems && lineItems.length > 0">
+      <div class="form-section line-items-section section-card" *ngIf="lineItems && lineItems.length > 0">
         <h3 class="section-title">
           <mat-icon>list</mat-icon>
-          Line items (product name & rate)
+          Line items
         </h3>
         <div class="line-items-table-wrapper">
           <table class="line-items-table">
@@ -145,7 +148,7 @@
                   <span class="line-amount">{{ (line.get('vatAmount')?.value ?? 0) | number: '1.2-2' }} {{ form.get('currency')?.value ?? 'AED' }}</span>
                 </td>
                 <td>
-                  <button mat-icon-button type="button" (click)="removeLineItem(i)" matTooltip="Remove line">
+                  <button mat-icon-button type="button" (click)="removeLineItem(i)" matTooltip="Remove line" class="remove-line-btn">
                     <mat-icon>remove_circle_outline</mat-icon>
                   </button>
                 </td>
@@ -153,20 +156,24 @@
             </tbody>
           </table>
         </div>
-        <button mat-stroked-button type="button" (click)="addLineItem()">
+        <button mat-stroked-button type="button" (click)="addLineItem()" class="add-line-btn">
           <mat-icon>add</mat-icon>
-          Add line
+          Add another line
         </button>
         <p class="line-items-hint" *ngIf="!selectedInvoice && lineItems && lineItems.length > 0">
           Select a related invoice above to prefill product name and rate from that invoice.
         </p>
       </div>
 
-      <div class="form-row" *ngIf="(!lineItems || lineItems.length === 0) && !data">
-        <button mat-stroked-button type="button" (click)="addLineItem()">
-          <mat-icon>list</mat-icon>
-          Add line items (product name & rate)
-        </button>
+      <div class="add-line-items-cta" *ngIf="(!lineItems || lineItems.length === 0) && !data">
+        <div class="add-line-items-cta__inner">
+          <mat-icon>playlist_add</mat-icon>
+          <span class="add-line-items-cta__text">Add line items to specify products and amounts</span>
+          <button mat-raised-button color="primary" type="button" (click)="addLineItem()" class="add-line-items-btn">
+            <mat-icon>add</mat-icon>
+            Add line items
+          </button>
+        </div>
       </div>
 
       <div class="form-row">
@@ -191,26 +198,26 @@
       </div>
 
       <div class="totals-row">
-        <span class="total-label">Total Amount:</span>
+        <span class="total-label">Total Amount</span>
         <span class="total-value">{{ totalAmount | number: '1.2-2' }} {{ form.get('currency')?.value ?? 'AED' }}</span>
       </div>
 
-      <mat-form-field appearance="outline" class="full-width">
+      <mat-form-field appearance="outline" class="full-width description-field">
         <mat-label>Description</mat-label>
-        <textarea matInput formControlName="description" rows="2"></textarea>
+        <textarea matInput formControlName="description" rows="2" placeholder="Optional description for this credit note"></textarea>
       </mat-form-field>
-      </div>
+      </section>
 
-    <div class="form-section">
+    <section class="form-section section-card notes-section">
       <h3 class="section-title">
         <mat-icon>notes</mat-icon>
         Notes
       </h3>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Notes</mat-label>
-        <textarea matInput formControlName="notes" rows="3"></textarea>
+        <mat-label>Internal notes</mat-label>
+        <textarea matInput formControlName="notes" rows="3" placeholder="Optional internal notes (not shown on the credit note)"></textarea>
       </mat-form-field>
-    </div>
+    </section>
   </form>
 </mat-dialog-content>
 

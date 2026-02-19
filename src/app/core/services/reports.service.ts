@@ -44,10 +44,12 @@ export class ReportsService {
         overdueInvoices: number;
       };
     };
-    cashBalance: number;
-    bankBalance: number;
-    outputVat: number;
-    inputVat: number;
+      cashBalance: number;
+      bankBalance: number;
+      outputVat: number;
+      inputVat: number;
+      /** Net VAT Payable for period (matches account entries for VAT Payable). */
+      vatPayableNet?: number;
   }> {
     return this.api.get<{
       profitAndLoss: {
@@ -74,6 +76,7 @@ export class ReportsService {
       bankBalance: number;
       outputVat: number;
       inputVat: number;
+      vatPayableNet?: number;
     }>('/reports/dashboard-summary', filters);
   }
 

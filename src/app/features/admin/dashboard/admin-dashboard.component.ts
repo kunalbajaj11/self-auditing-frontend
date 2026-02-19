@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { Observable, forkJoin, of, combineLatest, Subject } from 'rxjs';
 import { catchError, map, switchMap, tap, debounceTime, skip, takeUntil } from 'rxjs/operators';
 import { Organization } from '../../../core/models/organization.model';
@@ -13,6 +14,18 @@ import { LicenseKeysService } from '../../../core/services/license-keys.service'
 import { UploadUsage } from '../../../core/models/license-key.model';
 import { ExpensePaymentsService } from '../../../core/services/expense-payments.service';
 import { JournalEntriesService, JournalEntryAccount } from '../../../core/services/journal-entries.service';
+import {
+  AccountEntriesDialogComponent,
+  AccountEntriesDialogData,
+} from '../reports/account-entries-dialog.component';
+import {
+  DashboardInvoicesDialogComponent,
+  DashboardInvoicesDialogData,
+} from './dashboard-invoices-dialog.component';
+import {
+  DashboardExpensesDialogComponent,
+  DashboardExpensesDialogData,
+} from './dashboard-expenses-dialog.component';
 
 interface ExpenseSummaryRow {
   category: string;
@@ -103,6 +116,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     private readonly expensePaymentsService: ExpensePaymentsService,
     private readonly journalEntriesService: JournalEntriesService,
     private readonly fb: FormBuilder,
+    private readonly dialog: MatDialog,
   ) {
     // Initialize date range form with current month as default
     const now = new Date();
@@ -150,6 +164,73 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   refresh(): void {
     this.loadDashboard();
+  }
+
+  /**
+   * Open the entries modal for a dashboard tile (same pattern as TB report).
+   * Uses the current date range from the form.
+   */
+  openTileEntries(tile: string): void {
+    const { startDate, endDate } = this.getDateRange();
+
+    switch (tile) {
+      case 'netProfit':
+        this.openAccountEntriesDialog('Sales Revenue', 'Revenue', startDate, endDate);
+        break;
+      case 'vatPayable':
+        this.openAccountEntriesDialog('VAT Payable', 'Liability', startDate, endDate);
+        break;
+      case 'expenses':
+        this.dialog.open(DashboardExpensesDialogComponent, {
+          width: '900px',
+          maxWidth: '90vw',
+          maxHeight: '90vh',
+          data: { startDate, endDate } as DashboardExpensesDialogData,
+        });
+        break;
+      case 'receivables':
+        this.openAccountEntriesDialog('Accounts Receivable', 'Asset', startDate, endDate);
+        break;
+      case 'payables':
+        this.openAccountEntriesDialog('Accounts Payable', 'Liability', startDate, endDate);
+        break;
+      case 'bank':
+        this.openAccountEntriesDialog('Bank', 'Asset', startDate, endDate);
+        break;
+      case 'cash':
+        this.openAccountEntriesDialog('Cash', 'Asset', startDate, endDate);
+        break;
+      case 'totalInvoices':
+        this.dialog.open(DashboardInvoicesDialogComponent, {
+          width: '900px',
+          maxWidth: '90vw',
+          maxHeight: '90vh',
+          data: { startDate, endDate } as DashboardInvoicesDialogData,
+        });
+        break;
+      default:
+        break;
+    }
+  }
+
+  private openAccountEntriesDialog(
+    accountName: string,
+    accountType: string,
+    startDate: string,
+    endDate: string,
+  ): void {
+    const data: AccountEntriesDialogData = {
+      accountName,
+      accountType,
+      startDate,
+      endDate,
+    };
+    this.dialog.open(AccountEntriesDialogComponent, {
+      width: '1200px',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      data,
+    });
   }
 
   onDateRangePresetChange(preset: string): void {
@@ -309,7 +390,13 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           // Use VAT values from backend (matching TB calculation)
           const outputVat = dashboardSummary?.outputVat ?? revenueVat;
           const inputVat = dashboardSummary?.inputVat ?? expenseVat;
-          const netVatPayable = outputVat - inputVat;
+          const netVatPayableFromPnL = outputVat - inputVat;
+          // Use vatPayableNet when present so dashboard matches the VAT Payable account entries view (includes JEs)
+          const netVatPayable =
+            dashboardSummary?.vatPayableNet !== undefined &&
+            dashboardSummary?.vatPayableNet !== null
+              ? dashboardSummary.vatPayableNet
+              : netVatPayableFromPnL;
           const taxableAmount = totalRevenue + totalExpenses;
 
           // Convert expense items from P&L to expense summary format
@@ -358,9 +445,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           // Average expense amount (for period)
           const averageExpense = expenseCount > 0 ? totalExpenses / expenseCount : 0;
 
-          // Invoice metrics
-          // Total invoices: count all invoices in the period
-          const totalInvoices = allInvoices?.length ?? 0;
+          // Invoice metrics: count only tax invoices (exclude proforma and quotations)
+          const taxInvoicesOnly =
+            allInvoices?.filter((inv) => this.salesInvoicesService.isTaxInvoice(inv.status)) ?? [];
+          const totalInvoices = taxInvoicesOnly.length;
           // Outstanding invoices and amounts from dashboard summary (unpaid + partial)
           const outstandingInvoices = (dashboardSummary?.receivables?.summary?.unpaidInvoices ?? 0) + (dashboardSummary?.receivables?.summary?.partialInvoices ?? 0);
           const outstandingAmount = dashboardSummary?.receivables?.summary?.totalOutstanding ?? 0;
@@ -369,7 +457,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           // Receivables amount (total outstanding)
           const receivablesAmount = outstandingAmount ?? 0;
 
-          // VAT Payable (net VAT)
+          // VAT Payable: same as netVatPayable (from vatPayableNet or P&L)
           const vatPayable = netVatPayable;
 
           // Payables amount (total outstanding payables)

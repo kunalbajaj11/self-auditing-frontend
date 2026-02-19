@@ -33,6 +33,17 @@ export interface InvoicePayment {
   updatedAt: string;
 }
 
+/** Credit note application to an invoice (returned when fetching invoice by id). */
+export interface CreditNoteApplication {
+  id: string;
+  invoiceId?: string;
+  creditNoteId?: string;
+  creditNote?: { id: string; creditNoteNumber?: string };
+  appliedAmount: string;
+  appliedDate: string;
+  notes?: string | null;
+}
+
 export interface SalesInvoice {
   id: string;
   invoiceNumber: string;
@@ -77,6 +88,8 @@ export interface SalesInvoice {
     createdAt?: string;
     updatedAt?: string;
   } | null;
+  /** Applied credit notes (loaded when fetching invoice by id). */
+  creditNoteApplications?: CreditNoteApplication[];
   createdAt: string;
   updatedAt: string;
 }
@@ -111,9 +124,22 @@ export interface CreateSalesInvoicePayload {
   displayOptions?: Record<string, unknown> | null;
 }
 
+/** Statuses that are not tax invoices (quotations, proformas, and their converted variants). */
+const NON_TAX_INVOICE_STATUSES = [
+  'proforma_invoice',
+  'quotation',
+  'quotation_converted_to_proforma',
+  'proforma_converted_to_invoice',
+];
+
 @Injectable({ providedIn: 'root' })
 export class SalesInvoicesService {
   constructor(private readonly api: ApiService) {}
+
+  /** Returns true if the given status is a tax invoice (excludes quotation and proforma). */
+  isTaxInvoice(status: string): boolean {
+    return !!status && !NON_TAX_INVOICE_STATUSES.includes(String(status).toLowerCase());
+  }
 
   listInvoices(filters?: {
     status?: string;

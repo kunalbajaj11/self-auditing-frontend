@@ -167,6 +167,10 @@
         <span class="label">Paid Amount:</span>
         <span class="value paid positive-amount">+{{ invoice.currency }} {{ invoice.paidAmount | number: '1.2-2' }}</span>
       </div>
+      <div class="totals-row" *ngIf="getAppliedCreditNoteAmount() > 0">
+        <span class="label">Credit notes applied:</span>
+        <span class="value credit-note-applied negative-amount">-{{ invoice.currency }} {{ getAppliedCreditNoteAmount() | number: '1.2-2' }}</span>
+      </div>
       <div class="totals-row" *ngIf="outstandingAmount > 0">
         <span class="label">Outstanding:</span>
         <span class="value outstanding positive-amount">+{{ invoice.currency }} {{ outstandingAmount | number: '1.2-2' }}</span>

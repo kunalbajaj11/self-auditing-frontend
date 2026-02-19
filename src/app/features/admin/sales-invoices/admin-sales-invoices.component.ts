@@ -21,9 +21,9 @@ export class AdminSalesInvoicesComponent implements OnInit {
     'dueDate',
     'totalAmount',
     'paidAmount',
+    'outstandingAmount',
     'status',
     'paymentStatus',
-    'createdAt',
     'actions',
   ] as const;
   readonly dataSource = new MatTableDataSource<SalesInvoice>([]);
@@ -248,6 +248,20 @@ export class AdminSalesInvoicesComponent implements OnInit {
   getPaidAmount(invoice: SalesInvoice): number {
     const paid = parseFloat(invoice.paidAmount ?? '0');
     return Number.isNaN(paid) ? 0 : paid;
+  }
+
+  /** Outstanding = total − paid − applied credit notes. */
+  getOutstandingAmount(invoice: SalesInvoice): number {
+    const total = invoice.totalAmount != null && invoice.totalAmount !== ''
+      ? parseFloat(invoice.totalAmount)
+      : parseFloat(invoice.amount ?? '0') + parseFloat(invoice.vatAmount ?? '0');
+    const paid = this.getPaidAmount(invoice);
+    const appliedCredit =
+      invoice.creditNoteApplications?.reduce(
+        (sum, app) => sum + parseFloat(app.appliedAmount ?? '0'),
+        0,
+      ) ?? 0;
+    return Math.max(0, total - paid - appliedCredit);
   }
 
   get pageTitle(): string {

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-summary-card',
@@ -12,5 +12,8 @@ export class SummaryCardComponent {
   @Input() value: string | number | null = 0;
   @Input() hint?: string;
   @Input() accent = 'primary';
+  /** When true, the card is clickable and emits cardClick on click */
+  @Input() clickable = false;
+  @Output() cardClick = new EventEmitter<void>();
 }
 

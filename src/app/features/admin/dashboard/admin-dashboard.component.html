@@ -85,6 +85,8 @@
             [value]="'AED ' + (vm.netProfit | number: '1.0-2')"
             accent="primary"
             [hint]="'Revenue: AED ' + (vm.totalRevenue | number: '1.0-2') + ' - Expenses: AED ' + (vm.totalExpenses | number: '1.0-2')"
+            [clickable]="true"
+            (cardClick)="openTileEntries('netProfit')"
           ></app-summary-card>
 
           <app-summary-card
@@ -97,6 +99,8 @@
                 ? 'Output: AED ' + (vm.outputVat | number: '1.0-2') + ' - Input: AED ' + (vm.inputVat | number: '1.0-2')
                 : 'No VAT transactions'
             "
+            [clickable]="true"
+            (cardClick)="openTileEntries('vatPayable')"
           ></app-summary-card>
 
           <app-summary-card
@@ -105,6 +109,8 @@
             [value]="'AED ' + (vm.totalExpenses | number: '1.0-2')"
             accent="primary"
             [hint]="vm.expenseCount + ' items'"
+            [clickable]="true"
+            (cardClick)="openTileEntries('expenses')"
           ></app-summary-card>
 
           <app-summary-card
@@ -113,6 +119,8 @@
             [value]="'AED ' + (vm.receivablesAmount | number: '1.0-2')"
             accent="primary"
             [hint]="vm.outstandingInvoices ? vm.outstandingInvoices + ' invoices outstanding' : 'No outstanding invoices'"
+            [clickable]="true"
+            (cardClick)="openTileEntries('receivables')"
           ></app-summary-card>
 
           <app-summary-card
@@ -121,6 +129,8 @@
             [value]="'AED ' + (vm.payablesAmount | number: '1.0-2')"
             accent="accent"
             [hint]="vm.accrualSummary && vm.accrualSummary.length > 0 && vm.accrualSummary[0].count > 0 ? vm.accrualSummary[0].count + ' items pending' : 'No pending payables'"
+            [clickable]="true"
+            (cardClick)="openTileEntries('payables')"
           ></app-summary-card>
 
           <app-summary-card
@@ -129,6 +139,8 @@
             [value]="'AED ' + (vm.bankBalance | number: '1.0-2')"
             accent="primary"
             [hint]="vm.bankBalance >= 0 ? 'Positive balance' : 'Negative balance'"
+            [clickable]="true"
+            (cardClick)="openTileEntries('bank')"
           ></app-summary-card>
 
           <app-summary-card
@@ -137,6 +149,8 @@
             [value]="'AED ' + (vm.cashBalance | number: '1.0-2')"
             accent="accent"
             [hint]="vm.cashBalance >= 0 ? 'Positive balance' : 'Negative balance'"
+            [clickable]="true"
+            (cardClick)="openTileEntries('cash')"
           ></app-summary-card>
 
           <app-summary-card
@@ -145,6 +159,8 @@
             [value]="vm.totalInvoices || 0"
             accent="primary"
             [hint]="vm.outstandingInvoices ? vm.outstandingInvoices + ' outstanding' : undefined"
+            [clickable]="true"
+            (cardClick)="openTileEntries('totalInvoices')"
           ></app-summary-card>
 
           <app-summary-card

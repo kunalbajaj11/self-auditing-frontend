@@ -53,13 +53,26 @@ export class InvoiceDetailDialogComponent implements OnInit {
   calculateOutstanding(): void {
     if (!this.invoice) return;
     const totalAmount = this.getDisplayTotalAmount();
-    const paidAmount = parseFloat(this.invoice.paidAmount || '0');
-    this.outstandingAmount = Math.max(0, totalAmount - paidAmount);
+    const paidAmount = this.getPaidAmount();
+    const appliedCreditNoteAmount = this.getAppliedCreditNoteAmount();
+    this.outstandingAmount = Math.max(
+      0,
+      totalAmount - paidAmount - appliedCreditNoteAmount,
+    );
   }
 
   getPaidAmount(): number {
     if (!this.invoice) return 0;
     return parseFloat(this.invoice.paidAmount || '0');
+  }
+
+  /** Sum of credit note amounts applied to this invoice. */
+  getAppliedCreditNoteAmount(): number {
+    if (!this.invoice?.creditNoteApplications?.length) return 0;
+    return this.invoice.creditNoteApplications.reduce(
+      (sum, app) => sum + parseFloat(app.appliedAmount || '0'),
+      0,
+    );
   }
 
   /** Total amount (amount + VAT). Uses totalAmount from API or computes from amount + vatAmount. */

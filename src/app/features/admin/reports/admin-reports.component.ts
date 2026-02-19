@@ -876,6 +876,25 @@ export class AdminReportsComponent implements OnInit {
     };
   }
 
+  /** True when Balance Sheet report has Assets ≠ Liabilities + Equity (beyond rounding). */
+  isBalanceSheetOutOfBalance(report: GeneratedReport): boolean {
+    if (report.type !== 'balance_sheet' || !report.data?.summary) return false;
+    const d = this.getBalanceSheetDiscrepancy(report);
+    return Math.abs(d) > 0.01;
+  }
+
+  /** Discrepancy: Assets - (Liabilities + Equity). Zero when the balance sheet equation holds. */
+  getBalanceSheetDiscrepancy(report: GeneratedReport): number {
+    if (report.type !== 'balance_sheet' || !report.data?.summary) return 0;
+    const s = (report.data as any).summary;
+    const balance = Number(s.closingBalance ?? s.balance ?? 0);
+    if (balance !== 0) return balance;
+    const assets = Number(s.closingAssets ?? s.totalAssets ?? 0);
+    const liabilities = Number(s.closingLiabilities ?? s.totalLiabilities ?? 0);
+    const equity = Number(s.closingEquity ?? s.totalEquity ?? 0);
+    return assets - liabilities - equity;
+  }
+
   formatCurrency(value: number, showSign: boolean = false): string {
     const numValue = Number(value);
     const formatted = numValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
