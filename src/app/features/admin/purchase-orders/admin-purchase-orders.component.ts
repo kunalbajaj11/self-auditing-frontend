@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PurchaseOrdersService, PurchaseOrder } from '../../../core/services/purchase-orders.service';
@@ -11,7 +12,8 @@ import { PurchaseOrderDetailDialogComponent } from './purchase-order-detail-dial
   templateUrl: './admin-purchase-orders.component.html',
   styleUrls: ['./admin-purchase-orders.component.scss'],
 })
-export class AdminPurchaseOrdersComponent implements OnInit {
+export class AdminPurchaseOrdersComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'poNumber',
     'vendorName',
@@ -32,6 +34,10 @@ export class AdminPurchaseOrdersComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadPurchaseOrders();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadPurchaseOrders(): void {

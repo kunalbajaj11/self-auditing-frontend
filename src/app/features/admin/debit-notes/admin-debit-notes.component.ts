@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
@@ -12,7 +13,8 @@ import { DebitNoteDetailDialogComponent } from './debit-note-detail-dialog.compo
   templateUrl: './admin-debit-notes.component.html',
   styleUrls: ['./admin-debit-notes.component.scss'],
 })
-export class AdminDebitNotesComponent implements OnInit {
+export class AdminDebitNotesComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'debitNoteNumber',
     'customerName',
@@ -41,6 +43,10 @@ export class AdminDebitNotesComponent implements OnInit {
       }
     });
     this.loadDebitNotes();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadDebitNotes(): void {

@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
@@ -11,7 +12,8 @@ import { VendorFormDialogComponent } from './vendor-form-dialog.component';
   templateUrl: './admin-vendors.component.html',
   styleUrls: ['./admin-vendors.component.scss'],
 })
-export class AdminVendorsComponent implements OnInit {
+export class AdminVendorsComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'name',
     'vendorTrn',
@@ -41,6 +43,10 @@ export class AdminVendorsComponent implements OnInit {
       }
     });
     this.loadVendors();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadVendors(): void {

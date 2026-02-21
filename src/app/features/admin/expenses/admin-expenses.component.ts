@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -18,7 +19,8 @@ import { InvoiceDetailDialogComponent } from '../sales-invoices/invoice-detail-d
   templateUrl: './admin-expenses.component.html',
   styleUrls: ['./admin-expenses.component.scss'],
 })
-export class AdminExpensesComponent implements OnInit {
+export class AdminExpensesComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly Math = Math; // Expose Math to template
   readonly columns = [
     'vendor',
@@ -90,6 +92,10 @@ export class AdminExpensesComponent implements OnInit {
         this.loadExpenses();
       }
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   openCreateDialog(): void {

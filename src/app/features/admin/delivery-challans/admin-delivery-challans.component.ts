@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { DeliveryChallansService, DeliveryChallan } from '../../../core/services/delivery-challans.service';
 import { DeliveryChallanFormDialogComponent } from './delivery-challan-form-dialog.component';
 import { DeliveryChallanDetailDialogComponent } from './delivery-challan-detail-dialog.component';
@@ -11,7 +12,8 @@ import { DeliveryChallanDetailDialogComponent } from './delivery-challan-detail-
   templateUrl: './admin-delivery-challans.component.html',
   styleUrls: ['./admin-delivery-challans.component.scss'],
 })
-export class AdminDeliveryChallansComponent implements OnInit {
+export class AdminDeliveryChallansComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'challanNumber',
     'customerName',
@@ -32,6 +34,10 @@ export class AdminDeliveryChallansComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadDeliveryChallans();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadDeliveryChallans(): void {

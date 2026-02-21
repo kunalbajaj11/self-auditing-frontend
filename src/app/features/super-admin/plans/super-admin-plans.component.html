@@ -97,6 +97,7 @@
               class="table-row"
             ></tr>
           </table>
+          <mat-paginator [pageSizeOptions]="[5, 10, 25, 50]" [pageSize]="10" showFirstLastButtons aria-label="Select page of plans"></mat-paginator>
 
           <div class="table-overlay" *ngIf="loading">
             <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>

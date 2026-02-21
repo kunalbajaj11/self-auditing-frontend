@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup } from '@angular/forms';
@@ -37,7 +38,8 @@ interface BankTransaction {
   templateUrl: './bank-accounts.component.html',
   styleUrls: ['./bank-accounts.component.scss'],
 })
-export class BankAccountsComponent implements OnInit {
+export class BankAccountsComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'date',
     'type',
@@ -82,6 +84,10 @@ export class BankAccountsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadBankTransactions();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadBankTransactions(): void {

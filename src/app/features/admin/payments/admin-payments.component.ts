@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ExpensePaymentsService, ExpensePayment } from '../../../core/services/expense-payments.service';
@@ -10,7 +11,8 @@ import { PaymentFormDialogComponent } from './payment-form-dialog.component';
   templateUrl: './admin-payments.component.html',
   styleUrls: ['./admin-payments.component.scss'],
 })
-export class AdminPaymentsComponent implements OnInit {
+export class AdminPaymentsComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'expense',
     'vendor',
@@ -31,6 +33,10 @@ export class AdminPaymentsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadPayments();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadPayments(): void {

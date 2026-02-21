@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup } from '@angular/forms';
@@ -33,7 +34,8 @@ interface CashTransaction {
   templateUrl: './cash-accounts.component.html',
   styleUrls: ['./cash-accounts.component.scss'],
 })
-export class CashAccountsComponent implements OnInit {
+export class CashAccountsComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'date',
     'type',
@@ -76,6 +78,10 @@ export class CashAccountsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCashTransactions();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadCashTransactions(): void {

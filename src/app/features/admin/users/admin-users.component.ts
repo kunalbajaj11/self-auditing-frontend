@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UsersService } from '../../../core/services/users.service';
@@ -11,7 +12,8 @@ import { UserFormDialogComponent } from './user-form-dialog.component';
   templateUrl: './admin-users.component.html',
   styleUrls: ['./admin-users.component.scss'],
 })
-export class AdminUsersComponent implements OnInit {
+export class AdminUsersComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'name',
     'email',
@@ -39,6 +41,10 @@ export class AdminUsersComponent implements OnInit {
   ngOnInit(): void {
     this.loadUsers();
     this.loadUserLimitInfo();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   openCreateDialog(): void {

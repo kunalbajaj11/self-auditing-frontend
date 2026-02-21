@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { InventoryService, InventoryLocation } from '../../../core/services/inventory.service';
@@ -10,7 +11,8 @@ import { LocationFormDialogComponent } from './location-form-dialog.component';
   templateUrl: './admin-inventory-locations.component.html',
   styleUrls: ['./admin-inventory-locations.component.scss'],
 })
-export class AdminInventoryLocationsComponent implements OnInit {
+export class AdminInventoryLocationsComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = ['name', 'address', 'isDefault', 'isActive', 'actions'] as const;
   readonly dataSource = new MatTableDataSource<InventoryLocation>([]);
   loading = false;
@@ -23,6 +25,10 @@ export class AdminInventoryLocationsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadLocations();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadLocations(): void {

@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
@@ -13,7 +14,8 @@ import { InvoicePaymentDialogComponent } from './invoice-payment-dialog.componen
   templateUrl: './admin-sales-invoices.component.html',
   styleUrls: ['./admin-sales-invoices.component.scss'],
 })
-export class AdminSalesInvoicesComponent implements OnInit {
+export class AdminSalesInvoicesComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'invoiceNumber',
     'customerName',
@@ -36,6 +38,10 @@ export class AdminSalesInvoicesComponent implements OnInit {
     private readonly snackBar: MatSnackBar,
     private readonly route: ActivatedRoute,
   ) {}
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+  }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {

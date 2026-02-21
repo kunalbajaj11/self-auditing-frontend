@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
@@ -12,7 +13,8 @@ import { CreditNoteDetailDialogComponent } from './credit-note-detail-dialog.com
   templateUrl: './admin-credit-notes.component.html',
   styleUrls: ['./admin-credit-notes.component.scss'],
 })
-export class AdminCreditNotesComponent implements OnInit {
+export class AdminCreditNotesComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'creditNoteNumber',
     'customerName',
@@ -41,6 +43,10 @@ export class AdminCreditNotesComponent implements OnInit {
       }
     });
     this.loadCreditNotes();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadCreditNotes(): void {

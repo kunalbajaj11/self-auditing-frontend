@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { SalesOrdersService, SalesOrder } from '../../../core/services/sales-orders.service';
 import { SalesOrderFormDialogComponent } from './sales-order-form-dialog.component';
 import { SalesOrderDetailDialogComponent } from './sales-order-detail-dialog.component';
@@ -11,7 +12,8 @@ import { SalesOrderDetailDialogComponent } from './sales-order-detail-dialog.com
   templateUrl: './admin-sales-orders.component.html',
   styleUrls: ['./admin-sales-orders.component.scss'],
 })
-export class AdminSalesOrdersComponent implements OnInit {
+export class AdminSalesOrdersComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'soNumber',
     'customerName',
@@ -33,6 +35,10 @@ export class AdminSalesOrdersComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSalesOrders();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadSalesOrders(): void {

@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { PayrollService, PayrollRun } from '../../../core/services/payroll.service';
@@ -11,7 +12,8 @@ import { PayrollRunDetailDialogComponent } from './payroll-run-detail-dialog.com
   templateUrl: './admin-payroll-runs.component.html',
   styleUrls: ['./admin-payroll-runs.component.scss'],
 })
-export class AdminPayrollRunsComponent implements OnInit {
+export class AdminPayrollRunsComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = ['payrollPeriod', 'payDate', 'status', 'totalNetAmount', 'actions'] as const;
   readonly dataSource = new MatTableDataSource<PayrollRun>([]);
   loading = false;
@@ -24,6 +26,10 @@ export class AdminPayrollRunsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadPayrollRuns();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadPayrollRuns(): void {

@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { AuditLogsService, AuditLogItem } from '../../../core/services/audit-logs.service';
 import { SuperAdminService, OrganizationUsage } from '../../../core/services/super-admin.service';
@@ -10,7 +11,8 @@ import { SuperAdminService, OrganizationUsage } from '../../../core/services/sup
   templateUrl: './super-admin-audit-logs.component.html',
   styleUrls: ['./super-admin-audit-logs.component.scss'],
 })
-export class SuperAdminAuditLogsComponent implements OnInit {
+export class SuperAdminAuditLogsComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = ['timestamp', 'organization', 'user', 'entity', 'action'] as const;
   readonly dataSource = new MatTableDataSource<AuditLogItem>([]);
 
@@ -38,6 +40,10 @@ export class SuperAdminAuditLogsComponent implements OnInit {
     this.filters.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged())
       .subscribe(() => this.loadLogs());
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   refresh(): void {

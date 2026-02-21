@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CategoriesService, Category } from '../../../core/services/categories.service';
@@ -10,7 +11,8 @@ import { CategoryFormDialogComponent } from './category-form-dialog.component';
   templateUrl: './admin-categories.component.html',
   styleUrls: ['./admin-categories.component.scss'],
 })
-export class AdminCategoriesComponent implements OnInit {
+export class AdminCategoriesComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = ['name', 'description', 'type', 'actions'] as const;
   readonly dataSource = new MatTableDataSource<Category>([]);
   loading = false;
@@ -23,6 +25,10 @@ export class AdminCategoriesComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCategories();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   openDialog(category?: Category): void {

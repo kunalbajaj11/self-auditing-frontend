@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
@@ -13,7 +14,8 @@ import { LedgerAccountFormDialogComponent } from './ledger-account-form-dialog.c
   templateUrl: './admin-ledger-accounts.component.html',
   styleUrls: ['./admin-ledger-accounts.component.scss'],
 })
-export class AdminLedgerAccountsComponent implements OnInit {
+export class AdminLedgerAccountsComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = ['name', 'description', 'category', 'type', 'actions'] as const;
   readonly dataSource = new MatTableDataSource<LedgerAccount>([]);
   loading = false;
@@ -26,6 +28,10 @@ export class AdminLedgerAccountsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadLedgerAccounts();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   openDialog(ledgerAccount?: LedgerAccount): void {

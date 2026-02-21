@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
@@ -13,7 +14,8 @@ import { ExpenseTypeFormDialogComponent } from './expense-type-form-dialog.compo
   templateUrl: './admin-expense-types.component.html',
   styleUrls: ['./admin-expense-types.component.scss'],
 })
-export class AdminExpenseTypesComponent implements OnInit {
+export class AdminExpenseTypesComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = ['name', 'displayLabel', 'description', 'type', 'actions'] as const;
   readonly dataSource = new MatTableDataSource<ExpenseType>([]);
   loading = false;
@@ -26,6 +28,10 @@ export class AdminExpenseTypesComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadExpenseTypes();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   openDialog(expenseType?: ExpenseType): void {

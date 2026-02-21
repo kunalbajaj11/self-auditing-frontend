@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { FormBuilder } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
@@ -24,7 +25,8 @@ import { BulkImportDialogComponent } from './bulk-import-dialog.component';
   templateUrl: './admin-journal-entries.component.html',
   styleUrls: ['./admin-journal-entries.component.scss'],
 })
-export class AdminJournalEntriesComponent implements OnInit {
+export class AdminJournalEntriesComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly Math = Math; // Expose Math to template
   readonly columns = [
     'debitAccount',
@@ -84,6 +86,10 @@ export class AdminJournalEntriesComponent implements OnInit {
     this.filters.valueChanges.subscribe(() => {
       this.loadJournalEntries();
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadJournalEntries(): void {

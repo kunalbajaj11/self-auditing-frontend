@@ -1,6 +1,7 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales-invoices.service';
@@ -12,7 +13,8 @@ import { InvoiceDetailDialogComponent } from '../sales-invoices/invoice-detail-d
   templateUrl: './admin-quotations.component.html',
   styleUrls: ['./admin-quotations.component.scss'],
 })
-export class AdminQuotationsComponent implements OnInit {
+export class AdminQuotationsComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'invoiceNumber',
     'customerName',
@@ -36,6 +38,10 @@ export class AdminQuotationsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadQuotations();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadQuotations(): void {

@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { InventoryService, StockMovement, StockMovementType, CreateStockMovementPayload } from '../../../core/services/inventory.service';
@@ -10,7 +11,8 @@ import { StockMovementFormDialogComponent } from './stock-movement-form-dialog.c
   templateUrl: './admin-stock-movements.component.html',
   styleUrls: ['./admin-stock-movements.component.scss'],
 })
-export class AdminStockMovementsComponent implements OnInit {
+export class AdminStockMovementsComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = ['date', 'product', 'location', 'type', 'quantity', 'unitCost', 'totalCost', 'createdBy', 'notes', 'actions'] as const;
   readonly dataSource = new MatTableDataSource<StockMovement>([]);
   loading = false;
@@ -31,6 +33,10 @@ export class AdminStockMovementsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadMovements();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadMovements(): void {

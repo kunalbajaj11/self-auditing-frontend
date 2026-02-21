@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CustomersService, Customer } from '../../../core/services/customers.service';
@@ -11,7 +12,8 @@ import { ActivatedRoute } from '@angular/router';
   templateUrl: './admin-customers.component.html',
   styleUrls: ['./admin-customers.component.scss'],
 })
-export class AdminCustomersComponent implements OnInit {
+export class AdminCustomersComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'name',
     'customerNumber',
@@ -42,6 +44,10 @@ export class AdminCustomersComponent implements OnInit {
       }
     });
     this.loadCustomers();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadCustomers(): void {

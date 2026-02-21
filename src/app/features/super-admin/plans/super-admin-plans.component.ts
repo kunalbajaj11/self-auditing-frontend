@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { PlansService } from '../../../core/services/plans.service';
 import { PlanFormDialogComponent } from './plan-form-dialog.component';
 import { SubscriptionPlan } from '../../../core/models/plan.model';
@@ -11,7 +12,8 @@ import { SubscriptionPlan } from '../../../core/models/plan.model';
   templateUrl: './super-admin-plans.component.html',
   styleUrls: ['./super-admin-plans.component.scss'],
 })
-export class SuperAdminPlansComponent implements OnInit {
+export class SuperAdminPlansComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'name',
     'limits',
@@ -31,6 +33,10 @@ export class SuperAdminPlansComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadPlans();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   refresh(): void {

@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup } from '@angular/forms';
@@ -28,7 +29,8 @@ interface AdjustmentTransaction {
   templateUrl: './adjustments.component.html',
   styleUrls: ['./adjustments.component.scss'],
 })
-export class AdjustmentsComponent implements OnInit {
+export class AdjustmentsComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'date',
     'type',
@@ -69,6 +71,10 @@ export class AdjustmentsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadAdjustmentTransactions();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadAdjustmentTransactions(): void {

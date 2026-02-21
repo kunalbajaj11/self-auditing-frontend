@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { PayrollService, SalaryProfile } from '../../../core/services/payroll.service';
@@ -10,7 +11,8 @@ import { SalaryProfileFormDialogComponent } from './salary-profile-form-dialog.c
   templateUrl: './admin-salary-profiles.component.html',
   styleUrls: ['./admin-salary-profiles.component.scss'],
 })
-export class AdminSalaryProfilesComponent implements OnInit {
+export class AdminSalaryProfilesComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = ['user', 'basicSalary', 'currency', 'effectiveDate', 'isActive', 'actions'] as const;
   readonly dataSource = new MatTableDataSource<SalaryProfile>([]);
   loading = false;
@@ -23,6 +25,10 @@ export class AdminSalaryProfilesComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSalaryProfiles();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadSalaryProfiles(): void {

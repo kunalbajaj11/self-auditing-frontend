@@ -997,3 +997,27 @@ button[mat-unelevated-button][color="primary"] mat-icon {
 .cdk-overlay-backdrop {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+// Paginator font size to match table content (0.8rem, same as .mat-mdc-table td)
+mat-paginator.mat-mdc-paginator,
+.mat-mdc-paginator {
+  font-size: 0.8rem !important;
+
+  .mat-mdc-paginator-outer-container,
+  .mat-mdc-paginator-container,
+  .mat-mdc-paginator-page-size,
+  .mat-mdc-paginator-range-label,
+  .mat-mdc-paginator-page-size-label,
+  .mat-mdc-paginator-page-size-value {
+    font-size: 0.8rem !important;
+  }
+
+  .mat-mdc-paginator-page-size-select {
+    .mat-mdc-form-field,
+    .mat-mdc-form-field .mat-mdc-floating-label,
+    .mat-mdc-select .mat-mdc-select-value,
+    .mat-mdc-select-value-text {
+      font-size: 0.8rem !important;
+    }
+  }
+}

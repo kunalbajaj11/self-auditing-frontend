@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ProductsService, Product } from '../../../core/services/products.service';
@@ -10,7 +11,8 @@ import { ProductFormDialogComponent } from './product-form-dialog.component';
   templateUrl: './admin-products.component.html',
   styleUrls: ['./admin-products.component.scss'],
 })
-export class AdminProductsComponent implements OnInit {
+export class AdminProductsComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = ['name', 'sku', 'unitPrice', 'stockQuantity', 'isActive', 'actions'] as const;
   readonly dataSource = new MatTableDataSource<Product>([]);
   loading = false;
@@ -23,6 +25,10 @@ export class AdminProductsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProducts();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
   loadProducts(): void {
