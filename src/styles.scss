@@ -5,6 +5,11 @@
   --app-theme-primary: #0077c8;
   --app-theme-primary-hover: #005fa3;
   --app-theme-primary-light: rgba(0, 119, 200, 0.12);
+  --app-theme-primary-glow: rgba(0, 119, 200, 0.22);
+  --app-theme-shell-sidebar-bg: #f5f3ff;
+  --app-theme-shell-header-bg: #faf5ff;
+  --app-theme-shell-content-bg: #faf5ff;
+  --app-theme-shell-border: #e9e7ff;
 }
 
 // Custom palette maps
@@ -316,38 +321,62 @@ button.mat-mdc-outlined-button {
   }
 }
 
+// Theme-colored focus ring for keyboard navigation
+:focus-visible {
+  outline: 2px solid var(--app-theme-primary);
+  outline-offset: 2px;
+}
+
+// Icon buttons with primary color when used as primary actions
+button.mat-mdc-icon-button.mat-primary,
+.mat-mdc-icon-button[color="primary"] {
+  color: var(--app-theme-primary) !important;
+
+  &:hover {
+    background: var(--app-theme-primary-light) !important;
+    color: var(--app-theme-primary-hover) !important;
+  }
+}
+
 .mat-mdc-card {
   border-radius: 10px !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
   background-color: #ffffff;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--app-theme-shell-border, #e0e0e0);
+  border-top: 2px solid var(--app-theme-primary);
 }
 
-// Global table styles - streamlined
+// Global table styles - streamlined (theme-tinted header)
 .mat-mdc-table {
   background: #ffffff !important;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--app-theme-shell-border, #e0e0e0);
   font-size: 0.8rem !important;
-  
+
+  .mat-mdc-header-row {
+    min-height: 40px !important;
+    background: var(--app-theme-primary-light) !important;
+  }
+
   th {
     padding: 8px 10px !important;
     font-size: 0.75rem !important;
     font-weight: 600 !important;
     line-height: 1.4 !important;
+    color: var(--app-theme-primary) !important;
   }
-  
+
   td {
     padding: 8px 10px !important;
     font-size: 0.8rem !important;
     line-height: 1.4 !important;
   }
-  
-  .mat-mdc-header-row {
-    min-height: 40px !important;
+
+  .mat-mdc-row:hover {
+    background: var(--app-theme-primary-light) !important;
   }
-  
+
   .mat-mdc-row {
     min-height: 40px !important;
   }
@@ -384,7 +413,7 @@ table {
 
     &.mdc-text-field--focused {
       border-color: var(--app-theme-primary) !important;
-      box-shadow: 0 0 0 2px rgba(0, 119, 200, 0.2) !important;
+      box-shadow: 0 0 0 2px var(--app-theme-primary-glow, rgba(0, 119, 200, 0.2)) !important;
     }
   }
 

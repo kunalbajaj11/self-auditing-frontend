@@ -2,10 +2,11 @@
   height: 100vh;
 }
 
+// Shell uses theme CSS variables set by ThemeService (--app-theme-shell-*)
 .side-nav {
   width: 260px;
-  background: #ffffff;
-  border-right: 1px solid #e0e0e0;
+  background: var(--app-theme-shell-sidebar-bg, #f5f3ff);
+  border-right: 1px solid var(--app-theme-shell-border, #e9e7ff);
   color: #333333;
   display: flex;
   flex-direction: column;
@@ -15,7 +16,7 @@
     align-items: flex-start;
     gap: 8px;
     padding: 10px 10px;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--app-theme-shell-border, #e9e7ff);
   }
 
   .brand-logo {
@@ -254,7 +255,7 @@
 
   .side-footer {
     padding: 10px;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid var(--app-theme-shell-border, #e9e7ff);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -349,9 +350,9 @@
   z-index: 20;
   padding: 0 16px;
   min-height: 56px;
-  background: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background: var(--app-theme-shell-header-bg, #faf5ff);
+  border-bottom: 1px solid var(--app-theme-shell-border, #ede9fe);
+  box-shadow: 0 2px 8px var(--app-theme-primary-light, rgba(102, 126, 234, 0.08));
   display: flex;
   align-items: center;
 
@@ -397,7 +398,7 @@
 }
 
 .content-area {
-  background: #f9fafb;
+  background: var(--app-theme-shell-content-bg, #faf5ff);
 }
 
 .content-wrapper {
@@ -409,8 +410,8 @@
   background: #ffffff;
   border-radius: 8px;
   padding: 20px 16px;
-  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 12px var(--app-theme-primary-light, rgba(102, 126, 234, 0.06));
+  border: 1px solid var(--app-theme-shell-border, rgba(233, 231, 255, 0.8));
 }
 
 // Entrance animation for all routed views (post-login pages), same feel as sidebar expand
