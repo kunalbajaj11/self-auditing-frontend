@@ -158,7 +158,7 @@
             icon="description"
             [value]="vm.totalInvoices || 0"
             accent="primary"
-            [hint]="vm.outstandingInvoices ? vm.outstandingInvoices + ' outstanding' : undefined"
+            [hint]="(vm.outstandingInvoices ?? 0) + ' outstanding'"
             [clickable]="true"
             (cardClick)="openTileEntries('totalInvoices')"
           ></app-summary-card>

@@ -299,15 +299,9 @@
             <mat-label>Despatched through</mat-label>
             <input matInput formControlName="despatchedThrough" />
           </mat-form-field>
-        </div>
-        <div class="form-row">
           <mat-form-field appearance="outline" class="flex-1">
             <mat-label>Destination</mat-label>
             <input matInput formControlName="destination" />
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="flex-2">
-            <mat-label>Terms of delivery</mat-label>
-            <textarea matInput formControlName="termsOfDelivery" rows="3"></textarea>
           </mat-form-field>
         </div>
       </div>
@@ -315,14 +309,20 @@
       <!-- Notes & description -->
       <div class="form-section">
         <h3 class="section-title">Notes</h3>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Description</mat-label>
-          <textarea matInput formControlName="description" rows="3"></textarea>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Notes</mat-label>
-          <textarea matInput formControlName="notes" rows="4"></textarea>
-        </mat-form-field>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="flex-1">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" rows="6"></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="flex-1">
+            <mat-label>Notes</mat-label>
+            <textarea matInput formControlName="notes" rows="6"></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="flex-1">
+            <mat-label>Terms of delivery</mat-label>
+            <textarea matInput formControlName="termsOfDelivery" rows="6"></textarea>
+          </mat-form-field>
+        </div>
       </div>
 
       <!-- Advanced options: header, footer, Configure VAT (display checkboxes), payment & terms -->
@@ -353,7 +353,7 @@
 
             <div class="advanced-subsection">
               <h4 class="subsection-title">What to show on {{ documentWord }}</h4>
-              <div class="checkbox-row">
+              <div class="checkbox-grid">
                 <mat-checkbox formControlName="invoiceShowCompanyDetails">Show company details</mat-checkbox>
                 <mat-checkbox formControlName="invoiceShowVatDetails">Show VAT details</mat-checkbox>
                 <mat-checkbox formControlName="invoiceShowBankDetails">Show bank details</mat-checkbox>
@@ -361,8 +361,6 @@
                 <mat-checkbox formControlName="invoiceShowPaymentMethods">Show payment methods</mat-checkbox>
                 <mat-checkbox formControlName="invoiceShowTermsConditions">Show terms &amp; conditions</mat-checkbox>
                 <mat-checkbox formControlName="invoiceShowFooter">Show footer</mat-checkbox>
-              </div>
-              <div class="checkbox-row">
                 <mat-checkbox formControlName="invoiceShowItemDescription">Show item description</mat-checkbox>
                 <mat-checkbox formControlName="invoiceShowItemQuantity">Show item quantity</mat-checkbox>
                 <mat-checkbox formControlName="invoiceShowItemUnitPrice">Show unit price</mat-checkbox>

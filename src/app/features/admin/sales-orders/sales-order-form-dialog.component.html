@@ -63,82 +63,100 @@
         </mat-form-field>
       </section>
 
-      <section class="form-section line-items">
+      <section class="form-section line-items-section">
         <div class="line-items-header">
           <h3 class="section-title">
             <mat-icon>list_alt</mat-icon>
             Line Items
           </h3>
-        <button mat-stroked-button type="button" (click)="addLineItem()">
-          <mat-icon>add</mat-icon>
-          Add item
-        </button>
-      </div>
+          <button mat-stroked-button type="button" (click)="addLineItem()">
+            <mat-icon>add</mat-icon>
+            Add item
+          </button>
+        </div>
 
-      <div class="items" formArrayName="lineItems">
-        <div class="item" *ngFor="let item of lineItems.controls; let i = index" [formGroupName]="i">
-          <div class="item-grid">
-            <mat-form-field appearance="outline">
-              <mat-label>Product</mat-label>
-              <mat-select formControlName="productId" (selectionChange)="onProductSelected(i)">
-                <mat-option value="">Manual</mat-option>
-                <mat-option *ngFor="let p of products" [value]="p.id">
-                  {{ p.name }} <span *ngIf="p.sku">({{ p.sku }})</span>
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+        <div class="line-items-container" formArrayName="lineItems">
+          <table class="line-items-table" *ngIf="lineItems.length > 0">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Item Name *</th>
+                <th>Description</th>
+                <th>Qty</th>
+                <th>Unit</th>
+                <th>Unit Price *</th>
+                <th>VAT Rate</th>
+                <th>VAT Type</th>
+                <th>Amount</th>
+                <th>VAT</th>
+                <th>Total</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let lineItem of lineItems.controls; let i = index" [formGroupName]="i">
+                <td>
+                  <select class="form-select" formControlName="productId" (change)="onProductSelected(i)">
+                    <option value="">Manual</option>
+                    <option *ngFor="let p of products" [value]="p.id">
+                      {{ p.name }}{{ p.sku ? ' (' + p.sku + ')' : '' }}
+                    </option>
+                  </select>
+                </td>
+                <td>
+                  <input class="form-input" formControlName="itemName" placeholder="Item name" />
+                  <small class="error-text" *ngIf="lineItem.get('itemName')?.hasError('required') && lineItem.get('itemName')?.touched">Required</small>
+                </td>
+                <td>
+                  <input class="form-input" formControlName="description" placeholder="Description" />
+                </td>
+                <td>
+                  <input class="form-input num" type="number" formControlName="orderedQuantity" step="0.001" min="0.001" />
+                </td>
+                <td>
+                  <input class="form-input" formControlName="unitOfMeasure" placeholder="unit" />
+                </td>
+                <td>
+                  <input class="form-input num" type="number" formControlName="unitPrice" step="0.01" min="0" />
+                </td>
+                <td>
+                  <input class="form-input num" type="number" formControlName="vatRate" step="0.01" min="0" max="100" />
+                </td>
+                <td>
+                  <select class="form-select" formControlName="vatTaxType">
+                    <option *ngFor="let t of vatTaxTypes" [value]="t">{{ t }}</option>
+                  </select>
+                </td>
+                <td class="readonly">{{ lineItem.get('amount')?.value | number: '1.2-2' }}</td>
+                <td class="readonly">{{ lineItem.get('vatAmount')?.value | number: '1.2-2' }}</td>
+                <td class="readonly">{{ lineItem.get('totalAmount')?.value | number: '1.2-2' }}</td>
+                <td>
+                  <button mat-icon-button type="button" color="warn" (click)="removeLineItem(i)" [disabled]="lineItems.length <= 1" matTooltip="Remove">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Item</mat-label>
-              <input matInput formControlName="itemName" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Qty</mat-label>
-              <input matInput type="number" formControlName="orderedQuantity" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>UOM</mat-label>
-              <input matInput formControlName="unitOfMeasure" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Unit Price</mat-label>
-              <input matInput type="number" formControlName="unitPrice" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>VAT Rate %</mat-label>
-              <input matInput type="number" formControlName="vatRate" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>VAT Type</mat-label>
-              <mat-select formControlName="vatTaxType">
-                <mat-option *ngFor="let t of vatTaxTypes" [value]="t">{{ t }}</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <div class="amounts">
-              <div><span class="label">Amount</span> {{ item.get('amount')?.value }}</div>
-              <div><span class="label">VAT</span> {{ item.get('vatAmount')?.value }}</div>
-              <div class="total"><span class="label">Total</span> {{ item.get('totalAmount')?.value }}</div>
-            </div>
-          </div>
-
-          <div class="item-actions">
-            <button mat-button color="warn" type="button" (click)="removeLineItem(i)" [disabled]="lineItems.length <= 1">
-              Remove
-            </button>
+          <div *ngIf="lineItems.length === 0" class="empty-line-items">
+            <p>No line items. Click "Add item" to add items to this sales order.</p>
           </div>
         </div>
-      </div>
 
-        <div class="totals">
-          <div>Subtotal: {{ subtotal | number:'1.2-2' }}</div>
-          <div>VAT: {{ totalVat | number:'1.2-2' }}</div>
-          <div class="grand">Total: {{ totalAmount | number:'1.2-2' }} {{ form.get('currency')?.value }}</div>
+        <div class="totals-section" *ngIf="lineItems.length > 0">
+          <div class="totals-row">
+            <span class="total-label">Subtotal:</span>
+            <span class="total-value">{{ subtotal | number: '1.2-2' }} {{ form.get('currency')?.value }}</span>
+          </div>
+          <div class="totals-row">
+            <span class="total-label">Total VAT:</span>
+            <span class="total-value">{{ totalVat | number: '1.2-2' }} {{ form.get('currency')?.value }}</span>
+          </div>
+          <div class="totals-row total-amount">
+            <span class="total-label">Total Amount:</span>
+            <span class="total-value">{{ totalAmount | number: '1.2-2' }} {{ form.get('currency')?.value }}</span>
+          </div>
         </div>
       </section>
     </form>

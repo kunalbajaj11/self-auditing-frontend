@@ -66,6 +66,7 @@ export class AdminTaxFormsComponent implements OnInit {
   openGenerateDialog(): void {
     const dialogRef = this.dialog.open(GenerateVATReturnDialogComponent, {
       width: '600px',
+      maxWidth: '95vw',
     });
 
     dialogRef.afterClosed().subscribe((result) => {
@@ -78,6 +79,7 @@ export class AdminTaxFormsComponent implements OnInit {
   viewForm(form: TaxForm): void {
     this.dialog.open(TaxFormDetailDialogComponent, {
       width: '800px',
+      maxWidth: '95vw',
       data: form,
     });
   }

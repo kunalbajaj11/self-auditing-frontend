@@ -79,11 +79,6 @@
           <input matInput type="number" formControlName="discountAmount" min="0" step="0.01" placeholder="0" />
         </mat-form-field>
       </div>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Description</mat-label>
-        <textarea matInput formControlName="description" rows="2"></textarea>
-      </mat-form-field>
     </div>
 
     <div class="form-section">
@@ -114,19 +109,9 @@
           <mat-label>Despatched Through</mat-label>
           <input matInput formControlName="despatchedThrough" />
         </mat-form-field>
-      </div>
-      <div class="form-row">
         <mat-form-field appearance="outline" class="flex-1">
           <mat-label>Destination</mat-label>
           <input matInput formControlName="destination" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="flex-1 full-width">
-          <mat-label>Terms of Delivery</mat-label>
-          <textarea
-            matInput
-            formControlName="termsOfDelivery"
-            rows="2"
-          ></textarea>
         </mat-form-field>
       </div>
     </div>
@@ -257,10 +242,20 @@
         <mat-icon>notes</mat-icon>
         Notes
       </h3>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Notes</mat-label>
-        <textarea matInput formControlName="notes" rows="3"></textarea>
-      </mat-form-field>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="6"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Notes</mat-label>
+          <textarea matInput formControlName="notes" rows="6"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-label>Terms of Delivery</mat-label>
+          <textarea matInput formControlName="termsOfDelivery" rows="6"></textarea>
+        </mat-form-field>
+      </div>
     </div>
   </form>
 </mat-dialog-content>

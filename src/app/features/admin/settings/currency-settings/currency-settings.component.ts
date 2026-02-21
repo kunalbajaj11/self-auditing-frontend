@@ -228,6 +228,7 @@ export class CurrencySettingsComponent implements OnInit {
   addExchangeRate(): void {
     const dialogRef = this.dialog.open(ExchangeRateFormDialogComponent, {
       width: '500px',
+      maxWidth: '95vw',
       data: null,
     });
 
@@ -249,6 +250,7 @@ export class CurrencySettingsComponent implements OnInit {
   editExchangeRate(rate: ExchangeRate): void {
     const dialogRef = this.dialog.open(ExchangeRateFormDialogComponent, {
       width: '500px',
+      maxWidth: '95vw',
       data: rate,
     });
 

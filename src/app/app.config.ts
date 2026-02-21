@@ -6,12 +6,20 @@ import {
   withInterceptorsFromDi,
   HTTP_INTERCEPTORS,
 } from '@angular/common/http';
+import { MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
 import { routes } from './app.routes';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { IdleService } from './core/services/idle.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    {
+      provide: MAT_DIALOG_DEFAULT_OPTIONS,
+      useValue: {
+        enterAnimationDuration: '280ms',
+        exitAnimationDuration: '200ms',
+      },
+    },
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(
       routes,

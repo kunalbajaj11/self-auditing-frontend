@@ -303,9 +303,8 @@ export class BankAccountsComponent implements OnInit {
     }
 
     this.dialog.open(InvoiceDetailDialogComponent, {
-      width: '900px',
+      width: '750px',
       maxWidth: '95vw',
-      maxHeight: '90vh',
       data: { invoiceId: transaction.invoice.id },
     });
   }

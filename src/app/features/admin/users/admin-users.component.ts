@@ -52,6 +52,7 @@ export class AdminUsersComponent implements OnInit {
     }
     const dialogRef = this.dialog.open(UserFormDialogComponent, {
       width: '420px',
+      maxWidth: '95vw',
       data: null,
     });
     dialogRef.afterClosed().subscribe((created) => {

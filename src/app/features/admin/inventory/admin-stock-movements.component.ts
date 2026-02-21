@@ -57,6 +57,7 @@ export class AdminStockMovementsComponent implements OnInit {
   openDialog(movement?: StockMovement): void {
     const dialogRef = this.dialog.open(StockMovementFormDialogComponent, {
       width: '600px',
+      maxWidth: '95vw',
       data: movement ?? null,
     });
     dialogRef.afterClosed().subscribe((result) => {

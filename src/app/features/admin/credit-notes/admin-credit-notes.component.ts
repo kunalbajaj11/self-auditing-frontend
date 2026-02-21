@@ -109,7 +109,7 @@ export class AdminCreditNotesComponent implements OnInit {
 
   viewCreditNote(creditNote: CreditNote): void {
     const dialogRef = this.dialog.open(CreditNoteDetailDialogComponent, {
-      width: '800px',
+      width: '900px',
       maxWidth: '95vw',
       maxHeight: '90vh',
       data: { creditNoteId: creditNote.id },

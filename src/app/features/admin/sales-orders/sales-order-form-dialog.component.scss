@@ -1,3 +1,11 @@
+// Match invoice form variables for line-items table
+$primary: #1565c0;
+$primary-light: #e3f2fd;
+$text-primary: #0d47a1;
+$text-secondary: #546e7a;
+$border: #e0e7ef;
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+
 .sales-order-form-dialog {
   display: flex;
   flex-direction: column;
@@ -38,7 +46,7 @@
 
 mat-dialog-content.content {
   padding: 24px;
-  min-width: 760px;
+  min-width: 1080px;
   overflow-y: auto;
   max-height: calc(90vh - 180px);
   flex: 1 1 auto;
@@ -103,68 +111,184 @@ mat-dialog-content.content {
   width: 100%;
 }
 
-.line-items {
+.line-items-section {
   margin-top: 8px;
+
+  .section-title {
+    margin-bottom: 0;
+  }
 }
 
 .line-items-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 8px 0;
+  margin-bottom: 12px;
 }
 
-.items {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.line-items-container {
+  margin-bottom: 16px;
 }
 
-.item {
-  border: 1px solid rgba(0, 0, 0, 0.08);
+.line-items-table {
+  width: 100%;
+  min-width: 900px;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  background: #fff;
   border-radius: 10px;
-  padding: 12px;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+
+  thead {
+    background: $primary-light;
+
+    th {
+      padding: 12px 10px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: $text-primary;
+      border-bottom: 2px solid $border;
+      white-space: nowrap;
+    }
+    th:nth-child(1) { width: 12%; min-width: 100px; }
+    th:nth-child(2) { width: 14%; min-width: 120px; }
+    th:nth-child(3) { width: 10%; min-width: 80px; }
+    th:nth-child(4), th:nth-child(5) { width: 7%; min-width: 56px; text-align: right; }
+    th:nth-child(6), th:nth-child(7), th:nth-child(8) { width: 9%; min-width: 72px; text-align: right; }
+    th:nth-child(9), th:nth-child(10), th:nth-child(11) { width: 8%; min-width: 70px; text-align: right; }
+    th:nth-child(12) { width: 70px; min-width: 70px; max-width: 70px; text-align: center; box-sizing: border-box; }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid $border;
+
+      &:hover {
+        background-color: rgba($primary-light, 0.5);
+      }
+
+      td {
+        padding: 10px;
+        vertical-align: top;
+
+        &:nth-child(4), &:nth-child(5), &:nth-child(6), &:nth-child(7), &:nth-child(8) {
+          text-align: right;
+        }
+
+        &:nth-child(12) {
+          width: 70px;
+          min-width: 70px;
+          max-width: 70px;
+          overflow: visible;
+          box-sizing: border-box;
+        }
+
+        .form-input,
+        .form-select {
+          width: 100%;
+          border: 1px solid rgba(0, 0, 0, 0.12);
+          border-radius: 4px;
+          padding: 6px 8px;
+          font-size: 0.75rem;
+          font-family: inherit;
+          box-sizing: border-box;
+
+          &.num {
+            text-align: right;
+          }
+
+          &:focus {
+            outline: none;
+            border-color: #1e3a8a;
+          }
+
+          &.ng-invalid.ng-touched {
+            border-color: #ef4444;
+          }
+        }
+
+        .form-select {
+          background-color: white;
+          cursor: pointer;
+        }
+
+        .error-text {
+          display: block;
+          color: #ef4444;
+          font-size: 0.75rem;
+          margin-top: 4px;
+        }
+
+        &.readonly {
+          text-align: right;
+          font-weight: 500;
+          color: #0f172a;
+          line-height: 1.4;
+        }
+      }
+    }
+  }
 }
 
-.item-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+.empty-line-items {
+  padding: 24px 16px;
+  text-align: center;
+  color: $text-secondary;
+  background: #fff;
+  border: 1px dashed $border;
+  border-radius: 10px;
+  font-size: 0.875rem;
 }
 
-.amounts {
-  grid-column: 1 / -1;
+.totals-section {
+  margin-top: 16px;
+  padding: 8px 10px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  text-align: right;
+}
+
+.totals-row {
   display: flex;
-  gap: 16px;
   justify-content: flex-end;
   align-items: baseline;
-  color: rgba(0, 0, 0, 0.7);
-}
+  gap: 16px;
+  margin-bottom: 8px;
 
-.label {
-  color: rgba(0, 0, 0, 0.5);
-  margin-right: 6px;
-}
+  &:last-child {
+    margin-bottom: 0;
+  }
 
-.total {
-  font-weight: 600;
-}
+  .total-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: $text-secondary;
+    flex-shrink: 0;
+  }
 
-.item-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 8px;
-}
+  .total-value {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $text-primary;
+    text-align: right;
+  }
 
-.totals {
-  display: flex;
-  justify-content: flex-end;
-  gap: 20px;
-  margin-top: 12px;
-}
+  &.total-amount {
+    border-top: 2px solid $border;
+    padding-top: 10px;
+    margin-top: 10px;
 
-.grand {
-  font-weight: 700;
+    .total-label,
+    .total-value {
+      font-size: 0.875rem;
+      font-weight: 700;
+    }
+  }
 }
 
 @media (max-width: 900px) {
@@ -174,8 +298,14 @@ mat-dialog-content.content {
   .grid {
     grid-template-columns: 1fr;
   }
-  .item-grid {
-    grid-template-columns: 1fr;
+  .line-items-table {
+    font-size: 0.75rem;
+    min-width: 720px;
+
+    thead th,
+    tbody td {
+      padding: 6px 4px;
+    }
   }
 }
 

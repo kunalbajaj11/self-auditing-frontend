@@ -31,6 +31,7 @@ export class AdminExpenseTypesComponent implements OnInit {
   openDialog(expenseType?: ExpenseType): void {
     const dialogRef = this.dialog.open(ExpenseTypeFormDialogComponent, {
       width: '420px',
+      maxWidth: '95vw',
       data: expenseType ?? null,
     });
     dialogRef.afterClosed().subscribe((result) => {

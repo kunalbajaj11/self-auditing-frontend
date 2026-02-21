@@ -71,7 +71,7 @@ export class AdminPurchaseOrdersComponent implements OnInit {
 
   viewPurchaseOrder(po: PurchaseOrder): void {
     const dialogRef = this.dialog.open(PurchaseOrderDetailDialogComponent, {
-      width: '900px',
+      width: '1000px',
       maxWidth: '95vw',
       maxHeight: '90vh',
       data: { poId: po.id },

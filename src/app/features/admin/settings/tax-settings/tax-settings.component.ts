@@ -163,6 +163,7 @@ export class TaxSettingsComponent implements OnInit {
   addTaxRate(): void {
     const dialogRef = this.dialog.open(TaxRateFormDialogComponent, {
       width: '500px',
+      maxWidth: '95vw',
       data: null,
     });
 
@@ -184,6 +185,7 @@ export class TaxSettingsComponent implements OnInit {
   editTaxRate(rate: TaxRate): void {
     const dialogRef = this.dialog.open(TaxRateFormDialogComponent, {
       width: '500px',
+      maxWidth: '95vw',
       data: rate,
     });
 

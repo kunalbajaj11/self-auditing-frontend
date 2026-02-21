@@ -124,12 +124,11 @@ $shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
     max-width: 900px;
     margin: 0 auto;
     text-align: center;
-    animation: fadeInUp 0.8s ease-out;
   }
 
   .hero-logo {
     margin-bottom: 32px;
-    animation: fadeInDown 0.8s ease-out;
+    animation: fadeInDown 0.5s ease-out both;
 
     .logo-image {
       width: 140px;
@@ -149,6 +148,7 @@ $shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
     margin-bottom: 24px;
     line-height: 1.1;
     text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    animation: fadeInUp 0.5s ease-out 0.1s both;
 
     .title-highlight {
       display: block;
@@ -173,6 +173,7 @@ $shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
+    animation: fadeInUp 0.5s ease-out 0.2s both;
   }
 
   .hero-actions {
@@ -181,6 +182,7 @@ $shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
     justify-content: center;
     flex-wrap: wrap;
     margin-bottom: 24px;
+    animation: fadeInUp 0.5s ease-out 0.3s both;
   }
 
   .cta-button {
@@ -239,6 +241,7 @@ $shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
     justify-content: center;
     flex-wrap: wrap;
     margin-top: 32px;
+    animation: fadeInUp 0.5s ease-out 0.4s both;
   }
 
   .secondary-action-button {
@@ -298,10 +301,11 @@ $shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
   padding: 0 24px;
 }
 
-// Section Header
+// Section Header — entrance like sidebar expand
 .section-header {
   text-align: center;
   margin-bottom: 48px;
+  animation: fadeInUp 0.5s ease-out both;
 
   .section-badge {
     display: inline-block;
@@ -314,6 +318,7 @@ $shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 16px;
+    transition: transform 200ms ease, background 200ms ease;
   }
 
   .section-title {

@@ -445,7 +445,7 @@ export class InvoiceFormDialogComponent implements OnInit {
   /** Open the same Add/Edit customer modal used on the Customers page. On create, reload list and select the new customer. */
   openAddCustomerDialog(): void {
     const dialogRef = this.dialog.open(CustomerFormDialogComponent, {
-      width: '640px',
+      width: '760px',
       data: null,
     });
     dialogRef.afterClosed().subscribe((created: Customer | false | undefined) => {

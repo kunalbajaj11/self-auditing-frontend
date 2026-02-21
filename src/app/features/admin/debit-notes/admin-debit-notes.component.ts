@@ -109,7 +109,7 @@ export class AdminDebitNotesComponent implements OnInit {
 
   viewDebitNote(debitNote: DebitNote): void {
     const dialogRef = this.dialog.open(DebitNoteDetailDialogComponent, {
-      width: '800px',
+      width: '900px',
       maxWidth: '95vw',
       maxHeight: '90vh',
       data: { debitNoteId: debitNote.id },

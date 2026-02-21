@@ -31,6 +31,7 @@ export class AdminLedgerAccountsComponent implements OnInit {
   openDialog(ledgerAccount?: LedgerAccount): void {
     const dialogRef = this.dialog.open(LedgerAccountFormDialogComponent, {
       width: '420px',
+      maxWidth: '95vw',
       data: ledgerAccount ?? null,
     });
     dialogRef.afterClosed().subscribe((result) => {

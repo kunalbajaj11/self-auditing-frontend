@@ -46,6 +46,7 @@ export class AdminPayrollRunsComponent implements OnInit {
   openDialog(run?: PayrollRun): void {
     const dialogRef = this.dialog.open(PayrollRunFormDialogComponent, {
       width: '500px',
+      maxWidth: '95vw',
       data: run ?? null,
     });
     dialogRef.afterClosed().subscribe((result) => {

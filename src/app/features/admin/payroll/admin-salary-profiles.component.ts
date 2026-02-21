@@ -45,6 +45,7 @@ export class AdminSalaryProfilesComponent implements OnInit {
   openDialog(profile?: SalaryProfile): void {
     const dialogRef = this.dialog.open(SalaryProfileFormDialogComponent, {
       width: '700px',
+      maxWidth: '95vw',
       data: profile ?? null,
     });
     dialogRef.afterClosed().subscribe((result) => {

@@ -119,6 +119,7 @@ export class AdminComplianceComponent implements OnInit {
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(CreateDeadlineDialogComponent, {
       width: '600px',
+      maxWidth: '95vw',
     });
 
     dialogRef.afterClosed().subscribe((result) => {

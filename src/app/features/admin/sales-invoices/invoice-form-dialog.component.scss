@@ -291,7 +291,7 @@ mat-dialog-content {
   .advanced-fields {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: 16px 20px;
 
     .header-text-field {
       grid-column: 1 / -1;
@@ -301,14 +301,16 @@ mat-dialog-content {
     }
   }
 
-  .checkbox-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px 20px;
-    margin: 10px 0;
+  .checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px 24px;
+    margin: 12px 0 0;
 
     mat-checkbox {
       font-size: 0.8125rem;
+      min-height: 32px;
+      align-items: center;
     }
   }
 

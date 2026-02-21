@@ -54,6 +54,7 @@ export class AdminPaymentsComponent implements OnInit {
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(PaymentFormDialogComponent, {
       width: '600px',
+      maxWidth: '95vw',
       data: null,
     });
 

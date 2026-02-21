@@ -7,10 +7,17 @@
 .top-row {
   display: flex;
   align-items: center;
+  animation: app-fade-in 0.3s ease-out both;
+}
+
+.top-row a {
+  transition: color 200ms ease, transform 200ms ease;
 }
 
 .doc-card {
   padding: 8px 8px 0;
+  animation: app-fade-in-up 0.4s ease-out 0.1s both;
+  transition: box-shadow 200ms ease;
 }
 
 .markdown h1,

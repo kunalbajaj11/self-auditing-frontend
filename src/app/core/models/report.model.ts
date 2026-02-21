@@ -13,7 +13,17 @@ export interface ReportHistoryItem {
   type: ReportType;
   filters: Record<string, any>;
   fileUrl?: string;
+  /** ISO date string when the report was generated */
   createdAt: string;
+  /** Backend may send created_at (snake_case) */
+  created_at?: string;
+}
+
+export interface ReportHistoryPage {
+  items: ReportHistoryItem[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 export interface GeneratedReport<T = any> {

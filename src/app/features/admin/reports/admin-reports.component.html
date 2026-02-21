@@ -1,4 +1,88 @@
 <section class="reports-container">
+  <!-- Report history: collapsible, past reports for this organization -->
+  <mat-expansion-panel class="history-card" *ngIf="selectedReport" [expanded]="historyPanelExpanded" (opened)="onHistoryPanelOpened()">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon>history</mat-icon>
+        <span>Report history</span>
+        <span class="history-badge" *ngIf="historyTotal > 0">({{ historyTotal }})</span>
+      </mat-panel-title>
+      <mat-panel-description>
+        Previously generated reports. Expand to download or remove.
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+    <div class="history-panel-content">
+      <div class="history-loading" *ngIf="historyLoading">
+        <mat-spinner [diameter]="32"></mat-spinner>
+        <span>Loading report history…</span>
+      </div>
+      <div class="history-empty" *ngIf="!historyLoading && historyTotal === 0">
+        <mat-icon>folder_open</mat-icon>
+        <p>No report history yet. Generate a report to see it here.</p>
+      </div>
+      <div class="history-table-wrap" *ngIf="!historyLoading && historyTotal > 0">
+        <table mat-table [dataSource]="reportHistory" class="report-history-table">
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Report type</th>
+            <td mat-cell *matCellDef="let row">{{ getReportLabel(row.type) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="period">
+            <th mat-header-cell *matHeaderCellDef>Period</th>
+            <td mat-cell *matCellDef="let row">{{ getHistoryPeriodLabel(row) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="generatedAt">
+            <th mat-header-cell *matHeaderCellDef>Generated</th>
+            <td mat-cell *matCellDef="let row">{{ getHistoryDate(row) | date:'medium' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="actions-header">Download</th>
+            <td mat-cell *matCellDef="let row" class="actions-cell">
+              <button mat-stroked-button [matMenuTriggerFor]="downloadMenu" [disabled]="historyDownloadingId === row.id" (click)="downloadMenuRow = row">
+                <mat-progress-spinner *ngIf="historyDownloadingId === row.id" [diameter]="18" mode="indeterminate" class="btn-spinner"></mat-progress-spinner>
+                <mat-icon *ngIf="historyDownloadingId !== row.id">download</mat-icon>
+                <span>Download</span>
+              </button>
+              <mat-menu #downloadMenu="matMenu">
+                <button mat-menu-item (click)="downloadReportById(downloadMenuRow, 'pdf')" [disabled]="!downloadMenuRow">
+                  <mat-icon>picture_as_pdf</mat-icon>
+                  <span>PDF</span>
+                </button>
+                <button mat-menu-item (click)="downloadReportById(downloadMenuRow, 'xlsx')" [disabled]="!downloadMenuRow">
+                  <mat-icon>table_chart</mat-icon>
+                  <span>Excel</span>
+                </button>
+                <button mat-menu-item (click)="downloadReportById(downloadMenuRow, 'csv')" [disabled]="!downloadMenuRow">
+                  <mat-icon>description</mat-icon>
+                  <span>CSV</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="delete">
+            <th mat-header-cell *matHeaderCellDef class="delete-header"></th>
+            <td mat-cell *matCellDef="let row" class="delete-cell">
+              <button mat-icon-button color="warn" [disabled]="historyDeletingId === row.id" (click)="deleteReportFromHistory(row)" [matTooltip]="'Remove from history'">
+                <mat-progress-spinner *ngIf="historyDeletingId === row.id" [diameter]="20" mode="indeterminate" class="btn-spinner"></mat-progress-spinner>
+                <mat-icon *ngIf="historyDeletingId !== row.id">delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="['type', 'period', 'generatedAt', 'actions', 'delete']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['type', 'period', 'generatedAt', 'actions', 'delete']"></tr>
+        </table>
+        <mat-paginator
+          [length]="historyTotal"
+          [pageSize]="historyPageSize"
+          [pageIndex]="historyPage - 1"
+          [pageSizeOptions]="[5, 10, 25, 50]"
+          (page)="onHistoryPageChange($event)"
+          showFirstLastButtons
+          class="history-paginator">
+        </mat-paginator>
+      </div>
+    </div>
+  </mat-expansion-panel>
+
   <!-- Report Configuration View -->
   <div class="report-config" *ngIf="selectedReport && !generatedReport">
     <div class="config-header">
@@ -114,6 +198,11 @@
         <p>Generated on {{ generatedReport.generatedAt | date: 'medium' }}</p>
       </div>
       <div class="download-actions">
+        <button mat-stroked-button (click)="exportReportViewAsPdf()" [disabled]="exportingViewPdf" [matTooltip]="'Download PDF matching the on-screen view'">
+          <mat-progress-spinner *ngIf="exportingViewPdf" [diameter]="18" mode="indeterminate" class="btn-spinner"></mat-progress-spinner>
+          <mat-icon *ngIf="!exportingViewPdf">visibility</mat-icon>
+          PDF (as shown)
+        </button>
         <button mat-stroked-button (click)="generateAndDownload('pdf')" [disabled]="loading">
           <mat-icon>picture_as_pdf</mat-icon>
           PDF
@@ -133,6 +222,7 @@
       <mat-card-content>
         <!-- Trial Balance Report -->
         <div *ngIf="generatedReport.type === 'trial_balance'">
+          <div #reportPdfContent class="report-pdf-content">
           <!-- Trial Balance Validation Warning -->
           <div *ngIf="generatedReport.data.summary && generatedReport.data.summary.warning" class="trial-balance-warning">
             <mat-icon color="warn">warning</mat-icon>
@@ -322,10 +412,12 @@
             <tr mat-header-row *matHeaderRowDef="['accountName', 'accountType', 'openingDebit', 'openingCredit', 'openingBalance', 'debit', 'credit', 'balance', 'closingDebit', 'closingCredit', 'closingBalance']"></tr>
             <tr mat-row *matRowDef="let row; columns: ['accountName', 'accountType', 'openingDebit', 'openingCredit', 'openingBalance', 'debit', 'credit', 'balance', 'closingDebit', 'closingCredit', 'closingBalance']"></tr>
           </table>
+          </div>
         </div>
 
         <!-- Balance Sheet Report -->
         <div *ngIf="generatedReport.type === 'balance_sheet'">
+          <div #reportPdfContent class="report-pdf-content">
           <!-- Opening/Closing Balance Summary -->
           <div class="balance-summary" *ngIf="generatedReport.data.summary && (generatedReport.data.summary.openingAssets !== undefined || generatedReport.data.summary.openingLiabilities !== undefined)">
             <div class="balance-card">
@@ -548,10 +640,12 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
 
         <!-- Profit and Loss Report -->
         <div *ngIf="generatedReport.type === 'profit_and_loss'">
+          <div #reportPdfContent class="report-pdf-content">
           <!-- Opening/Closing Balance Summary -->
           <div class="balance-summary" *ngIf="generatedReport.data.summary && generatedReport.data.summary.openingRetainedEarnings !== undefined">
             <div class="balance-card">
@@ -679,10 +773,12 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
 
         <!-- Payables Report -->
         <div *ngIf="generatedReport.type === 'payables'">
+          <div #reportPdfContent class="report-pdf-content">
           <!-- Opening/Closing Balance Summary -->
           <div class="balance-summary" *ngIf="generatedReport.data.summary && generatedReport.data.summary.openingBalance !== undefined">
             <div class="balance-card">
@@ -806,10 +902,12 @@
               <tr mat-row *matRowDef="let row; columns: ['vendor', 'pendingBalance', 'itemCount', 'overdueAmount', 'overdueCount']"></tr>
             </table>
           </div>
+          </div>
         </div>
 
         <!-- Receivables Report -->
         <div *ngIf="generatedReport.type === 'receivables'">
+          <div #reportPdfContent class="report-pdf-content">
           <!-- Opening/Closing Balance Summary -->
           <div class="balance-summary" *ngIf="generatedReport.data.summary && generatedReport.data.summary.openingBalance !== undefined">
             <div class="balance-card">
@@ -911,10 +1009,12 @@
             <tr mat-header-row *matHeaderRowDef="['invoiceNumber', 'customer', 'total', 'paid', 'outstanding', 'dueDate', 'paymentStatus']"></tr>
             <tr mat-row *matRowDef="let row; columns: ['invoiceNumber', 'customer', 'total', 'paid', 'outstanding', 'dueDate', 'paymentStatus']"></tr>
           </table>
+          </div>
         </div>
 
         <!-- VAT Control Account Report -->
         <div *ngIf="generatedReport.type === 'vat_control_account'">
+          <div #reportPdfContent class="report-pdf-content">
           <div class="report-summary" *ngIf="generatedReport.data.summary">
             <div class="summary-card">
               <div class="summary-label">VAT Input</div>
@@ -970,7 +1070,7 @@
                 </ng-container>
                 <ng-container matColumnDef="vatRate">
                   <th mat-header-cell *matHeaderCellDef class="text-right">VAT Rate</th>
-                  <td mat-cell *matCellDef="let row" class="text-right">{{ row.vatRate || 0 }}%</td>
+                  <td mat-cell *matCellDef="let row" class="text-right">{{ row.vatRate != null ? row.vatRate + '%' : 'N/A' }}</td>
                 </ng-container>
                 <ng-container matColumnDef="vatAmount">
                   <th mat-header-cell *matHeaderCellDef class="text-right">VAT Amount</th>
@@ -1007,7 +1107,7 @@
                 </ng-container>
                 <ng-container matColumnDef="vatRate">
                   <th mat-header-cell *matHeaderCellDef class="text-right">VAT Rate</th>
-                  <td mat-cell *matCellDef="let row" class="text-right">{{ row.vatRate || 0 }}%</td>
+                  <td mat-cell *matCellDef="let row" class="text-right">{{ row.vatRate != null ? row.vatRate + '%' : 'N/A' }}</td>
                 </ng-container>
                 <ng-container matColumnDef="vatAmount">
                   <th mat-header-cell *matHeaderCellDef class="text-right">VAT Amount</th>
@@ -1025,10 +1125,12 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
 
         <!-- Stock Balance Report -->
         <div *ngIf="generatedReport.type === 'stock_balance'">
+          <div #reportPdfContent class="report-pdf-content">
           <!-- Period Information -->
           <div class="report-period" *ngIf="generatedReport.data?.period">
             <div class="period-info">
@@ -1172,10 +1274,12 @@
               <p>The total stock value ({{ formatCurrency(generatedReport.data.summary.totalStockValue) }}) should match the "Closing Stock (Inventory)" amount in the Balance Sheet report for the same date.</p>
             </div>
           </div>
+          </div>
         </div>
 
         <!-- General Ledger Report -->
         <div *ngIf="generatedReport.type === 'general_ledger'">
+          <div #reportPdfContent class="report-pdf-content">
           <div class="report-info" *ngIf="generatedReport.data?.period">
             <p>
               <strong>Period:</strong> {{ generatedReport.data.period.startDate }} to {{ generatedReport.data.period.endDate }}
@@ -1282,6 +1386,7 @@
           <div class="empty-state" *ngIf="!generatedReport.data?.accounts || generatedReport.data.accounts.length === 0">
             <mat-icon>book</mat-icon>
             <p>No accounts found for the selected period.</p>
+          </div>
           </div>
         </div>
       </mat-card-content>

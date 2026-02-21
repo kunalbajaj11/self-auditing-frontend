@@ -115,7 +115,7 @@ export class AdminJournalEntriesComponent implements OnInit {
 
   openBulkImportDialog(): void {
     const dialogRef = this.dialog.open(BulkImportDialogComponent, {
-      width: '720px',
+      width: '750px',
       maxWidth: '95vw',
     });
     dialogRef.afterClosed().subscribe((result) => {

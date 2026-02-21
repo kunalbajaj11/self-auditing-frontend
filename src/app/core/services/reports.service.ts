@@ -1,14 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
-import { ReportHistoryItem, GeneratedReport, ReportType } from '../models/report.model';
+import { ReportHistoryItem, ReportHistoryPage, GeneratedReport, ReportType } from '../models/report.model';
 
 @Injectable({ providedIn: 'root' })
 export class ReportsService {
   constructor(private readonly api: ApiService) {}
 
-  listHistory(filters?: { type?: ReportType }): Observable<ReportHistoryItem[]> {
-    return this.api.get<ReportHistoryItem[]>('/reports/history', filters);
+  listHistory(filters?: { type?: ReportType; page?: number; limit?: number }): Observable<ReportHistoryPage> {
+    return this.api.get<ReportHistoryPage>('/reports/history', filters);
+  }
+
+  deleteReport(id: string): Observable<{ success: boolean; message: string }> {
+    return this.api.delete<{ success: boolean; message: string }>(`/reports/${id}`);
   }
 
   generateReport(payload: {

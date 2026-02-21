@@ -53,6 +53,7 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
   currentThemeId = 'default';
 
   @ViewChild('sideNavScroll', { static: false }) sideNavScroll?: ElementRef<HTMLElement>;
+  @ViewChild('drawer', { static: false }) drawer?: MatSidenav;
 
   private sidebarScrollPosition = 0;
   private readonly destroy$ = new Subject<void>();
@@ -138,6 +139,14 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
     setTimeout(() => {
       this.attachScrollListener();
     }, 200);
+    // Restore scroll when drawer opens (e.g. after closing on handset)
+    this.drawer?.openedChange?.pipe(
+      takeUntil(this.destroy$),
+      filter((opened) => opened === true),
+    ).subscribe(() => {
+      setTimeout(() => this.restoreSidebarScroll(), 50);
+      setTimeout(() => this.restoreSidebarScroll(), 200);
+    });
   }
 
   /** Call from template when a nav link is clicked so we save scroll before navigation. */
@@ -161,12 +170,16 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
     if (savedPosition <= 0 || !this.sideNavScroll) return;
     const el = this.sideNavScroll.nativeElement;
     const restore = () => {
-      el.scrollTop = savedPosition;
+      if (el.scrollTop !== savedPosition) {
+        el.scrollTop = savedPosition;
+      }
     };
     requestAnimationFrame(restore);
     setTimeout(restore, 50);
     setTimeout(restore, 150);
     setTimeout(restore, 350);
+    setTimeout(restore, 500);
+    setTimeout(restore, 700);
   }
 
   ngOnDestroy(): void {

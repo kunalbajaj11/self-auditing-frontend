@@ -45,6 +45,7 @@ export class AdminInventoryLocationsComponent implements OnInit {
   openDialog(location?: InventoryLocation): void {
     const dialogRef = this.dialog.open(LocationFormDialogComponent, {
       width: '500px',
+      maxWidth: '95vw',
       data: location ?? null,
     });
     dialogRef.afterClosed().subscribe((result) => {

@@ -93,6 +93,7 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  animation: app-fade-in-down 0.45s ease-out both;
 }
 
 .brand-logo {
@@ -110,6 +111,7 @@
   letter-spacing: -0.02em;
   line-height: 1.2;
   text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+  animation: app-fade-in-up 0.45s ease-out 0.08s both;
 }
 
 .brand-subtitle {
@@ -118,6 +120,7 @@
   opacity: 0.95;
   line-height: 1.6;
   font-weight: 300;
+  animation: app-fade-in-up 0.45s ease-out 0.16s both;
 }
 
 .brand-features {
@@ -135,7 +138,12 @@
   border-radius: 8px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
+  transition: transform 200ms ease, background 200ms ease;
+  animation: app-fade-in-up 0.35s ease-out both;
+
+  &:nth-child(1) { animation-delay: 0.24s; }
+  &:nth-child(2) { animation-delay: 0.3s; }
+  &:nth-child(3) { animation-delay: 0.36s; }
 
   &:hover {
     background: rgba(255, 255, 255, 0.15);
@@ -172,6 +180,8 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
   border: none;
   overflow: hidden;
+  animation: app-fade-in-up 0.45s ease-out 0.2s both;
+  transition: box-shadow 200ms ease;
 
   mat-card-content {
     padding: 48px 40px;

@@ -54,7 +54,7 @@ export class AdminSalesOrdersComponent implements OnInit {
 
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(SalesOrderFormDialogComponent, {
-      width: '900px',
+      width: '1150px',
       maxWidth: '95vw',
       maxHeight: '90vh',
       data: null,
@@ -72,7 +72,7 @@ export class AdminSalesOrdersComponent implements OnInit {
 
   viewSalesOrder(so: SalesOrder): void {
     const dialogRef = this.dialog.open(SalesOrderDetailDialogComponent, {
-      width: '900px',
+      width: '1150px',
       maxWidth: '95vw',
       maxHeight: '90vh',
       data: { soId: so.id },
@@ -108,7 +108,7 @@ export class AdminSalesOrdersComponent implements OnInit {
 
   editSalesOrder(so: SalesOrder): void {
     const dialogRef = this.dialog.open(SalesOrderFormDialogComponent, {
-      width: '900px',
+      width: '1150px',
       maxWidth: '95vw',
       maxHeight: '90vh',
       data: so,

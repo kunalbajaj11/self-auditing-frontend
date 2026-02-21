@@ -6,9 +6,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { ReportsService } from '../../../core/services/reports.service';
 import { ApiService } from '../../../core/services/api.service';
-import { GeneratedReport, ReportType } from '../../../core/models/report.model';
+import { GeneratedReport, ReportHistoryItem, ReportType } from '../../../core/models/report.model';
 import { LicenseService } from '../../../core/services/license.service';
 import { take } from 'rxjs/operators';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import {
   LedgerAccountsService,
   LedgerAccount,
@@ -108,6 +110,19 @@ export class AdminReportsComponent implements OnInit {
   vendors: string[] = [];
   customers: string[] = [];
 
+  /** Report history (organization-scoped; paginated from API) */
+  reportHistory: ReportHistoryItem[] = [];
+  historyTotal = 0;
+  historyPage = 1;
+  historyPageSize = 10;
+  historyLoading = false;
+  historyDownloadingId: string | null = null;
+  historyDeletingId: string | null = null;
+  /** Collapsible panel: false = collapsed by default */
+  historyPanelExpanded = false;
+  /** Row for which the download menu is open (used for menu item actions) */
+  downloadMenuRow: ReportHistoryItem | null = null;
+
   // Cached chart data to prevent re-rendering
   profitAndLossChartData: ChartConfiguration<'bar'>['data'] | null = null;
   expensesByCategoryChartData: ChartConfiguration<'pie'>['data'] | null = null;
@@ -120,6 +135,9 @@ export class AdminReportsComponent implements OnInit {
   vatControlAccountChartData: ChartConfiguration<'bar'>['data'] | null = null;
 
   @ViewChild('reportPreviewCard') reportPreviewCard?: ElementRef;
+  @ViewChild('reportPdfContent') reportPdfContent?: ElementRef;
+
+  exportingViewPdf = false;
 
   private readonly ledgerAccountsById = new Map<string, LedgerAccount>();
 
@@ -347,7 +365,123 @@ export class AdminReportsComponent implements OnInit {
 
         // Load filter options (vendors and customers)
         this.loadFilterOptions();
+        // Report history loads when the user expands the panel (paginated)
       });
+  }
+
+  /** Called when the report history panel is expanded; loads first page. */
+  onHistoryPanelOpened(): void {
+    this.historyPage = 1;
+    this.loadReportHistory(this.historyPage, this.historyPageSize);
+  }
+
+  /** Paginator page/size change: load that page from the server. */
+  onHistoryPageChange(event: { pageIndex: number; pageSize: number }): void {
+    this.historyPage = event.pageIndex + 1;
+    this.historyPageSize = event.pageSize;
+    this.loadReportHistory(this.historyPage, this.historyPageSize);
+  }
+
+  /** Load report history for the current organization (paginated; API is tenant-scoped). */
+  loadReportHistory(page: number = 1, limit: number = this.historyPageSize): void {
+    this.historyLoading = true;
+    this.reportsService.listHistory({ page, limit }).subscribe({
+      next: (res) => {
+        this.historyLoading = false;
+        this.reportHistory = res.items ?? [];
+        this.historyTotal = res.total ?? 0;
+        this.historyPage = res.page ?? page;
+        this.historyPageSize = res.limit ?? limit;
+      },
+      error: () => {
+        this.historyLoading = false;
+        this.reportHistory = [];
+        this.historyTotal = 0;
+        this.snackBar.open('Could not load report history', 'Close', {
+          duration: 4000,
+          panelClass: ['snack-error'],
+        });
+      },
+    });
+  }
+
+  getReportLabel(type: ReportType): string {
+    const config = this.reports.find((r) => r.value === type);
+    return config?.label ?? type;
+  }
+
+  /** Period label from stored filters (e.g. "Jan 1, 2025 – Jan 31, 2025"). */
+  getHistoryPeriodLabel(item: ReportHistoryItem): string {
+    const f = item?.filters;
+    if (!f) return '—';
+    const start = f['startDate'];
+    const end = f['endDate'];
+    if (start && end) {
+      return `${this.formatDate(start)} – ${this.formatDate(end)}`;
+    }
+    if (start) return `From ${this.formatDate(start)}`;
+    if (end) return `Until ${this.formatDate(end)}`;
+    return '—';
+  }
+
+  /** Date when the report was generated (backend may send createdAt or created_at). */
+  getHistoryDate(item: ReportHistoryItem): string {
+    return item.createdAt ?? item.created_at ?? '';
+  }
+
+  /** Remove a report from history (org-scoped soft-delete). Refreshes current page. */
+  deleteReportFromHistory(item: ReportHistoryItem): void {
+    if (!item?.id) return;
+    const message = `Remove "${this.getReportLabel(item.type)}" (${this.getHistoryPeriodLabel(item)}) from report history?`;
+    if (!confirm(message)) return;
+    this.historyDeletingId = item.id;
+    this.reportsService.deleteReport(item.id).subscribe({
+      next: () => {
+        this.historyDeletingId = null;
+        this.historyTotal = Math.max(0, this.historyTotal - 1);
+        this.reportHistory = this.reportHistory.filter((r) => r.id !== item.id);
+        this.snackBar.open('Report removed from history', 'Close', { duration: 3000 });
+        if (this.reportHistory.length === 0 && this.historyTotal > 0 && this.historyPage > 1) {
+          this.historyPage = this.historyPage - 1;
+          this.loadReportHistory(this.historyPage, this.historyPageSize);
+        }
+      },
+      error: () => {
+        this.historyDeletingId = null;
+        this.snackBar.open('Failed to remove report', 'Close', {
+          duration: 4000,
+          panelClass: ['snack-error'],
+        });
+      },
+    });
+  }
+
+  /** Download a report from history by id (backend regenerates with stored type+filters; org-scoped). */
+  downloadReportById(item: ReportHistoryItem | null, format: 'pdf' | 'xlsx' | 'csv'): void {
+    if (!item?.id) return;
+    this.historyDownloadingId = item.id;
+    const ext = format === 'xlsx' ? 'xlsx' : format;
+    const dateStr = this.getHistoryDate(item) ? new Date(this.getHistoryDate(item)).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    const filename = `${item.type}_${dateStr}.${ext}`;
+    this.api.download(`/reports/${item.id}/download`, { format }).subscribe({
+      next: (blob) => {
+        this.historyDownloadingId = null;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.snackBar.open('Report downloaded', 'Close', { duration: 3000 });
+      },
+      error: () => {
+        this.historyDownloadingId = null;
+        this.snackBar.open('Failed to download report', 'Close', {
+          duration: 4000,
+          panelClass: ['snack-error'],
+        });
+      },
+    });
   }
 
   resolveAccountName(nameOrCode: string | null | undefined): string {
@@ -467,6 +601,7 @@ export class AdminReportsComponent implements OnInit {
           this.generatedReport = report;
           // Cache chart data to prevent re-rendering on hover
           this.updateCachedChartData(report);
+          this.loadReportHistory(1, this.historyPageSize);
           this.snackBar.open('Report generated successfully', 'Close', {
             duration: 3000,
           });
@@ -559,12 +694,12 @@ export class AdminReportsComponent implements OnInit {
       })
       .subscribe({
         next: () => {
-          // Get the latest report from history
-          this.reportsService.listHistory({ type: this.generatedReport!.type }).subscribe({
-            next: (history) => {
-              if (history && history.length > 0) {
-                // Get the most recent report
-                const latestReport = history[0];
+          // Get the latest report from history (first page, most recent)
+          this.reportsService.listHistory({ type: this.generatedReport!.type, page: 1, limit: 1 }).subscribe({
+            next: (res) => {
+              const items = res?.items ?? [];
+              if (items.length > 0) {
+                const latestReport = items[0];
                 this.downloadReport(latestReport.id, format);
               } else {
                 this.loading = false;
@@ -623,6 +758,87 @@ export class AdminReportsComponent implements OnInit {
         block: 'start',
       });
     }
+  }
+
+  /**
+   * Export the current report as PDF matching the on-screen view
+   * (tiles/summary, charts, tables) for any report type.
+   */
+  exportReportViewAsPdf(): void {
+    const el = this.reportPdfContent?.nativeElement as HTMLElement;
+    if (!el) {
+      this.snackBar.open('Report content not ready. Please generate the report first.', 'Close', {
+        duration: 4000,
+        panelClass: ['snack-error'],
+      });
+      return;
+    }
+
+    this.exportingViewPdf = true;
+    el.scrollIntoView({ behavior: 'instant', block: 'start' });
+
+    const runCapture = (): void => {
+      const scale = 2;
+      const opts: Parameters<typeof html2canvas>[1] = {
+        scale,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        width: el.scrollWidth,
+        height: el.scrollHeight,
+        windowWidth: el.scrollWidth,
+        windowHeight: Math.max(el.scrollHeight, window.innerHeight),
+        scrollX: 0,
+        scrollY: 0,
+        onclone: (_clonedDoc, clonedEl) => {
+          const style = (clonedEl as HTMLElement).style;
+          style.width = `${el.scrollWidth}px`;
+          style.minHeight = `${el.scrollHeight}px`;
+          style.overflow = 'visible';
+        },
+      };
+
+      html2canvas(el, opts)
+        .then((canvas) => {
+          const pdf = new jsPDF('p', 'mm', 'a4');
+          const pageWidth = pdf.internal.pageSize.getWidth();
+          const pageHeight = pdf.internal.pageSize.getHeight();
+          const margin = 10;
+          const contentWidth = pageWidth - 2 * margin;
+          const contentHeight = pageHeight - 2 * margin;
+          const imgHeight = (canvas.height * contentWidth) / canvas.width;
+          const imgData = canvas.toDataURL('image/png', 1.0);
+
+          pdf.addImage(imgData, 'PNG', margin, margin, contentWidth, imgHeight);
+
+          let heightLeft = imgHeight - contentHeight;
+          let pageIndex = 1;
+
+          while (heightLeft > 0) {
+            pdf.addPage();
+            const position = margin - pageIndex * contentHeight;
+            pdf.addImage(imgData, 'PNG', margin, position, contentWidth, imgHeight);
+            heightLeft -= contentHeight;
+            pageIndex += 1;
+          }
+
+          const reportSlug = (this.generatedReport?.type ?? 'report').replace(/_/g, '-');
+          const filename = `${reportSlug}_${new Date().toISOString().split('T')[0]}.pdf`;
+          pdf.save(filename);
+          this.exportingViewPdf = false;
+          this.snackBar.open('PDF downloaded (as shown on screen)', 'Close', { duration: 3000 });
+        })
+        .catch((err) => {
+          console.error('Export view as PDF failed:', err);
+          this.exportingViewPdf = false;
+          this.snackBar.open('Failed to export PDF. Try again or use the PDF button.', 'Close', {
+            duration: 4000,
+            panelClass: ['snack-error'],
+          });
+        });
+    };
+
+    setTimeout(runCapture, 400);
   }
 
   // Chart data helpers
@@ -950,7 +1166,7 @@ export class AdminReportsComponent implements OnInit {
     };
 
     this.dialog.open(AccountEntriesDialogComponent, {
-      width: '1200px',
+      width: '900px',
       maxWidth: '90vw',
       maxHeight: '90vh',
       data: dialogData,
@@ -1004,7 +1220,7 @@ export class AdminReportsComponent implements OnInit {
     };
 
     this.dialog.open(AccountEntriesDialogComponent, {
-      width: '1200px',
+      width: '900px',
       maxWidth: '90vw',
       maxHeight: '90vh',
       data: dialogData,
@@ -1049,7 +1265,7 @@ export class AdminReportsComponent implements OnInit {
     };
 
     this.dialog.open(AccountEntriesDialogComponent, {
-      width: '1200px',
+      width: '900px',
       maxWidth: '90vw',
       maxHeight: '90vh',
       data: dialogData,

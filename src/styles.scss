@@ -106,6 +106,32 @@ $brand-theme: mat.m2-define-light-theme((
 
 @include mat.core();
 
+// Shared entrance animations (sidebar-style timing: 200–300ms ease)
+@keyframes app-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes app-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes app-fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 // Global Mobile Optimizations
 @media (max-width: 768px) {
   // Touch-friendly targets (minimum 44x44px)
@@ -962,4 +988,12 @@ button[mat-unelevated-button][color="primary"] mat-icon {
 .mat-mdc-form-field-hint-wrapper, .mat-mdc-form-field-error-wrapper {
   position: relative !important;
   padding: 0px !important;
+}
+
+// Dialog open/close animation: smoother scale and fade (durations set via MAT_DIALOG_DEFAULT_OPTIONS in app.config.ts)
+.mat-mdc-dialog-container {
+  transform-origin: center center;
+}
+.cdk-overlay-backdrop {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }

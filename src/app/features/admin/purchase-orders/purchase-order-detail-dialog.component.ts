@@ -120,7 +120,7 @@ export class PurchaseOrderDetailDialogComponent implements OnInit {
     if (!this.purchaseOrder) return;
 
     const dialogRef = this.dialog.open(ReceiveItemsDialogComponent, {
-      width: '900px',
+      width: '1000px',
       maxWidth: '95vw',
       maxHeight: '90vh',
       data: { poId: this.purchaseOrder.id },
@@ -137,9 +137,8 @@ export class PurchaseOrderDetailDialogComponent implements OnInit {
     if (!this.purchaseOrder) return;
 
     const dialogRef = this.dialog.open(ConvertToExpenseDialogComponent, {
-      width: '1000px',
+      width: '600px',
       maxWidth: '95vw',
-      maxHeight: '90vh',
       data: { poId: this.purchaseOrder.id },
     });
 

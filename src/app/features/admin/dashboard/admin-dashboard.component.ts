@@ -226,7 +226,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       endDate,
     };
     this.dialog.open(AccountEntriesDialogComponent, {
-      width: '1200px',
+      width: '900px',
       maxWidth: '90vw',
       maxHeight: '90vh',
       data,
@@ -391,7 +391,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           const outputVat = dashboardSummary?.outputVat ?? revenueVat;
           const inputVat = dashboardSummary?.inputVat ?? expenseVat;
           const netVatPayableFromPnL = outputVat - inputVat;
-          // Use vatPayableNet when present so dashboard matches the VAT Payable account entries view (includes JEs)
+          // Use vatPayableNet when present so dashboard matches the VAT Payable account entries view (invoices, credit notes, customer debit notes only)
           const netVatPayable =
             dashboardSummary?.vatPayableNet !== undefined &&
             dashboardSummary?.vatPayableNet !== null

@@ -50,7 +50,7 @@ export class SalesOrderDetailDialogComponent implements OnInit {
   edit(): void {
     if (!this.salesOrder) return;
     const dialogRef = this.dialog.open(SalesOrderFormDialogComponent, {
-      width: '900px',
+      width: '1150px',
       maxWidth: '95vw',
       maxHeight: '90vh',
       data: this.salesOrder,

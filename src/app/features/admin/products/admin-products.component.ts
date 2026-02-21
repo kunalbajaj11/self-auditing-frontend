@@ -45,6 +45,7 @@ export class AdminProductsComponent implements OnInit {
   openDialog(product?: Product): void {
     const dialogRef = this.dialog.open(ProductFormDialogComponent, {
       width: '600px',
+      maxWidth: '95vw',
       data: product ?? null,
     });
     dialogRef.afterClosed().subscribe((result) => {

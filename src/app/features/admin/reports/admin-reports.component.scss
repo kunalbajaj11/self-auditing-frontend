@@ -4,6 +4,130 @@
   margin: 0 auto;
 }
 
+// Report history collapsible panel (organization-scoped list + download + delete)
+.history-card {
+  margin-bottom: 24px;
+
+  .mat-mdc-expansion-panel-header-title,
+  .mat-mdc-expansion-panel-header-description {
+    align-items: center;
+    gap: 8px;
+  }
+
+  mat-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+
+    mat-icon {
+      color: #64748b;
+    }
+
+    .history-badge {
+      font-weight: 500;
+      color: #64748b;
+      font-size: 0.875rem;
+    }
+  }
+
+  mat-panel-description {
+    font-size: 0.8125rem;
+    color: #64748b;
+  }
+
+  .history-panel-content {
+    padding: 0 0 8px;
+  }
+}
+
+.delete-header {
+  width: 48px;
+  min-width: 48px;
+}
+
+.delete-cell {
+  width: 48px;
+  min-width: 48px;
+  padding-left: 0;
+
+  button {
+    .btn-spinner {
+      display: block;
+    }
+  }
+}
+
+.history-paginator {
+  margin-top: 0;
+}
+
+.history-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.history-empty {
+  padding: 32px 24px;
+  text-align: center;
+  color: #64748b;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 8px;
+    opacity: 0.6;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+}
+
+.history-table-wrap {
+  overflow-x: auto;
+}
+
+.report-history-table {
+  width: 100%;
+
+  th {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 0.8125rem;
+  }
+
+  td {
+    font-size: 0.875rem;
+  }
+
+  .actions-header {
+    text-align: right;
+    width: 140px;
+  }
+
+  .actions-cell {
+    text-align: right;
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-spinner {
+      margin-right: 4px;
+    }
+  }
+}
+
 .reports-header {
   margin-bottom: 20px;
 
@@ -718,6 +842,11 @@
       }
     }
   }
+}
+
+// Wrapper for "PDF (as shown)" capture on all report types
+.report-pdf-content {
+  display: block;
 }
 
 // Trial Balance Warning

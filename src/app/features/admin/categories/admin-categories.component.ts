@@ -28,6 +28,7 @@ export class AdminCategoriesComponent implements OnInit {
   openDialog(category?: Category): void {
     const dialogRef = this.dialog.open(CategoryFormDialogComponent, {
       width: '420px',
+      maxWidth: '95vw',
       data: category ?? null,
     });
     dialogRef.afterClosed().subscribe((result) => {
