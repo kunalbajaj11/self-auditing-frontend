@@ -111,6 +111,26 @@ $text-muted: #64748b;
   }
 }
 
+.apply-to-invoice-section {
+  .apply-hint {
+    margin: 0 0 12px 0;
+    font-size: 0.875rem;
+    color: $text-muted;
+    line-height: 1.45;
+  }
+  .apply-checkbox {
+    display: block;
+    margin-bottom: 16px;
+  }
+  .apply-fields {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: $spacing-unit;
+    margin-top: 12px;
+    align-items: start;
+  }
+}
+
 mat-dialog-content {
   min-width: 800px;
   max-width: 1000px;

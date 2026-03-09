@@ -186,16 +186,45 @@
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="flex-1" *ngIf="data">
+        <mat-form-field appearance="outline" class="flex-1">
           <mat-label>Status</mat-label>
           <mat-select formControlName="status">
-            <mat-option *ngFor="let status of creditNoteStatuses" [value]="status">
+            <mat-option *ngFor="let status of statusOptions" [value]="status">
               {{ status | titlecase }}
             </mat-option>
           </mat-select>
-          <mat-hint>Issued credit notes can be applied to invoices.</mat-hint>
+          <mat-hint>{{ data ? 'Issued credit notes can be applied to invoices.' : 'Issue now to apply to invoice in one step.' }}</mat-hint>
         </mat-form-field>
       </div>
+
+      <section class="form-section section-card apply-to-invoice-section" *ngIf="showApplyToInvoiceOption">
+        <h3 class="section-title">
+          <mat-icon>link</mat-icon>
+          Apply to invoice at the same time
+        </h3>
+        <p class="apply-hint">When you issue this credit note, you can apply it to an invoice in one step.</p>
+        <mat-checkbox formControlName="applyToInvoiceNow" class="apply-checkbox">
+          Apply to invoice when submitting
+        </mat-checkbox>
+        <div class="apply-fields" *ngIf="form.get('applyToInvoiceNow')?.value">
+          <mat-form-field appearance="outline" class="flex-2">
+            <mat-label>Invoice to apply to *</mat-label>
+            <mat-select formControlName="applyToInvoiceId" [disableOptionCentering]="true">
+              <mat-option [value]="null">Select invoice</mat-option>
+              <mat-option *ngFor="let inv of invoices" [value]="inv.id">
+                {{ inv.invoiceNumber }} - {{ inv.customerName || 'N/A' }} (Outstanding: {{ getInvoiceOutstanding(inv) | number: '1.2-2' }} {{ inv.currency }})
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="flex-1">
+            <mat-label>Amount to apply *</mat-label>
+            <input matInput type="number" formControlName="applyAmount" step="0.01" min="0.01" [max]="maxApplyAmount" />
+            <span matSuffix>{{ form.get('currency')?.value ?? 'AED' }}</span>
+            <mat-hint>Max: {{ maxApplyAmount | number: '1.2-2' }}</mat-hint>
+            <mat-error *ngIf="form.get('applyAmount')?.hasError('min')">Amount must be greater than 0</mat-error>
+          </mat-form-field>
+        </div>
+      </section>
 
       <div class="totals-row">
         <span class="total-label">Total Amount</span>

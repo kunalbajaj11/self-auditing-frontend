@@ -35,6 +35,10 @@ export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterVi
   ];
 
   readonly creditNoteStatuses = ['draft', 'issued', 'cancelled'];
+  /** Status options for create: draft or issue. Edit shows all including cancelled. */
+  get statusOptions(): string[] {
+    return this.data ? this.creditNoteStatuses : ['draft', 'issued'];
+  }
   readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
   defaultVatRate = 5;
 
@@ -80,7 +84,32 @@ export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterVi
       description: [''],
       notes: [''],
       lineItems: this.fb.array([]),
+      applyToInvoiceNow: [false],
+      applyToInvoiceId: [null as string | null],
+      applyAmount: [0, [Validators.min(0)]],
     });
+  }
+
+  /** True when status is issued (create or edit) so we show "Apply to invoice" option. */
+  get showApplyToInvoiceOption(): boolean {
+    return (this.form.get('status')?.value || 'draft') === 'issued';
+  }
+
+  /** Max amount that can be applied (min of credit note total and selected invoice outstanding). */
+  get maxApplyAmount(): number {
+    const total = this.totalAmount;
+    const invId = this.form.get('applyToInvoiceId')?.value;
+    if (!invId) return total;
+    const inv = this.invoices.find((i) => i.id === invId);
+    if (!inv) return total;
+    const outstanding = this.getInvoiceOutstanding(inv);
+    return Math.min(total, outstanding);
+  }
+
+  getInvoiceOutstanding(invoice: SalesInvoice): number {
+    const total = parseFloat(invoice.totalAmount || '0');
+    const paid = parseFloat(invoice.paidAmount || '0');
+    return Math.max(0, total - paid);
   }
 
   private createLineItemGroup(li: Partial<CreditNoteLineItem> = {}): FormGroup {
@@ -137,6 +166,44 @@ export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterVi
         this.calculateVat();
       });
     }
+    // When status becomes "issued", default apply-to-invoice to related invoice and suggested amount
+    this.form.get('status')?.valueChanges?.subscribe((status) => {
+      if (status === 'issued') {
+        const invoiceId = this.form.get('invoiceId')?.value;
+        if (invoiceId) {
+          this.form.patchValue(
+            { applyToInvoiceId: invoiceId },
+            { emitEvent: false },
+          );
+          this.updateDefaultApplyAmount();
+        }
+      } else {
+        this.form.patchValue(
+          { applyToInvoiceNow: false, applyToInvoiceId: null, applyAmount: 0 },
+          { emitEvent: false },
+        );
+      }
+    });
+    this.form.get('applyToInvoiceId')?.valueChanges?.subscribe(() => this.updateDefaultApplyAmount());
+    this.form.get('invoiceId')?.valueChanges?.subscribe(() => {
+      if (this.form.get('status')?.value === 'issued') {
+        const invoiceId = this.form.get('invoiceId')?.value;
+        this.form.patchValue({ applyToInvoiceId: invoiceId }, { emitEvent: false });
+        this.updateDefaultApplyAmount();
+      }
+    });
+  }
+
+  private updateDefaultApplyAmount(): void {
+    const total = this.totalAmount;
+    const invId = this.form.get('applyToInvoiceId')?.value;
+    if (!invId) return;
+    const inv = this.invoices.find((i) => i.id === invId);
+    if (!inv) return;
+    const maxApply = Math.min(total, this.getInvoiceOutstanding(inv));
+    const current = parseFloat(this.form.get('applyAmount')?.value || '0');
+    const suggested = Number.isFinite(current) && current > 0 ? Math.min(current, maxApply) : maxApply;
+    this.form.patchValue({ applyAmount: suggested }, { emitEvent: false });
   }
 
   ngOnDestroy(): void {
@@ -247,17 +314,23 @@ export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterVi
       this.invoicesService.getInvoice(resolvedInvoiceId).subscribe({
         next: (invoice) => {
           this.selectedInvoice = invoice;
+          const total = parseFloat(creditNote.totalAmount || '0');
+          const outstanding = this.getInvoiceOutstanding(invoice);
+          const suggestedApply = creditNote.status === 'issued' ? Math.min(total, outstanding) : 0;
           this.form.patchValue({
             invoiceId: invoice.id,
             customerId: invoice.customerId || '',
             customerName: invoice.customerName || '',
             customerTrn: invoice.customerTrn || '',
             currency: invoice.currency || 'AED',
+            applyToInvoiceId: creditNote.status === 'issued' ? invoice.id : null,
+            applyAmount: suggestedApply,
           });
         },
       });
     }
 
+    const resolvedInvId = creditNote.invoiceId || creditNote.invoice?.id;
     this.form.patchValue({
       creditNoteDate: creditNote.creditNoteDate,
       reason: creditNote.reason,
@@ -267,6 +340,7 @@ export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterVi
       status: creditNote.status,
       description: creditNote.description || '',
       notes: creditNote.notes || '',
+      applyToInvoiceId: resolvedInvId || null,
     });
     if (creditNote.lineItems && creditNote.lineItems.length > 0) {
       this.lineItems.clear();
@@ -362,8 +436,33 @@ export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterVi
       return;
     }
 
-    this.loading = true;
     const formValue = this.form.getRawValue();
+    if (
+      formValue.applyToInvoiceNow &&
+      (!formValue.applyToInvoiceId || !Number(formValue.applyAmount) || Number(formValue.applyAmount) <= 0)
+    ) {
+      this.snackBar.open(
+        'Please select an invoice and enter an amount to apply when applying to invoice.',
+        'Close',
+        { duration: 4000, panelClass: ['snack-error'] },
+      );
+      this.form.get('applyToInvoiceId')?.markAsTouched();
+      this.form.get('applyAmount')?.markAsTouched();
+      return;
+    }
+    if (
+      formValue.applyToInvoiceNow &&
+      Number(formValue.applyAmount) > this.maxApplyAmount
+    ) {
+      this.snackBar.open(
+        `Apply amount cannot exceed ${this.maxApplyAmount.toFixed(2)} (credit note total or invoice outstanding).`,
+        'Close',
+        { duration: 4000, panelClass: ['snack-error'] },
+      );
+      return;
+    }
+
+    this.loading = true;
     const lines = formValue.lineItems || [];
     const hasLineItems = Array.isArray(lines) && lines.length > 0;
 
@@ -426,8 +525,41 @@ export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterVi
             .updateCreditNoteStatus(creditNoteId, desiredStatus)
             .subscribe({
               next: () => {
-                this.loading = false;
-                this.dialogRef.close(true);
+                if (
+                  desiredStatus === 'issued' &&
+                  formValue.applyToInvoiceNow &&
+                  formValue.applyToInvoiceId &&
+                  Number(formValue.applyAmount) > 0
+                ) {
+                  this.creditNotesService
+                    .applyCreditNote(
+                      creditNoteId,
+                      formValue.applyToInvoiceId,
+                      parseFloat(formValue.applyAmount),
+                    )
+                    .subscribe({
+                      next: () => {
+                        this.loading = false;
+                        this.dialogRef.close(true);
+                        this.snackBar.open(
+                          'Credit note issued and applied to invoice',
+                          'Close',
+                          { duration: 3000 },
+                        );
+                      },
+                      error: (err) => {
+                        this.loading = false;
+                        this.snackBar.open(
+                          err?.error?.message || 'Issued but failed to apply to invoice',
+                          'Close',
+                          { duration: 4000, panelClass: ['snack-error'] },
+                        );
+                      },
+                    });
+                } else {
+                  this.loading = false;
+                  this.dialogRef.close(true);
+                }
               },
               error: (error) => {
                 this.loading = false;
@@ -466,8 +598,41 @@ export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterVi
             .updateCreditNoteStatus(creditNoteId, desiredStatus)
             .subscribe({
               next: () => {
-                this.loading = false;
-                this.dialogRef.close(true);
+                if (
+                  desiredStatus === 'issued' &&
+                  formValue.applyToInvoiceNow &&
+                  formValue.applyToInvoiceId &&
+                  Number(formValue.applyAmount) > 0
+                ) {
+                  this.creditNotesService
+                    .applyCreditNote(
+                      creditNoteId,
+                      formValue.applyToInvoiceId,
+                      parseFloat(formValue.applyAmount),
+                    )
+                    .subscribe({
+                      next: () => {
+                        this.loading = false;
+                        this.dialogRef.close(true);
+                        this.snackBar.open(
+                          'Credit note created, issued and applied to invoice',
+                          'Close',
+                          { duration: 3000 },
+                        );
+                      },
+                      error: (err) => {
+                        this.loading = false;
+                        this.snackBar.open(
+                          err?.error?.message || 'Created and issued, but failed to apply to invoice',
+                          'Close',
+                          { duration: 4000, panelClass: ['snack-error'] },
+                        );
+                      },
+                    });
+                } else {
+                  this.loading = false;
+                  this.dialogRef.close(true);
+                }
               },
               error: (error) => {
                 this.loading = false;

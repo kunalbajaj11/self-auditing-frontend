@@ -118,7 +118,7 @@
 }
 
 mat-dialog-content {
-  min-width: 900px;
+  min-width: 960px;
   max-width: 1200px;
   width: 100%;
   padding: 0 !important;
@@ -138,8 +138,8 @@ mat-dialog-content {
 
 .expense-form {
   margin: 0;
-  padding: 20px 20px;
-  width: 83%;
+  padding: 24px 28px;
+  width: 100%;
   box-sizing: border-box;
   overflow-x: hidden;
 }
@@ -188,8 +188,8 @@ mat-dialog-content {
 
 .form-row {
   display: grid;
-  gap: 20px;
-  margin-bottom: 20px;
+  gap: 24px;
+  margin-bottom: 24px;
   align-items: start;
   width: 100%;
   box-sizing: border-box;
@@ -205,7 +205,12 @@ mat-dialog-content {
   // Invoice Number row: single column
   &:has(.flex-1:only-child) {
     grid-template-columns: 1fr;
-    max-width: 400px;
+    max-width: 480px;
+  }
+
+  // Status + Due Date row: 2 equal columns so they align and fill the row
+  &.form-row--two-cols {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   mat-form-field {

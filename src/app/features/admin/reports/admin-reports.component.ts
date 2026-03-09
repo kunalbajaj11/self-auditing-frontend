@@ -354,13 +354,13 @@ export class AdminReportsComponent implements OnInit {
           }
         }
 
-        // Set default date range to this month
+        // Set default date range to this month (use local date to avoid timezone shifts)
         const today = new Date();
         const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
         const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
         this.form.patchValue({
-          startDate: startDate.toISOString().substring(0, 10),
-          endDate: endDate.toISOString().substring(0, 10),
+          startDate: this.toDateOnly(startDate) ?? '',
+          endDate: this.toDateOnly(endDate) ?? '',
         });
 
         // Load filter options (vendors and customers)
@@ -408,6 +408,20 @@ export class AdminReportsComponent implements OnInit {
   getReportLabel(type: ReportType): string {
     const config = this.reports.find((r) => r.value === type);
     return config?.label ?? type;
+  }
+
+  /**
+   * Normalize a date (Date object or string) to YYYY-MM-DD in local date.
+   * Ensures report filters use calendar dates and avoid timezone shifts (e.g. Jan 31 not becoming Jan 30 UTC).
+   */
+  private toDateOnly(value: Date | string | null | undefined): string | null {
+    if (value == null) return null;
+    const d = typeof value === 'string' ? new Date(value) : value;
+    if (isNaN(d.getTime())) return null;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
   }
 
   /** Period label from stored filters (e.g. "Jan 1, 2025 – Jan 31, 2025"). */
@@ -548,8 +562,8 @@ export class AdminReportsComponent implements OnInit {
     }
 
     this.form.patchValue({
-      startDate: startDate.toISOString().substring(0, 10),
-      endDate: endDate.toISOString().substring(0, 10),
+      startDate: this.toDateOnly(startDate) ?? '',
+      endDate: this.toDateOnly(endDate) ?? '',
     });
   }
 
@@ -564,11 +578,13 @@ export class AdminReportsComponent implements OnInit {
     const rawValue = this.form.getRawValue();
     const filters: Record<string, any> = {};
 
-    if (rawValue['startDate']) {
-      filters['startDate'] = rawValue['startDate'];
+    const startDateOnly = this.toDateOnly(rawValue['startDate']);
+    const endDateOnly = this.toDateOnly(rawValue['endDate']);
+    if (startDateOnly) {
+      filters['startDate'] = startDateOnly;
     }
-    if (rawValue['endDate']) {
-      filters['endDate'] = rawValue['endDate'];
+    if (endDateOnly) {
+      filters['endDate'] = endDateOnly;
     }
     if (rawValue['status'] && rawValue['status'].length > 0) {
       filters['status'] = rawValue['status'];
@@ -665,8 +681,10 @@ export class AdminReportsComponent implements OnInit {
     const rawValue = this.form.getRawValue();
     const filters: Record<string, any> = {};
 
-    if (rawValue['startDate']) filters['startDate'] = rawValue['startDate'];
-    if (rawValue['endDate']) filters['endDate'] = rawValue['endDate'];
+    const startDateOnly = this.toDateOnly(rawValue['startDate']);
+    const endDateOnly = this.toDateOnly(rawValue['endDate']);
+    if (startDateOnly) filters['startDate'] = startDateOnly;
+    if (endDateOnly) filters['endDate'] = endDateOnly;
     if (rawValue['status'] && rawValue['status'].length > 0) {
       filters['status'] = rawValue['status'];
     }
@@ -1156,13 +1174,13 @@ export class AdminReportsComponent implements OnInit {
       return;
     }
 
-    const startDate = this.form.get('startDate')?.value;
-    const endDate = this.form.get('endDate')?.value;
+    const startDate = this.toDateOnly(this.form.get('startDate')?.value);
+    const endDate = this.toDateOnly(this.form.get('endDate')?.value);
     const dialogData: AccountEntriesDialogData = {
       accountName: row.accountName,
       accountType: row.accountType,
-      startDate: startDate || undefined,
-      endDate: endDate || undefined,
+      startDate: startDate ?? undefined,
+      endDate: endDate ?? undefined,
     };
 
     this.dialog.open(AccountEntriesDialogComponent, {
@@ -1183,7 +1201,7 @@ export class AdminReportsComponent implements OnInit {
 
     // Balance Sheet shows closing balances (all-time up to endDate)
     // So we should show all entries up to endDate, not just within the period
-    const endDate = this.form.get('endDate')?.value;
+    const endDate = this.toDateOnly(this.form.get('endDate')?.value);
     // Use a very early start date to show all historical entries up to endDate
     const startDate = '2000-01-01'; // Very early date to capture all entries
     
@@ -1216,7 +1234,7 @@ export class AdminReportsComponent implements OnInit {
       accountName,
       accountType,
       startDate: startDate,
-      endDate: endDate || undefined,
+      endDate: endDate ?? undefined,
     };
 
     this.dialog.open(AccountEntriesDialogComponent, {
@@ -1237,9 +1255,9 @@ export class AdminReportsComponent implements OnInit {
 
     // P&L shows period amounts, so we should show all entries within the period
     // Use the form's date range to show entries within the selected period
-    const startDate = this.form.get('startDate')?.value;
-    const endDate = this.form.get('endDate')?.value;
-    
+    const startDate = this.toDateOnly(this.form.get('startDate')?.value);
+    const endDate = this.toDateOnly(this.form.get('endDate')?.value);
+
     let accountName: string;
     let accountType: string;
 
@@ -1260,8 +1278,8 @@ export class AdminReportsComponent implements OnInit {
     const dialogData: AccountEntriesDialogData = {
       accountName,
       accountType,
-      startDate: startDate || undefined,
-      endDate: endDate || undefined,
+      startDate: startDate ?? undefined,
+      endDate: endDate ?? undefined,
     };
 
     this.dialog.open(AccountEntriesDialogComponent, {

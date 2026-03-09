@@ -100,7 +100,7 @@ export class AdminExpensesComponent implements OnInit, AfterViewInit {
 
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(ExpenseFormDialogComponent, {
-      width: '750px',
+      width: '960px',
       maxWidth: '95vw',
       data: null,
     });
@@ -115,7 +115,7 @@ export class AdminExpensesComponent implements OnInit, AfterViewInit {
 
   viewOrEditExpense(expense: Expense): void {
     const dialogRef = this.dialog.open(ExpenseFormDialogComponent, {
-      width: '750px',
+      width: '960px',
       maxWidth: '95vw',
       data: expense,
     });
@@ -324,11 +324,11 @@ export class AdminExpensesComponent implements OnInit, AfterViewInit {
     
     this.dialogOpened = true;
     const dialogRef = this.dialog.open(ExpenseFormDialogComponent, {
-      width: '750px',
+      width: '960px',
       maxWidth: '95vw',
-      data: { 
+      data: {
         attachment: attachment,
-        ocrResult: ocrResult 
+        ocrResult: ocrResult
       },
     });
     
