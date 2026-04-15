@@ -77,7 +77,7 @@
 
       <div class="totals">
         <div class="grand">
-          Total: {{ so.totalAmount }} {{ so.currency || 'AED' }}
+          Total: {{ so.totalAmount }} {{ so.currency || ('' | orgCurrencyCode) }}
         </div>
       </div>
     </div>

@@ -42,7 +42,7 @@
         </mat-card-header>
         <mat-card-content>
           <div class="balance-amount" [class.negative]="openingBalance < 0">
-            {{ openingBalance >= 0 ? '+' : '' }}{{ openingBalance | number: '1.2-2' }} AED
+            {{ openingBalance | signedOrgMoney }}
           </div>
         </mat-card-content>
       </mat-card>
@@ -52,7 +52,7 @@
         </mat-card-header>
         <mat-card-content>
           <div class="balance-amount" [class.negative]="periodTotal < 0">
-            {{ periodTotal >= 0 ? '+' : '' }}{{ periodTotal | number: '1.2-2' }} AED
+            {{ periodTotal | signedOrgMoney }}
           </div>
         </mat-card-content>
       </mat-card>
@@ -62,7 +62,7 @@
         </mat-card-header>
         <mat-card-content>
           <div class="balance-amount" [class.negative]="closingBalance < 0">
-            {{ closingBalance >= 0 ? '+' : '' }}{{ closingBalance | number: '1.2-2' }} AED
+            {{ closingBalance | signedOrgMoney }}
           </div>
         </mat-card-content>
       </mat-card>

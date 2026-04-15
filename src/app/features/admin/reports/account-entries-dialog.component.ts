@@ -1,13 +1,16 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ReportsService } from '../../../core/services/reports.service';
 import { InvoiceDetailDialogComponent } from '../sales-invoices/invoice-detail-dialog.component';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 export interface AccountEntriesDialogData {
   accountName: string;
   accountType: string;
   startDate?: string;
   endDate?: string;
+  /** Organization display currency (e.g. INR, AED) */
+  currency?: string;
 }
 
 @Component({
@@ -16,6 +19,8 @@ export interface AccountEntriesDialogData {
   styleUrls: ['./account-entries-dialog.component.scss'],
 })
 export class AccountEntriesDialogComponent implements OnInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   loading = false;
   accountEntries: any = null;
   displayedColumns: string[] = [
@@ -86,12 +91,18 @@ export class AccountEntriesDialogComponent implements OnInit {
 
   formatCurrency(value: number, showSign: boolean = false): string {
     if (value === null || value === undefined) return '—';
+    const code = (
+      this.data.currency ||
+      this.orgContext.currency()
+    )
+      .trim() ||
+      this.orgContext.currency();
     const formatted = new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(Math.abs(value));
     const sign = showSign && value !== 0 ? (value >= 0 ? '+' : '-') : '';
-    return `${sign}AED ${formatted}`;
+    return `${sign}${code} ${formatted}`;
   }
 
   formatDate(date: string): string {

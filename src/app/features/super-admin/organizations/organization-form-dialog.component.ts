@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { OrganizationService } from '../../../core/services/organization.service';
 import { PlanType } from '../../../core/models/plan.model';
+import { currencyForRegion } from '../../../core/constants/region-default-currency';
 
 @Component({
   selector: 'app-organization-form-dialog',
@@ -45,6 +46,15 @@ export class OrganizationFormDialogComponent {
       enableInventory: [false],
       enableBulkJournalImport: [false],
     });
+
+    this.form
+      .get('region')
+      ?.valueChanges.subscribe((r: string | null) => {
+        this.form.patchValue(
+          { currency: currencyForRegion(r ?? undefined) },
+          { emitEvent: false },
+        );
+      });
   }
 
   submit(): void {

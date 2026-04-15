@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, inject } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
@@ -14,6 +14,7 @@ import { JournalEntriesService, JournalEntry, JournalEntryAccount } from '../../
 import { ExpenseFormDialogComponent } from '../expenses/expense-form-dialog.component';
 import { InvoiceDetailDialogComponent } from '../sales-invoices/invoice-detail-dialog.component';
 import { JournalEntryFormDialogComponent } from '../journal-entries/journal-entry-form-dialog.component';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 interface CashTransaction {
   id: string;
@@ -35,6 +36,8 @@ interface CashTransaction {
   styleUrls: ['./cash-accounts.component.scss'],
 })
 export class CashAccountsComponent implements OnInit, AfterViewInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'date',
@@ -201,7 +204,7 @@ export class CashAccountsComponent implements OnInit, AfterViewInit {
                 description: payment.notes || expense.description || 'Payment',
                 vendorOrCustomer: expense.vendorName || '—',
                 amount: -parseFloat(payment.amount), // Negative because it's a cash outflow
-                currency: expense.currency || 'AED',
+                currency: expense.currency || this.orgContext.currency(),
                 expense: expense,
               };
               allTransactions.push(transaction);
@@ -229,7 +232,7 @@ export class CashAccountsComponent implements OnInit, AfterViewInit {
                     description: payment.notes || expense.description || 'Payment',
                     vendorOrCustomer: expense.vendorName || '—',
                     amount: -parseFloat(allocation.allocatedAmount),
-                    currency: expense.currency || 'AED',
+                    currency: expense.currency || this.orgContext.currency(),
                     expense: expense as any,
                   };
                   allTransactions.push(transaction);
@@ -246,7 +249,7 @@ export class CashAccountsComponent implements OnInit, AfterViewInit {
                 description: payment.notes || expense.description || 'Payment',
                 vendorOrCustomer: expense.vendorName || '—',
                 amount: -parseFloat(payment.amount),
-                currency: expense.currency || 'AED',
+                currency: expense.currency || this.orgContext.currency(),
                 expense: expense as any,
               };
               allTransactions.push(transaction);
@@ -271,7 +274,7 @@ export class CashAccountsComponent implements OnInit, AfterViewInit {
             description: expense.description || 'Expense',
             vendorOrCustomer: expense.vendorName || '—',
             amount: -parseFloat(expense.totalAmount.toString()), // Negative because it's a cash outflow
-            currency: expense.currency || 'AED',
+            currency: expense.currency || this.orgContext.currency(),
             expense: expense,
           };
           allTransactions.push(transaction);
@@ -298,7 +301,7 @@ export class CashAccountsComponent implements OnInit, AfterViewInit {
             description: invoice.description || `Invoice ${invoice.invoiceNumber}`,
             vendorOrCustomer: invoice.customerName || '—',
             amount: parseFloat(invoice.totalAmount),
-            currency: invoice.currency || 'AED',
+            currency: invoice.currency || this.orgContext.currency(),
             invoice: invoice,
           };
           allTransactions.push(transaction);
@@ -314,7 +317,7 @@ export class CashAccountsComponent implements OnInit, AfterViewInit {
             description: payment.notes || `Payment for Invoice ${invoice?.invoiceNumber || 'N/A'}`,
             vendorOrCustomer: invoice?.customerName || '—',
             amount: parseFloat(payment.amount),
-            currency: invoice?.currency || 'AED',
+            currency: invoice?.currency || this.orgContext.currency(),
             invoice: invoice,
             invoicePayment: payment,
           };
@@ -345,7 +348,7 @@ export class CashAccountsComponent implements OnInit, AfterViewInit {
               `Journal Entry - ${entry.debitAccount} / ${entry.creditAccount}`,
             vendorOrCustomer: entry.customerVendorName || 'Journal Entry',
             amount: transactionAmount,
-            currency: 'AED',
+            currency: this.orgContext.currency(),
             journalEntry: entry,
           };
           allTransactions.push(transaction);

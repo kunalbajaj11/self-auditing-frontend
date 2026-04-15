@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -8,6 +8,8 @@ import {
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { PayrollService, SalaryProfile, CreateSalaryProfilePayload, SalaryComponentPayload } from '../../../core/services/payroll.service';
+import { SUPPORTED_ORG_CURRENCIES } from '../../../core/constants/supported-currencies';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 @Component({
   selector: 'app-salary-profile-form-dialog',
@@ -15,6 +17,8 @@ import { PayrollService, SalaryProfile, CreateSalaryProfilePayload, SalaryCompon
   styleUrls: ['./salary-profile-form-dialog.component.scss'],
 })
 export class SalaryProfileFormDialogComponent implements OnInit, OnDestroy {
+  readonly orgContext = inject(OrganizationContextService);
+
   form: FormGroup;
   loading = false;
   readonly isEdit: boolean;
@@ -34,7 +38,7 @@ export class SalaryProfileFormDialogComponent implements OnInit, OnDestroy {
     { value: 'hourly', label: 'Hourly Rate' },
   ];
 
-  readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
+  readonly currencies = [...SUPPORTED_ORG_CURRENCIES];
 
   constructor(
     private readonly fb: FormBuilder,
@@ -47,7 +51,7 @@ export class SalaryProfileFormDialogComponent implements OnInit, OnDestroy {
       employeeName: [data?.employeeName || data?.user?.name || '', Validators.required],
       email: [data?.email || data?.user?.email || '', [Validators.email]],
       basicSalary: [data?.basicSalary ? parseFloat(data.basicSalary) : null, [Validators.required, Validators.min(0)]],
-      currency: [data?.currency || 'AED', Validators.required],
+      currency: [data?.currency || this.orgContext.currency(), Validators.required],
       effectiveDate: [data?.effectiveDate || '', Validators.required],
       endDate: [data?.endDate || ''],
       salaryComponents: this.fb.array([]),

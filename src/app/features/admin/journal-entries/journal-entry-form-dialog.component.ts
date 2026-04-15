@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -17,6 +17,7 @@ import { LedgerAccountsService, LedgerAccount } from '../../../core/services/led
 import { SettingsService, TaxSettings } from '../../../core/services/settings.service';
 import { Observable, of, forkJoin } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap, tap, catchError, finalize } from 'rxjs/operators';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 interface JournalEntryTemplate {
   name: string;
@@ -48,6 +49,8 @@ interface CustomAccountMetadata {
   styleUrls: ['./journal-entry-form-dialog.component.scss'],
 })
 export class JournalEntryFormDialogComponent implements OnInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   form: FormGroup;
   loading = false;
   isEditMode = false;
@@ -745,7 +748,7 @@ export class JournalEntryFormDialogComponent implements OnInit {
       vendorTrn: expense.vendorTrn || this.form.get('vendorTrn')?.value || '',
     });
     this.snackBar.open(
-      `Invoice ${expense.invoiceNumber || 'N/A'} selected. Amount set to ${outstandingAmount.toFixed(2)} AED`,
+      `Invoice ${expense.invoiceNumber || 'N/A'} selected. Amount set to ${outstandingAmount.toFixed(2)} ${this.orgContext.currency()}`,
       'Close',
       { duration: 3000 }
     );
@@ -761,7 +764,7 @@ export class JournalEntryFormDialogComponent implements OnInit {
       vendorTrn: invoice.customerTrn || this.form.get('vendorTrn')?.value || '', // Populate TRN from invoice or keep existing
     });
     this.snackBar.open(
-      `Invoice ${invoice.invoiceNumber || 'N/A'} selected. Amount set to ${outstanding.toFixed(2)} AED`,
+      `Invoice ${invoice.invoiceNumber || 'N/A'} selected. Amount set to ${outstanding.toFixed(2)} ${this.orgContext.currency()}`,
       'Close',
       { duration: 3000 }
     );
@@ -896,7 +899,7 @@ export class JournalEntryFormDialogComponent implements OnInit {
                   id: invoice.customerId || '',
                   name: invoice.customerName,
                   customerTrn: invoice.customerTrn || undefined,
-                  preferredCurrency: invoice.currency || 'AED',
+                  preferredCurrency: invoice.currency || this.orgContext.currency(),
                   isActive: true,
                   createdAt: invoice.createdAt,
                   updatedAt: invoice.updatedAt,

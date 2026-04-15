@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -10,6 +10,8 @@ import { CustomersService, Customer } from '../../../core/services/customers.ser
 import { Expense } from '../../../core/models/expense.model';
 import { Observable, of } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { SUPPORTED_ORG_CURRENCIES } from '../../../core/constants/supported-currencies';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 @Component({
   selector: 'app-bank-transaction-form-dialog',
@@ -17,6 +19,8 @@ import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'r
   styleUrls: ['./bank-transaction-form-dialog.component.scss'],
 })
 export class BankTransactionFormDialogComponent implements OnInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   form: FormGroup;
   loading = false;
 
@@ -43,7 +47,7 @@ export class BankTransactionFormDialogComponent implements OnInit {
     { value: 'sales', label: 'Sales Receipt' },
   ];
 
-  readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
+  readonly currencies = [...SUPPORTED_ORG_CURRENCIES];
 
   constructor(
     private readonly fb: FormBuilder,
@@ -66,7 +70,7 @@ export class BankTransactionFormDialogComponent implements OnInit {
       expenseId: [''], // Selected expense invoice for payment
       invoiceId: [''], // Selected sales invoice for receipt
       amount: [0, [Validators.required, Validators.min(0.01)]],
-      currency: ['AED', Validators.required],
+      currency: [this.orgContext.currency(), Validators.required],
       referenceNumber: [''],
       notes: [''],
     });

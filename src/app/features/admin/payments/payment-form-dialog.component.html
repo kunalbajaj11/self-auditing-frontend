@@ -113,7 +113,7 @@
             <ng-container matColumnDef="totalAmount">
               <th mat-header-cell *matHeaderCellDef class="text-right">Total Amount</th>
               <td mat-cell *matCellDef="let allocation" class="text-right">
-                {{ allocation.get('totalAmount')?.value | number: '1.2-2' }} AED
+                {{ allocation.get('totalAmount')?.value | number: '1.2-2' }} {{ orgContext.currency() }}
               </td>
             </ng-container>
 
@@ -121,7 +121,7 @@
               <th mat-header-cell *matHeaderCellDef class="text-right">Outstanding</th>
               <td mat-cell *matCellDef="let allocation" class="text-right">
                 <span class="outstanding-badge">
-                  {{ allocation.get('outstandingAmount')?.value | number: '1.2-2' }} AED
+                  {{ allocation.get('outstandingAmount')?.value | number: '1.2-2' }} {{ orgContext.currency() }}
                 </span>
               </td>
             </ng-container>
@@ -140,7 +140,7 @@
                     placeholder="0.00"
                     [disabled]="!allocation.get('selected')?.value"
                   />
-                  <span matSuffix>AED</span>
+                  <span matSuffix>{{ orgContext.currency() }}</span>
                   <mat-error *ngIf="allocation.get('allocatedAmount')?.hasError('max')">
                     Cannot exceed outstanding amount
                   </mat-error>
@@ -165,7 +165,7 @@
                 min="0.01"
                 placeholder="0.00"
               />
-              <span matSuffix>AED</span>
+              <span matSuffix>{{ orgContext.currency() }}</span>
               <mat-error *ngIf="form.get('totalPaymentAmount')?.hasError('required')">
                 Total payment amount is required
               </mat-error>
@@ -174,7 +174,7 @@
           <div class="summary-row">
             <span class="summary-label">Total Allocated:</span>
             <span class="summary-value" [class.mismatch]="getAllocationMismatch()">
-              {{ totalAllocated | number: '1.2-2' }} AED
+              {{ totalAllocated | number: '1.2-2' }} {{ orgContext.currency() }}
             </span>
           </div>
           <div class="summary-row" *ngIf="getAllocationMismatch()">
@@ -221,13 +221,13 @@
               <div class="expense-option-main">
                 <span class="vendor-name">{{ expense.vendorName || 'N/A' }}</span>
                 <span class="expense-amount">
-                  {{ expense.totalAmount | number: '1.2-2' }} {{ expense.currency || 'AED' }}
+                  {{ expense.totalAmount | number: '1.2-2' }} {{ expense.currency || ('' | orgCurrencyCode) }}
                 </span>
               </div>
               <div class="expense-option-details">
                 <span class="expense-date">{{ expense.expenseDate | date: 'shortDate' }}</span>
                 <span class="outstanding-badge">
-                  Outstanding: {{ expense.outstandingAmount | number: '1.2-2' }} {{ expense.currency || 'AED' }}
+                  Outstanding: {{ expense.outstandingAmount | number: '1.2-2' }} {{ expense.currency || ('' | orgCurrencyCode) }}
                 </span>
               </div>
             </div>
@@ -267,13 +267,13 @@
           <div class="detail-row">
             <span class="detail-label">Total Amount:</span>
             <span class="detail-value">
-              {{ selectedExpense.totalAmount | number: '1.2-2' }} {{ selectedExpense.currency || 'AED' }}
+              {{ selectedExpense.totalAmount | number: '1.2-2' }} {{ selectedExpense.currency || ('' | orgCurrencyCode) }}
             </span>
           </div>
           <div class="detail-row highlight">
             <span class="detail-label">Outstanding Balance:</span>
             <span class="detail-value outstanding">
-              {{ selectedExpense.outstandingAmount | number: '1.2-2' }} {{ selectedExpense.currency || 'AED' }}
+              {{ selectedExpense.outstandingAmount | number: '1.2-2' }} {{ selectedExpense.currency || ('' | orgCurrencyCode) }}
             </span>
           </div>
         </div>
@@ -292,9 +292,9 @@
           [max]="selectedExpense.outstandingAmount"
           placeholder="Enter payment amount"
         />
-        <span matSuffix>{{ selectedExpense.currency || 'AED' }}</span>
+        <span matSuffix>{{ selectedExpense.currency || ('' | orgCurrencyCode) }}</span>
         <mat-hint>
-          Maximum: {{ selectedExpense.outstandingAmount | number: '1.2-2' }} {{ selectedExpense.currency || 'AED' }}
+          Maximum: {{ selectedExpense.outstandingAmount | number: '1.2-2' }} {{ selectedExpense.currency || ('' | orgCurrencyCode) }}
         </mat-hint>
         <mat-error *ngIf="form.get('amount')?.hasError('required')">
           Payment amount is required

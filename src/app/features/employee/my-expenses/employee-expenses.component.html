@@ -37,7 +37,7 @@
         </mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
-        <div class="amount">AED {{ expense.totalAmount | number: '1.0-2' }}</div>
+        <div class="amount">{{ formatExpenseAmount(expense) }}</div>
         <div class="meta">
           Type: {{ expense.type | titlecase }}
         </div>

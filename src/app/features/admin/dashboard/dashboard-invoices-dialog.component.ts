@@ -1,13 +1,16 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { SalesInvoicesService } from '../../../core/services/sales-invoices.service';
 import { SalesInvoice } from '../../../core/services/sales-invoices.service';
 import { MatDialog } from '@angular/material/dialog';
 import { InvoiceDetailDialogComponent } from '../sales-invoices/invoice-detail-dialog.component';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 export interface DashboardInvoicesDialogData {
   startDate: string;
   endDate: string;
+  /** Organization display currency */
+  currency?: string;
 }
 
 @Component({
@@ -16,6 +19,8 @@ export interface DashboardInvoicesDialogData {
   styleUrls: ['./dashboard-invoices-dialog.component.scss'],
 })
 export class DashboardInvoicesDialogComponent implements OnInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   loading = false;
   invoices: SalesInvoice[] = [];
   displayedColumns = ['invoiceNumber', 'customerName', 'invoiceDate', 'totalAmount', 'status'];
@@ -63,7 +68,13 @@ export class DashboardInvoicesDialogComponent implements OnInit {
 
   formatCurrency(amount: number): string {
     if (amount == null) return '—';
-    return `AED ${Number(amount).toFixed(2)}`;
+    const code = (
+      this.data.currency ||
+      this.orgContext.currency()
+    )
+      .trim() ||
+      this.orgContext.currency();
+    return `${code} ${Number(amount).toFixed(2)}`;
   }
 
   openInvoice(invoiceId: string): void {

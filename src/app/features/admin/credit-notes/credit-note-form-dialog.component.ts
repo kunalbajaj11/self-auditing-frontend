@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -10,6 +10,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { CreditNotesService, CreditNote, CreditNoteLineItem } from '../../../core/services/credit-notes.service';
 import { CustomersService, Customer } from '../../../core/services/customers.service';
 import { SalesInvoicesService, SalesInvoice, InvoiceLineItem } from '../../../core/services/sales-invoices.service';
+import { SUPPORTED_ORG_CURRENCIES } from '../../../core/constants/supported-currencies';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 @Component({
   selector: 'app-credit-note-form-dialog',
@@ -17,6 +19,8 @@ import { SalesInvoicesService, SalesInvoice, InvoiceLineItem } from '../../../co
   styleUrls: ['./credit-note-form-dialog.component.scss'],
 })
 export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterViewInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   form: FormGroup;
   loading = false;
   customers: Customer[] = [];
@@ -39,7 +43,7 @@ export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterVi
   get statusOptions(): string[] {
     return this.data ? this.creditNoteStatuses : ['draft', 'issued'];
   }
-  readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
+  readonly currencies = [...SUPPORTED_ORG_CURRENCIES];
   defaultVatRate = 5;
 
   get lineItems(): FormArray {
@@ -79,7 +83,7 @@ export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterVi
       reason: ['return', Validators.required],
       amount: [0, [Validators.required, Validators.min(0)]],
       vatAmount: [0, [Validators.min(0)]],
-      currency: ['AED'],
+      currency: [this.orgContext.currency()],
       status: ['draft'],
       description: [''],
       notes: [''],
@@ -322,7 +326,7 @@ export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterVi
             customerId: invoice.customerId || '',
             customerName: invoice.customerName || '',
             customerTrn: invoice.customerTrn || '',
-            currency: invoice.currency || 'AED',
+            currency: invoice.currency || this.orgContext.currency(),
             applyToInvoiceId: creditNote.status === 'issued' ? invoice.id : null,
             applyAmount: suggestedApply,
           });
@@ -336,7 +340,7 @@ export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterVi
       reason: creditNote.reason,
       amount: parseFloat(creditNote.amount || '0'),
       vatAmount: parseFloat(creditNote.vatAmount || '0'),
-      currency: creditNote.currency || 'AED',
+      currency: creditNote.currency || this.orgContext.currency(),
       status: creditNote.status,
       description: creditNote.description || '',
       notes: creditNote.notes || '',
@@ -360,7 +364,7 @@ export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterVi
       customerId: invoice.customerId || '',
       customerName: invoice.customerName || '',
       customerTrn: invoice.customerTrn || '',
-      currency: invoice.currency || 'AED',
+      currency: invoice.currency || this.orgContext.currency(),
     });
     if (!isNewCreditNote) return;
     // Load full invoice to get line items (product name, rate) for credit note
@@ -416,7 +420,7 @@ export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterVi
       this.form.patchValue({
         customerName: customer.name,
         customerTrn: customer.customerTrn || '',
-        currency: customer.preferredCurrency || 'AED',
+        currency: customer.preferredCurrency || this.orgContext.currency(),
       });
     }
   }
@@ -479,7 +483,7 @@ export class CreditNoteFormDialogComponent implements OnInit, OnDestroy, AfterVi
       vatAmount: hasLineItems
         ? lines.reduce((s: number, li: any) => s + parseFloat(li.vatAmount || '0'), 0)
         : parseFloat(formValue.vatAmount || '0'),
-      currency: formValue.currency || 'AED',
+      currency: formValue.currency || this.orgContext.currency(),
       description: formValue.description || undefined,
       notes: formValue.notes || undefined,
     };

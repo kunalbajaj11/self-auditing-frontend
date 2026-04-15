@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, inject } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
@@ -15,6 +15,7 @@ import { ExpenseFormDialogComponent } from '../expenses/expense-form-dialog.comp
 import { InvoiceDetailDialogComponent } from '../sales-invoices/invoice-detail-dialog.component';
 import { BankTransactionFormDialogComponent } from './bank-transaction-form-dialog.component';
 import { JournalEntryFormDialogComponent } from '../journal-entries/journal-entry-form-dialog.component';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 interface BankTransaction {
   id: string;
@@ -39,6 +40,8 @@ interface BankTransaction {
   styleUrls: ['./bank-accounts.component.scss'],
 })
 export class BankAccountsComponent implements OnInit, AfterViewInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'date',
@@ -179,7 +182,7 @@ export class BankAccountsComponent implements OnInit, AfterViewInit {
                 description: expense.description || 'Expense',
                 vendorOrCustomer: expense.vendorName || '—',
                 amount: parseFloat(payment.amount),
-                currency: expense.currency || 'AED',
+                currency: expense.currency || this.orgContext.currency(),
                 expense: expense,
                 paymentMethod: payment.paymentMethod,
                 referenceNumber: payment.referenceNumber,
@@ -214,7 +217,7 @@ export class BankAccountsComponent implements OnInit, AfterViewInit {
               `Journal Entry - ${entry.debitAccount} / ${entry.creditAccount}`,
             vendorOrCustomer: entry.customerVendorName || 'Journal Entry',
             amount: transactionAmount,
-            currency: 'AED',
+            currency: this.orgContext.currency(),
             journalEntry: entry,
             paymentMethod: 'Bank Transfer',
             referenceNumber: entry.referenceNumber || undefined,
@@ -232,7 +235,7 @@ export class BankAccountsComponent implements OnInit, AfterViewInit {
             description: payment.notes || `Payment for Invoice ${invoice?.invoiceNumber || 'N/A'}`,
             vendorOrCustomer: invoice?.customerName || '—',
             amount: parseFloat(payment.amount),
-            currency: invoice?.currency || 'AED',
+            currency: invoice?.currency || this.orgContext.currency(),
             invoice: invoice,
             invoicePayment: payment,
             paymentMethod: payment.paymentMethod || 'Bank Transfer',

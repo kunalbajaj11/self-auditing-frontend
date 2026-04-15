@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, inject } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
@@ -13,6 +13,7 @@ import { ApiService } from '../../../core/services/api.service';
 import { TokenService } from '../../../core/services/token.service';
 import { SalesInvoicesService } from '../../../core/services/sales-invoices.service';
 import { InvoiceDetailDialogComponent } from '../sales-invoices/invoice-detail-dialog.component';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 @Component({
   selector: 'app-admin-expenses',
@@ -20,6 +21,8 @@ import { InvoiceDetailDialogComponent } from '../sales-invoices/invoice-detail-d
   styleUrls: ['./admin-expenses.component.scss'],
 })
 export class AdminExpensesComponent implements OnInit, AfterViewInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly Math = Math; // Expose Math to template
   readonly columns = [
@@ -467,6 +470,18 @@ export class AdminExpensesComponent implements OnInit, AfterViewInit {
       return expense.totalAmount; // Positive for sales/credit
     }
     return -expense.totalAmount; // Negative for expenses
+  }
+
+  formatExpenseListAmount(expense: Expense): string {
+    const sign = this.getAmountWithSign(expense) >= 0 ? '+' : '-';
+    const code =
+      expense.currency?.trim() || this.orgContext.currency();
+    const abs = Math.abs(this.getAmountWithSign(expense));
+    const formatted = abs.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    return `${sign}${code} ${formatted}`;
   }
 
   printInvoice(expense: Expense): void {

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, inject } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -11,6 +11,8 @@ import {
   SalesOrderLineItem,
 } from '../../../core/services/sales-orders.service';
 import { SettingsService, TaxRate } from '../../../core/services/settings.service';
+import { SUPPORTED_ORG_CURRENCIES } from '../../../core/constants/supported-currencies';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 @Component({
   selector: 'app-sales-order-form-dialog',
@@ -18,6 +20,8 @@ import { SettingsService, TaxRate } from '../../../core/services/settings.servic
   styleUrls: ['./sales-order-form-dialog.component.scss'],
 })
 export class SalesOrderFormDialogComponent implements OnInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   form: FormGroup;
   loading = false;
 
@@ -27,7 +31,7 @@ export class SalesOrderFormDialogComponent implements OnInit {
   defaultTaxRate = 5;
 
   readonly vatTaxTypes = ['STANDARD', 'ZERO_RATED', 'EXEMPT', 'REVERSE_CHARGE'];
-  readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
+  readonly currencies = [...SUPPORTED_ORG_CURRENCIES];
 
   get lineItems(): FormArray {
     return this.form.get('lineItems') as FormArray;
@@ -67,7 +71,7 @@ export class SalesOrderFormDialogComponent implements OnInit {
       customerTrn: [''],
       orderDate: [new Date().toISOString().substring(0, 10), Validators.required],
       expectedDeliveryDate: [''],
-      currency: ['AED', Validators.required],
+      currency: [this.orgContext.currency(), Validators.required],
       notes: [''],
       lineItems: this.fb.array([]),
     });
@@ -111,7 +115,7 @@ export class SalesOrderFormDialogComponent implements OnInit {
       customerTrn,
       orderDate: so.orderDate,
       expectedDeliveryDate: so.expectedDeliveryDate || '',
-      currency: so.currency || 'AED',
+      currency: so.currency || this.orgContext.currency(),
       notes: so.notes || '',
     });
 
@@ -128,7 +132,7 @@ export class SalesOrderFormDialogComponent implements OnInit {
     this.form.patchValue({
       customerName: customer.name,
       customerTrn: customer.customerTrn || '',
-      currency: customer.preferredCurrency || 'AED',
+      currency: customer.preferredCurrency || this.orgContext.currency(),
     });
   }
 

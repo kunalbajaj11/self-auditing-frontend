@@ -1,10 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { Subject, combineLatest } from 'rxjs';
 import { startWith, switchMap, takeUntil } from 'rxjs/operators';
 import { ExpensesService } from '../../../core/services/expenses.service';
 import { Expense } from '../../../core/models/expense.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 @Component({
   selector: 'app-employee-expenses',
@@ -12,6 +13,8 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrls: ['./employee-expenses.component.scss'],
 })
 export class EmployeeExpensesComponent implements OnInit, OnDestroy {
+  readonly orgContext = inject(OrganizationContextService);
+
   expenses: Expense[] = [];
   loading = false;
 
@@ -79,5 +82,15 @@ export class EmployeeExpensesComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  formatExpenseAmount(expense: Expense): string {
+    const code =
+      expense.currency?.trim() || this.orgContext.currency();
+    const n = Number(expense.totalAmount) || 0;
+    const formatted = n.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    return `${code} ${formatted}`;
+  }
 }
 

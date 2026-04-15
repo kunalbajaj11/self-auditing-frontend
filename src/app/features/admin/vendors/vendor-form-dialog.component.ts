@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -7,6 +7,8 @@ import {
 } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { VendorsService, Vendor } from '../../../core/services/vendors.service';
+import { SUPPORTED_ORG_CURRENCIES } from '../../../core/constants/supported-currencies';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 @Component({
   selector: 'app-vendor-form-dialog',
@@ -14,10 +16,12 @@ import { VendorsService, Vendor } from '../../../core/services/vendors.service';
   styleUrls: ['./vendor-form-dialog.component.scss'],
 })
 export class VendorFormDialogComponent implements OnInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   form: FormGroup;
   loading = false;
 
-  readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
+  readonly currencies = [...SUPPORTED_ORG_CURRENCIES];
 
   constructor(
     private readonly fb: FormBuilder,
@@ -37,7 +41,7 @@ export class VendorFormDialogComponent implements OnInit {
       email: ['', Validators.email],
       website: [''],
       contactPerson: [''],
-      preferredCurrency: ['AED'],
+      preferredCurrency: [this.orgContext.currency()],
       paymentTerms: [null, [this.numberValidator]],
       notes: [''],
     });
@@ -57,7 +61,7 @@ export class VendorFormDialogComponent implements OnInit {
         email: this.data.email || '',
         website: this.data.website || '',
         contactPerson: this.data.contactPerson || '',
-        preferredCurrency: this.data.preferredCurrency || 'AED',
+        preferredCurrency: this.data.preferredCurrency || this.orgContext.currency(),
         paymentTerms: this.data.paymentTerms || null,
         notes: this.data.notes || '',
       });

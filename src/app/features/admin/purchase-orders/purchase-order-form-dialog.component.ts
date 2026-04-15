@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -13,6 +13,8 @@ import { SettingsService, TaxRate } from '../../../core/services/settings.servic
 import { SalesInvoicesService } from '../../../core/services/sales-invoices.service';
 import { Observable, of } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { SUPPORTED_ORG_CURRENCIES } from '../../../core/constants/supported-currencies';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 @Component({
   selector: 'app-purchase-order-form-dialog',
@@ -20,6 +22,8 @@ import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'r
   styleUrls: ['./purchase-order-form-dialog.component.scss'],
 })
 export class PurchaseOrderFormDialogComponent implements OnInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   form: FormGroup;
   loading = false;
   vendors: Vendor[] = [];
@@ -28,7 +32,7 @@ export class PurchaseOrderFormDialogComponent implements OnInit {
   defaultTaxRate = 5;
 
   readonly vatTaxTypes = ['STANDARD', 'ZERO_RATED', 'EXEMPT', 'REVERSE_CHARGE'];
-  readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
+  readonly currencies = [...SUPPORTED_ORG_CURRENCIES];
 
   // Vendor autocomplete
   filteredVendors$!: Observable<Vendor[]>;
@@ -93,7 +97,7 @@ export class PurchaseOrderFormDialogComponent implements OnInit {
       vendorTrn: [''],
       poDate: [new Date().toISOString().substring(0, 10), Validators.required],
       expectedDeliveryDate: [''],
-      currency: ['AED'],
+      currency: [this.orgContext.currency()],
       notes: [''],
       lineItems: this.fb.array([]),
     });
@@ -179,7 +183,7 @@ export class PurchaseOrderFormDialogComponent implements OnInit {
       this.form.patchValue({
         vendorName: vendor.name,
         vendorTrn: vendor.vendorTrn || '',
-        currency: vendor.preferredCurrency || 'AED',
+        currency: vendor.preferredCurrency || this.orgContext.currency(),
       });
     }
   }
@@ -197,7 +201,7 @@ export class PurchaseOrderFormDialogComponent implements OnInit {
         vendorId: vendor.id,
         vendorName: vendor.name,
         vendorTrn: vendor.vendorTrn || '',
-        currency: vendor.preferredCurrency || 'AED',
+        currency: vendor.preferredCurrency || this.orgContext.currency(),
       }, { emitEvent: false });
     }
   }
@@ -244,7 +248,7 @@ export class PurchaseOrderFormDialogComponent implements OnInit {
     this.form.patchValue({
       poDate: po.poDate,
       expectedDeliveryDate: po.expectedDeliveryDate || '',
-      currency: po.currency || 'AED',
+      currency: po.currency || this.orgContext.currency(),
       notes: po.notes || '',
     });
 
@@ -434,7 +438,7 @@ export class PurchaseOrderFormDialogComponent implements OnInit {
       vendorTrn: formValue.vendorTrn || undefined,
       poDate: formValue.poDate,
       expectedDeliveryDate: formValue.expectedDeliveryDate || undefined,
-      currency: formValue.currency || 'AED',
+      currency: formValue.currency || this.orgContext.currency(),
       notes: formValue.notes || undefined,
       lineItems: lineItems,
     };

@@ -118,7 +118,7 @@
       <div class="totals-section" *ngIf="getSelectedItemsCount() > 0">
         <div class="total-row">
           <span class="label">Total Amount to Convert:</span>
-          <span class="value">{{ purchaseOrder.currency || 'AED' }} {{ getTotalAmount() | number: '1.2-2' }}</span>
+          <span class="value">{{ purchaseOrder.currency || ('' | orgCurrencyCode) }} {{ getTotalAmount() | number: '1.2-2' }}</span>
         </div>
       </div>
     </div>

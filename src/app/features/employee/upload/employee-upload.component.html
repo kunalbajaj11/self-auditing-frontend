@@ -65,7 +65,7 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Amount (AED)</mat-label>
+        <mat-label>Amount ({{ orgContext.currency() }})</mat-label>
         <input matInput type="number" formControlName="amount" required [disabled]="(canUploadExpense$ | async) === false" />
         <mat-error *ngIf="form.get('amount')?.hasError('required')">
           Amount is required
@@ -73,7 +73,7 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>VAT (AED)</mat-label>
+        <mat-label>{{ orgContext.taxAmountLabel() }} ({{ orgContext.currency() }})</mat-label>
         <input matInput type="text" formControlName="vatAmount" [disabled]="(canUploadExpense$ | async) === false" />
       </mat-form-field>
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CategoriesService, Category } from '../../../core/services/categories.service';
@@ -9,6 +9,7 @@ import { OrganizationService } from '../../../core/services/organization.service
 import { UploadUsage } from '../../../core/models/license-key.model';
 import { Observable, of } from 'rxjs';
 import { catchError, switchMap, take } from 'rxjs/operators';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 @Component({
   selector: 'app-employee-upload',
@@ -16,6 +17,8 @@ import { catchError, switchMap, take } from 'rxjs/operators';
   styleUrls: ['./employee-upload.component.scss'],
 })
 export class EmployeeUploadComponent implements OnInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   categories: Category[] = [];
   loading = false;
   isEnterprise$: Observable<boolean>;

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray, AbstractControl } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -7,6 +7,7 @@ import { VendorsService, Vendor } from '../../../core/services/vendors.service';
 import { Expense } from '../../../core/models/expense.model';
 import { Observable, of } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 @Component({
   selector: 'app-payment-form-dialog',
@@ -14,6 +15,8 @@ import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'r
   styleUrls: ['./payment-form-dialog.component.scss'],
 })
 export class PaymentFormDialogComponent implements OnInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   form: FormGroup;
   loading = false;
   

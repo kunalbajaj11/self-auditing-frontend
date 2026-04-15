@@ -6,11 +6,12 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import { finalize, startWith } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService, LicensePreview } from '../../../core/services/auth.service';
 import { PlanType } from '../../../core/models/plan.model';
 import { UserRole } from '../../../core/models/user.model';
+import { currencyForRegion } from '../../../core/constants/region-default-currency';
 
 @Component({
   selector: 'app-license-registration',
@@ -48,7 +49,7 @@ export class LicenseRegistrationComponent implements OnInit {
       planType: [{ value: '', disabled: true }, []],
       vatNumber: [''],
       address: [''],
-      currency: ['AED'],
+      currency: [currencyForRegion('UAE')],
       region: ['UAE'],
       contactPerson: [''],
       contactEmail: ['', [Validators.email]],
@@ -64,6 +65,14 @@ export class LicenseRegistrationComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.form.controls.region.valueChanges
+      .pipe(startWith(this.form.controls.region.value))
+      .subscribe((region) => {
+        this.form.controls.currency.setValue(currencyForRegion(region), {
+          emitEvent: false,
+        });
+      });
+
     // Reset plan field when license key changes
     this.form.controls.licenseKey.valueChanges.subscribe(() => {
       if (this.licenseInfo) {

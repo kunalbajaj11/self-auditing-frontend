@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -7,6 +7,7 @@ import {
 } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { CustomersService, Customer } from '../../../core/services/customers.service';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 @Component({
   selector: 'app-customer-form-dialog',
@@ -14,6 +15,8 @@ import { CustomersService, Customer } from '../../../core/services/customers.ser
   styleUrls: ['./customer-form-dialog.component.scss'],
 })
 export class CustomerFormDialogComponent implements OnInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   form: FormGroup;
   loading = false;
 
@@ -33,7 +36,7 @@ export class CustomerFormDialogComponent implements OnInit {
       phone: [''],
       email: ['', Validators.email],
       contactPerson: [''],
-      preferredCurrency: ['AED'],
+      preferredCurrency: [this.orgContext.currency()],
       paymentTerms: [null, [this.numberValidator]],
       isActive: [true],
       notes: [''],
@@ -52,7 +55,7 @@ export class CustomerFormDialogComponent implements OnInit {
         phone: this.data.phone || '',
         email: this.data.email || '',
         contactPerson: this.data.contactPerson || '',
-        preferredCurrency: this.data.preferredCurrency || 'AED',
+        preferredCurrency: this.data.preferredCurrency || this.orgContext.currency(),
         paymentTerms: this.data.paymentTerms || null,
         isActive: this.data.isActive,
         notes: this.data.notes || '',

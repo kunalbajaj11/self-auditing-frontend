@@ -5,6 +5,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { OrganizationService } from '../../../../core/services/organization.service';
 import { SettingsService, ExchangeRate, CurrencySettings } from '../../../../core/services/settings.service';
 import { ExchangeRateFormDialogComponent } from './exchange-rate-form-dialog.component';
+import { SUPPORTED_ORG_CURRENCIES } from '../../../../core/constants/supported-currencies';
+import { currencyForRegion } from '../../../../core/constants/region-default-currency';
 
 export interface Currency {
   code: string;
@@ -35,6 +37,10 @@ export class CurrencySettingsComponent implements OnInit {
     { code: 'INR', name: 'Indian Rupee', symbol: '₹' },
     { code: 'PKR', name: 'Pakistani Rupee', symbol: '₨' },
     { code: 'EGP', name: 'Egyptian Pound', symbol: '£' },
+    { code: 'OMR', name: 'Omani Rial', symbol: 'ر.ع.' },
+    { code: 'KWD', name: 'Kuwaiti Dinar', symbol: 'د.ك' },
+    { code: 'BHD', name: 'Bahraini Dinar', symbol: 'د.ب' },
+    { code: 'QAR', name: 'Qatari Riyal', symbol: 'ر.ق' },
   ];
 
   readonly exchangeRateSources = [
@@ -85,7 +91,10 @@ export class CurrencySettingsComponent implements OnInit {
     this.organizationService.getMyOrganization().subscribe({
       next: (org) => {
         this.form.patchValue({
-          baseCurrency: org.baseCurrency || org.currency || 'AED',
+          baseCurrency:
+            org.baseCurrency?.trim() ||
+            org.currency?.trim() ||
+            currencyForRegion(org.region),
         });
       },
       error: () => {},
@@ -116,9 +125,13 @@ export class CurrencySettingsComponent implements OnInit {
   private loadCurrencies(): void {
     this.organizationService.getMyOrganization().subscribe({
       next: (org) => {
-        const baseCurrency = org.baseCurrency || org.currency || 'AED';
+        const baseCurrency =
+          org.baseCurrency?.trim() ||
+          org.currency?.trim() ||
+          currencyForRegion(org.region);
+        const allowed = new Set(SUPPORTED_ORG_CURRENCIES);
         this.currencies = this.commonCurrencies
-          .filter(c => ['AED', 'USD', 'EUR', 'GBP', 'SAR'].includes(c.code))
+          .filter((c) => allowed.has(c.code))
           .map(c => ({
             code: c.code,
             name: c.name,

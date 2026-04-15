@@ -168,7 +168,7 @@
               <div class="item-suggestion">
                 <span class="item-name">{{ suggestion.itemName }}</span>
                 <span class="item-details">
-                  {{ form.get('currency')?.value || 'AED' }} {{ suggestion.unitPrice | number:'1.2-2' }} · VAT: {{ suggestion.vatRate }}%
+                  {{ form.get('currency')?.value || orgContext.currency() }} {{ suggestion.unitPrice | number:'1.2-2' }} · {{ orgContext.taxAmountLabel() }}: {{ suggestion.vatRate }}%
                 </span>
               </div>
             </mat-option>

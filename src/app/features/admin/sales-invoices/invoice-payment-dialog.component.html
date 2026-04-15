@@ -22,14 +22,14 @@
               <div class="invoice-option-main">
                 <span class="invoice-number">{{ invoice.invoiceNumber }}</span>
                 <span class="invoice-amount positive-amount">
-                  +{{ invoice.currency || 'AED' }} {{ invoice.totalAmount | number: '1.2-2' }}
+                  +{{ invoice.currency || ('' | orgCurrencyCode) }} {{ invoice.totalAmount | number: '1.2-2' }}
                 </span>
               </div>
               <div class="invoice-option-details">
                 <span class="invoice-date">{{ invoice.invoiceDate | date: 'shortDate' }}</span>
                 <span class="customer-name">{{ invoice.customerName || 'N/A' }}</span>
                 <span class="outstanding-badge positive-amount">
-                  Outstanding: +{{ invoice.currency || 'AED' }} {{ invoice.outstandingAmount | number: '1.2-2' }}
+                  Outstanding: +{{ invoice.currency || ('' | orgCurrencyCode) }} {{ invoice.outstandingAmount | number: '1.2-2' }}
                 </span>
               </div>
             </div>
@@ -72,19 +72,19 @@
           <div class="detail-row">
             <span class="detail-label">Total Amount:</span>
             <span class="detail-value positive-amount">
-              +{{ selectedInvoice.currency || 'AED' }} {{ selectedInvoice.totalAmount | number: '1.2-2' }}
+              +{{ selectedInvoice.currency || ('' | orgCurrencyCode) }} {{ selectedInvoice.totalAmount | number: '1.2-2' }}
             </span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Paid Amount:</span>
             <span class="detail-value positive-amount">
-              +{{ selectedInvoice.currency || 'AED' }} {{ selectedInvoice.paidAmount | number: '1.2-2' }}
+              +{{ selectedInvoice.currency || ('' | orgCurrencyCode) }} {{ selectedInvoice.paidAmount | number: '1.2-2' }}
             </span>
           </div>
           <div class="detail-row highlight">
             <span class="detail-label">Outstanding Balance:</span>
             <span class="detail-value outstanding positive-amount">
-              +{{ selectedInvoice.currency || 'AED' }} {{ selectedInvoice.outstandingAmount | number: '1.2-2' }}
+              +{{ selectedInvoice.currency || ('' | orgCurrencyCode) }} {{ selectedInvoice.outstandingAmount | number: '1.2-2' }}
             </span>
           </div>
           <div class="detail-row" *ngIf="selectedInvoice.description">
@@ -110,15 +110,15 @@
           [max]="selectedInvoice.outstandingAmount"
           placeholder="Enter payment amount"
         />
-        <span matSuffix>{{ selectedInvoice.currency || 'AED' }}</span>
+        <span matSuffix>{{ selectedInvoice.currency || ('' | orgCurrencyCode) }}</span>
         <mat-hint>
-          Maximum: {{ selectedInvoice.outstandingAmount | number: '1.2-2' }} {{ selectedInvoice.currency || 'AED' }}
+          Maximum: {{ selectedInvoice.outstandingAmount | number: '1.2-2' }} {{ selectedInvoice.currency || ('' | orgCurrencyCode) }}
         </mat-hint>
         <mat-error *ngIf="form.get('amount')?.hasError('required')">
           Payment amount is required
         </mat-error>
         <mat-error *ngIf="form.get('amount')?.hasError('max')">
-          Payment cannot exceed outstanding amount of {{ selectedInvoice.outstandingAmount | number: '1.2-2' }} {{ selectedInvoice.currency || 'AED' }}
+          Payment cannot exceed outstanding amount of {{ selectedInvoice.outstandingAmount | number: '1.2-2' }} {{ selectedInvoice.currency || ('' | orgCurrencyCode) }}
         </mat-error>
       </mat-form-field>
 

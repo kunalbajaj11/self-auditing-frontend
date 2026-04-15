@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, ViewChildren, QueryList } from '@angular/core';
+import { Component, Inject, OnInit, ViewChildren, QueryList, inject } from '@angular/core';
 import { FormBuilder, Validators, FormArray, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -13,6 +13,7 @@ import { SalesInvoicesService } from '../../../core/services/sales-invoices.serv
 import { Expense, ExpenseType, VatTaxType, PurchaseLineItem } from '../../../core/models/expense.model';
 import { Observable, of } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 @Component({
   selector: 'app-expense-form-dialog',
@@ -20,6 +21,8 @@ import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'r
   styleUrls: ['./expense-form-dialog.component.scss'],
 })
 export class ExpenseFormDialogComponent implements OnInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   expenseTypes: ExpenseTypeEntity[] = [];
   categories: Category[] = [];
   allCategories: Category[] = [];

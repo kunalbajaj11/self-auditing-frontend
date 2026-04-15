@@ -14,6 +14,7 @@ import {
   CreateJournalEntryPayload,
 } from '../../../core/services/journal-entries.service';
 import { ACCOUNT_METADATA } from '../../../core/services/journal-entries.service';
+import { OrgMoneyPipe } from '../../../shared/pipes/org-money.pipe';
 
 const VALID_ACCOUNTS = new Set([
   'cash',
@@ -60,6 +61,7 @@ interface ParsedRow {
     MatTableModule,
     MatProgressSpinnerModule,
     MatButtonModule,
+    OrgMoneyPipe,
   ],
   templateUrl: './bulk-import-dialog.component.html',
   styleUrls: ['./bulk-import-dialog.component.scss'],

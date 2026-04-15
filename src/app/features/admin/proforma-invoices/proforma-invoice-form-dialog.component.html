@@ -141,7 +141,7 @@
               <span class="item-name">{{ suggestion.itemName }}</span>
               <span *ngIf="suggestion.description" class="item-description">{{ suggestion.description }}</span>
               <span class="item-details">
-                {{ form.get('currency')?.value || 'AED' }} {{ suggestion.unitPrice | number: '1.2-2' }} 
+                {{ form.get('currency')?.value || ('' | orgCurrencyCode) }} {{ suggestion.unitPrice | number: '1.2-2' }} 
                 · VAT: {{ suggestion.vatRate }}% 
                 · Used {{ suggestion.usageCount }} time{{ suggestion.usageCount !== 1 ? 's' : '' }}
               </span>

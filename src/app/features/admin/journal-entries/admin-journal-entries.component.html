@@ -112,10 +112,10 @@
             </ng-container>
 
             <ng-container matColumnDef="amount">
-              <th mat-header-cell *matHeaderCellDef class="text-right">Amount (AED)</th>
+              <th mat-header-cell *matHeaderCellDef class="text-right">Amount ({{ '' | orgCurrencyCode }})</th>
               <td mat-cell *matCellDef="let entry" class="text-right">
                 <strong>
-                  AED {{ entry.amount | number: '1.2-2' }}
+                  {{ entry.amount | orgMoney:'1.2-2' }}
                 </strong>
               </td>
             </ng-container>
@@ -152,10 +152,10 @@
             </ng-container>
 
             <ng-container matColumnDef="vatAmount">
-              <th mat-header-cell *matHeaderCellDef class="text-right">VAT Amount</th>
+              <th mat-header-cell *matHeaderCellDef class="text-right">{{ orgContext.taxAmountLabel() }} Amount</th>
               <td mat-cell *matCellDef="let entry" class="text-right">
                 <span *ngIf="entry.vatAmount && entry.vatAmount > 0">
-                  AED {{ entry.vatAmount | number: '1.2-2' }}
+                  {{ entry.vatAmount | orgMoney:'1.2-2' }}
                   <span *ngIf="entry.vatTaxType" class="vat-type-badge">
                     ({{ entry.vatTaxType | titlecase }})
                   </span>

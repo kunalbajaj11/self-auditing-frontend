@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Organization } from '../../../core/models/organization.model';
 import { OrganizationService } from '../../../core/services/organization.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
+import { currencyForRegion } from '../../../core/constants/region-default-currency';
 
 @Component({
   selector: 'app-admin-company',
@@ -10,6 +12,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrls: ['./admin-company.component.scss'],
 })
 export class AdminCompanyComponent implements OnInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   organization: Organization | null = null;
   loading = false;
 
@@ -23,7 +27,7 @@ export class AdminCompanyComponent implements OnInit {
     this.form = this.fb.group({
       name: ['', [Validators.required]],
       vatNumber: [''],
-      currency: ['AED', [Validators.required]],
+      currency: [this.orgContext.currency(), [Validators.required]],
       contactPerson: [''],
       contactEmail: ['', [Validators.email]],
       address: [''],
@@ -72,7 +76,10 @@ export class AdminCompanyComponent implements OnInit {
       this.form.patchValue({
         name: org.name,
         vatNumber: org.vatNumber ?? '',
-        currency: org.currency ?? 'AED',
+        currency:
+          org.currency?.trim() ||
+          currencyForRegion(org.region) ||
+          this.orgContext.currency(),
         contactPerson: org.contactPerson ?? '',
         contactEmail: org.contactEmail ?? '',
         address: org.address ?? '',

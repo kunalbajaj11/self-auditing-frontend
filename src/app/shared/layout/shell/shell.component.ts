@@ -9,6 +9,7 @@ import { ExpensesService } from '../../../core/services/expenses.service';
 import { NotificationsService } from '../../../core/services/notifications.service';
 import { LicenseService } from '../../../core/services/license.service';
 import { ThemeService, ThemeOption } from '../../../core/services/theme.service';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 import { AuthUser } from '../../../core/models/user.model';
 import { PlanType } from '../../../core/models/plan.model';
 
@@ -67,6 +68,7 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly notificationsService: NotificationsService,
     private readonly licenseService: LicenseService,
     private readonly themeService: ThemeService,
+    private readonly organizationContext: OrganizationContextService,
   ) {
     this.user$ = this.authService.currentUser$;
     this.isHandset$ = this.breakpointObserver
@@ -80,6 +82,7 @@ export class ShellComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.organizationContext.refresh();
     this.themeService.currentTheme$.pipe(takeUntil(this.destroy$)).subscribe((id) => {
       this.currentThemeId = id;
     });

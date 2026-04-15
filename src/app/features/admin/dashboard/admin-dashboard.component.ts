@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, forkJoin, of, combineLatest, Subject } from 'rxjs';
-import { catchError, map, switchMap, tap, debounceTime, skip, takeUntil } from 'rxjs/operators';
+import { catchError, map, switchMap, tap, debounceTime, skip, take, takeUntil } from 'rxjs/operators';
 import { Organization } from '../../../core/models/organization.model';
 import { OrganizationService } from '../../../core/services/organization.service';
 import { ReportsService } from '../../../core/services/reports.service';
@@ -26,6 +26,8 @@ import {
   DashboardExpensesDialogComponent,
   DashboardExpensesDialogData,
 } from './dashboard-expenses-dialog.component';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
+import { currencyForRegion } from '../../../core/constants/region-default-currency';
 
 interface ExpenseSummaryRow {
   category: string;
@@ -91,6 +93,8 @@ interface AdminDashboardViewModel {
   styleUrls: ['./admin-dashboard.component.scss'],
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
+  readonly orgContext = inject(OrganizationContextService);
+
   dashboard$!: Observable<AdminDashboardViewModel | null>;
   loading = false;
   error: string | null = null;
@@ -173,44 +177,78 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   openTileEntries(tile: string): void {
     const { startDate, endDate } = this.getDateRange();
 
-    switch (tile) {
-      case 'netProfit':
-        this.openAccountEntriesDialog('Sales Revenue', 'Revenue', startDate, endDate);
-        break;
-      case 'vatPayable':
-        this.openAccountEntriesDialog('VAT Payable', 'Liability', startDate, endDate);
-        break;
-      case 'expenses':
-        this.dialog.open(DashboardExpensesDialogComponent, {
-          width: '900px',
-          maxWidth: '90vw',
-          maxHeight: '90vh',
-          data: { startDate, endDate } as DashboardExpensesDialogData,
-        });
-        break;
-      case 'receivables':
-        this.openAccountEntriesDialog('Accounts Receivable', 'Asset', startDate, endDate);
-        break;
-      case 'payables':
-        this.openAccountEntriesDialog('Accounts Payable', 'Liability', startDate, endDate);
-        break;
-      case 'bank':
-        this.openAccountEntriesDialog('Bank', 'Asset', startDate, endDate);
-        break;
-      case 'cash':
-        this.openAccountEntriesDialog('Cash', 'Asset', startDate, endDate);
-        break;
-      case 'totalInvoices':
-        this.dialog.open(DashboardInvoicesDialogComponent, {
-          width: '900px',
-          maxWidth: '90vw',
-          maxHeight: '90vh',
-          data: { startDate, endDate } as DashboardInvoicesDialogData,
-        });
-        break;
-      default:
-        break;
-    }
+    this.organizationService
+      .getMyOrganization()
+      .pipe(take(1))
+      .subscribe((org) => {
+        const currency =
+          org.currency?.trim() ||
+          currencyForRegion(org.region) ||
+          this.orgContext.currency();
+
+        switch (tile) {
+          case 'netProfit':
+            this.openAccountEntriesDialog(
+              'Sales Revenue',
+              'Revenue',
+              startDate,
+              endDate,
+              currency,
+            );
+            break;
+          case 'vatPayable':
+            this.openAccountEntriesDialog(
+              'VAT Payable',
+              'Liability',
+              startDate,
+              endDate,
+              currency,
+            );
+            break;
+          case 'expenses':
+            this.dialog.open(DashboardExpensesDialogComponent, {
+              width: '900px',
+              maxWidth: '90vw',
+              maxHeight: '90vh',
+              data: { startDate, endDate, currency } as DashboardExpensesDialogData,
+            });
+            break;
+          case 'receivables':
+            this.openAccountEntriesDialog(
+              'Accounts Receivable',
+              'Asset',
+              startDate,
+              endDate,
+              currency,
+            );
+            break;
+          case 'payables':
+            this.openAccountEntriesDialog(
+              'Accounts Payable',
+              'Liability',
+              startDate,
+              endDate,
+              currency,
+            );
+            break;
+          case 'bank':
+            this.openAccountEntriesDialog('Bank', 'Asset', startDate, endDate, currency);
+            break;
+          case 'cash':
+            this.openAccountEntriesDialog('Cash', 'Asset', startDate, endDate, currency);
+            break;
+          case 'totalInvoices':
+            this.dialog.open(DashboardInvoicesDialogComponent, {
+              width: '900px',
+              maxWidth: '90vw',
+              maxHeight: '90vh',
+              data: { startDate, endDate, currency } as DashboardInvoicesDialogData,
+            });
+            break;
+          default:
+            break;
+        }
+      });
   }
 
   private openAccountEntriesDialog(
@@ -218,12 +256,14 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     accountType: string,
     startDate: string,
     endDate: string,
+    currency: string,
   ): void {
     const data: AccountEntriesDialogData = {
       accountName,
       accountType,
       startDate,
       endDate,
+      currency,
     };
     this.dialog.open(AccountEntriesDialogComponent, {
       width: '900px',

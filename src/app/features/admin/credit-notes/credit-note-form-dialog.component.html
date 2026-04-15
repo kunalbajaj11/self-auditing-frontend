@@ -102,8 +102,8 @@
 
       <div class="form-row" *ngIf="useLineItems">
         <div class="line-totals">
-          <span>Amount: {{ form.get('amount')?.value | number: '1.2-2' }} {{ form.get('currency')?.value ?? 'AED' }}</span>
-          <span>VAT: {{ form.get('vatAmount')?.value | number: '1.2-2' }} {{ form.get('currency')?.value ?? 'AED' }}</span>
+          <span>Amount: {{ form.get('amount')?.value | number: '1.2-2' }} {{ form.get('currency')?.value ?? ('' | orgCurrencyCode) }}</span>
+          <span>VAT: {{ form.get('vatAmount')?.value | number: '1.2-2' }} {{ form.get('currency')?.value ?? ('' | orgCurrencyCode) }}</span>
         </div>
       </div>
 
@@ -142,10 +142,10 @@
                   </mat-form-field>
                 </td>
                 <td>
-                  <span class="line-amount">{{ (line.get('amount')?.value ?? 0) | number: '1.2-2' }} {{ form.get('currency')?.value ?? 'AED' }}</span>
+                  <span class="line-amount">{{ (line.get('amount')?.value ?? 0) | number: '1.2-2' }} {{ form.get('currency')?.value ?? ('' | orgCurrencyCode) }}</span>
                 </td>
                 <td>
-                  <span class="line-amount">{{ (line.get('vatAmount')?.value ?? 0) | number: '1.2-2' }} {{ form.get('currency')?.value ?? 'AED' }}</span>
+                  <span class="line-amount">{{ (line.get('vatAmount')?.value ?? 0) | number: '1.2-2' }} {{ form.get('currency')?.value ?? ('' | orgCurrencyCode) }}</span>
                 </td>
                 <td>
                   <button mat-icon-button type="button" (click)="removeLineItem(i)" matTooltip="Remove line" class="remove-line-btn">
@@ -219,7 +219,7 @@
           <mat-form-field appearance="outline" class="flex-1">
             <mat-label>Amount to apply *</mat-label>
             <input matInput type="number" formControlName="applyAmount" step="0.01" min="0.01" [max]="maxApplyAmount" />
-            <span matSuffix>{{ form.get('currency')?.value ?? 'AED' }}</span>
+            <span matSuffix>{{ form.get('currency')?.value ?? ('' | orgCurrencyCode) }}</span>
             <mat-hint>Max: {{ maxApplyAmount | number: '1.2-2' }}</mat-hint>
             <mat-error *ngIf="form.get('applyAmount')?.hasError('min')">Amount must be greater than 0</mat-error>
           </mat-form-field>
@@ -228,7 +228,7 @@
 
       <div class="totals-row">
         <span class="total-label">Total Amount</span>
-        <span class="total-value">{{ totalAmount | number: '1.2-2' }} {{ form.get('currency')?.value ?? 'AED' }}</span>
+        <span class="total-value">{{ totalAmount | number: '1.2-2' }} {{ form.get('currency')?.value ?? ('' | orgCurrencyCode) }}</span>
       </div>
 
       <mat-form-field appearance="outline" class="full-width description-field">

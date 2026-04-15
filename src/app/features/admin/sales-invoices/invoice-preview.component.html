@@ -279,14 +279,14 @@
                 "
               >
                 {{ item.unitPrice | number: '1.2-2' }}
-                {{ previewData.invoice?.currency || 'AED' }}
+                {{ previewData.invoice?.currency || ('' | orgCurrencyCode) }}
               </td>
               <td>{{ (item.vatTaxType === 'ZERO_RATED' || item.vatTaxType === 'EXEMPT') ? '0' : (item.vatRate || 5) }}%</td>
               <td
                 *ngIf="previewData?.templateSettings?.showItemTotal !== false"
               >
                 {{ item.amount | number: '1.2-2' }}
-                {{ previewData.invoice?.currency || 'AED' }}
+                {{ previewData.invoice?.currency || ('' | orgCurrencyCode) }}
               </td>
             </tr>
           </tbody>
@@ -307,28 +307,28 @@
           <span class="totals-label">Subtotal:</span>
           <span class="totals-value">
             {{ previewData.invoice.amount | number: '1.2-2' }}
-            {{ previewData.invoice?.currency || 'AED' }}
+            {{ previewData.invoice?.currency || ('' | orgCurrencyCode) }}
           </span>
         </div>
         <div class="totals-row" *ngIf="getDiscountAmount() > 0">
           <span class="totals-label">Discount:</span>
           <span class="totals-value">
             -{{ getDiscountAmount() | number: '1.2-2' }}
-            {{ previewData.invoice?.currency || 'AED' }}
+            {{ previewData.invoice?.currency || ('' | orgCurrencyCode) }}
           </span>
         </div>
         <div class="totals-row">
           <span class="totals-label">VAT &#64; {{ getEffectiveVatRate() }}%:</span>
           <span class="totals-value">
             {{ previewData.invoice.vatAmount | number: '1.2-2' }}
-            {{ previewData.invoice?.currency || 'AED' }}
+            {{ previewData.invoice?.currency || ('' | orgCurrencyCode) }}
           </span>
         </div>
         <div class="totals-row total-line">
           <span class="totals-label">Total Amount:</span>
           <span class="totals-value" [style.color]="getColorScheme()">
             {{ previewData.invoice.totalAmount | number: '1.2-2' }}
-            {{ previewData.invoice?.currency || 'AED' }}
+            {{ previewData.invoice?.currency || ('' | orgCurrencyCode) }}
           </span>
         </div>
       </div>

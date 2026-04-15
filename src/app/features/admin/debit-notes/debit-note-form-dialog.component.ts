@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, AfterViewInit } from '@angular/core';
+import { Component, Inject, OnInit, AfterViewInit, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -10,6 +10,8 @@ import { DebitNotesService, DebitNote } from '../../../core/services/debit-notes
 import { VendorsService, Vendor } from '../../../core/services/vendors.service';
 import { ExpensesService } from '../../../core/services/expenses.service';
 import { Expense } from '../../../core/models/expense.model';
+import { SUPPORTED_ORG_CURRENCIES } from '../../../core/constants/supported-currencies';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 @Component({
   selector: 'app-debit-note-form-dialog',
@@ -17,6 +19,8 @@ import { Expense } from '../../../core/models/expense.model';
   styleUrls: ['./debit-note-form-dialog.component.scss'],
 })
 export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   form: FormGroup;
   loading = false;
   vendors: Vendor[] = [];
@@ -34,7 +38,7 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
   ];
 
   readonly debitNoteStatuses = ['draft', 'issued', 'cancelled'];
-  readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
+  readonly currencies = [...SUPPORTED_ORG_CURRENCIES];
 
   get totalAmount(): number {
     const amount = parseFloat(this.form.get('amount')?.value || '0');
@@ -60,7 +64,7 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
       reason: ['return', Validators.required],
       amount: [0, [Validators.required, Validators.min(0.01)]],
       vatAmount: [0, [Validators.min(0)]],
-      currency: ['AED'],
+      currency: [this.orgContext.currency()],
       status: ['draft'],
       description: [''],
       notes: [''],
@@ -159,14 +163,14 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
             vendorId: expense.vendorId || vendorId || '',
             vendorName: expense.vendorName || debitNote.vendorName || '',
             vendorTrn: expense.vendorTrn || debitNote.vendorTrn || '',
-            currency: expense.currency || debitNote.currency || 'AED',
+            currency: expense.currency || debitNote.currency || this.orgContext.currency(),
           });
         },
         error: () => {
           // Fallback to debit note data
           this.form.patchValue({
             expenseId: expenseId,
-            currency: debitNote.expense?.currency || debitNote.currency || 'AED',
+            currency: debitNote.expense?.currency || debitNote.currency || this.orgContext.currency(),
           });
         },
       });
@@ -177,7 +181,7 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
       reason: debitNote.reason,
       amount: parseFloat(debitNote.amount || '0'),
       vatAmount: parseFloat(debitNote.vatAmount || '0'),
-      currency: debitNote.currency || 'AED',
+      currency: debitNote.currency || this.orgContext.currency(),
       status: debitNote.status,
       description: debitNote.description || '',
       notes: debitNote.notes || '',
@@ -200,7 +204,7 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
         vendorId: expense.vendorId || '',
         vendorName: expense.vendorName || '',
         vendorTrn: expense.vendorTrn || '',
-        currency: expense.currency || 'AED',
+        currency: expense.currency || this.orgContext.currency(),
         // Populate amount and VAT if creating new debit note
         ...(isNewDebitNote && {
           amount: expenseAmount > 0 ? expenseAmount : 0,
@@ -217,19 +221,23 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
       this.form.patchValue({
         vendorName: vendor.name,
         vendorTrn: vendor.vendorTrn || '',
-        currency: vendor.preferredCurrency || 'AED',
+        currency: vendor.preferredCurrency || this.orgContext.currency(),
       });
     }
   }
 
   calculateVat(): void {
     const amount = parseFloat(this.form.get('amount')?.value || '0');
-    const currency = this.form.get('currency')?.value || 'AED';
-    
-    // Default VAT calculation (5% for UAE standard rate)
-    // User can override manually
-    if (currency === 'AED' && parseFloat(this.form.get('vatAmount')?.value || '0') === 0 && amount > 0) {
-      const defaultVat = amount * 0.05;
+    const currency = this.form.get('currency')?.value || this.orgContext.currency();
+
+    // Default VAT/GST when empty (5% GCC; 18% India typical standard)
+    const defaultRate = this.orgContext.isIndia() ? 0.18 : 0.05;
+    if (
+      (currency === 'AED' || currency === 'INR') &&
+      parseFloat(this.form.get('vatAmount')?.value || '0') === 0 &&
+      amount > 0
+    ) {
+      const defaultVat = amount * defaultRate;
       this.form.patchValue({
         vatAmount: defaultVat.toFixed(2),
       });
@@ -257,7 +265,7 @@ export class DebitNoteFormDialogComponent implements OnInit, AfterViewInit {
       reason: formValue.reason,
       amount: parseFloat(formValue.amount),
       vatAmount: parseFloat(formValue.vatAmount || '0'),
-      currency: formValue.currency || 'AED',
+      currency: formValue.currency || this.orgContext.currency(),
       description: formValue.description || undefined,
       notes: formValue.notes || undefined,
     };

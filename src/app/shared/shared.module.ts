@@ -9,6 +9,9 @@ import { MaterialModule } from './material.module';
 import { ShellComponent } from './layout/shell/shell.component';
 import { SummaryCardComponent } from './components/summary-card/summary-card.component';
 import { FileUploadComponent } from './components/file-upload/file-upload.component';
+import { OrgMoneyPipe } from './pipes/org-money.pipe';
+import { OrgCurrencyCodePipe } from './pipes/org-currency-code.pipe';
+import { SignedOrgMoneyPipe } from './pipes/signed-org-money.pipe';
 
 @NgModule({
   declarations: [ShellComponent, SummaryCardComponent, FileUploadComponent],
@@ -21,6 +24,9 @@ import { FileUploadComponent } from './components/file-upload/file-upload.compon
     MaterialModule,
     LayoutModule,
     NgChartsModule,
+    OrgMoneyPipe,
+    OrgCurrencyCodePipe,
+    SignedOrgMoneyPipe,
   ],
   exports: [
     CommonModule,
@@ -34,6 +40,9 @@ import { FileUploadComponent } from './components/file-upload/file-upload.compon
     ShellComponent,
     SummaryCardComponent,
     FileUploadComponent,
+    OrgMoneyPipe,
+    OrgCurrencyCodePipe,
+    SignedOrgMoneyPipe,
   ],
 })
 export class SharedModule {}

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -17,6 +17,8 @@ import { Organization } from '../../../core/models/organization.model';
 import { CustomerFormDialogComponent } from '../customers/customer-form-dialog.component';
 import { Observable, of, forkJoin } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { SUPPORTED_ORG_CURRENCIES } from '../../../core/constants/supported-currencies';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 @Component({
   selector: 'app-invoice-form-dialog',
@@ -24,6 +26,8 @@ import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'r
   styleUrls: ['./invoice-form-dialog.component.scss'],
 })
 export class InvoiceFormDialogComponent implements OnInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   form: FormGroup;
   loading = false;
   customers: Customer[] = [];
@@ -47,7 +51,7 @@ export class InvoiceFormDialogComponent implements OnInit {
   };
   /** When opened from Proforma or Quotation screen, status is fixed; no dropdown. */
   documentType: 'invoice' | 'proforma' | 'quotation' = 'invoice';
-  readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
+  readonly currencies = [...SUPPORTED_ORG_CURRENCIES];
 
   organization: Organization | null = null;
   nextInvoiceNumber = '';
@@ -114,8 +118,14 @@ export class InvoiceFormDialogComponent implements OnInit {
 
   get totalInWords(): string {
     const n = Math.floor(this.totalAmount);
-    const curr = this.form.get('currency')?.value || 'AED';
-    const suffix = curr === 'AED' ? 'Dirham Only' : curr + ' Only';
+    const curr =
+      this.form.get('currency')?.value || this.orgContext.currency();
+    const suffix =
+      curr === 'AED'
+        ? 'Dirham Only'
+        : curr === 'INR'
+          ? 'Rupees Only'
+          : `${curr} Only`;
     if (n === 0) return 'Zero ' + suffix;
     if (n > 999999) return this.totalAmount.toFixed(2) + ' ' + curr;
     return this.numberToWords(n) + ' ' + suffix;
@@ -214,7 +224,7 @@ export class InvoiceFormDialogComponent implements OnInit {
       supplyDate: [''],
       dueDate: [''],
       discountAmount: [0],
-      currency: ['AED'],
+      currency: [this.orgContext.currency()],
       status: [defaultStatus],
       description: [''],
       notes: [''],
@@ -457,7 +467,10 @@ export class InvoiceFormDialogComponent implements OnInit {
           customerTrn: created.customerTrn || '',
           customerAddress: created.address || '',
           customerPhone: created.phone || '',
-          currency: created.preferredCurrency || this.form.get('currency')?.value || 'AED',
+          currency:
+            created.preferredCurrency ||
+            this.form.get('currency')?.value ||
+            this.orgContext.currency(),
         });
         if (created.paymentTerms != null) {
           const invoiceDate = new Date(this.form.get('invoiceDate')?.value || new Date());
@@ -528,7 +541,7 @@ export class InvoiceFormDialogComponent implements OnInit {
       supplyDate: (invoice as any).supplyDate || '',
       dueDate: invoice.dueDate || '',
       discountAmount: parseFloat((invoice as any).discountAmount || '0'),
-      currency: invoice.currency || 'AED',
+      currency: invoice.currency || this.orgContext.currency(),
       status: invoice.status,
       description: invoice.description || '',
       notes: invoice.notes || '',
@@ -612,7 +625,7 @@ export class InvoiceFormDialogComponent implements OnInit {
         customerTrn: customer.customerTrn || '',
         customerAddress: customer.address || '',
         customerPhone: customer.phone || '',
-        currency: customer.preferredCurrency || 'AED',
+        currency: customer.preferredCurrency || this.orgContext.currency(),
         suppliersRef: customer.customerNumber || '', // Customer Ref number (Commercial Details)
       });
 
@@ -877,7 +890,7 @@ export class InvoiceFormDialogComponent implements OnInit {
       supplyDate: formValue.supplyDate || undefined,
       dueDate: formValue.dueDate || undefined,
       discountAmount: parseFloat(formValue.discountAmount || '0'),
-      currency: formValue.currency || 'AED',
+      currency: formValue.currency || this.orgContext.currency(),
       status,
       description: formValue.description || undefined,
       notes: formValue.notes || undefined,

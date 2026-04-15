@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, inject } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
@@ -11,6 +11,7 @@ import { Expense } from '../../../core/models/expense.model';
 import { JournalEntriesService, JournalEntry } from '../../../core/services/journal-entries.service';
 import { ExpenseFormDialogComponent } from '../expenses/expense-form-dialog.component';
 import { JournalEntryFormDialogComponent } from '../journal-entries/journal-entry-form-dialog.component';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 interface AdjustmentTransaction {
   id: string;
@@ -30,6 +31,8 @@ interface AdjustmentTransaction {
   styleUrls: ['./adjustments.component.scss'],
 })
 export class AdjustmentsComponent implements OnInit, AfterViewInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   readonly columns = [
     'date',
@@ -118,7 +121,7 @@ export class AdjustmentsComponent implements OnInit, AfterViewInit {
             description: expense.description || 'Adjustment',
             vendorOrCustomer: expense.vendorName || '—',
             amount: expense.totalAmount,
-            currency: expense.currency || 'AED',
+            currency: expense.currency || this.orgContext.currency(),
             expense: expense,
           };
           allTransactions.push(transaction);

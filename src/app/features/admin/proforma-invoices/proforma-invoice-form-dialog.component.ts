@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -12,6 +12,8 @@ import { CustomersService, Customer } from '../../../core/services/customers.ser
 import { SettingsService, TaxRate } from '../../../core/services/settings.service';
 import { Observable, of } from 'rxjs';
 import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { SUPPORTED_ORG_CURRENCIES } from '../../../core/constants/supported-currencies';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 @Component({
   selector: 'app-proforma-invoice-form-dialog',
@@ -19,6 +21,8 @@ import { map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'r
   styleUrls: ['./proforma-invoice-form-dialog.component.scss'],
 })
 export class ProformaInvoiceFormDialogComponent implements OnInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   form: FormGroup;
   loading = false;
   customers: Customer[] = [];
@@ -27,7 +31,7 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
   defaultTaxRate = 5; // Fallback default
 
   readonly vatTaxTypes = ['STANDARD', 'ZERO_RATED', 'EXEMPT', 'REVERSE_CHARGE'];
-  readonly currencies = ['AED', 'USD', 'EUR', 'GBP', 'SAR'];
+  readonly currencies = [...SUPPORTED_ORG_CURRENCIES];
 
   // Item suggestions autocomplete
   itemSuggestionsMap = new Map<number, Observable<Array<{
@@ -89,7 +93,7 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
       supplyDate: [''],
       dueDate: [''],
       discountAmount: [0],
-      currency: ['AED'],
+      currency: [this.orgContext.currency()],
       status: ['proforma_invoice'], // Always proforma_invoice for this component
       description: [''],
       notes: [''],
@@ -200,7 +204,7 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
       supplyDate: (invoice as any).supplyDate || '',
       dueDate: invoice.dueDate || '',
       discountAmount: parseFloat((invoice as any).discountAmount || '0'),
-      currency: invoice.currency || 'AED',
+      currency: invoice.currency || this.orgContext.currency(),
       status: 'proforma_invoice', // Always set to proforma_invoice
       description: invoice.description || '',
       notes: invoice.notes || '',
@@ -242,7 +246,7 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
       this.form.patchValue({
         customerName: customer.name,
         customerTrn: customer.customerTrn || '',
-        currency: customer.preferredCurrency || 'AED',
+        currency: customer.preferredCurrency || this.orgContext.currency(),
         suppliersRef: customer.customerNumber || '', // Customer Ref number (Commercial Details)
       });
 
@@ -466,7 +470,7 @@ export class ProformaInvoiceFormDialogComponent implements OnInit {
       supplyDate: formValue.supplyDate || undefined,
       dueDate: formValue.dueDate || undefined,
       discountAmount: parseFloat(formValue.discountAmount || '0'),
-      currency: formValue.currency || 'AED',
+      currency: formValue.currency || this.orgContext.currency(),
       status: 'proforma_invoice', // Always proforma_invoice for this component
       description: formValue.description || undefined,
       notes: formValue.notes || undefined,

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -19,6 +19,9 @@ import {
   AccountEntriesDialogComponent,
   AccountEntriesDialogData,
 } from './account-entries-dialog.component';
+import { OrganizationService } from '../../../core/services/organization.service';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
+import { currencyForRegion } from '../../../core/constants/region-default-currency';
 
 interface ReportConfig {
   value: ReportType;
@@ -34,6 +37,8 @@ interface ReportConfig {
   styleUrls: ['./admin-reports.component.scss'],
 })
 export class AdminReportsComponent implements OnInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   readonly reports: ReportConfig[] = [
     {
       value: 'trial_balance',
@@ -123,6 +128,9 @@ export class AdminReportsComponent implements OnInit {
   /** Row for which the download menu is open (used for menu item actions) */
   downloadMenuRow: ReportHistoryItem | null = null;
 
+  /** Display currency from organization (e.g. INR, AED). */
+  orgCurrency = this.orgContext.currency();
+
   // Cached chart data to prevent re-rendering
   profitAndLossChartData: ChartConfiguration<'bar'>['data'] | null = null;
   expensesByCategoryChartData: ChartConfiguration<'pie'>['data'] | null = null;
@@ -151,6 +159,7 @@ export class AdminReportsComponent implements OnInit {
     private readonly licenseService: LicenseService,
     private readonly ledgerAccountsService: LedgerAccountsService,
     private readonly dialog: MatDialog,
+    private readonly organizationService: OrganizationService,
   ) {
     this.form = this.fb.group({
       reportType: [''],
@@ -164,10 +173,16 @@ export class AdminReportsComponent implements OnInit {
       customerName: [[]],
       paymentStatus: [[]],
     });
+    this.rebuildChartOptions();
   }
 
-  // Chart options - Fixed to prevent re-rendering on hover
-  chartOptions: ChartOptions<'bar' | 'line' | 'pie'> = {
+  /** Chart.js options; rebuilt when `orgCurrency` changes. */
+  chartOptions!: ChartOptions<'bar' | 'line' | 'pie'>;
+  pieChartOptions!: ChartOptions<'pie'>;
+
+  private rebuildChartOptions(): void {
+    const cur = this.orgCurrency;
+    this.chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     animation: {
@@ -219,7 +234,7 @@ export class AdminReportsComponent implements OnInit {
             if (isNaN(value) || !isFinite(value)) {
               value = 0;
             }
-            return `${label}: AED ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            return `${label}: ${cur} ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
           },
         },
       },
@@ -228,15 +243,14 @@ export class AdminReportsComponent implements OnInit {
       y: {
         beginAtZero: true,
         ticks: {
-          callback: function(value) {
-            return 'AED ' + Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-          },
+          callback: (value) =>
+            `${cur} ${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         },
       },
     },
-  };
+    };
 
-  pieChartOptions: ChartOptions<'pie'> = {
+    this.pieChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     animation: {
@@ -294,14 +308,26 @@ export class AdminReportsComponent implements OnInit {
               return numA + numB;
             }, 0);
             const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
-            return `${label}: AED ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${percentage}%)`;
+            return `${label}: ${cur} ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${percentage}%)`;
           },
         },
       },
     },
-  };
+    };
+  }
 
   ngOnInit(): void {
+    this.organizationService
+      .getMyOrganization()
+      .pipe(take(1))
+      .subscribe((org) => {
+        this.orgCurrency =
+          org?.currency?.trim() ||
+          currencyForRegion(org?.region) ||
+          this.orgContext.currency();
+        this.rebuildChartOptions();
+      });
+
     this.ledgerAccountsService.listLedgerAccounts().subscribe({
       next: (accounts) => {
         this.ledgerAccountsById.clear();
@@ -868,7 +894,7 @@ export class AdminReportsComponent implements OnInit {
       labels: ['Revenue', 'Expenses', 'Net Profit'],
       datasets: [
         {
-          label: 'Amount (AED)',
+          label: `Amount (${this.orgCurrency})`,
           data: [
             // Use NET revenue for consistency (invoices - credit notes + debit notes)
             Number(data.revenue?.netAmount ?? data.revenue?.amount ?? 0) || 0,
@@ -931,7 +957,7 @@ export class AdminReportsComponent implements OnInit {
       labels: Array.from(vendorMap.keys()),
       datasets: [
         {
-          label: 'Outstanding Amount (AED)',
+          label: `Outstanding Amount (${this.orgCurrency})`,
           data: Array.from(vendorMap.values()).map(v => Number(v) || 0),
           backgroundColor: 'rgba(156, 39, 176, 0.7)',
         },
@@ -957,7 +983,7 @@ export class AdminReportsComponent implements OnInit {
       labels: Array.from(customerMap.keys()),
       datasets: [
         {
-          label: 'Outstanding Amount (AED)',
+          label: `Outstanding Amount (${this.orgCurrency})`,
           data: Array.from(customerMap.values()).map(v => Number(v) || 0),
           backgroundColor: 'rgba(0, 150, 136, 0.7)',
         },
@@ -975,7 +1001,7 @@ export class AdminReportsComponent implements OnInit {
       labels: ['Total Debit', 'Total Credit', 'Balance'],
       datasets: [
         {
-          label: 'Amount (AED)',
+          label: `Amount (${this.orgCurrency})`,
           data: [
             Number(data.summary.totalDebit || 0) || 0,
             Number(data.summary.totalCredit || 0) || 0,
@@ -1075,7 +1101,7 @@ export class AdminReportsComponent implements OnInit {
       labels: data.assets.items.map((item: any) => item.category),
       datasets: [
         {
-          label: 'Amount (AED)',
+          label: `Amount (${this.orgCurrency})`,
           data: data.assets.items.map((item: any) => Number(item.amount || 0) || 0),
           backgroundColor: 'rgba(46, 125, 50, 0.7)',
         },
@@ -1093,7 +1119,7 @@ export class AdminReportsComponent implements OnInit {
       labels: ['VAT Input', 'VAT Output', 'Net VAT'],
       datasets: [
         {
-          label: 'Amount (AED)',
+          label: `Amount (${this.orgCurrency})`,
           data: [
             // Use NET input/output so the chart reconciles with Net VAT
             Number(data.summary.netVatInput ?? data.summary.vatInput ?? 0) || 0,
@@ -1130,13 +1156,14 @@ export class AdminReportsComponent implements OnInit {
   }
 
   formatCurrency(value: number, showSign: boolean = false): string {
+    const code = this.orgCurrency;
     const numValue = Number(value);
     const formatted = numValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     if (showSign) {
       const sign = numValue >= 0 ? '+' : '';
-      return `${sign}AED ${formatted}`;
+      return `${sign}${code} ${formatted}`;
     }
-    return `AED ${formatted}`;
+    return `${code} ${formatted}`;
   }
 
   /**
@@ -1155,9 +1182,9 @@ export class AdminReportsComponent implements OnInit {
     
     if (showSign) {
       const sign = displayValue >= 0 ? '+' : '-';
-      return `${sign}AED ${formatted}`;
+      return `${sign}${this.orgCurrency} ${formatted}`;
     }
-    return `AED ${formatted}`;
+    return `${this.orgCurrency} ${formatted}`;
   }
 
   formatDate(date: string): string {
@@ -1181,6 +1208,7 @@ export class AdminReportsComponent implements OnInit {
       accountType: row.accountType,
       startDate: startDate ?? undefined,
       endDate: endDate ?? undefined,
+      currency: this.orgCurrency,
     };
 
     this.dialog.open(AccountEntriesDialogComponent, {
@@ -1235,6 +1263,7 @@ export class AdminReportsComponent implements OnInit {
       accountType,
       startDate: startDate,
       endDate: endDate ?? undefined,
+      currency: this.orgCurrency,
     };
 
     this.dialog.open(AccountEntriesDialogComponent, {
@@ -1280,6 +1309,7 @@ export class AdminReportsComponent implements OnInit {
       accountType,
       startDate: startDate ?? undefined,
       endDate: endDate ?? undefined,
+      currency: this.orgCurrency,
     };
 
     this.dialog.open(AccountEntriesDialogComponent, {

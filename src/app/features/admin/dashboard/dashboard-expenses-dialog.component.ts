@@ -1,11 +1,14 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ExpensesService } from '../../../core/services/expenses.service';
 import { Expense } from '../../../core/models/expense.model';
+import { OrganizationContextService } from '../../../core/services/organization-context.service';
 
 export interface DashboardExpensesDialogData {
   startDate: string;
   endDate: string;
+  /** Organization display currency */
+  currency?: string;
 }
 
 @Component({
@@ -14,6 +17,8 @@ export interface DashboardExpensesDialogData {
   styleUrls: ['./dashboard-expenses-dialog.component.scss'],
 })
 export class DashboardExpensesDialogComponent implements OnInit {
+  readonly orgContext = inject(OrganizationContextService);
+
   loading = false;
   expenses: Expense[] = [];
   displayedColumns = ['expenseDate', 'vendorName', 'categoryName', 'totalAmount', 'type'];
@@ -57,7 +62,13 @@ export class DashboardExpensesDialogComponent implements OnInit {
 
   formatCurrency(amount: number): string {
     if (amount == null) return '—';
-    return `AED ${Number(amount).toFixed(2)}`;
+    const code = (
+      this.data.currency ||
+      this.orgContext.currency()
+    )
+      .trim() ||
+      this.orgContext.currency();
+    return `${code} ${Number(amount).toFixed(2)}`;
   }
 
   close(): void {

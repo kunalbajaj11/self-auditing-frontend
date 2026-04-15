@@ -82,9 +82,9 @@
           <app-summary-card
             label="Net Profit"
             icon="account_balance_wallet"
-            [value]="'AED ' + (vm.netProfit | number: '1.0-2')"
+            [value]="(vm.organization.currency || orgContext.currency()) + ' ' + (vm.netProfit | number: '1.0-2')"
             accent="primary"
-            [hint]="'Revenue: AED ' + (vm.totalRevenue | number: '1.0-2') + ' - Expenses: AED ' + (vm.totalExpenses | number: '1.0-2')"
+            [hint]="'Revenue: ' + (vm.organization.currency || orgContext.currency()) + ' ' + (vm.totalRevenue | number: '1.0-2') + ' - Expenses: ' + (vm.organization.currency || orgContext.currency()) + ' ' + (vm.totalExpenses | number: '1.0-2')"
             [clickable]="true"
             (cardClick)="openTileEntries('netProfit')"
           ></app-summary-card>
@@ -92,11 +92,11 @@
           <app-summary-card
             label="VAT Payable"
             icon="receipt_long"
-            [value]="'AED ' + (vm.vatAmount | number: '1.0-2')"
+            [value]="(vm.organization.currency || orgContext.currency()) + ' ' + (vm.vatAmount | number: '1.0-2')"
             accent="accent"
             [hint]="
               vm.vatSummary && (vm.inputVat > 0 || vm.outputVat > 0)
-                ? 'Output: AED ' + (vm.outputVat | number: '1.0-2') + ' - Input: AED ' + (vm.inputVat | number: '1.0-2')
+                ? 'Output: ' + (vm.organization.currency || orgContext.currency()) + ' ' + (vm.outputVat | number: '1.0-2') + ' - Input: ' + (vm.organization.currency || orgContext.currency()) + ' ' + (vm.inputVat | number: '1.0-2')
                 : 'No VAT transactions'
             "
             [clickable]="true"
@@ -106,7 +106,7 @@
           <app-summary-card
             label="Expenses"
             icon="receipt_long"
-            [value]="'AED ' + (vm.totalExpenses | number: '1.0-2')"
+            [value]="(vm.organization.currency || orgContext.currency()) + ' ' + (vm.totalExpenses | number: '1.0-2')"
             accent="primary"
             [hint]="vm.expenseCount + ' items'"
             [clickable]="true"
@@ -116,7 +116,7 @@
           <app-summary-card
             label="Receivables"
             icon="account_balance_wallet"
-            [value]="'AED ' + (vm.receivablesAmount | number: '1.0-2')"
+            [value]="(vm.organization.currency || orgContext.currency()) + ' ' + (vm.receivablesAmount | number: '1.0-2')"
             accent="primary"
             [hint]="vm.outstandingInvoices ? vm.outstandingInvoices + ' invoices outstanding' : 'No outstanding invoices'"
             [clickable]="true"
@@ -126,7 +126,7 @@
           <app-summary-card
             label="Payables"
             icon="account_balance_wallet"
-            [value]="'AED ' + (vm.payablesAmount | number: '1.0-2')"
+            [value]="(vm.organization.currency || orgContext.currency()) + ' ' + (vm.payablesAmount | number: '1.0-2')"
             accent="accent"
             [hint]="vm.accrualSummary && vm.accrualSummary.length > 0 && vm.accrualSummary[0].count > 0 ? vm.accrualSummary[0].count + ' items pending' : 'No pending payables'"
             [clickable]="true"
@@ -136,7 +136,7 @@
           <app-summary-card
             label="Bank"
             icon="account_balance"
-            [value]="'AED ' + (vm.bankBalance | number: '1.0-2')"
+            [value]="(vm.organization.currency || orgContext.currency()) + ' ' + (vm.bankBalance | number: '1.0-2')"
             accent="primary"
             [hint]="vm.bankBalance >= 0 ? 'Positive balance' : 'Negative balance'"
             [clickable]="true"
@@ -146,7 +146,7 @@
           <app-summary-card
             label="Cash"
             icon="payments"
-            [value]="'AED ' + (vm.cashBalance | number: '1.0-2')"
+            [value]="(vm.organization.currency || orgContext.currency()) + ' ' + (vm.cashBalance | number: '1.0-2')"
             accent="accent"
             [hint]="vm.cashBalance >= 0 ? 'Positive balance' : 'Negative balance'"
             [clickable]="true"
@@ -201,19 +201,19 @@
                   <ng-container matColumnDef="amount">
                     <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
                     <td mat-cell *matCellDef="let row" class="text-right">
-                      AED {{ row.amount | number: '1.0-2' }}
+                      {{ (vm.organization.currency || orgContext.currency()) }} {{ row.amount | number: '1.0-2' }}
                     </td>
                   </ng-container>
                   <ng-container matColumnDef="vat">
                     <th mat-header-cell *matHeaderCellDef class="text-right">VAT</th>
                     <td mat-cell *matCellDef="let row" class="text-right">
-                      AED {{ row.vatAmount | number: '1.0-2' }}
+                      {{ (vm.organization.currency || orgContext.currency()) }} {{ row.vatAmount | number: '1.0-2' }}
                     </td>
                   </ng-container>
                   <ng-container matColumnDef="total">
                     <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
                     <td mat-cell *matCellDef="let row" class="text-right">
-                      <strong>AED {{ row.totalAmount | number: '1.0-2' }}</strong>
+                      <strong>{{ (vm.organization.currency || orgContext.currency()) }} {{ row.totalAmount | number: '1.0-2' }}</strong>
                     </td>
                   </ng-container>
                   <tr mat-header-row *matHeaderRowDef="['category', 'amount', 'vat', 'total']" class="table-header"></tr>
@@ -257,7 +257,7 @@
                   <ng-container matColumnDef="value">
                     <th mat-header-cell *matHeaderCellDef class="text-right">Value</th>
                     <td mat-cell *matCellDef="let row" class="text-right">
-                      <strong>AED {{ row.amount | number: '1.0-2' }}</strong>
+                      <strong>{{ (vm.organization.currency || orgContext.currency()) }} {{ row.amount | number: '1.0-2' }}</strong>
                     </td>
                   </ng-container>
                   <tr mat-header-row *matHeaderRowDef="['status', 'count', 'value']" class="table-header"></tr>
@@ -295,7 +295,7 @@
                     <span class="vendor-name">{{ expense.vendorName || 'Unspecified vendor' }}</span>
                   </div>
                   <div class="expense-meta">
-                    <span class="amount">AED {{ expense.totalAmount | number: '1.0-2' }}</span>
+                    <span class="amount">{{ expense.currency || (vm.organization.currency || orgContext.currency()) }} {{ expense.totalAmount | number: '1.0-2' }}</span>
                     <span class="separator">•</span>
                     <span class="date">{{ expense.expenseDate | date: 'mediumDate' }}</span>
                     <span class="separator" *ngIf="expense.categoryName">•</span>
