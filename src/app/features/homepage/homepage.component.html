@@ -1,57 +1,163 @@
 <div class="homepage-container">
-  <div class="homepage-scale">
-    <!-- Hero Section -->
-    <section class="hero-section" aria-label="Hero section">
-      <div class="hero-background">
-        <div class="hero-gradient"></div>
-        <div class="hero-pattern"></div>
-        <div class="floating-shapes">
-          <div class="shape shape-1"></div>
-          <div class="shape shape-2"></div>
-          <div class="shape shape-3"></div>
-        </div>
+
+  <!-- Top Navigation -->
+  <nav class="site-nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a class="nav-brand" routerLink="/">
+        <img src="assets/images/backless_logo.png" alt="SelfAccounting.AI" class="nav-logo" />
+        <span class="nav-wordmark">SelfAccounting<span class="nav-wordmark-accent">.AI</span></span>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" role="button" tabindex="0" (click)="scrollTo('features')" (keyup.enter)="scrollTo('features')">Features</a>
+        <a class="nav-link" role="button" tabindex="0" (click)="scrollTo('use-cases')" (keyup.enter)="scrollTo('use-cases')">Who It's For</a>
+        <a class="nav-link" routerLink="/help">FAQ &amp; Manuals</a>
       </div>
-      <div class="hero-content">
-        <div class="hero-logo">
-          <img src="assets/images/backless_logo_white.png" alt="SelfAccounting.AI Logo" class="logo-image" />
-        </div>
+      <div class="nav-actions">
+        <button mat-stroked-button class="nav-btn nav-btn-outline" (click)="navigateToLogin()">Sign In</button>
+        <button mat-raised-button class="nav-btn nav-btn-primary" (click)="navigateToRegister()">
+          Get Started
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section" aria-label="Hero section">
+    <div class="hero-glow"></div>
+    <div class="hero-inner">
+      <div class="hero-left">
+        <span class="eyebrow-badge">
+          <mat-icon>auto_awesome</mat-icon>
+          AI-Powered Self Accounting for UAE Businesses
+        </span>
         <h1 class="hero-title">
-          <span class="title-highlight">Self Accounting Software</span>
-          <span class="title-main">for UAE Businesses</span>
+          Expense &amp; accounting software that runs itself
         </h1>
         <p class="hero-subtitle">
-          The leading self accounting platform for UAE businesses. SelfAccounting.AI provides comprehensive self accounting solutions including expense tracking, invoice management, payment recording, credit notes, and VAT compliance with AI-powered automation. Trusted by audit firms and accounting departments across the United Arab Emirates for reliable self accounting software.
+          SelfAccounting.AI automates expense tracking, invoicing, payments, and VAT compliance with
+          AI-powered receipt scanning — so audit firms and finance teams across the UAE spend less time
+          on data entry and more time on the numbers that matter.
         </p>
         <div class="hero-actions">
           <button mat-raised-button class="cta-button cta-button-primary" (click)="navigateToRegister()" aria-label="Get started with SelfAccounting.AI">
-            <span>Get Started</span>
+            <span>Get Started Free</span>
             <mat-icon>arrow_forward</mat-icon>
-          </button>
-          <button *ngIf="false" mat-stroked-button class="cta-button cta-button-outline" (click)="navigateToPricing()" aria-label="View pricing plans">
-            View Pricing
           </button>
           <button mat-stroked-button class="cta-button cta-button-outline" (click)="navigateToLogin()" aria-label="Sign in to your account">
             Sign In
           </button>
         </div>
-        <div class="hero-secondary-actions">
-          <a mat-stroked-button class="secondary-action-button download-manual-btn" routerLink="/help" aria-label="FAQ and manuals">
+        <div class="hero-utility-links">
+          <a routerLink="/help" class="utility-link">
             <mat-icon>help_outline</mat-icon>
-            <span>FAQ &amp; Manuals</span>
+            FAQ &amp; Manuals
           </a>
-          <a mat-stroked-button class="secondary-action-button download-manual-btn" href="assets/USER-MANUAL.pdf" download="SelfAccounting-User-Manual.pdf" aria-label="Download user manual PDF">
+          <a href="assets/USER-MANUAL.pdf" download="SelfAccounting-User-Manual.pdf" class="utility-link">
             <mat-icon>download</mat-icon>
-            <span>Download User Manual</span>
-          </a>
-          <a mat-stroked-button class="secondary-action-button whatsapp-btn" [href]="whatsappLink" target="_blank" aria-label="Contact us on WhatsApp">
-            <svg class="whatsapp-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-            </svg>
-            <span style="padding-left: 8px; vertical-align: text-bottom; height: 24px;">Chat on WhatsApp</span>
+            User Manual (PDF)
           </a>
         </div>
+        <div class="trust-row">
+          <div class="trust-item">
+            <mat-icon>bolt</mat-icon>
+            <span>90% less manual data entry</span>
+          </div>
+          <div class="trust-item">
+            <mat-icon>verified</mat-icon>
+            <span>UAE VAT &amp; FTA ready</span>
+          </div>
+          <div class="trust-item">
+            <mat-icon>domain</mat-icon>
+            <span>Built for multi-entity firms</span>
+          </div>
+        </div>
       </div>
-    </section>
+
+      <div class="hero-right">
+        <div class="product-preview">
+          <div class="preview-header">
+            <div class="preview-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="preview-title">Expense Dashboard</span>
+          </div>
+          <div class="preview-body">
+            <div class="preview-stats">
+              <div class="preview-stat">
+                <span class="stat-label">This Month</span>
+                <span class="stat-value">AED 84,210</span>
+                <span class="stat-delta stat-delta-up"><mat-icon>trending_up</mat-icon>12%</span>
+              </div>
+              <div class="preview-stat">
+                <span class="stat-label">Pending Approval</span>
+                <span class="stat-value">7</span>
+                <span class="stat-delta stat-delta-neutral">receipts</span>
+              </div>
+              <div class="preview-stat">
+                <span class="stat-label">VAT Reclaimable</span>
+                <span class="stat-value">AED 4,015</span>
+                <span class="stat-delta stat-delta-up"><mat-icon>trending_up</mat-icon>5%</span>
+              </div>
+            </div>
+            <div class="preview-list">
+              <div class="preview-row">
+                <span class="row-icon" style="background: rgba(0,119,200,.12); color:#0077c8;"><mat-icon>local_gas_station</mat-icon></span>
+                <div class="row-text">
+                  <span class="row-title">ENOC Fuel Station</span>
+                  <span class="row-sub">Travel &amp; Fuel</span>
+                </div>
+                <span class="row-amount">AED 220.00</span>
+                <span class="row-status status-approved">Approved</span>
+              </div>
+              <div class="preview-row">
+                <span class="row-icon" style="background: rgba(0,191,165,.14); color:#00bfa5;"><mat-icon>restaurant</mat-icon></span>
+                <div class="row-text">
+                  <span class="row-title">Business Lunch</span>
+                  <span class="row-sub">Meals &amp; Entertainment</span>
+                </div>
+                <span class="row-amount">AED 340.50</span>
+                <span class="row-status status-pending">Pending</span>
+              </div>
+              <div class="preview-row">
+                <span class="row-icon" style="background: rgba(244,162,97,.16); color:#c6601a;"><mat-icon>flight</mat-icon></span>
+                <div class="row-text">
+                  <span class="row-title">Emirates Airlines</span>
+                  <span class="row-sub">Travel</span>
+                </div>
+                <span class="row-amount">AED 1,980.00</span>
+                <span class="row-status status-approved">Approved</span>
+              </div>
+            </div>
+            <div class="preview-chart" aria-hidden="true">
+              <span style="height: 35%;"></span>
+              <span style="height: 55%;"></span>
+              <span style="height: 40%;"></span>
+              <span style="height: 70%;"></span>
+              <span style="height: 50%;"></span>
+              <span style="height: 85%;"></span>
+              <span style="height: 60%;"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="floating-badge badge-scan">
+          <mat-icon>document_scanner</mat-icon>
+          <div>
+            <strong>Receipt Scanned</strong>
+            <span>OCR extracted in 2s</span>
+          </div>
+        </div>
+        <div class="floating-badge badge-accuracy">
+          <mat-icon>check_circle</mat-icon>
+          <div>
+            <strong>98% Accuracy</strong>
+            <span>AI-powered OCR</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Benefits Section -->
   <section class="benefits-section" aria-label="Benefits of using SelfAccounting.AI">
@@ -62,7 +168,7 @@
         <p class="section-subtitle">The most comprehensive self accounting software designed specifically for UAE businesses, audit firms, and accounting departments. Our self accounting platform handles both money going out (expenses) and money coming in (invoices) in one unified self accounting solution.</p>
       </div>
       <div class="benefits-grid">
-        <mat-card *ngFor="let benefit of benefits; let i = index" class="benefit-card" [style.animation-delay]="(i * 0.1) + 's'">
+        <mat-card *ngFor="let benefit of benefits; let i = index" class="benefit-card" [style.animation-delay]="(i * 0.08) + 's'">
           <mat-card-content>
             <div class="benefit-icon-wrapper">
               <div class="benefit-icon"></div>
@@ -76,7 +182,7 @@
   </section>
 
   <!-- Features Section -->
-  <section class="features-section" aria-label="Features of SelfAccounting.AI expense tracker">
+  <section class="features-section" id="features" aria-label="Features of SelfAccounting.AI expense tracker">
     <div class="section-container">
       <div class="section-header">
         <span class="section-badge">Features</span>
@@ -86,10 +192,9 @@
         </p>
       </div>
       <div class="features-grid">
-        <mat-card *ngFor="let feature of features; let i = index" class="feature-card" [style.animation-delay]="(i * 0.05) + 's'">
+        <mat-card *ngFor="let feature of features; let i = index" class="feature-card" [style.animation-delay]="(i * 0.04) + 's'">
           <mat-card-content>
             <div class="feature-icon-wrapper" aria-hidden="true">
-              <div class="feature-icon-bg"></div>
               <mat-icon class="feature-icon">{{ feature.icon }}</mat-icon>
             </div>
             <h3>{{ feature.title }}</h3>
@@ -100,8 +205,8 @@
     </div>
   </section>
 
-    <!-- Use Cases Section -->
-    <section class="use-cases-section" aria-label="Who can use SelfAccounting.AI">
+  <!-- Use Cases Section -->
+  <section class="use-cases-section" id="use-cases" aria-label="Who can use SelfAccounting.AI">
     <div class="section-container">
       <div class="section-header">
         <span class="section-badge">Perfect For</span>
@@ -148,18 +253,15 @@
     </div>
   </section>
 
-    <!-- CTA Section -->
-    <section class="cta-section" aria-label="Call to action">
-    <div class="cta-background">
-      <div class="cta-gradient"></div>
-    </div>
+  <!-- CTA Section -->
+  <section class="cta-section" aria-label="Call to action">
     <div class="section-container">
       <div class="cta-content">
         <h2 class="cta-title">Ready to Transform Your Self Accounting in UAE?</h2>
         <p class="cta-subtitle">
-          Join leading audit firms and businesses in the UAE who trust SelfAccounting.AI for complete self accounting solutions - expense tracking, invoice management, payment tracking, VAT compliance, and comprehensive accounting. Experience the best self accounting software for UAE businesses.
+          Join leading audit firms and businesses in the UAE who trust SelfAccounting.AI for complete self accounting solutions — expense tracking, invoice management, payment tracking, VAT compliance, and comprehensive accounting.
         </p>
-        <button mat-raised-button class="cta-button-large cta-button-primary" (click)="navigateToRegister()" aria-label="Request a demo of SelfAccounting.AI">
+        <button mat-raised-button class="cta-button-large" (click)="navigateToRegister()" aria-label="Request a demo of SelfAccounting.AI">
           <span>Request Demo</span>
           <mat-icon>arrow_forward</mat-icon>
         </button>
@@ -167,8 +269,8 @@
     </div>
   </section>
 
-    <!-- Contact Form Section -->
-    <section class="contact-section" aria-label="Contact us">
+  <!-- Contact Form Section -->
+  <section class="contact-section" aria-label="Contact us">
     <div class="section-container">
       <div class="section-header">
         <span class="section-badge">Contact Us</span>
@@ -256,69 +358,68 @@
     </div>
   </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-      <div class="section-container">
-        <div class="footer-row">
-          <p class="footer-copy">&copy; {{ currentYear }} SelfAccounting.AI</p>
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="section-container">
+      <div class="footer-row">
+        <p class="footer-copy">&copy; {{ currentYear }} SelfAccounting.AI</p>
 
-          <div class="footer-links">
-            <a routerLink="/help">FAQ &amp; Manuals</a>
-            <a href="/auth/login">Sign In</a>
-            <a href="/auth/register">Register</a>
-          </div>
-
-          <div class="footer-social" aria-label="Social media links">
-            <span class="footer-social-label">Follow:</span>
-            <a
-              class="footer-social-link"
-              href="https://www.instagram.com/selfaccounting.ai?igsh=MWo0NDg5bDVodGYwdg=="
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-            >
-              <svg class="footer-social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" aria-hidden="true">
-                <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.5-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.5 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.5 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.5-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/>
-              </svg>
-            </a>
-            <a
-              class="footer-social-link"
-              href="https://www.linkedin.com/company/111421971"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="LinkedIn"
-            >
-              <svg class="footer-social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" aria-hidden="true">
-                <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"/>
-              </svg>
-            </a>
-            <a
-              class="footer-social-link"
-              href="https://www.youtube.com/@selfaccountingai"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="YouTube"
-            >
-              <svg class="footer-social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" fill="currentColor" aria-hidden="true">
-                <path d="M549.7 124.1c-6.3-23.7-24.8-42.3-48.3-48.6C458.8 64 288 64 288 64S117.2 64 74.6 75.5c-23.5 6.3-42 24.9-48.3 48.6C14.7 167 14.7 256 14.7 256s0 89 11.6 131.9c6.3 23.7 24.8 42.3 48.3 48.6C117.2 448 288 448 288 448s170.8 0 213.4-11.5c23.5-6.3 42-24.9 48.3-48.6C561.3 345 561.3 256 561.3 256s0-89-11.6-131.9zM232 336V176l144 80-144 80z"/>
-              </svg>
-            </a>
-          </div>
-
-          <div class="footer-meta">
-            <span class="footer-email">
-              Support:
-              <a href="mailto:support@selfaccounting.ai">support&#64;selfaccounting.ai</a>
-            </span>
-          </div>
+        <div class="footer-links">
+          <a routerLink="/help">FAQ &amp; Manuals</a>
+          <a href="/auth/login">Sign In</a>
+          <a href="/auth/register">Register</a>
         </div>
-        <div class="footer-powered-by">
-          <span>Powered by</span>
-          <a href="https://stryvon.ai" target="_blank" rel="noopener noreferrer">Stryvon.AI</a>
+
+        <div class="footer-social" aria-label="Social media links">
+          <span class="footer-social-label">Follow:</span>
+          <a
+            class="footer-social-link"
+            href="https://www.instagram.com/selfaccounting.ai?igsh=MWo0NDg5bDVodGYwdg=="
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+          >
+            <svg class="footer-social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" aria-hidden="true">
+              <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.5-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.5 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.5 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.5-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/>
+            </svg>
+          </a>
+          <a
+            class="footer-social-link"
+            href="https://www.linkedin.com/company/111421971"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn"
+          >
+            <svg class="footer-social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" aria-hidden="true">
+              <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"/>
+            </svg>
+          </a>
+          <a
+            class="footer-social-link"
+            href="https://www.youtube.com/@selfaccountingai"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="YouTube"
+          >
+            <svg class="footer-social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" fill="currentColor" aria-hidden="true">
+              <path d="M549.7 124.1c-6.3-23.7-24.8-42.3-48.3-48.6C458.8 64 288 64 288 64S117.2 64 74.6 75.5c-23.5 6.3-42 24.9-48.3 48.6C14.7 167 14.7 256 14.7 256s0 89 11.6 131.9c6.3 23.7 24.8 42.3 48.3 48.6C117.2 448 288 448 288 448s170.8 0 213.4-11.5c23.5-6.3 42-24.9 48.3-48.6C561.3 345 561.3 256 561.3 256s0-89-11.6-131.9zM232 336V176l144 80-144 80z"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="footer-meta">
+          <span class="footer-email">
+            Support:
+            <a href="mailto:support@selfaccounting.ai">support&#64;selfaccounting.ai</a>
+          </span>
         </div>
       </div>
-    </footer>
-  </div>
+      <div class="footer-powered-by">
+        <span>Powered by</span>
+        <a href="https://stryvon.ai" target="_blank" rel="noopener noreferrer">Stryvon.AI</a>
+      </div>
+    </div>
+  </footer>
 
   <!-- Floating WhatsApp Button -->
   <a class="floating-whatsapp" [href]="whatsappLink" target="_blank" aria-label="Contact us on WhatsApp">
@@ -328,4 +429,3 @@
     <span class="floating-tooltip">Chat with us!</span>
   </a>
 </div>
-

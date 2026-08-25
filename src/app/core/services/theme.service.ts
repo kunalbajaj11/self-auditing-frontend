@@ -22,7 +22,7 @@ export const THEME_STORAGE_KEY = 'selfaccounting.theme';
 export const THEMES: ThemeOption[] = [
   {
     id: 'default',
-    label: 'Blue',
+    label: 'Blue (default)',
     primary: '#0077c8',
     primaryHover: '#005fa3',
     primaryLight: 'rgba(0, 119, 200, 0.12)',
@@ -55,7 +55,7 @@ export const THEMES: ThemeOption[] = [
   },
   {
     id: 'violet',
-    label: 'Violet (default)',
+    label: 'Violet',
     primary: '#667eea',
     primaryHover: '#5a67d8',
     primaryLight: 'rgba(102, 126, 234, 0.14)',
@@ -79,7 +79,7 @@ export const THEMES: ThemeOption[] = [
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
-  private readonly currentThemeSubject = new BehaviorSubject<string>('violet');
+  private readonly currentThemeSubject = new BehaviorSubject<string>('default');
   readonly currentTheme$: Observable<string> = this.currentThemeSubject.asObservable();
 
   constructor() {
@@ -107,16 +107,16 @@ export class ThemeService {
   }
 
   private applyStoredTheme(): void {
-    let themeId = 'violet';
+    let themeId = 'default';
     try {
       const stored = localStorage.getItem(THEME_STORAGE_KEY);
       if (stored && THEMES.some((t) => t.id === stored)) {
         themeId = stored;
       }
     } catch {
-      themeId = 'violet';
+      themeId = 'default';
     }
-    const theme = THEMES.find((t) => t.id === themeId) ?? THEMES.find((t) => t.id === 'violet') ?? THEMES[0];
+    const theme = THEMES.find((t) => t.id === themeId) ?? THEMES.find((t) => t.id === 'default') ?? THEMES[0];
     this.applyTheme(theme);
     this.currentThemeSubject.next(themeId);
   }

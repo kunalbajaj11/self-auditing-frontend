@@ -1,13 +1,13 @@
 // Brand alignment with homepage
-$primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-$primary-color: #667eea;
-$primary-dark: #5568d3;
-$text-dark: #1a202c;
+$primary-gradient: linear-gradient(135deg, #0077c8 0%, #005fa3 55%, #00bfa5 100%);
+$primary-color: #0077c8;
+$primary-dark: #005fa3;
+$text-dark: #0f172a;
 $text-muted: #64748b;
 $bg-page: #f8fafc;
 $card-bg: #ffffff;
 $shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
-$shadow-card-hover: 0 12px 40px rgba(102, 126, 234, 0.12);
+$shadow-card-hover: 0 12px 40px rgba(0, 119, 200, 0.12);
 $radius: 12px;
 $radius-sm: 8px;
 
@@ -235,7 +235,7 @@ $radius-sm: 8px;
   font-weight: 600;
 
   &:hover {
-    background: rgba(102, 126, 234, 0.04) !important;
+    background: rgba(0, 119, 200, 0.04) !important;
   }
 }
 
@@ -281,7 +281,7 @@ $radius-sm: 8px;
   &:hover {
     box-shadow: $shadow-card-hover;
     transform: translateY(-2px);
-    border-color: rgba(102, 126, 234, 0.2);
+    border-color: rgba(0, 119, 200, 0.2);
   }
 
   mat-card-header {
@@ -363,7 +363,7 @@ $radius-sm: 8px;
   font-weight: 600;
   border-radius: $radius-sm;
   text-transform: none;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 119, 200, 0.25);
 
   mat-icon {
     font-size: 18px;
@@ -373,7 +373,7 @@ $radius-sm: 8px;
   }
 
   &:hover {
-    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.35);
+    box-shadow: 0 4px 14px rgba(0, 119, 200, 0.35);
   }
 }
 

@@ -193,6 +193,10 @@ export class HomepageComponent implements OnInit {
     this.router.navigate(['/pricing']);
   }
 
+  scrollTo(sectionId: string): void {
+    this.document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   features = [
     {
       icon: 'receipt_long',
