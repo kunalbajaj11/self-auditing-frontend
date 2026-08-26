@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, startWith } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Title, Meta } from '@angular/platform-browser';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -32,6 +33,35 @@ import { ManualIndex, ManualsService } from '../manuals.service';
 })
 export class FaqManualsComponent {
   private readonly manuals = inject(ManualsService);
+  private readonly titleService = inject(Title);
+  private readonly metaService = inject(Meta);
+
+  constructor() {
+    const title =
+      'FAQ & User Manuals - SelfAccounting.AI | Self Accounting Software Help Center';
+    const description =
+      'Get help with SelfAccounting.AI - the self accounting software for UAE businesses. Browse FAQs, onboarding guides, and user manuals for expense tracking, invoicing, VAT compliance, and more.';
+    const url = 'https://selfaccounting.ai/help';
+
+    this.titleService.setTitle(title);
+    this.metaService.updateTag({ name: 'description', content: description });
+    this.metaService.updateTag({ property: 'og:title', content: title });
+    this.metaService.updateTag({
+      property: 'og:description',
+      content: description,
+    });
+    this.metaService.updateTag({ property: 'og:url', content: url });
+    this.metaService.updateTag({ property: 'og:type', content: 'website' });
+    this.metaService.updateTag({
+      name: 'twitter:card',
+      content: 'summary_large_image',
+    });
+    this.metaService.updateTag({ name: 'twitter:title', content: title });
+    this.metaService.updateTag({
+      name: 'twitter:description',
+      content: description,
+    });
+  }
 
   readonly search = new FormControl<string>('', { nonNullable: true });
 

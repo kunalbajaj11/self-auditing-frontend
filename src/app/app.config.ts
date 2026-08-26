@@ -10,6 +10,7 @@ import { MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
 import { routes } from './app.routes';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { IdleService } from './core/services/idle.service';
+import { provideClientHydration } from '@angular/platform-browser';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -39,6 +40,6 @@ export const appConfig: ApplicationConfig = {
       multi: true,
       deps: [IdleService],
       useFactory: (idle: IdleService) => () => idle.start(),
-    },
+    }, provideClientHydration(),
   ],
 };

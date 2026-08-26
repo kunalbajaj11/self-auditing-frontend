@@ -1,19 +1,79 @@
 # robots.txt for SelfAccounting.AI
+# See also: /llms.txt for an AI-oriented summary of this site.
 
+# Default rule for all crawlers
 User-agent: *
 Allow: /
 Allow: /auth/login
 Allow: /auth/register
+Allow: /pricing
+Allow: /help
 
-# Disallow private/admin areas
+Disallow: /admin/
+Disallow: /super-admin/
+Disallow: /employee/
+Disallow: /api/
+Disallow: /invoices/public/
+
+Crawl-delay: 1
+
+# Explicitly welcome AI crawlers/answer engines (crawl-delay is not
+# meaningful to these agents, so it's omitted for them).
+User-agent: GPTBot
+Allow: /
 Disallow: /admin/
 Disallow: /super-admin/
 Disallow: /employee/
 Disallow: /api/
 
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin/
+Disallow: /super-admin/
+Disallow: /employee/
+Disallow: /api/
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: GoogleOther
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
 # Sitemap location
 Sitemap: https://selfaccounting.ai/sitemap.xml
-
-# Crawl-delay (optional, helps prevent server overload)
-Crawl-delay: 1
-

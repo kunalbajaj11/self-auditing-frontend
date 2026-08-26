@@ -1,0 +1,5 @@
+# SPA fallback for client-side routed pages (admin/employee/auth/etc).
+# Prerendered routes (/, /pricing, /help) are real static files and are
+# matched before this wildcard by both Netlify and Cloudflare Pages, so
+# they're served as-is and never fall through to this rule.
+/*    /index.html   200

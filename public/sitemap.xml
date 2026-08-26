@@ -3,38 +3,45 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-  
+
   <!-- Homepage - Highest Priority -->
   <url>
     <loc>https://selfaccounting.ai/</loc>
-    <lastmod>2024-12-20</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
-  
-  <!-- Login Page -->
-  <url>
-    <loc>https://selfaccounting.ai/auth/login</loc>
-    <lastmod>2024-12-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <!-- Registration Page -->
-  <url>
-    <loc>https://selfaccounting.ai/auth/register</loc>
-    <lastmod>2024-12-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
+
   <!-- Pricing Page -->
   <url>
     <loc>https://selfaccounting.ai/pricing</loc>
-    <lastmod>2024-12-20</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.9</priority>
   </url>
-  
-</urlset>
 
+  <!-- Help Center / FAQ & Manuals -->
+  <url>
+    <loc>https://selfaccounting.ai/help</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Login Page -->
+  <url>
+    <loc>https://selfaccounting.ai/auth/login</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Registration Page -->
+  <url>
+    <loc>https://selfaccounting.ai/auth/register</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+</urlset>

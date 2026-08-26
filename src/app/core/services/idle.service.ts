@@ -1,4 +1,5 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Inject, Injectable, NgZone, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from './auth.service';
@@ -8,15 +9,22 @@ export class IdleService {
   private timeoutMs = 60 * 60 * 1000; // 1 hour
   private timerId: any = null;
   private started = false;
+  private readonly isBrowser: boolean;
 
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router,
     private readonly snackBar: MatSnackBar,
     private readonly ngZone: NgZone,
-  ) {}
+    @Inject(PLATFORM_ID) platformId: object,
+  ) {
+    this.isBrowser = isPlatformBrowser(platformId);
+  }
 
   start(): void {
+    // Idle tracking is meaningless during SSR/prerendering (build-time Node
+    // rendering) — there's no `window` to attach activity listeners to.
+    if (!this.isBrowser) return;
     if (this.started) return;
     this.started = true;
 

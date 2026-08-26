@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface ThemeOption {
@@ -81,8 +82,10 @@ export const THEMES: ThemeOption[] = [
 export class ThemeService {
   private readonly currentThemeSubject = new BehaviorSubject<string>('default');
   readonly currentTheme$: Observable<string> = this.currentThemeSubject.asObservable();
+  private readonly isBrowser: boolean;
 
-  constructor() {
+  constructor(@Inject(PLATFORM_ID) platformId: object) {
+    this.isBrowser = isPlatformBrowser(platformId);
     this.applyStoredTheme();
   }
 
@@ -122,6 +125,9 @@ export class ThemeService {
   }
 
   private applyTheme(theme: ThemeOption): void {
+    // No DOM during SSR/prerendering — the real browser applies the theme
+    // again on hydration, so there's nothing to skip here functionally.
+    if (!this.isBrowser) return;
     const root = document.documentElement;
     root.style.setProperty('--app-theme-primary', theme.primary);
     root.style.setProperty('--app-theme-primary-hover', theme.primaryHover);
