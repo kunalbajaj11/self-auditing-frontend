@@ -73,7 +73,10 @@ export class IdleService {
           this.router.navigateByUrl('/auth/login');
         },
         error: () => {
-          // Even if logout call fails, clear local session
+          // Even if the logout call fails, clear the local session so a
+          // dead session can't silently re-authenticate on the next
+          // navigation.
+          this.authService.clearSessionLocally();
           this.router.navigateByUrl('/auth/login');
         },
       });

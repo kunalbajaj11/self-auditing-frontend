@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap, catchError, of, switchMap, map } from 'rxjs';
+import { BehaviorSubject, Observable, tap, catchError, of, switchMap, map, throwError } from 'rxjs';
 import { ApiService } from './api.service';
 import { TokenService, AuthTokens } from './token.service';
 import { AuthUser, UserRole } from '../models/user.model';
@@ -88,7 +88,7 @@ export class AuthService {
   refreshSession(): Observable<AuthTokens> {
     const tokens = this.tokenService.getTokens();
     if (!tokens) {
-      throw new Error('No refresh token found');
+      return throwError(() => new Error('No refresh token found'));
     }
     return this.api
       .post<AuthTokens>('/auth/refresh', {
@@ -111,11 +111,19 @@ export class AuthService {
 
   logout(): Observable<{ success: boolean }> {
     return this.api.post<{ success: boolean }>('/auth/logout').pipe(
-      tap(() => {
-        this.tokenService.clearTokens();
-        this.currentUserSubject.next(null);
-      }),
+      tap(() => this.clearSessionLocally()),
     );
+  }
+
+  /**
+   * Clears local session state without a network call. Used when the server
+   * round-trip has already failed (or can't be trusted to succeed) but the
+   * user must not be left in a stale "logged in" state — e.g. a failed
+   * refresh, or an idle-timeout logout whose /auth/logout call itself fails.
+   */
+  clearSessionLocally(): void {
+    this.tokenService.clearTokens();
+    this.currentUserSubject.next(null);
   }
 
   getCurrentUserSnapshot(): AuthUser | null {
