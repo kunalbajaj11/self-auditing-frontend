@@ -436,7 +436,12 @@ export class InvoiceFormDialogComponent implements OnInit {
     const matchingRate = this.taxRates.find(
       (rate) => rate.type.toLowerCase() === taxType.toLowerCase(),
     );
-    return matchingRate ? matchingRate.rate : this.defaultTaxRate;
+    if (matchingRate) return matchingRate.rate;
+    const normalized = (taxType || '').toUpperCase();
+    // Zero-rated and exempt supplies are 0% VAT by definition — never fall
+    // back to the organization's default rate for these.
+    if (normalized === 'ZERO_RATED' || normalized === 'EXEMPT') return 0;
+    return this.defaultTaxRate;
   }
 
   loadCustomers(): void {
@@ -665,7 +670,14 @@ export class InvoiceFormDialogComponent implements OnInit {
       // Auto-set VAT rate based on tax type if rate is default
       const vatRateValue = lineItemGroup.get('vatRate')?.value;
       const currentRate = typeof vatRateValue === 'number' ? vatRateValue : parseFloat(String(vatRateValue || '0'));
-      if (currentRate === this.defaultTaxRate || currentRate === 0) {
+      // this.defaultTaxRate can arrive as a string from the settings API
+      // (e.g. "5.00") — compare numerically so this guard doesn't silently
+      // fail to match on type/formatting alone.
+      const defaultRateNum =
+        typeof this.defaultTaxRate === 'number'
+          ? this.defaultTaxRate
+          : parseFloat(String(this.defaultTaxRate ?? '0'));
+      if (currentRate === defaultRateNum || currentRate === 0) {
         const rateForType = this.getTaxRateForType(taxType || 'STANDARD');
         lineItemGroup.patchValue({ vatRate: rateForType }, { emitEvent: false });
       }
@@ -838,7 +850,14 @@ export class InvoiceFormDialogComponent implements OnInit {
         quantity: parseFloat(value.quantity),
         unitPrice: parseFloat(value.unitPrice),
         unitOfMeasure: value.unitOfMeasure || 'unit',
-        vatRate: parseFloat(value.vatRate || String(this.defaultTaxRate)),
+        // `value.vatRate` can legitimately be 0 (a deliberate zero-rated
+        // line) — `||` would treat that as falsy and silently replace it
+        // with the org default, so check for "not set" explicitly instead.
+        vatRate: parseFloat(
+          value.vatRate !== null && value.vatRate !== undefined && value.vatRate !== ''
+            ? String(value.vatRate)
+            : String(this.defaultTaxRate),
+        ),
         vatTaxType: value.vatTaxType || 'STANDARD',
         amount: parseFloat(value.amount),
         vatAmount: parseFloat(value.vatAmount),

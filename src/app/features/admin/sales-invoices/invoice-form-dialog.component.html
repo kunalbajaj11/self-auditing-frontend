@@ -178,6 +178,7 @@
             <thead>
               <tr>
                 <th>Item</th>
+                <th>Tax type</th>
                 <th>VAT rate</th>
                 <th>Quantity</th>
                 <th>Rate</th>
@@ -207,6 +208,14 @@
                     <option value="hour">hour</option>
                     <option value="day">day</option>
                     <option value="m2">m²</option>
+                  </select>
+                </td>
+                <td class="tax-type-cell">
+                  <select class="form-select tax-type-select" formControlName="vatTaxType" matTooltip="Whether FTA treats this line as a taxable or non-taxable supply">
+                    <option value="STANDARD">Standard (Taxable)</option>
+                    <option value="ZERO_RATED">Zero-Rated (Non-Taxable)</option>
+                    <option value="EXEMPT">Exempt (Non-Taxable)</option>
+                    <option value="REVERSE_CHARGE">Reverse Charge</option>
                   </select>
                 </td>
                 <td class="vat-rate-cell">
