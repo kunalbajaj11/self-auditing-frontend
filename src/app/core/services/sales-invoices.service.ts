@@ -90,6 +90,8 @@ export interface SalesInvoice {
   } | null;
   /** Applied credit notes (loaded when fetching invoice by id). */
   creditNoteApplications?: CreditNoteApplication[];
+  /** Recorded payments (loaded when fetching invoice by id). */
+  payments?: InvoicePayment[];
   createdAt: string;
   updatedAt: string;
 }
@@ -185,6 +187,10 @@ export class SalesInvoicesService {
     notes?: string;
   }): Observable<any> {
     return this.api.post(`/sales-invoices/${invoiceId}/payments`, payment);
+  }
+
+  deletePayment(invoiceId: string, paymentId: string): Observable<any> {
+    return this.api.delete(`/sales-invoices/${invoiceId}/payments/${paymentId}`);
   }
 
   sendInvoiceEmail(invoiceId: string, emailData: {

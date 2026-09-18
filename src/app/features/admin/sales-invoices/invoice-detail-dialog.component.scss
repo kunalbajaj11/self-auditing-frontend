@@ -306,6 +306,75 @@
   }
 }
 
+.payments-section {
+  margin-top: 32px;
+
+  h3 {
+    margin: 0 0 12px 0;
+    font-size: 0.800rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .payments-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.813rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+    thead {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+
+      th {
+        padding: 12px;
+        text-align: left;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #ffffff;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #334155;
+
+        &:first-child { padding-left: 20px; }
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom: 1px solid #f1f5f9;
+        transition: background-color 0.15s ease;
+
+        &:hover { background-color: #f8fafc; }
+        &:last-child { border-bottom: none; }
+
+        td {
+          padding: 10px 12px;
+          color: #0f172a;
+          font-weight: 500;
+
+          &:first-child { padding-left: 20px; }
+
+          &:nth-child(4) {
+            font-weight: 700;
+            font-family: 'SF Mono', 'Monaco', monospace;
+          }
+        }
+
+        .payment-actions {
+          padding: 4px 12px 4px 4px;
+          text-align: right;
+        }
+      }
+    }
+  }
+}
+
 .notes-section {
   margin-top: 32px;
   padding: 24px 28px;

@@ -177,6 +177,41 @@
       </div>
     </div>
 
+    <!-- Payments -->
+    <div class="payments-section" *ngIf="invoice.payments?.length">
+      <h3>Payments</h3>
+      <table class="payments-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Method</th>
+            <th>Reference</th>
+            <th>Amount</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let pmt of invoice.payments">
+            <td>{{ pmt.paymentDate | date: 'mediumDate' }}</td>
+            <td>{{ (pmt.paymentMethod || '—') | titlecase }}</td>
+            <td>{{ pmt.referenceNumber || '—' }}</td>
+            <td>{{ invoice.currency }} {{ pmt.amount | number: '1.2-2' }}</td>
+            <td class="payment-actions">
+              <button
+                mat-icon-button
+                color="warn"
+                matTooltip="Delete this payment"
+                [disabled]="deletingPaymentId === pmt.id"
+                (click)="deletePayment(pmt)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
     <!-- Notes -->
     <div class="notes-section" *ngIf="invoice.description || invoice.notes">
       <h3>Notes</h3>

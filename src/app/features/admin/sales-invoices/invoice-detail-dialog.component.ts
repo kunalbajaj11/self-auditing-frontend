@@ -3,7 +3,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { SalesInvoicesService, SalesInvoice } from '../../../core/services/sales-invoices.service';
+import { SalesInvoicesService, SalesInvoice, InvoicePayment } from '../../../core/services/sales-invoices.service';
 import { InvoicePaymentDialogComponent } from './invoice-payment-dialog.component';
 import { InvoiceEmailDialogComponent } from './invoice-email-dialog.component';
 
@@ -17,6 +17,7 @@ export class InvoiceDetailDialogComponent implements OnInit {
   loading = false;
   loadError: string | null = null;
   outstandingAmount = 0;
+  deletingPaymentId: string | null = null;
 
   constructor(
     private readonly dialogRef: MatDialogRef<InvoiceDetailDialogComponent>,
@@ -193,6 +194,35 @@ export class InvoiceDetailDialogComponent implements OnInit {
       if (result) {
         this.loadInvoice(); // Reload invoice to get updated payment status
       }
+    });
+  }
+
+  deletePayment(payment: InvoicePayment): void {
+    if (!this.invoice) return;
+    const amountLabel = `${this.invoice.currency} ${parseFloat(payment.amount || '0').toFixed(2)}`;
+    if (
+      !confirm(
+        `Delete this payment of ${amountLabel}? This cannot be undone and will recalculate the invoice's paid/outstanding amounts.`,
+      )
+    ) {
+      return;
+    }
+
+    this.deletingPaymentId = payment.id;
+    this.invoicesService.deletePayment(this.invoice.id, payment.id).subscribe({
+      next: () => {
+        this.deletingPaymentId = null;
+        this.snackBar.open('Payment deleted', 'Close', { duration: 3000 });
+        this.loadInvoice();
+      },
+      error: (err) => {
+        this.deletingPaymentId = null;
+        const msg =
+          typeof err?.error?.message === 'string'
+            ? err.error.message
+            : 'Failed to delete payment';
+        this.snackBar.open(msg, 'Close', { duration: 4000, panelClass: ['snack-error'] });
+      },
     });
   }
 
