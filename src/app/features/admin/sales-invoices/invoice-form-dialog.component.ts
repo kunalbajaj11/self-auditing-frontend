@@ -35,7 +35,7 @@ export class InvoiceFormDialogComponent implements OnInit {
   taxRates: TaxRate[] = [];
   defaultTaxRate = 5; // Fallback default
 
-  readonly vatTaxTypes = ['STANDARD', 'ZERO_RATED', 'EXEMPT', 'REVERSE_CHARGE'];
+  readonly vatTaxTypes = ['STANDARD', 'ZERO_RATED', 'EXEMPT', 'REVERSE_CHARGE', 'OUT_OF_SCOPE'];
   /** Status options for Tax Invoice screen only (Receivable, Bank Received, Cash Received). */
   readonly invoiceStatuses = [
     'tax_invoice_receivable',
@@ -805,10 +805,13 @@ export class InvoiceFormDialogComponent implements OnInit {
     
     // Calculate VAT based on tax type
     let vatAmount = 0;
-    if (vatTaxType === 'STANDARD' && vatRate > 0) {
-      vatAmount = amount * (vatRate / 100);
-    } else if (vatTaxType === 'REVERSE_CHARGE' && vatRate > 0) {
-      vatAmount = amount * (vatRate / 100); // For reverse charge, VAT is still calculated but handled differently
+    if (
+      (vatTaxType === 'STANDARD' ||
+        vatTaxType === 'REVERSE_CHARGE' ||
+        vatTaxType === 'OUT_OF_SCOPE') &&
+      vatRate > 0
+    ) {
+      vatAmount = amount * (vatRate / 100); // Reverse charge and out-of-scope still carry VAT, just tracked differently for reporting
     }
     // ZERO_RATED and EXEMPT have vatAmount = 0
 
