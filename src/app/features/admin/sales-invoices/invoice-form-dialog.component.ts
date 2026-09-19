@@ -438,9 +438,14 @@ export class InvoiceFormDialogComponent implements OnInit {
     );
     if (matchingRate) return matchingRate.rate;
     const normalized = (taxType || '').toUpperCase();
-    // Zero-rated and exempt supplies are 0% VAT by definition — never fall
-    // back to the organization's default rate for these.
-    if (normalized === 'ZERO_RATED' || normalized === 'EXEMPT') return 0;
+    // Zero-rated, exempt, and out-of-scope supplies are 0% VAT by
+    // definition — never fall back to the organization's default rate.
+    if (
+      normalized === 'ZERO_RATED' ||
+      normalized === 'EXEMPT' ||
+      normalized === 'OUT_OF_SCOPE'
+    )
+      return 0;
     return this.defaultTaxRate;
   }
 
@@ -805,15 +810,12 @@ export class InvoiceFormDialogComponent implements OnInit {
     
     // Calculate VAT based on tax type
     let vatAmount = 0;
-    if (
-      (vatTaxType === 'STANDARD' ||
-        vatTaxType === 'REVERSE_CHARGE' ||
-        vatTaxType === 'OUT_OF_SCOPE') &&
-      vatRate > 0
-    ) {
-      vatAmount = amount * (vatRate / 100); // Reverse charge and out-of-scope still carry VAT, just tracked differently for reporting
+    if (vatTaxType === 'STANDARD' && vatRate > 0) {
+      vatAmount = amount * (vatRate / 100);
+    } else if (vatTaxType === 'REVERSE_CHARGE' && vatRate > 0) {
+      vatAmount = amount * (vatRate / 100); // For reverse charge, VAT is still calculated but handled differently
     }
-    // ZERO_RATED and EXEMPT have vatAmount = 0
+    // ZERO_RATED, EXEMPT, and OUT_OF_SCOPE have vatAmount = 0
 
     const totalAmount = amount + vatAmount;
 
