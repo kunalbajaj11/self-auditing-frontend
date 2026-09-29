@@ -31,16 +31,55 @@ export class AdminSalesInvoicesComponent implements OnInit, AfterViewInit {
   readonly dataSource = new MatTableDataSource<SalesInvoice>([]);
   loading = false;
   currentFilter: 'all' | 'outstanding' | 'overdue' | 'payments' = 'all';
+  searchTerm = '';
 
   constructor(
     private readonly invoicesService: SalesInvoicesService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
     private readonly route: ActivatedRoute,
-  ) {}
+  ) {
+    // Match against every attribute a user might search by, not just the
+    // columns visible in the table (e.g. TRN, email, notes).
+    this.dataSource.filterPredicate = (invoice: SalesInvoice, filter: string): boolean => {
+      const haystack = [
+        invoice.invoiceNumber,
+        invoice.customer?.name,
+        invoice.customerName,
+        invoice.customer?.customerTrn,
+        invoice.customerTrn,
+        invoice.customer?.email,
+        invoice.customer?.phone,
+        invoice.customerPhone,
+        this.getStatusDisplayLabel(invoice.status),
+        invoice.status,
+        invoice.paymentStatus,
+        invoice.currency,
+        invoice.amount,
+        invoice.vatAmount,
+        invoice.totalAmount,
+        invoice.paidAmount,
+        invoice.description,
+        invoice.notes,
+        invoice.invoiceDate,
+        invoice.dueDate,
+      ]
+        .filter((value) => value !== null && value !== undefined)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(filter);
+    };
+  }
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
+  }
+
+  onSearchChange(): void {
+    this.dataSource.filter = this.searchTerm.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   ngOnInit(): void {

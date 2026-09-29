@@ -19,6 +19,21 @@
         </div>
       </mat-card-header>
       <mat-card-content>
+        <div class="filters">
+          <div class="form-field-with-icon">
+            <mat-icon class="field-icon">search</mat-icon>
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label style="margin-left: 12px;">Search invoices</mat-label>
+              <input
+                matInput
+                [(ngModel)]="searchTerm"
+                (ngModelChange)="onSearchChange()"
+                placeholder="Search by invoice #, customer, status, amount..."
+              />
+            </mat-form-field>
+          </div>
+        </div>
+
         <div class="table-container">
           <table mat-table [dataSource]="dataSource" class="invoices-table">
             <ng-container matColumnDef="invoiceNumber">
