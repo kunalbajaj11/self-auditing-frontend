@@ -56,6 +56,20 @@
   }
 }
 
+// Card header: title on the left, search field on the right
+::ng-deep .invoices-card-header.mat-mdc-card-header {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100%;
+  gap: 16px;
+
+  .mat-mdc-card-header-text {
+    flex: 0 0 auto;
+  }
+}
+
 // Form field with icon on the left
 .form-field-with-icon {
   display: flex;
@@ -63,6 +77,7 @@
   gap: 12px;
   height: 40px !important;
   margin: 0 !important;
+  flex-shrink: 0;
 
   .field-icon {
     margin-top: 8px;
@@ -71,26 +86,6 @@
     width: 24px;
     height: 24px;
     flex-shrink: 0;
-  }
-
-  .search-field {
-    flex: 1;
-  }
-}
-
-.filters {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
-  align-items: center;
-  align-content: center;
-  padding: 0 20px;
-
-  > * {
-    height: 40px !important;
-    display: flex !important;
-    align-items: center !important;
-    margin: 0 !important;
   }
 
   .search-field {
