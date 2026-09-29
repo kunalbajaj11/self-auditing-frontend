@@ -56,24 +56,6 @@
   }
 }
 
-// Card header: title on the left, search field on the right
-::ng-deep .invoices-card-header.mat-mdc-card-header {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-  gap: 12px 16px;
-
-  .mat-mdc-card-header-text {
-    flex: 0 1 auto;
-    min-width: 0;
-  }
-}
-
 // Form field with icon on the left
 .form-field-with-icon {
   display: flex;
@@ -284,7 +266,7 @@
   .invoices-card {
     border-radius: 8px;
 
-    mat-card-header {
+    .invoices-card-header {
       padding: 8px 10px;
     }
 
@@ -328,7 +310,12 @@
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
   }
 
-  mat-card-header {
+  .invoices-card-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px 16px;
     padding: 8px 10px;
     border-bottom: 1px solid rgba(15, 23, 42, 0.08);
     background: linear-gradient(to bottom, #ffffff, #f8fafc);
@@ -338,6 +325,8 @@
       align-items: center;
       gap: 8px;
       margin-bottom: 0;
+      min-width: 0;
+      flex: 0 1 auto;
 
       mat-icon {
         font-size: 16px;
@@ -347,11 +336,14 @@
         flex-shrink: 0;
       }
 
-      mat-card-title {
+      .card-title-text {
         margin: 0;
         font-size: 1rem;
         font-weight: 600;
         color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
   }

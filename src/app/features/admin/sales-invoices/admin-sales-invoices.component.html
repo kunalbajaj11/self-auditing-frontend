@@ -12,10 +12,10 @@
 
   <section class="invoices-section">
     <mat-card class="invoices-card">
-      <mat-card-header class="invoices-card-header">
+      <div class="invoices-card-header">
         <div class="card-title-with-icon">
           <mat-icon>description</mat-icon>
-          <mat-card-title>Invoice List</mat-card-title>
+          <span class="card-title-text">Invoice List</span>
         </div>
         <div class="form-field-with-icon">
           <mat-icon class="field-icon">search</mat-icon>
@@ -29,7 +29,7 @@
             />
           </mat-form-field>
         </div>
-      </mat-card-header>
+      </div>
       <mat-card-content>
         <div class="table-container">
           <table mat-table [dataSource]="dataSource" class="invoices-table">
