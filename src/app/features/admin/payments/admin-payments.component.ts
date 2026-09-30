@@ -24,12 +24,30 @@ export class AdminPaymentsComponent implements OnInit, AfterViewInit {
   ] as const;
   readonly dataSource = new MatTableDataSource<ExpensePayment>([]);
   loading = false;
+  searchTerm = '';
 
   constructor(
     private readonly paymentsService: ExpensePaymentsService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
-  ) {}
+  ) {
+    this.dataSource.filterPredicate = (payment: ExpensePayment, filter: string): boolean => {
+      const haystack = [
+        payment.expense?.vendorName,
+        payment.expense?.vendorTrn,
+        payment.expense?.description,
+        payment.amount,
+        payment.paymentDate,
+        payment.paymentMethod,
+        payment.referenceNumber,
+        payment.notes,
+      ]
+        .filter((value) => value !== null && value !== undefined)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(filter);
+    };
+  }
 
   ngOnInit(): void {
     this.loadPayments();
@@ -37,6 +55,13 @@ export class AdminPaymentsComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
+  }
+
+  onSearchChange(): void {
+    this.dataSource.filter = this.searchTerm.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   loadPayments(): void {

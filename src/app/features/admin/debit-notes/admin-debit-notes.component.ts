@@ -28,13 +28,39 @@ export class AdminDebitNotesComponent implements OnInit, AfterViewInit {
   ] as const;
   readonly dataSource = new MatTableDataSource<DebitNote>([]);
   loading = false;
+  searchTerm = '';
 
   constructor(
     private readonly debitNotesService: DebitNotesService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
     private readonly route: ActivatedRoute,
-  ) {}
+  ) {
+    this.dataSource.filterPredicate = (debitNote: DebitNote, filter: string): boolean => {
+      const haystack = [
+        debitNote.debitNoteNumber,
+        debitNote.customer?.name,
+        debitNote.customerName,
+        debitNote.customer?.customerTrn,
+        debitNote.customerTrn,
+        debitNote.vendor?.name,
+        debitNote.vendorName,
+        debitNote.vendor?.vendorTrn,
+        debitNote.vendorTrn,
+        debitNote.reason,
+        debitNote.status,
+        debitNote.currency,
+        debitNote.amount,
+        debitNote.vatAmount,
+        debitNote.totalAmount,
+        debitNote.debitNoteDate,
+      ]
+        .filter((value) => value !== null && value !== undefined)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(filter);
+    };
+  }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
@@ -47,6 +73,13 @@ export class AdminDebitNotesComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
+  }
+
+  onSearchChange(): void {
+    this.dataSource.filter = this.searchTerm.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   loadDebitNotes(): void {

@@ -14,12 +14,24 @@
     <section class="invoices-section">
       <h3 class="section-title">Quotations</h3>
       <mat-card class="invoices-card">
-        <mat-card-header>
+        <div class="invoices-card-header">
           <div class="card-title-with-icon">
             <mat-icon>description</mat-icon>
-            <mat-card-title>Quotation List</mat-card-title>
+            <span class="card-title-text">Quotation List</span>
           </div>
-        </mat-card-header>
+          <div class="form-field-with-icon">
+            <mat-icon class="field-icon">search</mat-icon>
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label style="margin-left: 12px;">Search quotations</mat-label>
+              <input
+                matInput
+                [(ngModel)]="searchTerm"
+                (ngModelChange)="onSearchChange()"
+                placeholder="Search by invoice #, customer, status, amount..."
+              />
+            </mat-form-field>
+          </div>
+        </div>
         <mat-card-content>
           <div class="table-container">
             <table mat-table [dataSource]="dataSource" class="invoices-table">

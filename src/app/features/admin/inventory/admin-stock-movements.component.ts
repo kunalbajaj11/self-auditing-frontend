@@ -24,12 +24,32 @@ export class AdminStockMovementsComponent implements OnInit, AfterViewInit {
     { value: StockMovementType.RETURN, label: 'Return' },
   ];
   selectedType: StockMovementType | '' = '';
+  searchTerm = '';
 
   constructor(
     private readonly inventoryService: InventoryService,
     private readonly snackBar: MatSnackBar,
     private readonly dialog: MatDialog,
-  ) {}
+  ) {
+    this.dataSource.filterPredicate = (movement: StockMovement, filter: string): boolean => {
+      const haystack = [
+        movement.product?.name,
+        movement.product?.sku,
+        movement.location?.name,
+        this.getMovementTypeLabel(movement.movementType),
+        movement.movementType,
+        movement.quantity,
+        movement.unitCost,
+        movement.referenceType,
+        movement.notes,
+        movement.createdBy?.name,
+      ]
+        .filter((value) => value !== null && value !== undefined)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(filter);
+    };
+  }
 
   ngOnInit(): void {
     this.loadMovements();
@@ -37,6 +57,13 @@ export class AdminStockMovementsComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
+  }
+
+  onSearchChange(): void {
+    this.dataSource.filter = this.searchTerm.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   loadMovements(): void {

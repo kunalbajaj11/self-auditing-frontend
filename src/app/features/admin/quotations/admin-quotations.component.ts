@@ -27,6 +27,7 @@ export class AdminQuotationsComponent implements OnInit, AfterViewInit {
   readonly dataSource = new MatTableDataSource<SalesInvoice>([]);
   loading = false;
   convertingId: string | null = null;
+  searchTerm = '';
 
   constructor(
     private readonly invoicesService: SalesInvoicesService,
@@ -34,7 +35,34 @@ export class AdminQuotationsComponent implements OnInit, AfterViewInit {
     private readonly snackBar: MatSnackBar,
     private readonly cdr: ChangeDetectorRef,
     private readonly router: Router,
-  ) {}
+  ) {
+    this.dataSource.filterPredicate = (invoice: SalesInvoice, filter: string): boolean => {
+      const haystack = [
+        invoice.invoiceNumber,
+        invoice.customer?.name,
+        invoice.customerName,
+        invoice.customer?.customerTrn,
+        invoice.customerTrn,
+        invoice.customer?.email,
+        invoice.customer?.phone,
+        invoice.customerPhone,
+        this.getStatusDisplayLabel(invoice.status),
+        invoice.status,
+        invoice.currency,
+        invoice.amount,
+        invoice.vatAmount,
+        invoice.totalAmount,
+        invoice.description,
+        invoice.notes,
+        invoice.invoiceDate,
+        invoice.dueDate,
+      ]
+        .filter((value) => value !== null && value !== undefined)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(filter);
+    };
+  }
 
   ngOnInit(): void {
     this.loadQuotations();
@@ -42,6 +70,13 @@ export class AdminQuotationsComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
+  }
+
+  onSearchChange(): void {
+    this.dataSource.filter = this.searchTerm.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   loadQuotations(): void {

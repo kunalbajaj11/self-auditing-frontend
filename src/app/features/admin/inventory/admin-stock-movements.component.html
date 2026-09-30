@@ -24,6 +24,19 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
+
+        <div class="form-field-with-icon">
+          <mat-icon class="field-icon">search</mat-icon>
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label style="margin-left: 12px;">Search movements</mat-label>
+            <input
+              matInput
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="onSearchChange()"
+              placeholder="Search by product, SKU, location, notes..."
+            />
+          </mat-form-field>
+        </div>
       </div>
     </mat-card-content>
   </mat-card>

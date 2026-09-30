@@ -14,12 +14,24 @@
     <section class="pos-section">
       <h3 class="section-title">Purchase Orders</h3>
       <mat-card class="pos-card">
-        <mat-card-header>
+        <div class="invoices-card-header">
           <div class="card-title-with-icon">
             <mat-icon>shopping_cart</mat-icon>
-            <mat-card-title>Purchase Order List</mat-card-title>
+            <span class="card-title-text">Purchase Order List</span>
           </div>
-        </mat-card-header>
+          <div class="form-field-with-icon">
+            <mat-icon class="field-icon">search</mat-icon>
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label style="margin-left: 12px;">Search purchase orders</mat-label>
+              <input
+                matInput
+                [(ngModel)]="searchTerm"
+                (ngModelChange)="onSearchChange()"
+                placeholder="Search by PO #, vendor, status, amount..."
+              />
+            </mat-form-field>
+          </div>
+        </div>
         <mat-card-content>
           <div class="table-container">
             <table mat-table [dataSource]="dataSource" class="pos-table">

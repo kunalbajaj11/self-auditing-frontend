@@ -16,12 +16,30 @@ export class AdminProductsComponent implements OnInit, AfterViewInit {
   readonly columns = ['name', 'sku', 'unitPrice', 'stockQuantity', 'isActive', 'actions'] as const;
   readonly dataSource = new MatTableDataSource<Product>([]);
   loading = false;
+  searchTerm = '';
 
   constructor(
     private readonly productsService: ProductsService,
     private readonly snackBar: MatSnackBar,
     private readonly dialog: MatDialog,
-  ) {}
+  ) {
+    this.dataSource.filterPredicate = (product: Product, filter: string): boolean => {
+      const haystack = [
+        product.name,
+        product.sku,
+        product.description,
+        product.category,
+        product.unitPrice,
+        product.unitOfMeasure,
+        product.stockQuantity,
+        product.isActive ? 'active' : 'inactive',
+      ]
+        .filter((value) => value !== null && value !== undefined)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(filter);
+    };
+  }
 
   ngOnInit(): void {
     this.loadProducts();
@@ -29,6 +47,13 @@ export class AdminProductsComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
+  }
+
+  onSearchChange(): void {
+    this.dataSource.filter = this.searchTerm.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   loadProducts(): void {

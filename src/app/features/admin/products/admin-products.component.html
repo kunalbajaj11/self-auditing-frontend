@@ -11,12 +11,24 @@
   </header>
 
   <mat-card class="products-card">
-    <mat-card-header>
+    <div class="products-card-header">
       <div class="card-title-with-icon">
         <mat-icon>inventory_2</mat-icon>
-        <mat-card-title>Products</mat-card-title>
+        <span class="card-title-text">Products</span>
       </div>
-    </mat-card-header>
+      <div class="form-field-with-icon">
+        <mat-icon class="field-icon">search</mat-icon>
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label style="margin-left: 12px;">Search products</mat-label>
+          <input
+            matInput
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearchChange()"
+            placeholder="Search by name, SKU, category..."
+          />
+        </mat-form-field>
+      </div>
+    </div>
     <mat-card-content>
       <div class="table-container" *ngIf="!loading; else loadingTemplate">
         <table mat-table [dataSource]="dataSource" class="products-table">

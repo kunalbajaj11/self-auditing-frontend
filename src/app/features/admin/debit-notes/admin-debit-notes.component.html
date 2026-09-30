@@ -12,12 +12,24 @@
 
   <section class="debit-notes-section">
     <mat-card class="debit-notes-card">
-      <mat-card-header>
+      <div class="debit-notes-card-header">
         <div class="card-title-with-icon">
           <mat-icon>note</mat-icon>
-          <mat-card-title>Debit Note List</mat-card-title>
+          <span class="card-title-text">Debit Note List</span>
         </div>
-      </mat-card-header>
+        <div class="form-field-with-icon">
+          <mat-icon class="field-icon">search</mat-icon>
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label style="margin-left: 12px;">Search debit notes</mat-label>
+            <input
+              matInput
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="onSearchChange()"
+              placeholder="Search by debit note #, customer, vendor, status, amount..."
+            />
+          </mat-form-field>
+        </div>
+      </div>
       <mat-card-content>
         <div class="table-container">
           <table mat-table [dataSource]="dataSource" class="debit-notes-table">

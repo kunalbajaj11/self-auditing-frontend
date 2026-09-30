@@ -26,12 +26,34 @@ export class AdminSalesOrdersComponent implements OnInit, AfterViewInit {
 
   readonly dataSource = new MatTableDataSource<SalesOrder>([]);
   loading = false;
+  searchTerm = '';
 
   constructor(
     private readonly salesOrdersService: SalesOrdersService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
-  ) {}
+  ) {
+    this.dataSource.filterPredicate = (so: SalesOrder, filter: string): boolean => {
+      const haystack = [
+        so.soNumber,
+        so.customer?.name,
+        so.customerName,
+        so.customer?.customerTrn,
+        so.customerTrn,
+        this.getStatusDisplayLabel(so.status),
+        so.status,
+        so.currency,
+        so.totalAmount,
+        so.notes,
+        so.orderDate,
+        so.expectedDeliveryDate,
+      ]
+        .filter((value) => value !== null && value !== undefined)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(filter);
+    };
+  }
 
   ngOnInit(): void {
     this.loadSalesOrders();
@@ -39,6 +61,13 @@ export class AdminSalesOrdersComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
+  }
+
+  onSearchChange(): void {
+    this.dataSource.filter = this.searchTerm.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   loadSalesOrders(): void {

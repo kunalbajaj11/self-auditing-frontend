@@ -12,12 +12,24 @@
 
   <section class="credit-notes-section">
     <mat-card class="credit-notes-card">
-      <mat-card-header>
+      <div class="credit-notes-card-header">
         <div class="card-title-with-icon">
           <mat-icon>note</mat-icon>
-          <mat-card-title>Credit Note List</mat-card-title>
+          <span class="card-title-text">Credit Note List</span>
         </div>
-      </mat-card-header>
+        <div class="form-field-with-icon">
+          <mat-icon class="field-icon">search</mat-icon>
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label style="margin-left: 12px;">Search credit notes</mat-label>
+            <input
+              matInput
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="onSearchChange()"
+              placeholder="Search by credit note #, customer, status, amount..."
+            />
+          </mat-form-field>
+        </div>
+      </div>
       <mat-card-content>
         <div class="table-container">
           <table mat-table [dataSource]="dataSource" class="credit-notes-table">

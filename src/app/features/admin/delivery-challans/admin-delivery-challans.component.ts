@@ -25,12 +25,36 @@ export class AdminDeliveryChallansComponent implements OnInit, AfterViewInit {
 
   readonly dataSource = new MatTableDataSource<DeliveryChallan>([]);
   loading = false;
+  searchTerm = '';
 
   constructor(
     private readonly deliveryChallansService: DeliveryChallansService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
-  ) {}
+  ) {
+    this.dataSource.filterPredicate = (dc: DeliveryChallan, filter: string): boolean => {
+      const haystack = [
+        dc.challanNumber,
+        dc.customer?.name,
+        dc.customerName,
+        dc.customer?.customerTrn,
+        dc.customerTrn,
+        dc.salesOrder?.soNumber,
+        this.getStatusDisplayLabel(dc.status),
+        dc.status,
+        dc.vehicleNumber,
+        dc.transportMode,
+        dc.lrNumber,
+        dc.deliveryAddress,
+        dc.notes,
+        dc.challanDate,
+      ]
+        .filter((value) => value !== null && value !== undefined)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(filter);
+    };
+  }
 
   ngOnInit(): void {
     this.loadDeliveryChallans();
@@ -38,6 +62,13 @@ export class AdminDeliveryChallansComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
+  }
+
+  onSearchChange(): void {
+    this.dataSource.filter = this.searchTerm.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   loadDeliveryChallans(): void {

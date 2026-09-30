@@ -12,12 +12,24 @@
 
   <section class="payments-section">
     <mat-card class="payments-card">
-      <mat-card-header>
+      <div class="payments-card-header">
         <div class="card-title-with-icon">
           <mat-icon>payment</mat-icon>
-          <mat-card-title>Payment List</mat-card-title>
+          <span class="card-title-text">Payment List</span>
         </div>
-      </mat-card-header>
+        <div class="form-field-with-icon">
+          <mat-icon class="field-icon">search</mat-icon>
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label style="margin-left: 12px;">Search payments</mat-label>
+            <input
+              matInput
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="onSearchChange()"
+              placeholder="Search by vendor, amount, method, reference..."
+            />
+          </mat-form-field>
+        </div>
+      </div>
       <mat-card-content>
         <div class="table-container">
           <table mat-table [dataSource]="dataSource" class="payments-table">

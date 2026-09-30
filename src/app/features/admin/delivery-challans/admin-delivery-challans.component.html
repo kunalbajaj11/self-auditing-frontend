@@ -13,6 +13,18 @@
   <mat-card class="card">
     <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
 
+    <div class="search-row">
+      <mat-icon>search</mat-icon>
+      <mat-form-field appearance="outline" class="search-field">
+        <input
+          matInput
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Search by DC #, customer, status, vehicle..."
+        />
+      </mat-form-field>
+    </div>
+
     <div class="table-wrap">
       <table mat-table [dataSource]="dataSource" class="mat-elevation-z0">
         <ng-container matColumnDef="challanNumber">

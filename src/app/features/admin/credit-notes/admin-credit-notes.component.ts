@@ -28,13 +28,35 @@ export class AdminCreditNotesComponent implements OnInit, AfterViewInit {
   ] as const;
   readonly dataSource = new MatTableDataSource<CreditNote>([]);
   loading = false;
+  searchTerm = '';
 
   constructor(
     private readonly creditNotesService: CreditNotesService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
     private readonly route: ActivatedRoute,
-  ) {}
+  ) {
+    this.dataSource.filterPredicate = (creditNote: CreditNote, filter: string): boolean => {
+      const haystack = [
+        creditNote.creditNoteNumber,
+        creditNote.customer?.name,
+        creditNote.customerName,
+        creditNote.customer?.customerTrn,
+        creditNote.customerTrn,
+        creditNote.reason,
+        creditNote.status,
+        creditNote.currency,
+        creditNote.amount,
+        creditNote.vatAmount,
+        creditNote.totalAmount,
+        creditNote.creditNoteDate,
+      ]
+        .filter((value) => value !== null && value !== undefined)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(filter);
+    };
+  }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
@@ -47,6 +69,13 @@ export class AdminCreditNotesComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
+  }
+
+  onSearchChange(): void {
+    this.dataSource.filter = this.searchTerm.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   loadCreditNotes(): void {

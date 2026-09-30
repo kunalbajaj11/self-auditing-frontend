@@ -72,7 +72,12 @@
     box-shadow: 0 4px 20px rgba(15, 23, 42, 0.12);
   }
 
-  mat-card-header {
+  .credit-notes-card-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px 16px;
     padding: 24px 24px 16px;
     border-bottom: 1px solid rgba(15, 23, 42, 0.08);
     background: linear-gradient(to bottom, #ffffff, #f8fafc);
@@ -82,6 +87,8 @@
       align-items: center;
       gap: 12px;
       margin-bottom: 0;
+      min-width: 0;
+      flex: 0 1 auto;
 
       mat-icon {
         font-size: 18px;
@@ -91,11 +98,14 @@
         flex-shrink: 0;
       }
 
-      mat-card-title {
+      .card-title-text {
         margin: 0;
         font-size: 1.1rem;
         font-weight: 700;
         color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
   }
@@ -201,6 +211,159 @@
     margin: 0;
     font-size: 0.75rem;
     color: #64748b;
+  }
+}
+
+// Form field with icon on the left
+.form-field-with-icon {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  height: 40px !important;
+  margin: 0 !important;
+  flex: 1 1 220px;
+  min-width: 0;
+  max-width: 400px;
+
+  .field-icon {
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .search-field {
+    flex: 1;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-self: center !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+
+    ::ng-deep {
+      &.search-field .mat-mdc-form-field,
+      .mat-mdc-form-field {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+
+        .mat-mdc-text-field-wrapper {
+          padding: 0 !important;
+          margin: 0 !important;
+          min-height: 40px !important;
+          max-height: 40px !important;
+          height: 40px !important;
+          display: flex !important;
+          align-items: center !important;
+        }
+
+        .mat-mdc-form-field-infix {
+          padding-top: 12px !important;
+          padding-bottom: 4px !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          min-height: 40px !important;
+          max-height: 40px !important;
+          height: 40px !important;
+          box-sizing: border-box !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 0 !important;
+          position: relative !important;
+          overflow: visible !important;
+        }
+
+        .mdc-text-field__prefix {
+          padding-right: 12px !important;
+          margin-right: 0 !important;
+          position: absolute !important;
+          left: 12px !important;
+          top: 50% !important;
+          transform: translateY(-50%) !important;
+          margin: 0 !important;
+          width: 20px !important;
+          min-width: 20px !important;
+          max-width: 20px !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          flex-shrink: 0 !important;
+          padding: 0 !important;
+          z-index: 1 !important;
+          pointer-events: none !important;
+
+          mat-icon,
+          .mat-icon,
+          .mdc-icon {
+            font-size: 18px !important;
+            width: 18px !important;
+            height: 18px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: block !important;
+            color: #64748b !important;
+          }
+        }
+
+        .mat-mdc-form-field-label {
+          font-size: 0.75rem !important;
+        }
+
+        .mat-mdc-form-field-label-wrapper {
+          top: 0 !important;
+          padding-top: 0 !important;
+        }
+
+        input.mat-mdc-input-element,
+        .mdc-text-field__input {
+          font-size: 0.8rem !important;
+          line-height: 20px !important;
+          padding-top: 0 !important;
+          padding-right: 12px !important;
+          padding-bottom: 0 !important;
+          padding-left: 40px !important;
+          margin: 0 !important;
+          height: 20px !important;
+          margin-top: 0 !important;
+          margin-bottom: 0 !important;
+          box-sizing: border-box !important;
+          border: none !important;
+          outline: none !important;
+          background: transparent !important;
+          display: block !important;
+          width: 100% !important;
+
+          &::placeholder {
+            line-height: 20px !important;
+            padding-left: 0 !important;
+          }
+        }
+
+        .mat-mdc-form-field-subscript-wrapper {
+          display: none !important;
+        }
+
+        .mat-mdc-form-field-icon-suffix {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .form-field-with-icon {
+    flex-basis: 100%;
+    max-width: 100%;
   }
 }
 
