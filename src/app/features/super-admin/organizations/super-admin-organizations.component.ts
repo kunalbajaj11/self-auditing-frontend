@@ -58,6 +58,9 @@ export class SuperAdminOrganizationsComponent implements OnInit, AfterViewInit {
   loading = false;
   error: string | null = null;
 
+  /** 'all' shows everyone; otherwise shows orgs whose license expires within N days (including already-expired, since those need follow-up too). */
+  expiryFilter: 'all' | '7' | '15' | '30' = 'all';
+
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -70,14 +73,44 @@ export class SuperAdminOrganizationsComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
-    this.dataSource.filterPredicate = (data, filter) =>
-      `${data.name} ${data.planType} ${data.status}`
-        .toLowerCase()
-        .includes(filter);
+    this.dataSource.filterPredicate = (data, filterJson) => {
+      const { search, maxDays } = JSON.parse(filterJson) as {
+        search: string;
+        maxDays: number | null;
+      };
+      const matchesSearch =
+        !search ||
+        `${data.name} ${data.planType} ${data.status}`
+          .toLowerCase()
+          .includes(search);
+      if (!matchesSearch) return false;
+      if (maxDays === null) return true;
+      const days = this.getDaysUntilExpiry(data.licenseExpiresAt);
+      return days !== null && days <= maxDays;
+    };
+    // MatTableDataSource invokes filterPredicate even with the default
+    // empty-string filter, and our predicate expects JSON — seed it now.
+    this.applyFilter();
     this.loadOrganizations();
     this.searchControl.valueChanges
       .pipe(debounceTime(250), distinctUntilChanged())
-      .subscribe((value) => this.applyFilter(value ?? ''));
+      .subscribe(() => this.applyFilter());
+  }
+
+  onExpiryFilterChange(): void {
+    this.applyFilter();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
+  }
+
+  /** Days until expiry (negative if already expired), or null if there's no license/expiry date. */
+  getDaysUntilExpiry(expiresAt: string | null | undefined): number | null {
+    if (!expiresAt) return null;
+    const expiryDate = new Date(expiresAt);
+    if (Number.isNaN(expiryDate.getTime())) return null;
+    const now = new Date();
+    return Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
   }
 
   ngAfterViewInit(): void {
@@ -365,15 +398,10 @@ export class SuperAdminOrganizationsComponent implements OnInit, AfterViewInit {
       return { status: 'valid', color: 'primary', label: 'No license' };
     }
 
-    const expiryDate = new Date(expiresAt);
-    if (Number.isNaN(expiryDate.getTime())) {
+    const daysUntilExpiry = this.getDaysUntilExpiry(expiresAt);
+    if (daysUntilExpiry === null) {
       return { status: 'valid', color: 'primary', label: '—' };
     }
-
-    const now = new Date();
-    const daysUntilExpiry = Math.ceil(
-      (expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
-    );
 
     if (daysUntilExpiry < 0) {
       return { status: 'expired', color: 'warn', label: 'Expired' };
@@ -417,8 +445,12 @@ export class SuperAdminOrganizationsComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private applyFilter(value: string): void {
-    this.dataSource.filter = value.trim().toLowerCase();
+  private applyFilter(): void {
+    const search = (this.searchControl.value ?? '').trim().toLowerCase();
+    const maxDays = this.expiryFilter === 'all' ? null : Number(this.expiryFilter);
+    // MatTableDataSource only carries one filter string — encode both
+    // criteria into it and let filterPredicate (set in ngOnInit) apply both.
+    this.dataSource.filter = JSON.stringify({ search, maxDays });
   }
 
   togglePayroll(org: OrganizationUsage, enabled: boolean): void {

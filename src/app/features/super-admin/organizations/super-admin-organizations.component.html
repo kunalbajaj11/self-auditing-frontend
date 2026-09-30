@@ -22,6 +22,19 @@
       <input matInput [formControl]="searchControl" placeholder="Name, status, or plan" />
     </mat-form-field>
     </div>
+    <div class="expiry-filter">
+      <span class="expiry-filter-label">License expiring:</span>
+      <mat-button-toggle-group
+        [(ngModel)]="expiryFilter"
+        (ngModelChange)="onExpiryFilterChange()"
+        aria-label="Filter by license expiry window"
+      >
+        <mat-button-toggle value="all">All</mat-button-toggle>
+        <mat-button-toggle value="7">≤ 7 days</mat-button-toggle>
+        <mat-button-toggle value="15">≤ 15 days</mat-button-toggle>
+        <mat-button-toggle value="30">≤ 30 days</mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
     <button mat-button (click)="refresh()">
       <mat-icon>refresh</mat-icon>
       Refresh

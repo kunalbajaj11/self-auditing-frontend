@@ -85,29 +85,47 @@
 }
 
 .filters-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);
   border: 1px solid rgba(15, 23, 42, 0.08);
 
-  mat-card-content {
+  .form-field-with-icon {
+    flex: 1 1 260px;
+    min-width: 0;
+  }
+
+  .expiry-filter {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 16px;
+    gap: 8px;
+    flex: 0 1 auto;
 
-    mat-form-field {
-      flex: 1;
+    .expiry-filter-label {
+      font-size: 0.813rem;
+      font-weight: 600;
+      color: #475569;
+      white-space: nowrap;
     }
 
-    button {
-      height: 56px;
-      padding: 0 16px;
-      border-radius: 8px;
-      font-weight: 600;
+    mat-button-toggle-group {
+      height: 40px;
+    }
+  }
 
-      mat-icon {
-        margin-right: 8px;
-      }
+  > button {
+    height: 56px;
+    padding: 0 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    flex-shrink: 0;
+
+    mat-icon {
+      margin-right: 8px;
     }
   }
 }
@@ -303,18 +321,30 @@
   }
 
   .filters-card {
-    mat-card-content {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px;
+
+    .form-field-with-icon {
+      flex-basis: auto;
+    }
+
+    mat-form-field {
+      width: 100%;
+    }
+
+    .expiry-filter {
       flex-direction: column;
-      padding: 14px;
+      align-items: flex-start;
 
-      mat-form-field {
+      mat-button-toggle-group {
         width: 100%;
       }
+    }
 
-      button {
-        width: 100%;
-        min-height: 40px;
-      }
+    > button {
+      width: 100%;
+      min-height: 40px;
     }
   }
 
